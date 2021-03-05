@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:redstone_torch"
+    }],
+  "result": {
+    "item": "tinyredstone:tiny_redstone_torch",
+    "count": 9
+  }
+}

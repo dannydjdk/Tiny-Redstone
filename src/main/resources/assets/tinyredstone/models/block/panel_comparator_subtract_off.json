@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "tinyredstone:panel_comparator_subtract_off"
+  }
+}

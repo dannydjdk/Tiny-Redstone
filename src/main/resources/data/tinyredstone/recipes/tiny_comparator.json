@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{
+    "item": "minecraft:comparator"
+  }],
+  "result": {
+    "item": "tinyredstone:tiny_comparator",
+    "count": 9
+  }
+}

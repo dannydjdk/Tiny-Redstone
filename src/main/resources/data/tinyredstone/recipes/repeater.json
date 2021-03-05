@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "tinyredstone:tiny_repeater"
+    }
+  },
+  "result": {
+    "item": "minecraft:repeater"
+  }
+}

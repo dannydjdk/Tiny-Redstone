@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SSS",
+    "RRR",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:smooth_stone_slab"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "tinyredstone:redstone_panel",
+    "count": 3
+  }
+}

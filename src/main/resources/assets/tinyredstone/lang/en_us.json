@@ -1,0 +1,13 @@
+{
+  "block.tinyredstone.redstone_panel" : "Redstone Panel",
+  "message.item.redstone_panel" : "Panel to hold tiny redstone bits. Right click with dye to change color.",
+  "message.item.redstone_wrench": "Right-click a Redstone Panel to rotate. Left click to remove tiny redstone bits.",
+  "message.item.redstone_panel_cell": "Can be placed on a Redstone Panel to form a redstone circuit.",
+  "item.tinyredstone.tiny_redstone" : "Tiny Redstone Dust",
+  "item.tinyredstone.tiny_repeater" : "Tiny Repeater",
+  "item.tinyredstone.tiny_redstone_torch" : "Tiny Redstone Torch",
+  "item.tinyredstone.redstone_wrench" : "Redstone Wrench",
+  "item.tinyredstone.tiny_comparator": "Tiny Comparator",
+  "item.tinyredstone.tiny_redstone_block": "Tiny Redstone Block",
+  "tinyredstone.close" : "Close"
+}
