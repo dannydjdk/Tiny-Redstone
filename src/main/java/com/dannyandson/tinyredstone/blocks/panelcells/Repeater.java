@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.gui.RepeaterCellGUI;
@@ -96,23 +97,23 @@ public class Repeater implements IPanelCell
     }
 
     /**
-     * Responding to the redstone signal output of an adjacent cells.
-     * This can be called up to 16 times in a redstone tick (1/10th second).
-     *
-     * @param rsFrontStrong strength of incoming redstone signal from Front
-     * @param rsRightStrong strength of incoming redstone signal from Right
-     * @param rsBackStrong  strength of incoming redstone signal from Back
-     * @param rsLeftStrong  strength of incoming redstone signal from Left
+     * Called when neighboring redstone signal output changes.
+     * This can be called multiple times in a tick.
+     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
+     * @param frontNeighbor object to access info about front neighbor
+     * @param rightNeighbor object to access info about right neighbor
+     * @param backNeighbor object to access info about back neighbor
+     * @param leftNeighbor object to access info about left neighbor
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean inputRs(int rsFrontStrong, int rsRightStrong, int rsBackStrong, int rsLeftStrong,int rsFrontWeak, int rsRightWeak, int rsBackWeak, int rsLeftWeak)
+    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
     {
-        if (rsBackStrong+rsBackWeak >0 && !input)
+        if (backNeighbor!=null && backNeighbor.getWeakRsOutput() >0 && !input)
         {
             input=true;
         }
-        else if (rsBackStrong+rsBackWeak ==0 && input)
+        else if ((backNeighbor==null || backNeighbor.getWeakRsOutput() ==0 ) && input)
         {
             input=false;
         }

@@ -10,15 +10,16 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class RedstoneBlock  implements IPanelCell
-{
-    public static ResourceLocation TEXTURE_REDSTONE_BLOCK = new ResourceLocation("minecraft","block/redstone_block");
+public class TinyBlock implements IPanelCell {
+
+    public static ResourceLocation TEXTURE_TINY_BLOCK = new ResourceLocation("minecraft","block/smooth_stone");
+
+    private int weakSignalStrength = 0;
+    private int strongSignalStrength = 0;
 
     /**
      * Drawing the cell on the panel
@@ -33,7 +34,7 @@ public class RedstoneBlock  implements IPanelCell
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
         IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_BLOCK);
+        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TINY_BLOCK);
 
 
 
@@ -73,7 +74,6 @@ public class RedstoneBlock  implements IPanelCell
         add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
 
     }
-
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn) {
         renderer.pos(stack.getLast().getMatrix(), x, y, z)
                 .color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -87,32 +87,70 @@ public class RedstoneBlock  implements IPanelCell
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
      * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * @param frontNeighbor object to access info about front neighbor
-     * @param rightNeighbor object to access info about right neighbor
-     * @param backNeighbor object to access info about back neighbor
-     * @param leftNeighbor object to access info about left neighbor
+     * WARNING! Check for null values!
+     *
+     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
+     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
+     * @param backNeighbor  object to access info about back neighbor or NULL if no neighbor exists
+     * @param leftNeighbor  object to access info about left neighbor or NULL if no neighbor exists
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
-    {
+    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
+
+        int weak=0,strong=0;
+        if (frontNeighbor!=null) {
+            if (frontNeighbor.powerDrops())
+                weak = frontNeighbor.getWeakRsOutput();
+            else
+                strong = frontNeighbor.getStrongRsOutput();
+        }
+        if (rightNeighbor!=null) {
+            if (rightNeighbor.powerDrops())
+                weak = Math.max(weak,rightNeighbor.getWeakRsOutput());
+            else
+                strong = Math.max(strong,rightNeighbor.getStrongRsOutput());
+        }
+        if (backNeighbor!=null) {
+            if (backNeighbor.powerDrops())
+                weak = Math.max(weak,backNeighbor.getWeakRsOutput());
+            else
+                strong = Math.max(strong,backNeighbor.getStrongRsOutput());
+        }
+        if (leftNeighbor!=null) {
+            if (leftNeighbor.powerDrops())
+                weak = Math.max(weak,leftNeighbor.getWeakRsOutput());
+            else
+                strong = Math.max(strong,leftNeighbor.getStrongRsOutput());
+        }
+
+        weak=Math.max(weak,strong);
+
+        if (weak!=this.weakSignalStrength ||strong!=this.strongSignalStrength)
+        {
+            this.weakSignalStrength =weak;
+            this.strongSignalStrength=strong;
+            return true;
+        }
+
         return false;
     }
+
 
     /**
      * Gets redstone output of the given side of the cell
      *
-     * @param outputDirection
-     * @return integer 0-15 indicating the strengh of redstone signal
+     * @param outputDirection (1=Front,2=Right,3=Back,4=Left)
+     * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection)
-    {
-        return getStrongRsOutput(outputDirection);
+    public int getWeakRsOutput(PanelCellSide outputDirection) {
+        return this.weakSignalStrength;
     }
+
     @Override
     public int getStrongRsOutput(PanelCellSide outputDirection) {
-        return 15;
+        return this.strongSignalStrength;
     }
 
     /**
@@ -132,11 +170,11 @@ public class RedstoneBlock  implements IPanelCell
      */
     @Override
     public boolean isIndependentState() {
-        return true;
+        return false;
     }
 
     /**
-     * Called at the beginning of each tick if isTicking() returned true on last call.
+     * Called each each tick.
      *
      * @return boolean indicating whether redstone output of this cell has changed
      */
@@ -148,8 +186,9 @@ public class RedstoneBlock  implements IPanelCell
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
      *
-     * @param panelTile the activated PanelTile tile entity that contains this cell
-     * @param cellIndex The index of the clicked IPanelCell within the panel
+     * @param panelTile      the activated PanelTile tile entity that contains this cell
+     * @param cellIndex      The index of the clicked IPanelCell within the panel (this IPanelCell)
+     * @param segmentClicked Which of nine segment within the cell were clicked. 0 through 8 where 0 is front-right and 8 is back-left;
      * @return true if a change was made to the cell output
      */
     @Override
@@ -160,11 +199,14 @@ public class RedstoneBlock  implements IPanelCell
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
+        nbt.putInt("strong",this.strongSignalStrength);
+        nbt.putInt("weak",this.weakSignalStrength);
         return nbt;
     }
 
     @Override
     public void readNBT(CompoundNBT compoundNBT) {
-
+        this.strongSignalStrength=compoundNBT.getInt("strong");
+        this.weakSignalStrength=compoundNBT.getInt("weak");
     }
 }

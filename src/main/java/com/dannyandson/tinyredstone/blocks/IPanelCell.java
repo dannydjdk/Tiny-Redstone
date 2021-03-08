@@ -19,15 +19,28 @@ public interface IPanelCell {
     void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay);
 
     /**
-     * Responding to the redstone signal output of an adjacent cells.
-     * This can be called up to 16 times in a tick.
+     * Responding to a change in redstone signal output of an adjacent cells.
+     * This can be called multiple times in a tick.
      * @param rsFrontStrong strength of incoming redstone signal from Front
      * @param rsRightStrong strength of incoming redstone signal from Right
      * @param rsBackStrong strength of incoming redstone signal from Back
      * @param rsLeftStrong strength of incoming redstone signal from Left
      * @return boolean indicating whether redstone output of this cell has changed
      */
-    boolean inputRs(int rsFrontStrong, int rsRightStrong, int rsBackStrong, int rsLeftStrong,int rsFrontWeak, int rsRightWeak, int rsBackWeak, int rsLeftWeak);
+   // boolean inputRs(int rsFrontStrong, int rsRightStrong, int rsBackStrong, int rsLeftStrong,int rsFrontWeak, int rsRightWeak, int rsBackWeak, int rsLeftWeak);
+
+    /**
+     * Called when neighboring redstone signal output changes.
+     * This can be called multiple times in a tick.
+     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
+     * WARNING! Check for null values!
+     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
+     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
+     * @param backNeighbor object to access info about back neighbor or NULL if no neighbor exists
+     * @param leftNeighbor object to access info about left neighbor or NULL if no neighbor exists
+     * @return boolean indicating whether redstone output of this cell has changed
+     */
+    boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor);
 
     /**
      * Gets redstone output of the given side of the cell

@@ -40,7 +40,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public Map<Direction, Integer> weakPowerToNeighbors = new HashMap<>();
     public Integer Color = DyeColor.GRAY.getColorValue();
 
-    public List<Direction> comparatorOverrides = new ArrayList<>();
+    public Map<Direction, Integer> comparatorOverrides = new HashMap<>();
 
     public PanelTile() {
         super(Registration.REDSTONE_PANEL_TILE.get());
@@ -148,6 +148,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             weakPowerToNeighbors.putInt(Direction.EAST.getIndex() + "", this.weakPowerToNeighbors.get(Direction.EAST));
             weakPowerToNeighbors.putInt(Direction.WEST.getIndex() + "", this.weakPowerToNeighbors.get(Direction.WEST));
             parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
+
+            CompoundNBT comparatorOverrideNBT = new CompoundNBT();
+            for(Direction cDirection : comparatorOverrides.keySet())
+            {
+                comparatorOverrideNBT.putInt(cDirection.getIndex()+"",comparatorOverrides.get(cDirection));
+            }
+            parentNBTTagCompound.put("comparator_overrides",comparatorOverrideNBT);
+
         } catch (NullPointerException exception) {
             TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.getMessage());
         }
@@ -210,6 +218,19 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.weakPowerToNeighbors.put(Direction.WEST, weakPowerToNeighbors.getInt(Direction.WEST.getIndex() + ""));
         }
 
+        CompoundNBT comparatorOverridesNBT = parentNBTTagCompound.getCompound("comparator_overrides");
+        if (!comparatorOverridesNBT.isEmpty())
+        {
+            if (comparatorOverridesNBT.contains(Direction.NORTH.getIndex()+""))
+                this.comparatorOverrides.put(Direction.NORTH,comparatorOverridesNBT.getInt(Direction.NORTH.getIndex()+""));
+            if (comparatorOverridesNBT.contains(Direction.SOUTH.getIndex()+""))
+                this.comparatorOverrides.put(Direction.SOUTH,comparatorOverridesNBT.getInt(Direction.SOUTH.getIndex()+""));
+            if (comparatorOverridesNBT.contains(Direction.EAST.getIndex()+""))
+                this.comparatorOverrides.put(Direction.EAST,comparatorOverridesNBT.getInt(Direction.EAST.getIndex()+""));
+            if (comparatorOverridesNBT.contains(Direction.WEST.getIndex()+""))
+                this.comparatorOverrides.put(Direction.WEST,comparatorOverridesNBT.getInt(Direction.WEST.getIndex()+""));
+        }
+
         this.Color = parentNBTTagCompound.getInt("color");
 
     }
@@ -229,23 +250,27 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public void tick() {
         boolean dirty = false;
         //if we have a neighbor with a comparator override (outputs through comparator), check for change
-        for (Direction direction :  comparatorOverrides)
+        if (!this.world.isRemote)
+        for (Direction direction :  comparatorOverrides.keySet())
         {
             BlockPos neighborPos = pos.offset(direction);
             BlockState neighborState = world.getBlockState(neighborPos);
             if (neighborState.hasComparatorInputOverride()) {
-                int powerLevel1 = world.getRedstonePower(neighborPos, direction);
-                int powerLevel2 = neighborState.getComparatorInputOverride(world, pos.offset(direction));
-                int powerLevel = Math.max(powerLevel1,powerLevel2);
-                if (powerLevel!=this.weakPowerFromNeighbors.get(direction))
+                int comparatorInputOverride = neighborState.getComparatorInputOverride(world, pos.offset(direction));
+                if (comparatorInputOverride != comparatorOverrides.get(direction))
                 {
-                    this.weakPowerFromNeighbors.put(direction,powerLevel);
+                    this.comparatorOverrides.put(direction,comparatorInputOverride);
                     updateSide(direction);
                     dirty=true;
                 }
             }
-            else
+            else {
                 comparatorOverrides.remove(direction);
+                if(updateSide(direction))
+                {
+                    dirty=true;
+                }
+            }
 
         }
         //call the tick() method in all our cells
@@ -412,6 +437,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         //row 0 is west
         //column 0 is north
 
+        boolean change = false;
         if (iteration > 63) {
             TinyRedstone.LOGGER.warn("Redstone panel iterated too many times.");
             return false;
@@ -427,29 +453,21 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 Direction rightDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.RIGHT);
                 Direction leftDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.LEFT);
 
-                Integer[] power = getPowerFromNeighbor(frontDirection, index);
-                int frontWeak = power[0];
-                int frontStrong = power[1];
-                power = getPowerFromNeighbor(backDirection, index);
-                int backWeak = power[0];
-                int backStrong = power[1];
-                power = getPowerFromNeighbor(rightDirection, index);
-                int rightWeak = power[0];
-                int rightStrong = power[1];
-                power = getPowerFromNeighbor(leftDirection, index);
-                int leftWeak = power[0];
-                int leftStrong = power[1];
+                PanelCellNeighbor front = getNeighbor(frontDirection, index);
+                PanelCellNeighbor back = getNeighbor(backDirection, index);
+                PanelCellNeighbor right = getNeighbor(rightDirection, index);
+                PanelCellNeighbor left = getNeighbor(leftDirection, index);
 
-                boolean change = thisCell.inputRs(frontStrong, rightStrong, backStrong, leftStrong, frontWeak, rightWeak, backWeak, leftWeak);
-
-                if (change) {
+                if (thisCell.neighborChanged(front,right,back,left)) {
                     updateNeighborCells(index, iteration + 1);
-                    this.markDirty();
+                    change=true;
                 }
             }
 
         }
-        return false;
+        if (change)
+            this.markDirty();
+        return change;
     }
 
     /**
@@ -461,29 +479,22 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * @param localCellIndex Index of the panel cell on this panel.
      * @return an Integer array of size 2. First element is weak power. Second is strong power.
      */
-    private Integer[] getPowerFromNeighbor(Direction facing, Integer localCellIndex) {
+    private PanelCellNeighbor getNeighbor(Direction facing, Integer localCellIndex) {
         //row 0 is west
         //column 0 is north
 
         int row = Math.round((localCellIndex.floatValue() / 8f) - 0.5f);
         int cell = localCellIndex % 8;
-        Integer weak = 0;
-        Integer strong = 0;
 
         IPanelCell localCell = this.cells.get(localCellIndex);
         Integer neighborIndex = getAdjacentIndex(localCellIndex, facing);
 
         if (this.cells.containsKey(neighborIndex)) {
+
             IPanelCell neighborCell = this.cells.get(neighborIndex);
-
-            strong = neighborCell.getStrongRsOutput(getPanelCellSide(neighborIndex, facing.getOpposite()));
-            weak = neighborCell.getWeakRsOutput(getPanelCellSide(neighborIndex, facing.getOpposite()));
-
-            if (neighborCell.powerDrops()&&localCell.powerDrops())
-            {
-                strong-=1;
-                weak-=1;
-            }
+            IPanelCell.PanelCellSide panelCellSide = getPanelCellSide(neighborIndex, facing.getOpposite());
+            PanelCellNeighbor panelCellNeighbor = new PanelCellNeighbor(this,neighborCell,panelCellSide);
+            return panelCellNeighbor;
 
         } else if (cellPanelEdge(localCellIndex,facing)) {
             TileEntity te = world.getTileEntity(pos.offset(facing));
@@ -501,31 +512,16 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 IPanelCell neighborPanelCell = neighborTile.cells.get(neighborCellIndex);
                 IPanelCell.PanelCellSide neighborFacing = neighborTile.getPanelCellSide(neighborCellIndex, facing.getOpposite());
                 if (neighborFacing != null) {
-                    strong = neighborPanelCell.getStrongRsOutput(neighborFacing);
-                    weak = neighborPanelCell.getWeakRsOutput(neighborFacing);
-
-                    if (neighborPanelCell.powerDrops()&&localCell.powerDrops())
-                    {
-                        strong-=1;
-                        weak-=1;
-                    }
-
+                    return new PanelCellNeighbor(this,neighborPanelCell,neighborFacing);
                 }
+                return null;
             } else {
-                strong = strongPowerFromNeighbors.get(facing);
-                weak = weakPowerFromNeighbors.get(facing);
-
-                if (localCell.powerDrops() && world.getBlockState(pos.offset(facing)).getBlock()== Blocks.REDSTONE_WIRE)
-                {
-                    strong-=1;
-                    weak-=1;
-                }
-
-
+                BlockPos blockPos = this.pos.offset(facing);
+                return new PanelCellNeighbor(this,blockPos,facing);
             }
         }
 
-        return new Integer[]{weak, strong};
+        return null;
     }
 
     private void updateNeighborTileCell(Direction facing, Integer localCellIndex) {
@@ -771,7 +767,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public void sync()
     {
         this.world.notifyBlockUpdate(pos,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
-        //World#notifyBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, int flags);
     }
 
 }

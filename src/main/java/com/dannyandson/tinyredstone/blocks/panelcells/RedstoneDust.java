@@ -2,9 +2,11 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.block.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -98,31 +100,65 @@ public class RedstoneDust implements IPanelCell {
     }
 
     /**
-     * Responding to the redstone signal output of an adjacent cells.
-     * This can be called up to 16 times in a redstone tick (1/10th second).
-     * Numbers correspond to the Direction enum ordinals
-     *
-     * @param rsFrontStrong strength of incoming redstone signal from direction 2 (North)
-     * @param rsRightStrong strength of incoming redstone signal from direction 3 (South)
-     * @param rsBackStrong strength of incoming redstone signal from direction 4 (West)
-     * @param rsLeftStrong strength of incoming redstone signal from direction 5 (East)
+     * Called when neighboring redstone signal output changes.
+     * This can be called multiple times in a tick.
+     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
+     * @param frontNeighbor object to access info about front neighbor
+     * @param rightNeighbor object to access info about right neighbor
+     * @param backNeighbor object to access info about back neighbor
+     * @param leftNeighbor object to access info about left neighbor
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean inputRs(int rsFrontStrong, int rsRightStrong, int rsBackStrong, int rsLeftStrong,int rsFrontWeak, int rsRightWeak, int rsBackWeak, int rsLeftWeak)
+    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
     {
-        int front = (frontEnabled)?rsFrontStrong:0;
-        int right = (rightEnabled)?rsRightStrong:0;
-        int back = (backEnabled)?rsBackStrong:0;
-        int left = (leftEnabled)?rsLeftStrong:0;
+        int front=0, right=0,back=0, left=0;
+        if (frontEnabled && frontNeighbor!=null)
+        {
+            front = getNeighborOutput(frontNeighbor);
+        }
+        if (rightEnabled && rightNeighbor!=null)
+        {
+            right=getNeighborOutput(rightNeighbor);
+        }
+        if (backEnabled && backNeighbor!=null)
+        {
+            back=getNeighborOutput(backNeighbor);
+        }
+        if (leftEnabled && leftNeighbor!=null)
+        {
+            left=getNeighborOutput(leftNeighbor);
+        }
 
-        int signal = Math.max(Math.max(front, right),Math.max(back, left));
+
+        int signal = Math.max( Math.max(Math.max(front, right),Math.max(back, left)) , 0);
         if (signal!=this.signalStrength)
         {
             this.signalStrength=signal;
             return true;
         }
         return false;
+    }
+
+    private int getNeighborOutput(PanelCellNeighbor neighbor)
+    {
+        int input = 0;
+
+        int s = neighbor.getStrongRsOutput();
+        int w = neighbor.getWeakRsOutput();
+        input=(neighbor.powerDrops())?s-1:s;
+        if (w>input)
+        {
+            BlockState blockState = neighbor.getNeighborBlockState();
+            if (blockState !=null && (
+                    blockState.getBlock() instanceof AbstractButtonBlock ||
+                            blockState.getBlock() instanceof LeverBlock ||
+                            blockState.getBlock() instanceof RedstoneTorchBlock
+            )
+            )
+                input=neighbor.getWeakRsOutput();
+        }
+        return input;
     }
 
     private boolean sideEnabled(PanelCellSide side)

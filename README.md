@@ -7,7 +7,7 @@ Each panel can hold up to 64 components in an 8x8 grid. You can choose which sid
 ## How to play
 
 Craft a Redstone Panel and some tiny redstone components. Right click the panel with the components to place them. Left click with a component or Redstone Wrench in your hand to remove them.
-Right click with a Redstone Wrench to rotate the circuit. Break the panel with a pick or your bear hands if you want, and it will retain its components.
+Right click with a Redstone Wrench to rotate the circuit. Break the panel with a pick or your bare hands if you want, and it will retain its components.
 
 ### Tiny Redstone ![Tiny Redstone](https://media.forgecdn.net/attachments/345/698/tiny_redstone.png "Tiny Redstone")
 
@@ -15,7 +15,7 @@ Tiny redstone behaves very much like regular redstone. It picks up signals from 
 
 ### Tiny Repeater
 
-Tiny repeaters are similar to their bigger cousins. They will pick up any redstone signal received at the back and output a full (15) signal to the front with a delay. One major difference is that when you right click the tiny repeater a GUI will appear allowing you to increase or decrease the tick as much as you'd like to. These ticks represent game ticks. Therefore, 2 ticks = 1 redstone tick. So, if you want the repeater to delay for 1 second, set the ticks to 20.
+Tiny repeaters are similar to their bigger cousins. They will pick up any redstone signal received at the back and output a full (15) signal to the front with a delay. One major difference is that when you right click the tiny repeater, a GUI will appear allowing you to increase or decrease the tick as much as you'd like to. These ticks represent game ticks. Therefore, 2 ticks = 1 redstone tick. So, if you want the repeater to delay for 1 second, set the ticks to 20.
 
 ### Tiny Comparator
 
@@ -27,20 +27,20 @@ Similar to regular redstone torches, but cuter. Tiny Redstone Torches can act as
 
 ### Tiny Redstone Block ![Tiny Redstone Block](https://media.forgecdn.net/attachments/345/702/tiny_redstone_block.png "Tiny Redstone Block")
 
-Like their huge counterpart, Tiny Redstone Blocks output full redstone power on all 4 directions.
+Like their huge counterpart, Tiny Redstone Blocks output full redstone power in all 4 directions.
 
-*Note:* You can not break a Redstone Panel while you are holding a Redstone Wrench or a tiny component. This is to help prevent accidental breakage while removing tiny components from the panel.
+*Note:* You can not break a Redstone Panel while you are holding a Redstone Wrench or a tiny component. This is to help prevent accidental breakage while removing tiny components from the panel, especially in creative mode.
 
 ## Future Plans
 
-Tiny buttons, levers, redstone lamps, and even pistons!!
-Export/Import circuits to share or use between worlds
-One Probe support, so you can see the redstone signal of each tiny component.
-Several model improvements.
-Sneak right click with wrench to instantly pick up a panel.
-Support for creative player to left click to remove tiny components (currently creatives must sneak-right click with wrench)
-Possible add ons - gates, clocks, redstone math (possibly as an add-on mod since I want to keep this mod vanilla flavored)
-Fixing whatever bugs you find that somehow I didn't find.
+- Tiny buttons, levers, redstone lamps, and even pistons!!
+- Export/Import circuits to share with friends or use between worlds
+- One Probe support, so you can see the redstone signal of each tiny component.
+- Several model improvements.
+- Sneak right click with wrench to instantly pick up a panel.
+- Support for creative player to left click to remove tiny components (currently creatives must sneak-right click with wrench)
+- Possible add ons - gates, clocks, redstone math (possibly as an add-on mod since I want to keep this mod vanilla flavored)
+- Fixing whatever bugs you find that somehow I didn't find.
 
 ## Permissions
 

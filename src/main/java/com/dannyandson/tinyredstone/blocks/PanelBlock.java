@@ -244,7 +244,7 @@ public class PanelBlock extends Block {
         TileEntity tileentity = world.getTileEntity(pos);
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
-            panelTile.comparatorOverrides.clear();
+            //panelTile.comparatorOverrides.clear();
 
             for (Direction whichFace : directions) {
                 BlockPos neighborPos = pos.offset(whichFace);
@@ -253,9 +253,8 @@ public class PanelBlock extends Block {
                 int strongPowerLevel = world.getStrongPower(neighborPos, whichFace);
 
                 BlockState neighborState = world.getBlockState(pos.offset(whichFace));
-                if (neighborState.hasComparatorInputOverride()) {
-                    powerLevel = neighborState.getComparatorInputOverride(world, pos.offset(whichFace));
-                    panelTile.comparatorOverrides.add(whichFace);
+                if (neighborState.hasComparatorInputOverride() && !world.isRemote) {
+                    panelTile.comparatorOverrides.put(whichFace,neighborState.getComparatorInputOverride(world, pos.offset(whichFace)));
                 }
 
                 if (panelTile.weakPowerFromNeighbors.get(whichFace) == null || panelTile.weakPowerFromNeighbors.get(whichFace) != powerLevel ||
@@ -464,6 +463,7 @@ public class PanelBlock extends Block {
                 ItemStack itemStack = new ItemStack(item);
                 ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY()+.5, pos.getZ(), itemStack);
                 world.addEntity(itemEntity);
+                itemEntity.setPosition(player.getPosX(),player.getPosY(),player.getPosZ());
             }
 
             //remove from panel

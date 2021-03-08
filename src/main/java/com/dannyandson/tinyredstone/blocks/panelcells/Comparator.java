@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -102,19 +103,20 @@ public class Comparator implements IPanelCell
     }
 
     /**
-     * Responding to the redstone signal output of an adjacent cells.
-     * This can be called up to 16 times in a redstone tick (1/10th second).
-     *
-     * @param rsFrontStrong strength of incoming redstone signal from Front
-     * @param rsRightStrong strength of incoming redstone signal from Right
-     * @param rsBackStrong  strength of incoming redstone signal from Back
-     * @param rsLeftStrong  strength of incoming redstone signal from Left
+     * Called when neighboring redstone signal output changes.
+     * This can be called multiple times in a tick.
+     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
+     * @param frontNeighbor object to access info about front neighbor or null if no neighbor
+     * @param rightNeighbor object to access info about right neighbor or null if no neighbor
+     * @param backNeighbor object to access info about back neighbor or null if no neighbor
+     * @param leftNeighbor object to access info about left neighbor or null if no neighbor
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean inputRs(int rsFrontStrong, int rsRightStrong, int rsBackStrong, int rsLeftStrong,int rsFrontWeak, int rsRightWeak, int rsBackWeak, int rsLeftWeak) {
-        this.input1 = Math.max(rsBackStrong, rsBackWeak);
-        this.input2 = Math.max(rsLeftStrong, rsRightStrong);
+    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
+    {
+        this.input1 = (backNeighbor==null)?0: Math.max(Math.max(backNeighbor.getStrongRsOutput(), backNeighbor.getWeakRsOutput()), backNeighbor.getComparatorOverride());
+        this.input2 = Math.max((leftNeighbor==null)?0: leftNeighbor.getStrongRsOutput(), (rightNeighbor==null)?0:rightNeighbor.getStrongRsOutput());
 
         return updateOutput();
     }
