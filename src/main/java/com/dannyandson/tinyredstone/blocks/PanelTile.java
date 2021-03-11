@@ -1,6 +1,8 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.panelcells.Piston;
+import com.dannyandson.tinyredstone.blocks.panelcells.Sticky_Piston;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -12,6 +14,8 @@ import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.util.Constants;
@@ -26,7 +30,13 @@ import java.util.Map;
 public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     //TODO
-    // cell types - button, lever, lamp?, pistons (useful for resetting clocks and other more complicated circuitry)
+    // better item textures
+    // better texture for tiny solid block (maybe match color of panel, or allow coloring?)
+    // change repeater to use vanilla behavior
+    // make "upgraded" repeater with GUI using redstone ticks, or add text specifying game ticks
+    // localization for item names
+    // -
+    // cell types - button, lever, lamp?
     // add-on - gates, clock
     // One probe support
     // troubleshoot issue with powered neighbor blocks not updating their neighbors
@@ -273,15 +283,33 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             }
 
         }
+
+        List<Integer> pistons = null;
         //call the tick() method in all our cells
         for (Integer index : this.cells.keySet()) {
             IPanelCell panelCell = this.cells.get(index);
             boolean update = panelCell.tick();
             if (update) {
-                updateNeighborCells(index);
+                if (panelCell instanceof Piston)
+                {
+                    if (pistons==null)
+                        pistons=new ArrayList<>();
+                    pistons.add(index);
+                }
+                else {
+                    updateNeighborCells(index);
+                }
                 dirty = true;
             }
 
+        }
+
+        if (pistons!=null)
+        {
+            for(Integer index : pistons)
+            {
+                updatePiston(index);
+            }
         }
 
         if (dirty) {
@@ -291,6 +319,110 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             sync();
         }
 
+    }
+
+    private void updatePiston(int index) {
+        IPanelCell panelCell = cells.get(index);
+        if (panelCell instanceof Piston) {
+
+            PanelTile panelTile = this;
+            Direction moveDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.BACK);
+            Integer moverIndex = getAdjacentIndex(index, moveDirection);
+            if (moverIndex == null) {
+                TileEntity te = world.getTileEntity(pos.offset(moveDirection));
+                if (te instanceof PanelTile) {
+                    panelTile = (PanelTile) te;
+                    moverIndex = getNeighborTileCellIndex(moveDirection, index);
+                }
+            }
+            if (!((Piston) panelCell).isExtended() && panelCell instanceof Sticky_Piston) {
+                Integer adjacentIndex = moverIndex;
+                moverIndex = getAdjacentIndex(moverIndex, moveDirection);
+                if (moverIndex == null) {
+                    TileEntity te = world.getTileEntity(pos.offset(moveDirection));
+                    if (te instanceof PanelTile) {
+                        panelTile = (PanelTile) te;
+                        moverIndex = getNeighborTileCellIndex(moveDirection, adjacentIndex);
+                    }
+                }
+                moveDirection = moveDirection.getOpposite();
+            }
+
+            world.playSound(
+                    pos.getX(), pos.getY(), pos.getZ(),
+                    (((Piston) panelCell).isExtended()) ? SoundEvents.BLOCK_PISTON_EXTEND : SoundEvents.BLOCK_PISTON_CONTRACT,
+                    SoundCategory.BLOCKS, 0.25f, 2f, false
+            );
+
+            if (moverIndex != null)
+                panelTile.moveCell(moverIndex, moveDirection,0);
+        }
+    }
+
+    private void moveCell(int index, Direction direction, Integer iteration)
+    {
+        if (iteration>12)return;
+
+        if(cells.containsKey(index) && cells.get(index).isPushable())
+        {
+            IPanelCell cell = cells.get(index);
+            Integer newindex = getAdjacentIndex(index, direction);
+            PanelTile panelTile = this;
+            if (newindex == null) {
+                //newindex is null, so we are on the edge of the block
+                TileEntity te = world.getTileEntity(pos.offset(direction));
+                if (te instanceof PanelTile) {
+                    panelTile = (PanelTile) te;
+                    newindex = this.getNeighborTileCellIndex(direction, index);
+                }
+            }
+
+            if (newindex != null) {
+                if (cell != null) {
+                    if (panelTile.cells.containsKey(newindex))
+                    {
+                        panelTile.moveCell(newindex,direction,iteration+1);
+                    }
+                    panelTile.cells.put(newindex, cell);
+                    this.cells.remove(index);
+                    panelTile.cellDirections.put(newindex, this.cellDirections.get(index));
+                    this.cellDirections.remove(index);
+                    this.updateNeighborCells(index);
+                    panelTile.updateNeighborCells(newindex);
+                    panelTile.markDirty();
+                }
+            }
+        }
+
+    }
+
+    public boolean canExtendTo(Integer index, Direction direction, Integer iteration)
+    {
+        if (iteration>12)return false;
+
+        IPanelCell iPanelCell = this.cells.get(index);
+        if (iPanelCell==null)
+            return true;
+
+        if(!iPanelCell.isPushable())
+            return false;
+
+        Integer adjacentIndex = this.getAdjacentIndex(index,direction);
+        if (adjacentIndex==null)
+        {
+            TileEntity te = world.getTileEntity(pos.offset(direction));
+            if (te instanceof PanelTile)
+            {
+                PanelTile neighborTile = (PanelTile) te;
+                Integer neighborIndex = getNeighborTileCellIndex(direction,index);
+                return neighborTile.canExtendTo(neighborIndex,direction,iteration+1);
+            }
+            else
+                return false;
+        }
+        else {
+            return canExtendTo(adjacentIndex,direction,iteration+1);
+        }
     }
 
     @Override
@@ -493,7 +625,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
             IPanelCell neighborCell = this.cells.get(neighborIndex);
             IPanelCell.PanelCellSide panelCellSide = getPanelCellSide(neighborIndex, facing.getOpposite());
-            PanelCellNeighbor panelCellNeighbor = new PanelCellNeighbor(this,neighborCell,panelCellSide);
+            PanelCellNeighbor panelCellNeighbor = new PanelCellNeighbor(this,neighborCell,panelCellSide,facing,neighborIndex);
             return panelCellNeighbor;
 
         } else if (cellPanelEdge(localCellIndex,facing)) {
@@ -512,7 +644,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 IPanelCell neighborPanelCell = neighborTile.cells.get(neighborCellIndex);
                 IPanelCell.PanelCellSide neighborFacing = neighborTile.getPanelCellSide(neighborCellIndex, facing.getOpposite());
                 if (neighborFacing != null) {
-                    return new PanelCellNeighbor(this,neighborPanelCell,neighborFacing);
+                    return new PanelCellNeighbor(this,neighborPanelCell,neighborFacing,facing, neighborCellIndex);
                 }
                 return null;
             } else {
@@ -528,23 +660,27 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         //row 0 is west
         //column 0 is north
 
-        int row = Math.round((localCellIndex.floatValue() / 8f) - 0.5f);
-        int cell = localCellIndex % 8;
-
         TileEntity te = world.getTileEntity(pos.offset(facing));
         if (te instanceof PanelTile) {
             PanelTile neighborTile = ((PanelTile) te);
-            int neighborRow, neighborCell;
-            if (facing == Direction.NORTH || facing == Direction.SOUTH) {
-                neighborRow = row;
-                neighborCell = (cell - 7) * -1;
-            } else {
-                neighborRow = (row - 7) * -1;
-                neighborCell = cell;
-            }
-            int neighborCellIndex = (neighborRow * 8) + neighborCell;
+            int neighborCellIndex = getNeighborTileCellIndex(facing,localCellIndex);
             neighborTile.updateCell(neighborCellIndex);
         }
+    }
+
+    private int getNeighborTileCellIndex(Direction facing, Integer localCellIndex)
+    {
+        int row = Math.round((localCellIndex.floatValue() / 8f) - 0.5f);
+        int cell = localCellIndex % 8;
+        int neighborRow, neighborCell;
+        if (facing == Direction.NORTH || facing == Direction.SOUTH) {
+            neighborRow = row;
+            neighborCell = (cell - 7) * -1;
+        } else {
+            neighborRow = (row - 7) * -1;
+            neighborCell = cell;
+        }
+        return (neighborRow * 8) + neighborCell;
     }
 
     private IPanelCell.PanelCellSide getPanelCellSide(int cellIndex, Direction facing) {
@@ -600,6 +736,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private Integer getAdjacentIndex(Integer cellIndex, Direction direction) {
         //row 0 is west
         //cell 0 is north
+
+        if (cellIndex==null) return null;
+
         int row = Math.round((cellIndex.floatValue() / 8f) - 0.5f);
         int cell = cellIndex % 8;
 

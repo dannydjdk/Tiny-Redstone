@@ -182,6 +182,16 @@ public class Comparator implements IPanelCell
     }
 
     /**
+     * Can this cell be pushed by a piston?
+     *
+     * @return true if a piston can push this block
+     */
+    @Override
+    public boolean isPushable() {
+        return false;
+    }
+
+    /**
      * Called at the beginning of each game tick if isTicking() returned true on last call.
      * Note: 1 redstone tick is 2 game ticks, so this is called 2x per redstone tick, 20x per second.
      * @return boolean indicating whether redstone output of this cell has changed

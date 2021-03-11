@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "tinyredstone:item/tiny_sticky_piston"
+  }
+}

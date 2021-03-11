@@ -63,7 +63,6 @@ public class RepeaterCellGUI extends Screen {
 
     private void changeTicks(int change)
     {
-        //TODO fix issue where client side briefly reverts to old tick setting even though it gets explicitly set there first
         repeaterCell.setTicks(repeaterCell.getTicks()+change);
 
         ModNetworkHandler.sendToServer(new RepeaterTickSync(panelTile.getPos(),cellIndex, repeaterCell.getTicks()));

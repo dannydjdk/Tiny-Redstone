@@ -8,6 +8,9 @@
   "item.tinyredstone.tiny_redstone_torch" : "Tiny Redstone Torch",
   "item.tinyredstone.redstone_wrench" : "Redstone Wrench",
   "item.tinyredstone.tiny_comparator": "Tiny Comparator",
+  "item.tinyredstone.tiny_piston": "Tiny Piston",
+  "item.tinyredstone.tiny_sticky_piston": "Tiny Sticky Piston",
+  "item.tinyredstone.tiny_solid_block": "Tiny Solid Block",
   "item.tinyredstone.tiny_redstone_block": "Tiny Redstone Block",
   "tinyredstone.close" : "Close"
 }

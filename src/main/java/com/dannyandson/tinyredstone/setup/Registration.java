@@ -35,7 +35,9 @@ public class Registration {
         TinyRedstone.registerPanelCell(Torch.class,TINY_REDSTONE_TORCH.get());
         TinyRedstone.registerPanelCell(Comparator.class,TINY_COMPARATOR.get());
         TinyRedstone.registerPanelCell(RedstoneBlock.class,TINY_REDSTONE_BLOCK.get());
-        TinyRedstone.registerPanelCell(TinyBlock.class, Items.WHITE_WOOL);
+        TinyRedstone.registerPanelCell(TinyBlock.class, TINY_SOLID_BLOCK.get());
+        TinyRedstone.registerPanelCell(Piston.class, TINY_PISTON.get());
+        TinyRedstone.registerPanelCell(Sticky_Piston.class, TINY_STICKY_PISTON.get());
     }
 
     public static final RegistryObject<PanelBlock> REDSTONE_PANEL_BLOCK = BLOCKS.register("redstone_panel", PanelBlock::new);
@@ -48,6 +50,9 @@ public class Registration {
     public static final RegistryObject<Item> TINY_REPEATER = ITEMS.register("tiny_repeater",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_REDSTONE_BLOCK = ITEMS.register("tiny_redstone_block",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_COMPARATOR = ITEMS.register("tiny_comparator",PanelCellItem::new);
+    public static final RegistryObject<Item> TINY_SOLID_BLOCK = ITEMS.register("tiny_solid_block",PanelCellItem::new);
+    public static final RegistryObject<Item> TINY_PISTON = ITEMS.register("tiny_piston",PanelCellItem::new);
+    public static final RegistryObject<Item> TINY_STICKY_PISTON = ITEMS.register("tiny_sticky_piston",PanelCellItem::new);
 
     public static final RegistryObject<RedstoneWrench> REDSTONE_WRENCH = ITEMS.register("redstone_wrench", RedstoneWrench::new);
 

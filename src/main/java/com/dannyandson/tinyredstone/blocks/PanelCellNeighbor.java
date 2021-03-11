@@ -11,12 +11,15 @@ public class PanelCellNeighbor {
     private Direction facingDirection=null;
     private IPanelCell.PanelCellSide panelCellSide=null;
     private final PanelTile panelTile;
+    private Integer index=null;
 
-    PanelCellNeighbor(PanelTile panelTile,IPanelCell panelCell, IPanelCell.PanelCellSide panelCellSide)
+    PanelCellNeighbor(PanelTile panelTile,IPanelCell panelCell, IPanelCell.PanelCellSide panelCellSide, Direction facing, Integer index)
     {
         this.iPanelCell=panelCell;
         this.panelTile=panelTile;
         this.panelCellSide=panelCellSide;
+        this.index=index;
+        this.facingDirection=facing;
     }
     PanelCellNeighbor(PanelTile panelTile,BlockPos blockPos,Direction facingDirection)
     {
@@ -79,6 +82,11 @@ public class PanelCellNeighbor {
         if (iPanelCell!=null)
             return iPanelCell.powerDrops();
         return panelTile.getWorld().getBlockState(blockPos).getBlock() == Blocks.REDSTONE_WIRE;
+    }
+
+    public boolean isPushable()
+    {
+        return panelTile.canExtendTo(this.index,this.facingDirection,0);
     }
 
     /**

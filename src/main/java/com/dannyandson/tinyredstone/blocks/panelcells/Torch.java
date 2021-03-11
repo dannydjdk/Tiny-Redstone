@@ -50,12 +50,12 @@ public class Torch implements IPanelCell
 
         matrixStack.translate(0,0,0.01);
 
+        matrixStack.push();
         add(builder, matrixStack, 0,0,0, sprite_torch.getMinU(), sprite_torch.getMaxV(),combinedLight,combinedOverlay);
         add(builder, matrixStack, 1,0,0, sprite_torch.getMaxU(), sprite_torch.getMaxV(),combinedLight,combinedOverlay);
         add(builder, matrixStack, 1,1,0, sprite_torch.getMaxU(), sprite_torch.getMinV(),combinedLight,combinedOverlay);
         add(builder, matrixStack, 0,1,0, sprite_torch.getMinU(), sprite_torch.getMinV(),combinedLight,combinedOverlay);
-
-
+        matrixStack.pop();
 
     }
 
@@ -131,6 +131,16 @@ public class Torch implements IPanelCell
      */
     @Override
     public boolean isIndependentState() {
+        return false;
+    }
+
+    /**
+     * Can this cell be pushed by a piston?
+     *
+     * @return true if a piston can push this block
+     */
+    @Override
+    public boolean isPushable() {
         return false;
     }
 

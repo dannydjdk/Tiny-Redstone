@@ -16,7 +16,7 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class TinyBlock implements IPanelCell {
 
-    public static ResourceLocation TEXTURE_TINY_BLOCK = new ResourceLocation("minecraft","block/smooth_stone");
+    public static ResourceLocation TEXTURE_TINY_BLOCK = new ResourceLocation("minecraft","block/white_wool");
 
     private int weakSignalStrength = 0;
     private int strongSignalStrength = 0;
@@ -171,6 +171,16 @@ public class TinyBlock implements IPanelCell {
     @Override
     public boolean isIndependentState() {
         return false;
+    }
+
+    /**
+     * Can this cell be pushed by a piston?
+     *
+     * @return true if a piston can push this block
+     */
+    @Override
+    public boolean isPushable() {
+        return true;
     }
 
     /**

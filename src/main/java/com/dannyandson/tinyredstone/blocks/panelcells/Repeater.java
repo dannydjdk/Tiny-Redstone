@@ -161,6 +161,16 @@ public class Repeater implements IPanelCell
     }
 
     /**
+     * Can this cell be pushed by a piston?
+     *
+     * @return true if a piston can push this block
+     */
+    @Override
+    public boolean isPushable() {
+        return false;
+    }
+
+    /**
      * Called at the beginning of each tick if isTicking() returned true on last call.
      *
      * @return boolean indicating whether redstone output of this cell has changed

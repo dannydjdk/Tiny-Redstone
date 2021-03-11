@@ -63,6 +63,12 @@ public interface IPanelCell {
     boolean isIndependentState();
 
     /**
+     * Can this cell be pushed by a piston?
+     * @return true if a piston can push this block
+     */
+    boolean isPushable();
+
+    /**
      * Called each each tick.
      * @return boolean indicating whether redstone output of this cell has changed
      */
