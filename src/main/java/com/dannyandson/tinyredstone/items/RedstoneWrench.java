@@ -38,11 +38,6 @@ public class RedstoneWrench extends Item {
             Hand hand = context.getHand();
             BlockPos pos = context.getPos();
 
-            TileEntity te = world.getTileEntity(pos);
-            if (te instanceof PanelTile) {
-                //TODO drop block on shift click
-            }
-
             if (player != null && player.isSneaking()) {
                 // Make sure the block get activated if it is a BaseBlockNew
                 BlockState state = world.getBlockState(pos);

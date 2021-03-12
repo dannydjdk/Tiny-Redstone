@@ -2,7 +2,7 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.panelcells.Piston;
-import com.dannyandson.tinyredstone.blocks.panelcells.Sticky_Piston;
+import com.dannyandson.tinyredstone.blocks.panelcells.StickyPiston;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -30,13 +30,7 @@ import java.util.Map;
 public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     //TODO
-    // better item textures
-    // better texture for tiny solid block (maybe match color of panel, or allow coloring?)
-    // change repeater to use vanilla behavior
-    // make "upgraded" repeater with GUI using redstone ticks, or add text specifying game ticks
-    // localization for item names
-    // -
-    // cell types - button, lever, lamp?
+    // cell types - button, lever, lamp
     // add-on - gates, clock
     // One probe support
     // troubleshoot issue with powered neighbor blocks not updating their neighbors
@@ -335,7 +329,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     moverIndex = getNeighborTileCellIndex(moveDirection, index);
                 }
             }
-            if (!((Piston) panelCell).isExtended() && panelCell instanceof Sticky_Piston) {
+            if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston) {
                 Integer adjacentIndex = moverIndex;
                 moverIndex = getAdjacentIndex(moverIndex, moveDirection);
                 if (moverIndex == null) {
@@ -556,7 +550,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 world.notifyNeighborsOfStateChange(pos, this.getBlockState().getBlock());
         }
 
-        return updateCells(indices, iteration) || updateOutputs;
+        return updateCells(indices, iteration+1) || updateOutputs;
     }
 
     /**

@@ -29,6 +29,12 @@ public class ModNetworkHandler {
                 .consumer(RepeaterTickSync::handle)
                 .add();
 
+        INSTANCE.messageBuilder(TinyBlockColorSync.class,nextID())
+                .encoder(TinyBlockColorSync::toBytes)
+                .decoder(TinyBlockColorSync::new)
+                .consumer(TinyBlockColorSync::handle)
+                .add();
+
     }
 
     public static void sendToClient(Object packet, ServerPlayerEntity player) {

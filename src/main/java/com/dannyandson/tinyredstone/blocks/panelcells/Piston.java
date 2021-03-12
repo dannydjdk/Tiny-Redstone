@@ -21,12 +21,6 @@ public class Piston implements IPanelCell {
     public static ResourceLocation TEXTURE_PISTON_BOTTOM = new ResourceLocation("minecraft","block/piston_bottom");
     public static ResourceLocation TEXTURE_PISTON_INNER = new ResourceLocation("minecraft","block/piston_inner");
 
-    protected TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE);
-    protected TextureAtlasSprite sprite_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_TOP);
-    protected TextureAtlasSprite sprite_bottom = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_BOTTOM);
-    protected TextureAtlasSprite sprite_inner = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_INNER);
-
-
     protected boolean extended = false;
     protected int changePending = -1;
 
@@ -42,6 +36,12 @@ public class Piston implements IPanelCell {
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+
+        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE);
+        TextureAtlasSprite sprite_bottom = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_BOTTOM);
+        TextureAtlasSprite sprite_inner = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_INNER);
+
+
         IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
         TextureAtlasSprite sprite_top = getSprite_top();
 
@@ -82,10 +82,10 @@ public class Piston implements IPanelCell {
         if (renderExtended)
         {
             matrixStack.translate(0,0,-1.75);
-            add(builder, matrixStack, 0,0,0, this.sprite_top.getMinU(), this.sprite_top.getMaxV(),combinedLight,combinedOverlay);
-            add(builder, matrixStack, 1,0,0, this.sprite_top.getMaxU(), this.sprite_top.getMaxV(),combinedLight,combinedOverlay);
-            add(builder, matrixStack, 1,1,0, this.sprite_top.getMaxU(), this.sprite_top.getMinV(),combinedLight,combinedOverlay);
-            add(builder, matrixStack, 0,1,0, this.sprite_top.getMinU(), this.sprite_top.getMinV(),combinedLight,combinedOverlay);
+            add(builder, matrixStack, 0,0,0, sprite_top.getMinU(), sprite_top.getMaxV(),combinedLight,combinedOverlay);
+            add(builder, matrixStack, 1,0,0, sprite_top.getMaxU(), sprite_top.getMaxV(),combinedLight,combinedOverlay);
+            add(builder, matrixStack, 1,1,0, sprite_top.getMaxU(), sprite_top.getMinV(),combinedLight,combinedOverlay);
+            add(builder, matrixStack, 0,1,0, sprite_top.getMinU(), sprite_top.getMinV(),combinedLight,combinedOverlay);
         }
         matrixStack.pop();
 
@@ -157,7 +157,7 @@ public class Piston implements IPanelCell {
     }
     protected TextureAtlasSprite getSprite_top()
     {
-        return this.sprite_top;
+        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_TOP);
     }
 
     public boolean isExtended(){

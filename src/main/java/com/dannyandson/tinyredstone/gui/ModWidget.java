@@ -5,6 +5,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ModWidget extends Widget {
 
@@ -24,6 +26,7 @@ public class ModWidget extends Widget {
     private int textWidth;
     private int textHeight;
     private ITextComponent toolTipTextComponent;
+    private ModWidget.IPressable pressedAction=null;
 
     public ModWidget(int x, int y, int width, int height, ITextComponent title, int textColor, int bgColor)
     {
@@ -51,6 +54,12 @@ public class ModWidget extends Widget {
         this(x,y,width,height,ITextComponent.getTextComponentOrEmpty(""),0xFFFFFFFF,bgColor);
 
     }
+    public ModWidget(int x, int y, int width, int height, int bgColor, ModWidget.IPressable pressedAction)
+    {
+        this(x,y,width,height,ITextComponent.getTextComponentOrEmpty(""),0xFFFFFFFF,bgColor);
+        this.pressedAction=pressedAction;
+    }
+
 
     public ModWidget setTextHAlignment(HAlignment alignment) {
         this.halignment = alignment;
@@ -69,7 +78,14 @@ public class ModWidget extends Widget {
 
     @Override
     protected boolean clicked(double mouseX, double mouseY) {
-        return false;
+        if (pressedAction==null ||
+                mouseX<this.x || mouseX>this.x+this.width ||
+                mouseY<this.y || mouseY>this.y+this.height
+        )
+            return false;
+
+        pressedAction.onPress(this);
+        return true;
     }
 
     @Override
@@ -136,6 +152,12 @@ public class ModWidget extends Widget {
             fill(matrixStack, mouseX + 1, mouseY + 11, mouseX + width + 3, mouseY + 10 + height + 3, 0x66EEEEEE);
             fr.func_238422_b_(matrixStack, this.toolTipTextComponent.func_241878_f(), (float) (mouseX + 3.0), (float) (mouseY + 13.0), 0xFFFEFEFE);
         }
+    }
+
+
+    @OnlyIn(Dist.CLIENT)
+    public interface IPressable {
+        void onPress(ModWidget modWidget);
     }
 
 }

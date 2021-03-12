@@ -22,6 +22,7 @@ public class Comparator implements IPanelCell
     private Integer input2 = 0;
     private Integer output = 0;
     private Boolean subtract = false;
+    protected int changePending = -1;
 
     public static ResourceLocation TEXTURE_COMPARATOR_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_on");
     public static ResourceLocation TEXTURE_COMPARATOR_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_off");
@@ -118,7 +119,9 @@ public class Comparator implements IPanelCell
         this.input1 = (backNeighbor==null)?0: Math.max(Math.max(backNeighbor.getStrongRsOutput(), backNeighbor.getWeakRsOutput()), backNeighbor.getComparatorOverride());
         this.input2 = Math.max((leftNeighbor==null)?0: leftNeighbor.getStrongRsOutput(), (rightNeighbor==null)?0:rightNeighbor.getStrongRsOutput());
 
-        return updateOutput();
+        this.changePending=1;
+
+        return false;
     }
 
     private boolean updateOutput()
@@ -198,7 +201,15 @@ public class Comparator implements IPanelCell
      */
     @Override
     public boolean tick() {
-        return false;
+        if (changePending < 0)
+            return false;
+        if (changePending > 0) {
+            changePending--;
+            return false;
+        }
+        changePending--;
+        return updateOutput();
+
     }
 
     /**
@@ -221,6 +232,7 @@ public class Comparator implements IPanelCell
         nbt.putInt("output",output);
         nbt.putInt("input1",input1);
         nbt.putInt("input2",input2);
+        nbt.putInt("changePending",changePending);
         nbt.putBoolean("subtract",subtract);
 
         return nbt;
@@ -231,6 +243,7 @@ public class Comparator implements IPanelCell
         this.output = compoundNBT.getInt("output");
         this.input1 = compoundNBT.getInt("input1");
         this.input2 = compoundNBT.getInt("input2");
+        this.changePending=compoundNBT.getInt("changePending");
         this.subtract = compoundNBT.getBoolean("subtract");
     }
 

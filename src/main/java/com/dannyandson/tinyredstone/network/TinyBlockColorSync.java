@@ -2,44 +2,38 @@ package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
-import com.dannyandson.tinyredstone.blocks.panelcells.Repeater;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.minecraft.client.Minecraft;
+import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.util.Map;
 import java.util.function.Supplier;
 
-public class RepeaterTickSync {
+public class TinyBlockColorSync {
     private final BlockPos pos;
     private final int cellIndex;
-    private final int ticks;
+    private final int color;
 
-    public RepeaterTickSync(BlockPos pos, int cellIndex, int ticks)
+    public TinyBlockColorSync(BlockPos pos, int cellIndex, int color)
     {
         this.pos=pos;
         this.cellIndex=cellIndex;
-        this.ticks = ticks;
+        this.color = color;
     }
 
-    public RepeaterTickSync(PacketBuffer buffer)
+    public TinyBlockColorSync(PacketBuffer buffer)
     {
         this.pos= buffer.readBlockPos();
         this.cellIndex=buffer.readInt();
-        this.ticks=buffer.readInt();
+        this.color =buffer.readInt();
     }
 
     public void toBytes(PacketBuffer buf)
     {
         buf.writeBlockPos(pos);
         buf.writeInt(cellIndex);
-        buf.writeInt(ticks);
+        buf.writeInt(color);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
@@ -49,9 +43,9 @@ public class RepeaterTickSync {
             if (te instanceof PanelTile)
             {
                 IPanelCell cell = ((PanelTile)te).cells.get(this.cellIndex);
-                if (cell instanceof Repeater)
+                if (cell instanceof TinyBlock)
                 {
-                    ((Repeater)cell).setTicks(this.ticks);
+                    ((TinyBlock)cell).setColor(this.color);
                     ((PanelTile) te).sync();
                 }
             }

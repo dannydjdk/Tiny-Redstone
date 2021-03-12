@@ -12,5 +12,7 @@
   "item.tinyredstone.tiny_sticky_piston": "Tiny Sticky Piston",
   "item.tinyredstone.tiny_solid_block": "Tiny Solid Block",
   "item.tinyredstone.tiny_redstone_block": "Tiny Redstone Block",
-  "tinyredstone.close" : "Close"
+  "tinyredstone.close" : "Close",
+  "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
+  "tinyredstone.gui.tinyblock.msg" : "Select a color"
 }

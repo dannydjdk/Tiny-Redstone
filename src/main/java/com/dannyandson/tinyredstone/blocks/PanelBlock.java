@@ -359,8 +359,9 @@ public class PanelBlock extends Block {
                     }
                 }else if(heldItem == Registration.REDSTONE_WRENCH.get() && player.isSneaking())
                 {
-                    //TODO harvest block on sneak right click with wrench
-                    //harvestBlock(world,player,pos,state,panelTile,new ItemStack(Registration.REDSTONE_PANEL_ITEM.get()));
+                    //harvest block on sneak right click with wrench
+                    this.onBlockHarvested(world,pos,state,player);
+                    replaceBlock(state,Blocks.AIR.getDefaultState(),world,pos,1);
                 }
                 else if (itemPanelCellMap.containsKey(heldItem)) {
                     //if player is holding an item registered as a panel cell, try to place that cell on the panel

@@ -9,7 +9,6 @@ import com.dannyandson.tinyredstone.items.PanelItem;
 import com.dannyandson.tinyredstone.items.RedstoneWrench;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -37,7 +36,7 @@ public class Registration {
         TinyRedstone.registerPanelCell(RedstoneBlock.class,TINY_REDSTONE_BLOCK.get());
         TinyRedstone.registerPanelCell(TinyBlock.class, TINY_SOLID_BLOCK.get());
         TinyRedstone.registerPanelCell(Piston.class, TINY_PISTON.get());
-        TinyRedstone.registerPanelCell(Sticky_Piston.class, TINY_STICKY_PISTON.get());
+        TinyRedstone.registerPanelCell(StickyPiston.class, TINY_STICKY_PISTON.get());
     }
 
     public static final RegistryObject<PanelBlock> REDSTONE_PANEL_BLOCK = BLOCKS.register("redstone_panel", PanelBlock::new);

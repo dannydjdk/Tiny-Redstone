@@ -6,6 +6,7 @@ import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -56,14 +57,13 @@ public class TinyRedstone {
     @SubscribeEvent
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event)
     {
-        //TODO allow creative players to remove cells by left clicking with wrench or cell item
-        /*
-        Item heldItem = event.getPlayer().getHeldItem(event.getHand()).getItem();
-        if (heldItem==Registration.REDSTONE_WRENCH.get())
-        {
-            event.setCanceled(true);
+        //allow creative players to remove cells by left clicking with wrench or cell item
+        if (event.getPlayer().isCreative() && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof PanelBlock) {
+                BlockState blockState = event.getWorld().getBlockState(event.getPos());
+                PanelBlock panelBlock = (PanelBlock)blockState.getBlock();
+                panelBlock.onBlockClicked(blockState,event.getWorld(),event.getPos(), event.getPlayer());
+                event.setCanceled(true);
         }
-        */
     }
 
 }

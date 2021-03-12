@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
@@ -10,7 +11,9 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -20,6 +23,7 @@ public class TinyBlock implements IPanelCell {
 
     private int weakSignalStrength = 0;
     private int strongSignalStrength = 0;
+    private int color= DyeColor.WHITE.getColorValue();
 
     /**
      * Drawing the cell on the panel
@@ -76,7 +80,7 @@ public class TinyBlock implements IPanelCell {
     }
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn) {
         renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .color(ColorHelper.PackedColor.getRed(color),ColorHelper.PackedColor.getGreen(color), ColorHelper.PackedColor.getBlue(color), ColorHelper.PackedColor.getAlpha(color))
                 .tex(u, v)
                 .lightmap(combinedLightIn)
                 .normal(1, 0, 0)
@@ -102,25 +106,25 @@ public class TinyBlock implements IPanelCell {
         if (frontNeighbor!=null) {
             if (frontNeighbor.powerDrops())
                 weak = frontNeighbor.getWeakRsOutput();
-            else
+            else if (!frontNeighbor.isPushable())
                 strong = frontNeighbor.getStrongRsOutput();
         }
         if (rightNeighbor!=null) {
             if (rightNeighbor.powerDrops())
                 weak = Math.max(weak,rightNeighbor.getWeakRsOutput());
-            else
+            else if (!rightNeighbor.isPushable())
                 strong = Math.max(strong,rightNeighbor.getStrongRsOutput());
         }
         if (backNeighbor!=null) {
             if (backNeighbor.powerDrops())
                 weak = Math.max(weak,backNeighbor.getWeakRsOutput());
-            else
+            else if (!backNeighbor.isPushable())
                 strong = Math.max(strong,backNeighbor.getStrongRsOutput());
         }
         if (leftNeighbor!=null) {
             if (leftNeighbor.powerDrops())
                 weak = Math.max(weak,leftNeighbor.getWeakRsOutput());
-            else
+            else if (!leftNeighbor.isPushable())
                 strong = Math.max(strong,leftNeighbor.getStrongRsOutput());
         }
 
@@ -203,7 +207,13 @@ public class TinyBlock implements IPanelCell {
      */
     @Override
     public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked) {
+        if(panelTile.getWorld().isRemote)
+            TinyBlockGUI.open(panelTile,cellIndex,this);
         return false;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 
     @Override
@@ -211,6 +221,7 @@ public class TinyBlock implements IPanelCell {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("strong",this.strongSignalStrength);
         nbt.putInt("weak",this.weakSignalStrength);
+        nbt.putInt("color",this.color);
         return nbt;
     }
 
@@ -218,5 +229,6 @@ public class TinyBlock implements IPanelCell {
     public void readNBT(CompoundNBT compoundNBT) {
         this.strongSignalStrength=compoundNBT.getInt("strong");
         this.weakSignalStrength=compoundNBT.getInt("weak");
+        this.color=compoundNBT.getInt("color");
     }
 }

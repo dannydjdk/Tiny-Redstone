@@ -5,17 +5,9 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 
-public class Sticky_Piston extends Piston {
+public class StickyPiston extends Piston {
 
     public static ResourceLocation TEXTURE_PISTON_TOP = new ResourceLocation("minecraft","block/piston_top_sticky");
-
-    protected TextureAtlasSprite sprite_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_TOP);
-
-    @Override
-    protected TextureAtlasSprite getSprite_top()
-    {
-        return this.sprite_top;
-    }
 
    /**
      * Called each each tick.
@@ -32,6 +24,12 @@ public class Sticky_Piston extends Piston {
         }
         changePending--;
         return true;
+    }
+
+    @Override
+    protected TextureAtlasSprite getSprite_top()
+    {
+        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_TOP);
     }
 
 
