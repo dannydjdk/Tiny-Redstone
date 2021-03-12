@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "tinyredstone:tiny_piston"
+    }
+  },
+  "result": {
+    "item": "minecraft:piston"
+  }
+}

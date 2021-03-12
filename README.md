@@ -29,6 +29,21 @@ Similar to regular redstone torches, but cuter. Tiny Redstone Torches can act as
 
 Like their huge counterpart, Tiny Redstone Blocks output full redstone power in all 4 directions.
 
+### Tiny Piston & Tiny Sticky Piston
+
+Work almost exactly like their monstrous counterpart. Can push up to 12 tiny blocks.
+Will not extend if a non-pushable block is in the way.
+It will push tiny blocks onto adjacent Redstone Panels but will not push off the panel
+if no adjecent Redstone Panel exists.
+
+### Tiny Solid Block
+
+Colorful little wool like blocks. They're not just pretty. They are very useful.
+They behave like solid blocks with vanilla redstone. They will carry a weak redstone
+signal when powered by redstone, and a strong signal when powered by a repeater or comparator.
+And, since they can be pushed by tiny pistons, you can build edge detectors and other powerful circuits.
+
+
 *Note:* You can not break a Redstone Panel while you are holding a Redstone Wrench or a tiny component. This is to help prevent accidental breakage while removing tiny components from the panel, especially in creative mode.
 
 ## Future Plans

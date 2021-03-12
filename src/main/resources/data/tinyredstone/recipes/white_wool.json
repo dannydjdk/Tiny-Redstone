@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AAA",
+    "AAA",
+    "AAA"
+  ],
+  "key": {
+    "A": {
+      "item": "tinyredstone:tiny_solid_block"
+    }
+  },
+  "result": {
+    "item": "minecraft:white_wool"
+  }
+}
