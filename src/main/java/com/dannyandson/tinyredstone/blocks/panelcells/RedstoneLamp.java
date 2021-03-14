@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -73,7 +74,7 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
 
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn) {
         renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .color(ColorHelper.PackedColor.getRed(color),ColorHelper.PackedColor.getGreen(color), ColorHelper.PackedColor.getBlue(color), ColorHelper.PackedColor.getAlpha(color))
                 .tex(u, v)
                 .lightmap((weakSignalStrength+strongSignalStrength>0)?15728880:combinedLightIn)
                 .normal(1, 0, 0)

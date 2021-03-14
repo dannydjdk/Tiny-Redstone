@@ -24,7 +24,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell {
 
     protected int weakSignalStrength = 0;
     protected int strongSignalStrength = 0;
-    private int color= DyeColor.WHITE.getColorValue();
+    protected int color= DyeColor.WHITE.getColorValue();
 
     /**
      * Drawing the cell on the panel
