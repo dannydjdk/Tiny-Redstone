@@ -1,13 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "SSS",
     "RRR",
+    "iii",
     "SSS"
   ],
   "key": {
     "S": {
       "item": "minecraft:smooth_stone_slab"
+    },
+    "i": {
+      "item": "tinyredstone:silicon"
     },
     "R": {
       "item": "minecraft:redstone"

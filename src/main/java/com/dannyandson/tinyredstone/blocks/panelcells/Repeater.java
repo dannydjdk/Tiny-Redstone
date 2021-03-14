@@ -275,6 +275,16 @@ public class Repeater implements IPanelCell
     }
 
     /**
+     * If this cell outputs light, return the level here. Otherwise, return 0.
+     *
+     * @return Light level to output 0-15
+     */
+    @Override
+    public int lightOutput() {
+        return 0;
+    }
+
+    /**
      * Called at the beginning of each tick if isTicking() returned true on last call.
      *
      * @return boolean indicating whether redstone output of this cell has changed
@@ -323,16 +333,16 @@ public class Repeater implements IPanelCell
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("output",output);
         nbt.putBoolean("input",input);
-        CompoundNBT queueNBT = new CompoundNBT();
+
+        String queueString = "";
         int i=0;
         for (Object b : queue.toArray())
         {
-            if (b instanceof Boolean){
-                queueNBT.putBoolean(i+"",(Boolean)b);
-                i++;
-            }
+            queueString += ((Boolean)b)?"1":"0";
         }
-        nbt.put("queue",queueNBT);
+        nbt.putString("queue",queueString);
+
+
         nbt.putInt("ticks",this.ticks);
 
         return nbt;
@@ -343,19 +353,11 @@ public class Repeater implements IPanelCell
         this.output = compoundNBT.getBoolean("output");
         this.input = compoundNBT.getBoolean("input");
         this.ticks = compoundNBT.getInt("ticks");
-        if (compoundNBT.contains("queue"))
+
+        String queueString = compoundNBT.getString("queue");
+        for (Byte b : queueString.getBytes())
         {
-            CompoundNBT queueNBT = compoundNBT.getCompound("queue");
-            for(int i=0 ; i<this.ticks ; i++)
-            {
-                if (queueNBT.contains(i+"")) {
-                    this.queue.add(queueNBT.getBoolean(i + ""));
-                }
-                else
-                {
-                    this.queue.add(false);
-                }
-            }
+            queue.add(b==49);
         }
 
     }

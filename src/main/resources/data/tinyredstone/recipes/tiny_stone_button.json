@@ -1,14 +1,13 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [{
-    "item": "minecraft:comparator"   },
+    "item": "minecraft:stone_button"
+  },
     {
       "tag": "forge:silicon"
-
-    }
-  ],
+    }],
   "result": {
-    "item": "tinyredstone:tiny_comparator",
+    "item": "tinyredstone:tiny_stone_button",
     "count": 4
   }
 }

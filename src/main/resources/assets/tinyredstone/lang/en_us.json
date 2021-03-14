@@ -12,6 +12,12 @@
   "item.tinyredstone.tiny_sticky_piston": "Tiny Sticky Piston",
   "item.tinyredstone.tiny_solid_block": "Tiny Solid Block",
   "item.tinyredstone.tiny_redstone_block": "Tiny Redstone Block",
+  "item.tinyredstone.tiny_redstone_lamp": "Tiny Redstone Lamp",
+  "item.tinyredstone.tiny_transparent_block": "Tiny Glass Block",
+  "item.tinyredstone.tiny_button": "Tiny Wooden Button",
+  "item.tinyredstone.tiny_stone_button": "Tiny Stone Button",
+  "item.tinyredstone.silicon": "Silicon",
+  "item.tinyredstone.silicon_compound": "Silicon Compound",
   "tinyredstone.close" : "Close",
   "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
   "tinyredstone.gui.tinyblock.msg" : "Select a color"

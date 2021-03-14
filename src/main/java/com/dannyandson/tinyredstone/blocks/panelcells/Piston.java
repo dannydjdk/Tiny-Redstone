@@ -40,6 +40,7 @@ public class Piston implements IPanelCell {
         TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE);
         TextureAtlasSprite sprite_bottom = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_BOTTOM);
         TextureAtlasSprite sprite_inner = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_INNER);
+        TextureAtlasSprite sprite_inner_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_TOP);
 
 
         IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
@@ -82,10 +83,10 @@ public class Piston implements IPanelCell {
         if (renderExtended)
         {
             matrixStack.translate(0,0,-1.75);
-            add(builder, matrixStack, 0,0,0, sprite_top.getMinU(), sprite_top.getMaxV(),combinedLight,combinedOverlay);
-            add(builder, matrixStack, 1,0,0, sprite_top.getMaxU(), sprite_top.getMaxV(),combinedLight,combinedOverlay);
-            add(builder, matrixStack, 1,1,0, sprite_top.getMaxU(), sprite_top.getMinV(),combinedLight,combinedOverlay);
-            add(builder, matrixStack, 0,1,0, sprite_top.getMinU(), sprite_top.getMinV(),combinedLight,combinedOverlay);
+            add(builder, matrixStack, 0,0,0, sprite_inner_top.getMinU(), sprite_inner_top.getMaxV(),combinedLight,combinedOverlay);
+            add(builder, matrixStack, 1,0,0, sprite_inner_top.getMaxU(), sprite_inner_top.getMaxV(),combinedLight,combinedOverlay);
+            add(builder, matrixStack, 1,1,0, sprite_inner_top.getMaxU(), sprite_inner_top.getMinV(),combinedLight,combinedOverlay);
+            add(builder, matrixStack, 0,1,0, sprite_inner_top.getMinU(), sprite_inner_top.getMinV(),combinedLight,combinedOverlay);
         }
         matrixStack.pop();
 
@@ -242,6 +243,16 @@ public class Piston implements IPanelCell {
     @Override
     public boolean isPushable() {
         return !extended;
+    }
+
+    /**
+     * If this cell outputs light, return the level here. Otherwise, return 0.
+     *
+     * @return Light level to output 0-15
+     */
+    @Override
+    public int lightOutput() {
+        return 0;
     }
 
     /**

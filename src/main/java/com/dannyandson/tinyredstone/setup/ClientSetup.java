@@ -3,10 +3,7 @@ package com.dannyandson.tinyredstone.setup;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTileColor;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
-import com.dannyandson.tinyredstone.blocks.panelcells.Comparator;
-import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
-import com.dannyandson.tinyredstone.blocks.panelcells.Repeater;
-import com.dannyandson.tinyredstone.blocks.panelcells.Torch;
+import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.items.PanelItemColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
@@ -46,6 +43,8 @@ public class ClientSetup {
         event.addSprite(Comparator.TEXTURE_COMPARATOR_ON);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_OFF);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
+        event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
+        event.addSprite(TransparentBlock.TEXTURE_TRANSPARENT_BLOCK);
     }
 
 

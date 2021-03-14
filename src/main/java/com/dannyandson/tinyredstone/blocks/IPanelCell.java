@@ -69,6 +69,12 @@ public interface IPanelCell {
     boolean isPushable();
 
     /**
+     * If this cell outputs light, return the level here. Otherwise, return 0.
+     * @return Light level to output 0-15
+     */
+    int lightOutput();
+
+    /**
      * Called each each tick.
      * @return boolean indicating whether redstone output of this cell has changed
      */

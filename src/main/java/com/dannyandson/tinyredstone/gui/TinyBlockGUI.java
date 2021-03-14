@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.IColorablePanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
@@ -11,9 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.item.DyeColor;
-import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class TinyBlockGUI extends Screen {
@@ -23,15 +22,15 @@ public class TinyBlockGUI extends Screen {
 
     private final PanelTile panelTile;
     private final Integer cellIndex;
-    private final TinyBlock tinyBlockCell;
+    private final IColorablePanelCell iColorablePanelCell;
 
     private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
 
-    protected TinyBlockGUI(PanelTile panelTile, Integer cellIndex, TinyBlock tinyBlockCell) {
+    protected TinyBlockGUI(PanelTile panelTile, Integer cellIndex, IColorablePanelCell iColorablePanelCell) {
         super(new TranslationTextComponent("tinyredstone:tinyBlockGUI"));
         this.panelTile = panelTile;
         this.cellIndex = cellIndex;
-        this.tinyBlockCell = tinyBlockCell;
+        this.iColorablePanelCell = iColorablePanelCell;
     }
 
     @Override
@@ -77,7 +76,7 @@ public class TinyBlockGUI extends Screen {
 
     private void setColor(int color)
     {
-        this.tinyBlockCell.setColor(color);
+        this.iColorablePanelCell.setColor(color);
         ModNetworkHandler.sendToServer(new TinyBlockColorSync(panelTile.getPos(),cellIndex, color));
         this.close();
     }
@@ -99,7 +98,7 @@ public class TinyBlockGUI extends Screen {
     }
 
 
-    public static void open(PanelTile panelTile, Integer cellIndex, TinyBlock tinyBlockCell) {
-        Minecraft.getInstance().displayGuiScreen(new TinyBlockGUI(panelTile, cellIndex, tinyBlockCell));
+    public static void open(PanelTile panelTile, Integer cellIndex, IColorablePanelCell iColorablePanelCell) {
+        Minecraft.getInstance().displayGuiScreen(new TinyBlockGUI(panelTile, cellIndex, iColorablePanelCell));
     }
 }

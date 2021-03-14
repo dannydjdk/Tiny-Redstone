@@ -1,14 +1,14 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [{
-    "item": "minecraft:comparator"   },
+    "item": "minecraft:redstone_lamp"
+  },
     {
       "tag": "forge:silicon"
 
-    }
-  ],
+    }],
   "result": {
-    "item": "tinyredstone:tiny_comparator",
+    "item": "tinyredstone:tiny_redstone_lamp",
     "count": 4
   }
 }

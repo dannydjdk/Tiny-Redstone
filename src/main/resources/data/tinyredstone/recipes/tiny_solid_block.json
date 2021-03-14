@@ -2,9 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients":[ {
     "item": "minecraft:white_wool"
-  }],
+  },
+    {
+      "tag": "forge:silicon"
+    }],
   "result": {
     "item": "tinyredstone:tiny_solid_block",
-    "count": 9
+    "count": 4
   }
 }

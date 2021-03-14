@@ -150,11 +150,16 @@ public class RedstoneDust implements IPanelCell {
         if (w>input)
         {
             BlockState blockState = neighbor.getNeighborBlockState();
-            if (blockState !=null && (
+            IPanelCell iPanelCell = neighbor.getNeighborIPanelCell();
+            if (
+                    (blockState !=null && (
                     blockState.getBlock() instanceof AbstractButtonBlock ||
                             blockState.getBlock() instanceof LeverBlock ||
                             blockState.getBlock() instanceof RedstoneTorchBlock
-            )
+                    )) ||
+                            (iPanelCell !=null && (
+                                    iPanelCell instanceof Button
+                                    ))
             )
                 input=neighbor.getWeakRsOutput();
         }
@@ -216,6 +221,16 @@ public class RedstoneDust implements IPanelCell {
     @Override
     public boolean isPushable() {
         return false;
+    }
+
+    /**
+     * If this cell outputs light, return the level here. Otherwise, return 0.
+     *
+     * @return Light level to output 0-15
+     */
+    @Override
+    public int lightOutput() {
+        return 0;
     }
 
     /**

@@ -1,9 +1,11 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.IColorablePanelCell;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
@@ -12,15 +14,14 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3f;
 
-public class Torch implements IPanelCell
+public class TransparentBlock  implements IPanelCell, IColorablePanelCell
 {
-    private boolean output = false;
-
-    public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_torch_on");
-    public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_torch_off");
-
+    public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation(TinyRedstone.MODID,"block/panel_transparent_block");
+    private int color= 16777215;
 
     /**
      * Drawing the cell on the panel
@@ -34,38 +35,64 @@ public class Torch implements IPanelCell
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-        //TODO 3d Torch render
+        //TODO render these as actually transparent
 
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
-        TextureAtlasSprite sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_ON);
-
-        if (this.output) {
-            sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_ON);
-        }
-        else
-        {
-            sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_OFF);
-        }
+        IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
+        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TRANSPARENT_BLOCK);
 
 
-        matrixStack.translate(0,0,0.01);
 
-        matrixStack.push();
-        add(builder, matrixStack, 0,0,0, sprite_torch.getMinU(), sprite_torch.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite_torch.getMaxU(), sprite_torch.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,1,0, sprite_torch.getMaxU(), sprite_torch.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,1,0, sprite_torch.getMinU(), sprite_torch.getMinV(),combinedLight,combinedOverlay);
-        matrixStack.pop();
+        matrixStack.translate(0,0,1.0);
+
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.translate(0,-1,0);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
 
     }
 
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn) {
+        //renderer.addVertex(x,y,z,
+         //       ColorHelper.PackedColor.getRed(color)/255f,ColorHelper.PackedColor.getGreen(color)/255f, ColorHelper.PackedColor.getBlue(color)/255f, ColorHelper.PackedColor.getAlpha(color)/255f
+         //       ,u,v,combinedOverlayIn,combinedLightIn,1,0,0);
+
         renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .color(ColorHelper.PackedColor.getRed(color),ColorHelper.PackedColor.getGreen(color), ColorHelper.PackedColor.getBlue(color), ColorHelper.PackedColor.getAlpha(color))
                 .tex(u, v)
-                .lightmap((output)?15728880:combinedLightIn)
+                .overlay(combinedOverlayIn)
+                .lightmap(combinedLightIn)
                 .normal(1, 0, 0)
                 .endVertex();
+
+
     }
 
     /**
@@ -81,17 +108,6 @@ public class Torch implements IPanelCell
     @Override
     public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
     {
-        if (backNeighbor!=null && backNeighbor.getWeakRsOutput() >0 && output)
-        {
-            output=false;
-            return true;
-        }
-        else if ((backNeighbor==null || backNeighbor.getWeakRsOutput() ==0) && !output)
-        {
-            output=true;
-            return true;
-        }
-
         return false;
     }
 
@@ -104,14 +120,11 @@ public class Torch implements IPanelCell
     @Override
     public int getWeakRsOutput(PanelCellSide outputDirection)
     {
-        return getStrongRsOutput(outputDirection);
+        return 0;
     }
     @Override
     public int getStrongRsOutput(PanelCellSide outputDirection) {
-        if (output&&outputDirection!=PanelCellSide.BACK)
-            return 15;
-        else
-            return 0;
+        return 0;
     }
 
     /**
@@ -131,7 +144,7 @@ public class Torch implements IPanelCell
      */
     @Override
     public boolean isIndependentState() {
-        return false;
+        return true;
     }
 
     /**
@@ -141,7 +154,7 @@ public class Torch implements IPanelCell
      */
     @Override
     public boolean isPushable() {
-        return false;
+        return true;
     }
 
     /**
@@ -151,7 +164,7 @@ public class Torch implements IPanelCell
      */
     @Override
     public int lightOutput() {
-        return (output)?1:0;
+        return 0;
     }
 
     /**
@@ -173,18 +186,25 @@ public class Torch implements IPanelCell
      */
     @Override
     public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked) {
+        if(panelTile.getWorld().isRemote)
+            TinyBlockGUI.open(panelTile,cellIndex,this);
         return false;
     }
 
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putBoolean("output",output);
+        nbt.putInt("color",color);
         return nbt;
     }
 
     @Override
     public void readNBT(CompoundNBT compoundNBT) {
-        this.output = compoundNBT.getBoolean("output");
+        this.color=compoundNBT.getInt("color");
+    }
+
+    @Override
+    public void setColor(int color) {
+        this.color=color;
     }
 }

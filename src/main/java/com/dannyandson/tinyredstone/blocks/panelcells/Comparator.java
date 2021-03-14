@@ -195,6 +195,16 @@ public class Comparator implements IPanelCell
     }
 
     /**
+     * If this cell outputs light, return the level here. Otherwise, return 0.
+     *
+     * @return Light level to output 0-15
+     */
+    @Override
+    public int lightOutput() {
+        return 0;
+    }
+
+    /**
      * Called at the beginning of each game tick if isTicking() returned true on last call.
      * Note: 1 redstone tick is 2 game ticks, so this is called 2x per redstone tick, 20x per second.
      * @return boolean indicating whether redstone output of this cell has changed

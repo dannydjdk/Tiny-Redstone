@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.network;
 
+import com.dannyandson.tinyredstone.blocks.IColorablePanelCell;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
@@ -43,9 +44,9 @@ public class TinyBlockColorSync {
             if (te instanceof PanelTile)
             {
                 IPanelCell cell = ((PanelTile)te).cells.get(this.cellIndex);
-                if (cell instanceof TinyBlock)
+                if (cell instanceof IColorablePanelCell)
                 {
-                    ((TinyBlock)cell).setColor(this.color);
+                    ((IColorablePanelCell)cell).setColor(this.color);
                     ((PanelTile) te).sync();
                 }
             }

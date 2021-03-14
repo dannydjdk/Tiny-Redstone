@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SQ",
+    "C "
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:sand"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "C": {
+      "item": "minecraft:charcoal"
+    }
+  },
+  "result": {
+    "item": "tinyredstone:silicon_compound",
+    "count": 2
+  }
+}

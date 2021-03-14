@@ -10,16 +10,23 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class RedstoneBlock  implements IPanelCell
-{
-    public static ResourceLocation TEXTURE_REDSTONE_BLOCK = new ResourceLocation("minecraft","block/redstone_block");
+import java.util.LinkedList;
 
+public class Observer implements IPanelCell {
+
+    public static ResourceLocation TEXTURE_OBSERVER_TOP      = new ResourceLocation("minecraft","block/observer_top");
+    public static ResourceLocation TEXTURE_OBSERVER_BACK_ON  = new ResourceLocation("minecraft","block/observer_back_on");
+    public static ResourceLocation TEXTURE_OBSERVER_BACK     = new ResourceLocation("minecraft","block/observer_back");
+    public static ResourceLocation TEXTURE_OBSERVER_FRONT    = new ResourceLocation("minecraft","block/observer_front");
+    public static ResourceLocation TEXTURE_OBSERVER_SIDE     = new ResourceLocation("minecraft","block/observer_side");
+
+
+    boolean output = false;
+    private LinkedList<Boolean> queue = new LinkedList<>();
     /**
      * Drawing the cell on the panel
      *
@@ -33,47 +40,44 @@ public class RedstoneBlock  implements IPanelCell
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
         IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_BLOCK);
 
-
+        TextureAtlasSprite sprite_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_TOP);
+        TextureAtlasSprite sprite_back;
+        if (output)
+            sprite_back = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_BACK_ON);
+        else
+            sprite_back = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_BACK);
+        TextureAtlasSprite sprite_front = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_FRONT);
+        TextureAtlasSprite sprite_side = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_SIDE);
 
         matrixStack.translate(0,0,1.0);
-
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        addRectangle(builder,matrixStack,sprite_top,combinedLight,combinedOverlay);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        addRectangle(builder,matrixStack,sprite_back,combinedLight,combinedOverlay);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        addRectangle(builder,matrixStack,sprite_side,combinedLight,combinedOverlay);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        addRectangle(builder,matrixStack,sprite_front,combinedLight,combinedOverlay);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        addRectangle(builder,matrixStack,sprite_side,combinedLight,combinedOverlay);
 
     }
 
+    private void addRectangle(IVertexBuilder builder, MatrixStack matrixStack, TextureAtlasSprite sprite,int combinedLight, int combinedOverlay)
+    {
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+    }
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn) {
         renderer.pos(stack.getLast().getMatrix(), x, y, z)
                 .color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -82,37 +86,44 @@ public class RedstoneBlock  implements IPanelCell
                 .normal(1, 0, 0)
                 .endVertex();
     }
-
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
      * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * @param frontNeighbor object to access info about front neighbor
-     * @param rightNeighbor object to access info about right neighbor
-     * @param backNeighbor object to access info about back neighbor
-     * @param leftNeighbor object to access info about left neighbor
+     * WARNING! Check for null values!
+     *
+     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
+     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
+     * @param backNeighbor  object to access info about back neighbor or NULL if no neighbor exists
+     * @param leftNeighbor  object to access info about left neighbor or NULL if no neighbor exists
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
-    {
+    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
+        queue.add(false);
+        queue.add(false);
+        queue.add(true);
+        queue.add(true);
+        queue.add(true);
+        queue.add(true);
+
         return false;
     }
 
     /**
      * Gets redstone output of the given side of the cell
      *
-     * @param outputDirection
-     * @return integer 0-15 indicating the strengh of redstone signal
+     * @param outputDirection (1=Front,2=Right,3=Back,4=Left)
+     * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection)
-    {
-        return getStrongRsOutput(outputDirection);
+    public int getWeakRsOutput(PanelCellSide outputDirection) {
+        return 0;
     }
+
     @Override
     public int getStrongRsOutput(PanelCellSide outputDirection) {
-        return 15;
+        return getWeakRsOutput(outputDirection);
     }
 
     /**
@@ -156,20 +167,41 @@ public class RedstoneBlock  implements IPanelCell
     }
 
     /**
-     * Called at the beginning of each tick if isTicking() returned true on last call.
+     * Called each each tick.
      *
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean tick() {
+    public boolean tick(){
+        if (queue.size()>0)
+        {
+            return setOutput(queue.remove());
+        }
+        if (output)
+        {
+            output=false;
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean setOutput(boolean output)
+    {
+        if (this.output!=output)
+        {
+            this.output=output;
+            return true;
+        }
         return false;
     }
 
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
      *
-     * @param panelTile the activated PanelTile tile entity that contains this cell
-     * @param cellIndex The index of the clicked IPanelCell within the panel
+     * @param panelTile      the activated PanelTile tile entity that contains this cell
+     * @param cellIndex      The index of the clicked IPanelCell within the panel (this IPanelCell)
+     * @param segmentClicked Which of nine segment within the cell were clicked. 0 through 8 where 0 is front-right and 8 is back-left;
      * @return true if a change was made to the cell output
      */
     @Override
@@ -180,11 +212,26 @@ public class RedstoneBlock  implements IPanelCell
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
+        nbt.putBoolean("output",output);
+
+        String queueString = "";
+        int i=0;
+        for (Object b : queue.toArray())
+        {
+            queueString += ((Boolean)b)?"1":"0";
+        }
+        nbt.putString("queue",queueString);
+
         return nbt;
     }
 
     @Override
     public void readNBT(CompoundNBT compoundNBT) {
-
+        this.output = compoundNBT.getBoolean("output");
+        String queueString = compoundNBT.getString("queue");
+        for (Byte b : queueString.getBytes())
+        {
+            queue.add(String.valueOf(b)=="1");
+        }
     }
 }

@@ -232,10 +232,9 @@ public class PanelBlock extends Block {
                 world.notifyNeighborsOfStateChange(pos, this);
         }
     }
-    // ------ various block methods that react to changes and are responsible for updating the redstone power information
 
     // Called when a neighbouring block changes.
-    // Only called on the server side- so it doesn't help us alter rendering on the client side.
+    // Only called on the server side.
     @Override
     public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
 
@@ -244,7 +243,6 @@ public class PanelBlock extends Block {
         TileEntity tileentity = world.getTileEntity(pos);
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
-            //panelTile.comparatorOverrides.clear();
 
             for (Direction whichFace : directions) {
                 BlockPos neighborPos = pos.offset(whichFace);
@@ -412,15 +410,25 @@ public class PanelBlock extends Block {
                 panelTile.sync();
                 if (!world.isRemote) {
                     panelTile.markDirty();
-                } else {
-                    //player.sendMessage(ITextComponent.getTextComponentOrEmpty("row:" + row + " cell: " + cell + " index:" + cellNumber), player.getUniqueID());
-                }
+                 }
                 if (panelTile.updateOutputs())
                     world.notifyNeighborsOfStateChange(pos, this);
             }
 
         }
         return super.onBlockActivated(state, world, pos, player, hand, result);
+    }
+
+    @Override
+    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos)
+    {
+        int ll = 0;
+        TileEntity te = world.getTileEntity(pos);
+        if (te instanceof PanelTile) {
+            PanelTile panelTile = (PanelTile) te;
+            ll=panelTile.getLightOutput();
+        }
+        return Math.min(ll,world.getMaxLightLevel());
     }
 
     @SuppressWarnings("deprecation")

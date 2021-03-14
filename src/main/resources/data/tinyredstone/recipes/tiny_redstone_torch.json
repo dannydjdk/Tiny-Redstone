@@ -3,9 +3,13 @@
   "ingredients": [
     {
       "item": "minecraft:redstone_torch"
+    },
+    {
+      "tag": "forge:silicon"
+
     }],
   "result": {
     "item": "tinyredstone:tiny_redstone_torch",
-    "count": 9
+    "count": 4
   }
 }

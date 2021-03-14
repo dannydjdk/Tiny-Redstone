@@ -30,7 +30,7 @@ import java.util.Map;
 public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     //TODO
-    // cell types - button, lever, lamp
+    // cell types - lever, observer
     // add-on - gates, clock
     // One probe support
     // troubleshoot issue with powered neighbor blocks not updating their neighbors
@@ -43,6 +43,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public Map<Direction, Integer> strongPowerToNeighbors = new HashMap<>();
     public Map<Direction, Integer> weakPowerToNeighbors = new HashMap<>();
     public Integer Color = DyeColor.GRAY.getColorValue();
+    private Integer lightOutput = 0;
+    private boolean flagLightUpdate = false;
 
     public Map<Direction, Integer> comparatorOverrides = new HashMap<>();
 
@@ -55,9 +57,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     //  it uses getUpdatePacket(), getUpdateTag(), onDataPacket(), and handleUpdateTag() to do this:
     //  getUpdatePacket() and onDataPacket() are used for one-at-a-time TileEntity updates
     //  getUpdateTag() and handleUpdateTag() are used by vanilla to collate together into a single chunk update packet
-    // In this case, we need it for the gem colour.  There's no need to save the gem angular position because
-    //  the player will never notice the difference and the client<-->server synchronisation lag will make it
-    //  inaccurate anyway
     */
 
     @Override
@@ -65,7 +64,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public SUpdateTileEntityPacket getUpdatePacket() {
         CompoundNBT nbtTagCompound = new CompoundNBT();
         write(nbtTagCompound);
-        int tileEntityType = -1;  // arbitrary number; only used for vanilla TileEntities.  You can use it, or not, as you want.
+        int tileEntityType = -1;  // arbitrary number; only used for vanilla TileEntities.
         return new SUpdateTileEntityPacket(this.pos, tileEntityType, nbtTagCompound);
     }
 
@@ -80,7 +79,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     }
 
     /* Creates a tag containing the TileEntity information, used by vanilla to transmit from server to client*/
-
     @Override
     public CompoundNBT getUpdateTag() {
         CompoundNBT nbtTagCompound = new CompoundNBT();
@@ -89,7 +87,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     }
 
     /* Populates this TileEntity with information from the tag, used by vanilla to transmit from server to client*/
-
     @Override
     public void handleUpdateTag(BlockState blockState, CompoundNBT tag) {
         if (this.world.isRemote) {
@@ -120,8 +117,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return compoundNBT;
     }
 
-    /* This is where you save any data that you don't want to lose when the tile entity unloads
-    // In this case, we only need to store the gem colour.  For examples with other types of data, see MBE20*/
+    /* This is where you save any data that you don't want to lose when the tile entity unloads*/
     @Override
     public CompoundNBT write(CompoundNBT parentNBTTagCompound) {
         try {
@@ -159,6 +155,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 comparatorOverrideNBT.putInt(cDirection.getIndex()+"",comparatorOverrides.get(cDirection));
             }
             parentNBTTagCompound.put("comparator_overrides",comparatorOverrideNBT);
+
+            parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
+            parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
 
         } catch (NullPointerException exception) {
             TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.getMessage());
@@ -236,6 +235,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
 
         this.Color = parentNBTTagCompound.getInt("color");
+        this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
+        this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
 
     }
 
@@ -305,6 +306,13 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 updatePiston(index);
             }
         }
+
+        if (this.flagLightUpdate)
+        {
+            this.flagLightUpdate=false;
+            this.world.getLightManager().checkBlock(pos);
+        }
+
 
         if (dirty) {
             markDirty();
@@ -827,6 +835,16 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         }
 
+        int ll = 0;
+        for(Integer index : cells.keySet())
+        {
+            ll+=cells.get(index).lightOutput();
+        }
+        if (ll!=this.lightOutput) {
+            this.lightOutput=ll;
+            this.flagLightUpdate=true;
+        }
+
         if (change) sync();
 
         return change;
@@ -885,6 +903,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             return DyeColor.GRAY.getColorValue();
         }
         return this.Color;
+    }
+
+    public int getLightOutput()
+    {
+        return this.lightOutput;
     }
 
     //TODO Import/Export

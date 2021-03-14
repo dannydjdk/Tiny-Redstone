@@ -1,0 +1,9 @@
+{
+  "type": "blasting",
+  "ingredient": {
+    "item": "tinyredstone:silicon_compound"
+  },
+  "result": "tinyredstone:silicon",
+  "experience": 0.45,
+  "cookingtime": 100
+}

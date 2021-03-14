@@ -1,14 +1,13 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "AA",
-    "AA"
-  ],
-  "key": {
-    "A": {
-      "item": "minecraft:redstone"
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:redstone_block"
+    },
+    {
+      "tag": "forge:silicon"
     }
-  },
+  ],
   "result": {
     "item": "tinyredstone:tiny_redstone_block",
     "count": 4
