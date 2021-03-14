@@ -22,8 +22,8 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell {
 
     public static ResourceLocation TEXTURE_TINY_BLOCK = new ResourceLocation("minecraft","block/white_wool");
 
-    private int weakSignalStrength = 0;
-    private int strongSignalStrength = 0;
+    protected int weakSignalStrength = 0;
+    protected int strongSignalStrength = 0;
     private int color= DyeColor.WHITE.getColorValue();
 
     /**
@@ -107,25 +107,25 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell {
         if (frontNeighbor!=null) {
             if (frontNeighbor.powerDrops())
                 weak = frontNeighbor.getWeakRsOutput();
-            else if (!frontNeighbor.isPushable())
+            else if (!(frontNeighbor.getNeighborIPanelCell() instanceof TinyBlock))
                 strong = frontNeighbor.getStrongRsOutput();
         }
         if (rightNeighbor!=null) {
             if (rightNeighbor.powerDrops())
                 weak = Math.max(weak,rightNeighbor.getWeakRsOutput());
-            else if (!rightNeighbor.isPushable())
+            else if (!(rightNeighbor.getNeighborIPanelCell() instanceof TinyBlock))
                 strong = Math.max(strong,rightNeighbor.getStrongRsOutput());
         }
         if (backNeighbor!=null) {
             if (backNeighbor.powerDrops())
                 weak = Math.max(weak,backNeighbor.getWeakRsOutput());
-            else if (!backNeighbor.isPushable())
+            else if (!(backNeighbor.getNeighborIPanelCell() instanceof TinyBlock))
                 strong = Math.max(strong,backNeighbor.getStrongRsOutput());
         }
         if (leftNeighbor!=null) {
             if (leftNeighbor.powerDrops())
                 weak = Math.max(weak,leftNeighbor.getWeakRsOutput());
-            else if (!leftNeighbor.isPushable())
+            else if (!(leftNeighbor.getNeighborIPanelCell() instanceof TinyBlock))
                 strong = Math.max(strong,leftNeighbor.getStrongRsOutput());
         }
 

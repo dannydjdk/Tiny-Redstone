@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
@@ -151,7 +152,7 @@ public class Torch implements IPanelCell
      */
     @Override
     public int lightOutput() {
-        return (output)?1:0;
+        return (output && Config.TORCH_LIGHT.get())?1:0;
     }
 
     /**
