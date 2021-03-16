@@ -63,16 +63,26 @@ Like their bigger counterparts, they will light up when given a redstone signal.
 The light they output is very dim. 15 lit lamps will output the max light of 15, so you can control
 exactly how much light you want your panel to output.
 
+### Tiny Observers
+Work almost exactly like their big brother.
+Outputs a pulse to the back whenever a change is detected in the cell or block in front of it.
+When facing blocks out in the world, it behaves exactly like vanilla observers. When facing cells on the tile,
+it will detect movement, placement, removal and redstone changes.
+It currently does not detect color changes or tiny repeater delay changes. You probably didn't want it to anyway. ;)
+
 *Note:* You can not break a Redstone Panel while you are holding a Redstone Wrench or a tiny component.
 This is to help prevent accidental breakage while removing tiny components from the panel, especially in creative mode.
 Sneak right click with the Redstone Wrench to instantly pick up the Redstone Panel, or you can always use a pickaxe.
 
 ## Future Plans
 
-- Tiny buttons, levers, redstone lamps.
+- Tiny Levers.
 - Export/Import circuits to share with friends or use between worlds.
+- Panel covers to hide circuitry and reduce lag potential.
+- Highlight cell grid when placing components to see where component will place
 - One Probe support, so you can see the redstone signal of each tiny component.
-- Several model improvements.
+- 3d redstone torch model.
+- Color variation of redstone dust to reflect power level.
 - Possible add-ons - gates, clocks, redstone math (possibly as an add-on mod since I want to keep this mod vanilla flavored)
 - Fixing whatever bugs you find that somehow I didn't find.
 

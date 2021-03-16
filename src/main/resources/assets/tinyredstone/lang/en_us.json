@@ -18,6 +18,7 @@
   "item.tinyredstone.tiny_stone_button": "Tiny Stone Button",
   "item.tinyredstone.silicon": "Silicon",
   "item.tinyredstone.silicon_compound": "Silicon Compound",
+  "item.tinyredstone.tiny_observer": "Tiny Observer",
   "tinyredstone.close" : "Close",
   "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
   "tinyredstone.gui.tinyblock.msg" : "Select a color"

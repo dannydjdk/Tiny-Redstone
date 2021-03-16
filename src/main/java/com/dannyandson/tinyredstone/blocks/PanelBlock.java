@@ -236,36 +236,44 @@ public class PanelBlock extends Block {
     // Called when a neighbouring block changes.
     // Only called on the server side.
     @Override
-    public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
+
+        Direction direction = null;
+        if (pos.east().equals(neighborPos))
+            direction = EAST;
+        else if (pos.south().equals(neighborPos))
+            direction = SOUTH;
+        else if (pos.west().equals(neighborPos))
+            direction = WEST;
+        else if (pos.north().equals(neighborPos))
+            direction = NORTH;
+        else
+            return;
+
 
         List<Direction> changedPowerFromNeighbors = new ArrayList<>();
-        Direction[] directions = new Direction[]{WEST, EAST, NORTH, SOUTH};
         TileEntity tileentity = world.getTileEntity(pos);
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
 
-            for (Direction whichFace : directions) {
-                BlockPos neighborPos = pos.offset(whichFace);
+            panelTile.pingOutwardObservers(direction);
 
-                int powerLevel = world.getRedstonePower(neighborPos, whichFace);
-                int strongPowerLevel = world.getStrongPower(neighborPos, whichFace);
+            int powerLevel = world.getRedstonePower(neighborPos, direction);
+            int strongPowerLevel = world.getStrongPower(neighborPos, direction);
 
-                BlockState neighborState = world.getBlockState(pos.offset(whichFace));
-                if (neighborState.hasComparatorInputOverride() && !world.isRemote) {
-                    panelTile.comparatorOverrides.put(whichFace,neighborState.getComparatorInputOverride(world, pos.offset(whichFace)));
-                }
-
-                if (panelTile.weakPowerFromNeighbors.get(whichFace) == null || panelTile.weakPowerFromNeighbors.get(whichFace) != powerLevel ||
-                        panelTile.strongPowerFromNeighbors.get(whichFace) == null || panelTile.strongPowerFromNeighbors.get(whichFace) != strongPowerLevel) {
-                    changedPowerFromNeighbors.add(whichFace);
-                    panelTile.weakPowerFromNeighbors.put(whichFace, powerLevel);
-                    panelTile.strongPowerFromNeighbors.put(whichFace, strongPowerLevel);
-                }
+            BlockState neighborState = world.getBlockState(pos.offset(direction));
+            if (neighborState.hasComparatorInputOverride() && !world.isRemote) {
+                panelTile.comparatorOverrides.put(direction, neighborState.getComparatorInputOverride(world, pos.offset(direction)));
             }
 
-            for (Direction direction : changedPowerFromNeighbors) {
+            if (panelTile.weakPowerFromNeighbors.get(direction) == null || panelTile.weakPowerFromNeighbors.get(direction) != powerLevel ||
+                    panelTile.strongPowerFromNeighbors.get(direction) == null || panelTile.strongPowerFromNeighbors.get(direction) != strongPowerLevel) {
+                panelTile.weakPowerFromNeighbors.put(direction, powerLevel);
+                panelTile.strongPowerFromNeighbors.put(direction, strongPowerLevel);
                 panelTile.updateSide(direction);
             }
+
+
             if (panelTile.updateOutputs()) {
                 if (!world.isRemote)
                     panelTile.markDirty();
@@ -363,34 +371,35 @@ public class PanelBlock extends Block {
                 }
                 else if (itemPanelCellMap.containsKey(heldItem)) {
                     //if player is holding an item registered as a panel cell, try to place that cell on the panel
-                    try {
-                        //catch any exception thrown while attempting to construct from the registered IPanelCell class
-                        Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 
-                        if (panelCell instanceof IPanelCell) {
-                            //place the cell on the panel
-                            panelTile.cellDirections.put(cellNumber, player.getHorizontalFacing());
-                            panelTile.cells.put(cellNumber, (IPanelCell) panelCell);
+                    //but first, check to see if a piston is extended into that space
+                    if(!panelTile.checkCellForPistonExtension(cellNumber)) {
+                        try {
+                            //catch any exception thrown while attempting to construct from the registered IPanelCell class
+                            Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 
-                            if (((IPanelCell) panelCell).isIndependentState())
-                            {
-                                //for "stateless" cells (such as redstone block), just directly update neighbors
+                            if (panelCell instanceof IPanelCell) {
+                                //place the cell on the panel
+                                panelTile.cellDirections.put(cellNumber, player.getHorizontalFacing());
+                                panelTile.cells.put(cellNumber, (IPanelCell) panelCell);
+
+                                if (!((IPanelCell) panelCell).isIndependentState()) {
+                                    panelTile.updateCell(cellNumber);
+                                }
                                 panelTile.updateNeighborCells(cellNumber);
+
+                                //remove an item from the player's stack
+                                if (!player.isCreative())
+                                    player.getHeldItem(hand).setCount(player.getHeldItem(hand).getCount() - 1);
                             }
-                            else
-                                panelTile.updateCell(cellNumber);
 
-                            //remove an item from the player's stack
-                            if (!player.isCreative())
-                                player.getHeldItem(hand).setCount(player.getHeldItem(hand).getCount() - 1);
+                        } catch (InstantiationException e) {
+                            TinyRedstone.LOGGER.error(e.getMessage());
+                        } catch (IllegalAccessException e) {
+                            TinyRedstone.LOGGER.error(e.getMessage());
+                        } catch (InvocationTargetException e) {
+                            TinyRedstone.LOGGER.error(e.getMessage());
                         }
-
-                    } catch (InstantiationException e) {
-                        TinyRedstone.LOGGER.error(e.getMessage());
-                    } catch (IllegalAccessException e) {
-                        TinyRedstone.LOGGER.error(e.getMessage());
-                    } catch (InvocationTargetException e) {
-                        TinyRedstone.LOGGER.error(e.getMessage());
                     }
 
                 }else if (heldItem instanceof DyeItem)

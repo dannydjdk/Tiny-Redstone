@@ -40,7 +40,6 @@ public class PanelCellNeighbor {
         else if (blockPos!=null)
         {
             return panelTile.weakPowerFromNeighbors.get(facingDirection);
-            //return panelTile.getWorld().getRedstonePower(blockPos,facingDirection);
         }
         return 0;
     }
@@ -52,7 +51,6 @@ public class PanelCellNeighbor {
         else if (blockPos!=null)
         {
             return panelTile.strongPowerFromNeighbors.get(facingDirection);
-            //return panelTile.getWorld().getStrongPower(blockPos,facingDirection);
         }
         return 0;
     }
@@ -61,7 +59,6 @@ public class PanelCellNeighbor {
     {
         if (blockPos!=null)
             return panelTile.comparatorOverrides.containsKey(facingDirection);
-            //return panelTile.getWorld().getBlockState(blockPos).hasComparatorInputOverride();
         return false;
     }
 
@@ -69,7 +66,6 @@ public class PanelCellNeighbor {
     {
         if (blockPos!=null && panelTile.comparatorOverrides.containsKey(facingDirection))
             return panelTile.comparatorOverrides.get(facingDirection);
-            //2return panelTile.getWorld().getBlockState(blockPos).getComparatorInputOverride(panelTile.getWorld(),blockPos);
         return 0;
     }
 
@@ -81,7 +77,9 @@ public class PanelCellNeighbor {
     public boolean powerDrops() {
         if (iPanelCell!=null)
             return iPanelCell.powerDrops();
-        return panelTile.getWorld().getBlockState(blockPos).getBlock() == Blocks.REDSTONE_WIRE;
+        if(blockPos!=null)
+            return panelTile.getWorld().getBlockState(blockPos).getBlock() == Blocks.REDSTONE_WIRE;
+        return false;
     }
 
     public boolean isPushable()
@@ -93,13 +91,8 @@ public class PanelCellNeighbor {
      * Gets the neighboring cell if neighbor is an iPanelCell
      * @return Either an IPanelCell instance or null if no neighbor is not an IPanelCell
      */
-    public IPanelCell getNeighborIPanelCell()
-    {
-        if (iPanelCell!=null)
-        {
-            return iPanelCell;
-        }
-        return null;
+    public IPanelCell getNeighborIPanelCell() {
+        return iPanelCell;
     }
     /**
      * Gets the neighboring BlockState if the neighbor is a block

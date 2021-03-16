@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
+import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;

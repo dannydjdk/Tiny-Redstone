@@ -41,7 +41,7 @@ public class Registration {
         TinyRedstone.registerPanelCell(TransparentBlock.class,TINY_TRANSPARENT_BLOCK.get());
         TinyRedstone.registerPanelCell(Button.class,TINY_BUTTON.get());
         TinyRedstone.registerPanelCell(StoneButton.class,TINY_STONE_BUTTON.get());
-        //TinyRedstone.registerPanelCell(Observer.class,TINY_OBSERVER.get());
+        TinyRedstone.registerPanelCell(Observer.class,TINY_OBSERVER.get());
     }
 
     public static final RegistryObject<PanelBlock> REDSTONE_PANEL_BLOCK = BLOCKS.register("redstone_panel", PanelBlock::new);
@@ -61,7 +61,7 @@ public class Registration {
     public static final RegistryObject<Item> TINY_TRANSPARENT_BLOCK = ITEMS.register("tiny_transparent_block",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_BUTTON = ITEMS.register("tiny_button",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_STONE_BUTTON = ITEMS.register("tiny_stone_button",PanelCellItem::new);
-    //public static final RegistryObject<Item> TINY_OBSERVER = ITEMS.register("tiny_observer",PanelCellItem::new);
+    public static final RegistryObject<Item> TINY_OBSERVER = ITEMS.register("tiny_observer",PanelCellItem::new);
 
     public static final RegistryObject<Item> SILICON = ITEMS.register("silicon",()->new Item(new Item.Properties()
             .group(ModSetup.ITEM_GROUP)

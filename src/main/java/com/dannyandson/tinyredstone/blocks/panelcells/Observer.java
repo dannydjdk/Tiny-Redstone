@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.blocks.IObservingPanelCell;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
@@ -16,7 +17,7 @@ import net.minecraft.util.math.vector.Vector3f;
 
 import java.util.LinkedList;
 
-public class Observer implements IPanelCell {
+public class Observer implements IPanelCell, IObservingPanelCell {
 
     public static ResourceLocation TEXTURE_OBSERVER_TOP      = new ResourceLocation("minecraft","block/observer_top");
     public static ResourceLocation TEXTURE_OBSERVER_BACK_ON  = new ResourceLocation("minecraft","block/observer_back_on");
@@ -51,7 +52,11 @@ public class Observer implements IPanelCell {
         TextureAtlasSprite sprite_side = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_SIDE);
 
         matrixStack.translate(0,0,1.0);
+        matrixStack.push();
+        matrixStack.translate(1,1,0);
+        matrixStack.rotate(Vector3f.ZN.rotationDegrees(180));
         addRectangle(builder,matrixStack,sprite_top,combinedLight,combinedOverlay);
+        matrixStack.pop();
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
@@ -100,13 +105,6 @@ public class Observer implements IPanelCell {
      */
     @Override
     public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
-        queue.add(false);
-        queue.add(false);
-        queue.add(true);
-        queue.add(true);
-        queue.add(true);
-        queue.add(true);
-
         return false;
     }
 
@@ -118,7 +116,7 @@ public class Observer implements IPanelCell {
      */
     @Override
     public int getWeakRsOutput(PanelCellSide outputDirection) {
-        return 0;
+        return (outputDirection==PanelCellSide.BACK && output)?15:0;
     }
 
     @Override
@@ -172,7 +170,8 @@ public class Observer implements IPanelCell {
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean tick(){
+    public boolean tick()
+    {
         if (queue.size()>0)
         {
             return setOutput(queue.remove());
@@ -231,7 +230,21 @@ public class Observer implements IPanelCell {
         String queueString = compoundNBT.getString("queue");
         for (Byte b : queueString.getBytes())
         {
-            queue.add(String.valueOf(b)=="1");
+            queue.add(b==49);
         }
+    }
+
+    @Override
+    public boolean frontNeighborUpdated() {
+        queue.clear();
+
+        queue.add(output);
+        queue.add(output);
+        queue.add(true);
+        queue.add(true);
+        queue.add(true);
+        queue.add(true);
+
+        return false;
     }
 }

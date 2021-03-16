@@ -356,8 +356,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     SoundCategory.BLOCKS, 0.25f, 2f, false
             );
 
-            if (moverIndex != null)
-                panelTile.moveCell(moverIndex, moveDirection,0);
+            if (moverIndex != null) {
+                if (panelTile.cells.containsKey(moverIndex))
+                    panelTile.moveCell(moverIndex, moveDirection, 0);
+                else
+                    panelTile.updateNeighborCells(getAdjacentIndex(index, getPanelSideDirection(index, IPanelCell.PanelCellSide.BACK)));
+            }
         }
     }
 
@@ -403,26 +407,36 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         if (iteration>12)return false;
 
         IPanelCell iPanelCell = this.cells.get(index);
+
+        //check if a piston has extended into this block
+        if (checkCellForPistonExtension(index))
+            return false;
+
+        //if this is an empty cell, we know it can be pushed into
         if (iPanelCell==null)
             return true;
 
+        //if this is not a pushable cell, we know we can't extend into it
         if(!iPanelCell.isPushable())
             return false;
 
+        //otherwise, check if we're on the edge of a tile
         Integer adjacentIndex = this.getAdjacentIndex(index,direction);
         if (adjacentIndex==null)
         {
             TileEntity te = world.getTileEntity(pos.offset(direction));
             if (te instanceof PanelTile)
             {
+                //if we're next to another panel tile, tell it to check it's adjacent cell
                 PanelTile neighborTile = (PanelTile) te;
                 Integer neighborIndex = getNeighborTileCellIndex(direction,index);
                 return neighborTile.canExtendTo(neighborIndex,direction,iteration+1);
             }
-            else
+            else //we must be at the edge of the tile and facing some other type of block, so we can't extend
                 return false;
         }
         else {
+            //we can be pushed and are not on the edge, so check the next cell and see if it can also be pushed
             return canExtendTo(adjacentIndex,direction,iteration+1);
         }
     }
@@ -476,6 +490,46 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     }
 
+
+    public boolean pingOutwardObservers(Direction facing) {
+        //row 0 is west
+        //cell 0 is north
+        boolean updated = false;
+        List<Integer> cellIndices = new ArrayList<>();
+        if (facing == Direction.WEST) {
+            for (int i = 0; i < 8; i++) {
+                if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==facing) {
+                    if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
+                        updated=true;
+                }
+            }
+        } else if (facing == Direction.NORTH) {
+            for (int i = 0; i < 64; i += 8) {
+                if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==facing) {
+                    if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
+                        updated=true;
+                }
+            }
+        } else if (facing == Direction.EAST) {
+            for (int i = 56; i < 64; i++) {
+                if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==facing) {
+                    if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
+                        updated=true;
+                }
+            }
+        } else if (facing == Direction.SOUTH) {
+            for (int i = 7; i < 64; i += 8) {
+                if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==facing) {
+                    if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
+                        updated=true;
+                }
+            }
+        }
+
+
+        return updated;
+    }
+
     public boolean updateSide(Direction facing) {
         //row 0 is west
         //cell 0 is north
@@ -525,33 +579,15 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         List<Integer> indices = new ArrayList<>();
         boolean updateOutputs = false;
 
-        Integer adjacentIndex = getAdjacentIndex(cellIndex, Direction.NORTH);
-        if (adjacentIndex == null) {
-            updateOutputs = true;
-            updateNeighborTileCell(Direction.NORTH, cellIndex);
-        } else
-            indices.add(adjacentIndex);
+        if (updateNeighbor(cellIndex,Direction.NORTH,indices))
+            updateOutputs=true;
+        if (updateNeighbor(cellIndex,Direction.EAST,indices))
+            updateOutputs=true;
+        if (updateNeighbor(cellIndex,Direction.SOUTH,indices))
+            updateOutputs=true;
+        if (updateNeighbor(cellIndex,Direction.WEST,indices))
+            updateOutputs=true;
 
-        adjacentIndex = getAdjacentIndex(cellIndex, Direction.EAST);
-        if (adjacentIndex == null) {
-            updateOutputs = true;
-            updateNeighborTileCell(Direction.EAST, cellIndex);
-        } else
-            indices.add(adjacentIndex);
-
-        adjacentIndex = getAdjacentIndex(cellIndex, Direction.SOUTH);
-        if (adjacentIndex == null) {
-            updateOutputs = true;
-            updateNeighborTileCell(Direction.SOUTH, cellIndex);
-        } else
-            indices.add(adjacentIndex);
-
-        adjacentIndex = getAdjacentIndex(cellIndex, Direction.WEST);
-        if (adjacentIndex == null) {
-            updateOutputs = true;
-            updateNeighborTileCell(Direction.WEST, cellIndex);
-        } else
-            indices.add(adjacentIndex);
 
         if (updateOutputs) {
             if (updateOutputs())
@@ -560,6 +596,41 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         return updateCells(indices, iteration+1) || updateOutputs;
     }
+
+    private boolean updateNeighbor(Integer cellIndex, Direction direction, List<Integer> indices)
+    {
+        Integer adjacentIndex = getAdjacentIndex(cellIndex, direction);
+        Boolean updateOutputs = false;
+        if (adjacentIndex == null) {
+            updateOutputs = true;
+            updateNeighborTileCell(Direction.WEST, cellIndex);
+        } else {
+            IPanelCell adjacentCell = cells.get(adjacentIndex);
+            if (adjacentCell instanceof IObservingPanelCell) {
+                Direction direction1 = cellDirections.get(adjacentIndex);
+                Direction direction2 = direction.getOpposite();
+                if (direction1 == direction2) {
+                    ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
+                }
+            }
+            else if (adjacentCell!=null && !adjacentCell.isIndependentState())
+                indices.add(adjacentIndex);
+        }
+        return updateOutputs;
+    }
+
+    public boolean checkCellForPistonExtension(Integer cellIndex) {
+        Direction[] directions = new Direction[]{Direction.NORTH,Direction.EAST,Direction.SOUTH,Direction.WEST};
+
+        for(Direction direction : directions)
+        {
+            IPanelCell cell = getAdjacentCell(cellIndex,direction);
+            if (cell instanceof Piston && cellDirections.get(getAdjacentIndex(cellIndex,direction))==direction && ((Piston) cell).isExtended())
+                return true;
+        }
+        return false;
+    }
+
 
     /**
      * Update a cell with a potential input change
@@ -580,21 +651,23 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         for (Integer index : indices) {
             IPanelCell thisCell = cells.get(index);
 
-            if (thisCell != null && !thisCell.isIndependentState()) {
+            if (thisCell != null) {
+                if (!thisCell.isIndependentState()) {
 
-                Direction frontDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.FRONT);
-                Direction backDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.BACK);
-                Direction rightDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.RIGHT);
-                Direction leftDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.LEFT);
+                    Direction frontDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.FRONT);
+                    Direction backDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.BACK);
+                    Direction rightDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.RIGHT);
+                    Direction leftDirection = getPanelSideDirection(index, IPanelCell.PanelCellSide.LEFT);
 
-                PanelCellNeighbor front = getNeighbor(frontDirection, index);
-                PanelCellNeighbor back = getNeighbor(backDirection, index);
-                PanelCellNeighbor right = getNeighbor(rightDirection, index);
-                PanelCellNeighbor left = getNeighbor(leftDirection, index);
+                    PanelCellNeighbor front = getNeighbor(frontDirection, index);
+                    PanelCellNeighbor back = getNeighbor(backDirection, index);
+                    PanelCellNeighbor right = getNeighbor(rightDirection, index);
+                    PanelCellNeighbor left = getNeighbor(leftDirection, index);
 
-                if (thisCell.neighborChanged(front,right,back,left)) {
-                    updateNeighborCells(index, iteration + 1);
-                    change=true;
+                    if (thisCell.neighborChanged(front, right, back, left)) {
+                        updateNeighborCells(index, iteration + 1);
+                        change = true;
+                    }
                 }
             }
 
@@ -623,11 +696,18 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         IPanelCell localCell = this.cells.get(localCellIndex);
         Integer neighborIndex = getAdjacentIndex(localCellIndex, facing);
 
-        if (this.cells.containsKey(neighborIndex)) {
+        if (neighborIndex!=null) {
+            PanelCellNeighbor panelCellNeighbor=null;
+            if (this.cells.containsKey(neighborIndex)) {
+                IPanelCell neighborCell = this.cells.get(neighborIndex);
+                IPanelCell.PanelCellSide panelCellSide = getPanelCellSide(neighborIndex, facing.getOpposite());
+                panelCellNeighbor = new PanelCellNeighbor(this, neighborCell, panelCellSide, facing, neighborIndex);
+            }
+            else if(checkCellForPistonExtension(neighborIndex))
+            {
+                panelCellNeighbor = new PanelCellNeighbor(this,null, null, facing, neighborIndex);
+            }
 
-            IPanelCell neighborCell = this.cells.get(neighborIndex);
-            IPanelCell.PanelCellSide panelCellSide = getPanelCellSide(neighborIndex, facing.getOpposite());
-            PanelCellNeighbor panelCellNeighbor = new PanelCellNeighbor(this,neighborCell,panelCellSide,facing,neighborIndex);
             return panelCellNeighbor;
 
         } else if (cellPanelEdge(localCellIndex,facing)) {
