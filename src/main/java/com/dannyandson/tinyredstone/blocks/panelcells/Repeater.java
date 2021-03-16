@@ -8,6 +8,7 @@ import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.gui.RepeaterCellGUI;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -17,12 +18,14 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
+import javax.annotation.Nullable;
 import java.util.LinkedList;
 
 public class Repeater implements IPanelCell
 {
     private boolean input = false;
     private boolean output = false;
+    private boolean locked = false;
     private LinkedList<Boolean> queue = new LinkedList<>();
     private Integer ticks = 2;
 
@@ -44,12 +47,16 @@ public class Repeater implements IPanelCell
         IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
         TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_ON);
-        TextureAtlasSprite sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT);
+        TextureAtlasSprite sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT);;
+
 
         if (!this.output){
             sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_OFF);
             sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
         }
+
+        if (locked)
+            sprite_torch_head=Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation("minecraft","block/bedrock"));
 
 
         matrixStack.translate(0,0,0.25);
@@ -211,7 +218,7 @@ public class Repeater implements IPanelCell
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
+    public boolean neighborChanged(@Nullable PanelCellNeighbor frontNeighbor,@Nullable PanelCellNeighbor rightNeighbor,@Nullable  PanelCellNeighbor backNeighbor,@Nullable  PanelCellNeighbor leftNeighbor)
     {
         if (backNeighbor!=null && backNeighbor.getWeakRsOutput() >0 && !input)
         {
@@ -221,6 +228,16 @@ public class Repeater implements IPanelCell
         {
             input=false;
         }
+
+        this.locked= (leftNeighbor != null && leftNeighbor.getStrongRsOutput() > 0 &&
+                (leftNeighbor.getNeighborIPanelCell() instanceof Repeater || leftNeighbor.getNeighborIPanelCell() instanceof Comparator ||
+                        (leftNeighbor.getNeighborBlockState() != null && (leftNeighbor.getNeighborBlockState().getBlock() == Blocks.REPEATER || leftNeighbor.getNeighborBlockState().getBlock() == Blocks.COMPARATOR))
+                ))
+                ||
+                (rightNeighbor != null && rightNeighbor.getStrongRsOutput() > 0 &&
+                        (rightNeighbor.getNeighborIPanelCell() instanceof Repeater || rightNeighbor.getNeighborIPanelCell() instanceof Comparator ||
+                                (rightNeighbor.getNeighborBlockState() != null && (rightNeighbor.getNeighborBlockState().getBlock() == Blocks.REPEATER || rightNeighbor.getNeighborBlockState().getBlock() == Blocks.COMPARATOR))
+                        ));
 
         return false;
     }
@@ -300,7 +317,7 @@ public class Repeater implements IPanelCell
         Boolean newOutput = this.queue.remove();
         this.queue.add(input);
 
-        if (this.output!=newOutput)
+        if (!this.locked && this.output!=newOutput)
         {
             this.output=newOutput;
             return true;
@@ -333,6 +350,7 @@ public class Repeater implements IPanelCell
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("output",output);
         nbt.putBoolean("input",input);
+        nbt.putBoolean("locked",locked);
 
         String queueString = "";
         int i=0;
@@ -352,6 +370,7 @@ public class Repeater implements IPanelCell
     public void readNBT(CompoundNBT compoundNBT) {
         this.output = compoundNBT.getBoolean("output");
         this.input = compoundNBT.getBoolean("input");
+        this.locked = compoundNBT.getBoolean("locked");
         this.ticks = compoundNBT.getInt("ticks");
 
         String queueString = compoundNBT.getString("queue");

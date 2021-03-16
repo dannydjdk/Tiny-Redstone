@@ -2,9 +2,9 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Hand;
+
+import javax.annotation.Nullable;
 
 public interface IPanelCell {
 
@@ -40,7 +40,7 @@ public interface IPanelCell {
      * @param leftNeighbor object to access info about left neighbor or NULL if no neighbor exists
      * @return boolean indicating whether redstone output of this cell has changed
      */
-    boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor);
+    boolean neighborChanged(@Nullable PanelCellNeighbor frontNeighbor, @Nullable PanelCellNeighbor rightNeighbor, @Nullable  PanelCellNeighbor backNeighbor, @Nullable  PanelCellNeighbor leftNeighbor);
 
     /**
      * Gets redstone output of the given side of the cell
