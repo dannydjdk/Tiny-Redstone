@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
@@ -8,11 +9,14 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class RedstoneLamp extends TinyBlock implements IPanelCell {
+
+    private boolean lit = false;
 
     public static ResourceLocation TEXTURE_REDSTONE_LAMP = new ResourceLocation("minecraft","block/redstone_lamp");
     public static ResourceLocation TEXTURE_REDSTONE_LAMP_ON = new ResourceLocation("minecraft","block/redstone_lamp_on");
@@ -32,7 +36,7 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
         IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
         TextureAtlasSprite sprite;
 
-        if (weakSignalStrength+strongSignalStrength>0) sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_LAMP_ON);
+        if (lit) sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_LAMP_ON);
         else sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_LAMP);
 
         matrixStack.translate(0,0,1.0);
@@ -81,6 +85,39 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
                 .endVertex();
     }
 
+    @Override
+    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
+
+        boolean change =  super.neighborChanged(frontNeighbor, rightNeighbor, backNeighbor, leftNeighbor);
+
+        if (
+                (weakSignalStrength+strongSignalStrength>0) ||
+                        ((
+                                ((frontNeighbor!=null)?frontNeighbor.getWeakRsOutput():0)+
+                                ((rightNeighbor!=null)?rightNeighbor.getWeakRsOutput():0)+
+                                ((backNeighbor!=null)?backNeighbor.getWeakRsOutput():0)+
+                                ((leftNeighbor!=null)?leftNeighbor.getWeakRsOutput():0)) >0)
+        )
+                this.lit=true;
+            else
+                this.lit=false;
+
+        return change;
+    }
+
+    @Override
+    public CompoundNBT writeNBT() {
+        CompoundNBT nbt = super.writeNBT();
+        nbt.putBoolean("lit",this.lit);
+        return nbt;
+    }
+
+    @Override
+    public void readNBT(CompoundNBT compoundNBT) {
+        super.readNBT(compoundNBT);
+        this.lit= compoundNBT.getBoolean("lit");
+    }
+
     /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
      *
@@ -88,7 +125,7 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
      */
     @Override
     public int lightOutput() {
-        return (weakSignalStrength+strongSignalStrength>0)?1:0;
+        return (this.lit)?1:0;
     }
 
 }
