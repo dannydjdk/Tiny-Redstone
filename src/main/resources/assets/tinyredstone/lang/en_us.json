@@ -19,7 +19,10 @@
   "item.tinyredstone.silicon": "Silicon",
   "item.tinyredstone.silicon_compound": "Silicon Compound",
   "item.tinyredstone.tiny_observer": "Tiny Observer",
+  "item.tinyredstone.blueprint": "Tiny Redstone Blueprint",
   "tinyredstone.close" : "Close",
   "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
-  "tinyredstone.gui.tinyblock.msg" : "Select a color"
+  "tinyredstone.gui.tinyblock.msg" : "Select a color",
+  "message.item.blueprint.full" : "Storing circuit requiring the following:",
+  "message.item.blueprint.empty" : "Right click a Redstone Panel to save the circuit to this blueprint."
 }

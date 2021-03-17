@@ -501,5 +501,9 @@ public class PanelBlock extends Block {
         panelCellItemMap.put(iPanelCellClass,correspondingItem);
     }
 
+    public static Item getPanelCellItemFromClass(Class<? extends IPanelCell> iPanelCellClass)
+    {
+        return panelCellItemMap.get(iPanelCellClass);
+    }
 
 }

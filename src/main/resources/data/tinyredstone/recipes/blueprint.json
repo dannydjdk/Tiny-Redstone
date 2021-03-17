@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "tinyredstone:tiny_redstone",
+      "count": 2
+    }
+  ],
+  "result": {
+    "item": "tinyredstone:blueprint",
+    "count": 1
+  }
+}

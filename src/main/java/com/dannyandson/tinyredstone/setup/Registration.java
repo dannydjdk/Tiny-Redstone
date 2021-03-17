@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
+import com.dannyandson.tinyredstone.items.Blueprint;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.items.PanelItem;
 import com.dannyandson.tinyredstone.items.RedstoneWrench;
@@ -62,6 +63,8 @@ public class Registration {
     public static final RegistryObject<Item> TINY_BUTTON = ITEMS.register("tiny_button",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_STONE_BUTTON = ITEMS.register("tiny_stone_button",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_OBSERVER = ITEMS.register("tiny_observer",PanelCellItem::new);
+
+    public static final RegistryObject<Item> BLUEPRINT = ITEMS.register("blueprint", Blueprint::new);
 
     public static final RegistryObject<Item> SILICON = ITEMS.register("silicon",()->new Item(new Item.Properties()
             .group(ModSetup.ITEM_GROUP)

@@ -173,23 +173,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
 
-        CompoundNBT cellsNBT = parentNBTTagCompound.getCompound("cells");
-
-        for (Integer i = 0; i < 64; i++) {
-            CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
-            if (cellNBT.contains("data")) {
-                String className = cellNBT.getString("class");
-                try {
-                    IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
-                    cell.readNBT(cellNBT.getCompound("data"));
-                    this.cells.put(i, cell);
-                    this.cellDirections.put(i, Direction.byIndex(cellNBT.getInt("direction")));
-                } catch (Exception exception) {
-                    TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class " + className +
-                            ": " + exception.getMessage());
-                }
-            }
-        }
+        this.loadCellsFromNBT(parentNBTTagCompound);
 
         CompoundNBT strongPowerFromNeighbors = parentNBTTagCompound.getCompound("strong_power_incoming");
         if (!strongPowerFromNeighbors.isEmpty()) {
@@ -237,6 +221,28 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         this.Color = parentNBTTagCompound.getInt("color");
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
+
+    }
+
+    public void loadCellsFromNBT(CompoundNBT parentNBTTagCompound)
+    {
+        CompoundNBT cellsNBT = parentNBTTagCompound.getCompound("cells");
+
+        for (Integer i = 0; i < 64; i++) {
+            CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
+            if (cellNBT.contains("data")) {
+                String className = cellNBT.getString("class");
+                try {
+                    IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
+                    cell.readNBT(cellNBT.getCompound("data"));
+                    this.cells.put(i, cell);
+                    this.cellDirections.put(i, Direction.byIndex(cellNBT.getInt("direction")));
+                } catch (Exception exception) {
+                    TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class " + className +
+                            ": " + exception.getMessage());
+                }
+            }
+        }
 
     }
 
