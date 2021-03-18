@@ -35,6 +35,12 @@ public class ModNetworkHandler {
                 .consumer(TinyBlockColorSync::handle)
                 .add();
 
+        INSTANCE.messageBuilder(BlueprintSync.class,nextID())
+                .encoder(BlueprintSync::toBytes)
+                .decoder(BlueprintSync::new)
+                .consumer(BlueprintSync::handle)
+                .add();
+
     }
 
     public static void sendToClient(Object packet, ServerPlayerEntity player) {

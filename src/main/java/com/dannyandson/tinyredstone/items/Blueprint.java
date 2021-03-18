@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.gui.BlueprintGUI;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,7 +13,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -48,6 +51,7 @@ public class Blueprint extends Item {
     }
 
 
+    //called when item is used on a block
     @Override
     @Nonnull
     public ActionResultType onItemUse(ItemUseContext context) {
@@ -68,9 +72,18 @@ public class Blueprint extends Item {
                         {
                             for (Item item : items.keySet())
                             {
-                                ItemStack itemStack = new ItemStack(item);
-                                int slot = player.inventory.getSlotFor(itemStack);
-                                player.inventory.getStackInSlot(slot).setCount(player.inventory.getStackInSlot(slot).getCount()-items.get(item));
+                                int itemsToRemove = items.get(item);
+                                for(ItemStack invStack : player.inventory.mainInventory)
+                                {
+                                    if (invStack.getItem().equals(item))
+                                    {
+                                        int removeCt = Math.min(invStack.getCount(),itemsToRemove);
+                                        invStack.setCount(invStack.getCount()-removeCt);
+                                        itemsToRemove-=removeCt;
+                                    }
+                                    if (itemsToRemove==0)
+                                        break;
+                                }
                             }
                         }
                     }
@@ -86,7 +99,16 @@ public class Blueprint extends Item {
 
             }
         }
+
         return ActionResultType.SUCCESS;
+    }
+
+    //called when item is right clicked in the air
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+        if(worldIn.isRemote)
+            BlueprintGUI.open(playerIn.getHeldItem(handIn));
+        return super.onItemRightClick(worldIn, playerIn, handIn);
     }
 
     private static Map<Item,Integer> getRequiredComponents(CompoundNBT blueprintNBT)
@@ -123,8 +145,15 @@ public class Blueprint extends Item {
         for (Item item : items.keySet())
         {
             ItemStack itemStack = new ItemStack(item);
-            int slot = player.inventory.getSlotFor(itemStack);
-            if(slot == -1 || player.inventory.getStackInSlot(slot).getCount()<items.get(item))
+            int count = 0;
+            for(ItemStack invStack : player.inventory.mainInventory)
+            {
+                if (invStack.getItem().equals(itemStack.getItem()))
+                {
+                    count+= invStack.getCount();
+                }
+            }
+            if (count<items.get(item))
                 return false;
         }
         return true;

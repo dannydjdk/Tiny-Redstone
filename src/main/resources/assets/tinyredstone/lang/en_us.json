@@ -1,8 +1,8 @@
 {
   "block.tinyredstone.redstone_panel" : "Redstone Panel",
-  "message.item.redstone_panel" : "Panel to hold tiny redstone bits. Right click with dye to change color.",
-  "message.item.redstone_wrench": "Right-click a Redstone Panel to rotate. Left click to remove tiny redstone bits.",
-  "message.item.redstone_panel_cell": "Can be placed on a Redstone Panel to form a redstone circuit.",
+  "message.item.redstone_panel" : "§7Panel to hold tiny redstone bits.\nRight click with dye to change color.§r",
+  "message.item.redstone_wrench": "§7Right-click a Redstone Panel to rotate.\nLeft click to remove tiny redstone bits.§r",
+  "message.item.redstone_panel_cell": "§7Can be placed on a Redstone Panel to form a redstone circuit.§r",
   "item.tinyredstone.tiny_redstone" : "Tiny Redstone Dust",
   "item.tinyredstone.tiny_repeater" : "Tiny Repeater",
   "item.tinyredstone.tiny_redstone_torch" : "Tiny Redstone Torch",
@@ -23,6 +23,12 @@
   "tinyredstone.close" : "Close",
   "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
   "tinyredstone.gui.tinyblock.msg" : "Select a color",
-  "message.item.blueprint.full" : "Storing circuit requiring the following:",
-  "message.item.blueprint.empty" : "Right click a Redstone Panel to save the circuit to this blueprint."
+  "tinyredstone.gui.blueprint.msg" : "Blueprint",
+  "message.item.blueprint.full" : "§7Right click a Redstone Panel to install this circuit.\nRight click the air to export to a JSON file.\n\n§dRequires the following:§r",
+  "message.item.blueprint.empty" : "§7Right click a Redstone Panel to save the circuit to this blueprint.\nRight Click in air to import a circuit from a JSON file.§r",
+  "tinyredstone.import": "Import",
+  "tinyredstone.export": "Export",
+  "tinyredstone.cancel": "Cancel",
+  "tinyredstone.choose_file": "Select JSON File",
+  "tinyredstone.save_file": "Save JSON File As..."
 }
