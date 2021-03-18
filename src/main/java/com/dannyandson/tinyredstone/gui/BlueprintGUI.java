@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.items.Blueprint;
 import com.dannyandson.tinyredstone.network.BlueprintSync;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -88,17 +89,20 @@ public class BlueprintGUI  extends Screen {
             this.buttons.remove(button);
             this.buttons.add(new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444));
 
-            MemoryStack stack = MemoryStack.stackPush();
-            PointerBuffer filters = stack.mallocPointer(1);
-            filters.put(stack.UTF8("*.json"));
-
             new Thread(() -> {
+
+                MemoryStack stack = MemoryStack.stackPush();
+                PointerBuffer filters = stack.mallocPointer(1);
+                filters.put(stack.UTF8("*.json"));
+                filters.flip();
+
                 String path = TinyFileDialogs.tinyfd_saveFileDialog(
                         new TranslationTextComponent("tinyredstone.save_file").getString(),
-                        null, filters, null
+                        "blueprint.json", filters, null
                 );
                 close();
                 this.dialogOpen=false;
+                stack.pop();
 
                 if (path != null) {
                     try {
@@ -124,17 +128,23 @@ public class BlueprintGUI  extends Screen {
             this.buttons.remove(button);
             this.buttons.add(new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444));
 
-            MemoryStack stack = MemoryStack.stackPush();
-            PointerBuffer filters = stack.mallocPointer(1);
-            filters.put(stack.UTF8("*.json"));
-
             new Thread(() -> {
+
+                MemoryStack stack = MemoryStack.stackPush();
+                PointerBuffer filters = stack.mallocPointer(2);
+                filters.put(stack.UTF8("*.j"));
+                filters.put(stack.UTF8("*.json"));
+                filters.flip();
+
+
                 String path = TinyFileDialogs.tinyfd_openFileDialog(
                         new TranslationTextComponent("tinyredstone.choose_file").getString(),
-                        null, filters, null, false
+                        null, filters, "JSON File (*.json)", false
                 );
                 close();
                 this.dialogOpen=false;
+
+                stack.pop();
 
                 if (path != null) {
                     StringBuilder data = new StringBuilder();
@@ -150,10 +160,13 @@ public class BlueprintGUI  extends Screen {
                     }
 
                     try {
-                        //TODO validate that NBT received from JSON file is a valid blueprint
+                        //will throw CommandSyntaxException, abort and log error if file is not valid NBT json
                         CompoundNBT nbt = JsonToNBT.getTagFromJson(data.toString());
-                        this.blueprint.setTag(nbt);
-                        ModNetworkHandler.sendToServer(new BlueprintSync(nbt));
+                        CompoundNBT cleanNBT = Blueprint.cleanUpBlueprintNBT(nbt);
+                        if (cleanNBT!=null) {
+                            this.blueprint.setTag(cleanNBT);
+                            ModNetworkHandler.sendToServer(new BlueprintSync(cleanNBT));
+                        }
                     } catch (CommandSyntaxException e) {
                         TinyRedstone.LOGGER.error("CommandSyntaxException reading JSON from user file: " + e.getLocalizedMessage());
                     }

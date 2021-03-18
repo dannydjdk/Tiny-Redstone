@@ -159,4 +159,49 @@ public class Blueprint extends Item {
         return true;
     }
 
+    /**
+     * Checks nbt for valid blueprint data. Removes any irrelevant data or cells with no definitions installed.
+     * RETURNS NULL if no valid data found.
+     * @param nbt CompoundNBT to be cleaned up - usually acquired untrusted source such as a json file or network
+     * @return cleaned up NBT with any irrelevant date removed. NULL if no valid data found.
+     */
+    @Nullable
+    public static CompoundNBT cleanUpBlueprintNBT(CompoundNBT nbt)
+    {
+        if (nbt.contains("blueprint"))
+        {
+            CompoundNBT blueprintNBT = nbt.getCompound("blueprint");
+            if (blueprintNBT.contains("cells"))
+            {
+                CompoundNBT newCellsNBT = new CompoundNBT();
+
+                CompoundNBT cellsNBT = blueprintNBT.getCompound("cells");
+                for (String key : cellsNBT.keySet())
+                {
+                    try {
+                        if (IPanelCell.class.isAssignableFrom(Class.forName(cellsNBT.getCompound(key).getString("class"))))
+                        {
+                            newCellsNBT.put(key,cellsNBT.getCompound(key));
+                        }
+                    }catch (ClassNotFoundException e)
+                    {
+                        TinyRedstone.LOGGER.error("Class not found exception while attempting to read components from blueprint NBT: " + e.getLocalizedMessage());
+                    }
+
+                }
+
+                CompoundNBT newNBT = new CompoundNBT();
+                CompoundNBT newBlueprintNBT = new CompoundNBT();
+                newNBT.putInt("CustomModelData",1);
+                newBlueprintNBT.put("cells",newCellsNBT);
+                newNBT.put("blueprint",newBlueprintNBT);
+                if (nbt.contains("display"))
+                    newNBT.put("display",nbt.getCompound("display"));
+
+                return newNBT;
+            }
+        }
+        return null;
+    }
+
 }

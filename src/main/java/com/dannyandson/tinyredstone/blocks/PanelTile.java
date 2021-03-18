@@ -17,7 +17,6 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -30,7 +29,7 @@ import java.util.Map;
 public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     //TODO
-    // cell types - lever, observer
+    // cell types - lever
     // add-on - gates, clock
     // One probe support
     // troubleshoot issue with powered neighbor blocks not updating their neighbors
@@ -994,16 +993,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public int getLightOutput()
     {
         return this.lightOutput;
-    }
-
-    //TODO Import/Export
-    public String getJson()
-    {
-        CompoundNBT nbt = new CompoundNBT();
-        this.saveToNbt(nbt);
-        ITextComponent textComponent = nbt.toFormattedComponent();
-
-        return textComponent.getString();
     }
 
     public void sync()
