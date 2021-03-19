@@ -18,10 +18,14 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class RedstoneDust implements IPanelCell {
 
-    public static ResourceLocation TEXTURE_REDSTONE_DUST = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust");
+    public static ResourceLocation TEXTURE_REDSTONE_DUST_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_on");
     public static ResourceLocation TEXTURE_REDSTONE_DUST_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_off");
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment_on");
+    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment_on");
     public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment_off");
+
+    public static ResourceLocation TEXTURE_REDSTONE_DUST = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust");
+    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment");
+
 
     //pre-calculated variables for segment points
     private static final float s6 = 0.375f;
@@ -36,6 +40,10 @@ public class RedstoneDust implements IPanelCell {
     private boolean backEnabled = true;
     private boolean leftEnabled = false;
 
+    private float red = .25f;
+    private float green = 0;
+    private float blue = 0;
+
     /**
      * Drawing the cell on the panel
      *
@@ -46,18 +54,10 @@ public class RedstoneDust implements IPanelCell {
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
 
-        TextureAtlasSprite sprite_redstone_dust;
-        TextureAtlasSprite sprite_redstone_segment;
+        red = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
 
-        if (this.signalStrength>0) {
-            sprite_redstone_dust = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_DUST);
-            sprite_redstone_segment = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_DUST_SEGMENT);
-        }
-        else
-        {
-            sprite_redstone_dust = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_DUST_OFF);
-            sprite_redstone_segment = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
-        }
+        TextureAtlasSprite sprite_redstone_dust = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_DUST);
+        TextureAtlasSprite sprite_redstone_segment = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_DUST_SEGMENT);
 
         IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
 
@@ -92,7 +92,7 @@ public class RedstoneDust implements IPanelCell {
 
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float u, float v, int combinedLightIn, int combinedOverlayIn) {
         renderer.pos(stack.getLast().getMatrix(), x, y, 0)
-                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .color(red, green, blue, 1.0f)
                 .tex(u, v)
                 .lightmap(combinedLightIn)
                 .normal(1, 0, 0)

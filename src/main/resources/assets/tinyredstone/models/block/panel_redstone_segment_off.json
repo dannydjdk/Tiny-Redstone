@@ -1,6 +1,6 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "all": "tinyredstone:panel_redstone_segment_off"
+    "all": "tinyredstone:block/panel_redstone_segment_off"
   }
 }

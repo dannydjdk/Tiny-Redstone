@@ -1,7 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.Config;
-import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
@@ -14,13 +13,14 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class Torch implements IPanelCell
 {
     private boolean output = false;
 
-    public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_torch_on");
-    public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_torch_off");
+    public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation("minecraft","block/redstone_torch");
+    public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation("minecraft","block/redstone_torch_off");
 
 
     /**
@@ -35,9 +35,8 @@ public class Torch implements IPanelCell
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-        //TODO 3d Torch render
 
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
         TextureAtlasSprite sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_ON);
 
         if (this.output) {
@@ -48,15 +47,53 @@ public class Torch implements IPanelCell
             sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_OFF);
         }
 
+        float u1 = sprite_torch.getMinU() + 0.0068359375f;
+        float u2 = sprite_torch.getMaxU() - 0.0068359375f;
+        float v1 = sprite_torch.getMinV() + 0.01171875f;
+        float v2 = sprite_torch.getMaxV();
 
-        matrixStack.translate(0,0,0.01);
+        float x1 = 0.375f;
+        float x2 = 0.625f;
+        float y1 = 0;
+        float y2 = 0.625f;
 
-        matrixStack.push();
-        add(builder, matrixStack, 0,0,0, sprite_torch.getMinU(), sprite_torch.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite_torch.getMaxU(), sprite_torch.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,1,0, sprite_torch.getMaxU(), sprite_torch.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,1,0, sprite_torch.getMinU(), sprite_torch.getMinV(),combinedLight,combinedOverlay);
-        matrixStack.pop();
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(60));
+        matrixStack.translate(0,0.03125f,0);
+
+
+        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay);
+
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(-x1,0,x2);
+        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay);
+
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(-x1,0,x2);
+        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay);
+
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(-x1,0,x2);
+        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay);
+
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.translate(0,-x1,y2);
+        add(builder, matrixStack, x1,x1,0, u1, v2-0.01953125f,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,x1,0, u2, v2-0.01953125f,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x2,x2,0, u2, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,x2,0, u1, v1,combinedLight,combinedOverlay);
+
 
     }
 

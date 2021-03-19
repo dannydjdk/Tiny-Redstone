@@ -47,7 +47,7 @@ public class Repeater implements IPanelCell
         IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
         TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_ON);
-        TextureAtlasSprite sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT);;
+        TextureAtlasSprite sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_ON);
 
 
         if (!this.output){

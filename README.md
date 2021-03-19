@@ -1,4 +1,5 @@
 Tiny Redstone is a forge mod for Minecraft that adds many tiny redstone pieces that you can put together on redstone panels to form tiny redstone circuits.
+These circuits can be copied onto blueprints and shared inside and outside your Minecraft world.
 
 These panels can be picked up, moved, rotated, and linked with other panels. You can even dye them to match your build!
 
@@ -74,10 +75,30 @@ It currently does not detect color changes or tiny repeater delay changes. You p
 This is to help prevent accidental breakage while removing tiny components from the panel, especially in creative mode.
 Sneak right click with the Redstone Wrench to instantly pick up the Redstone Panel, or you can always use a pickaxe.
 
+## Copying and Sharing Circuits
+### Saving a circuit
+Craft a Blueprint and right click the empty blueprint on your assembled Redstone Panel.
+The circuit on that panel is now saved to that blueprint.
+To clear the blueprint, place it in a crafting grid.
+
+### Copying a saved circuit
+Hover over the blueprint to see the components required for your circuit.
+Make sure you have all those components in your inventory (unless you are in Creative Mode).
+Right click on an empty Redstone Panel.
+The required components will be taken from your inventory and placed on the panel to form the circuit.
+
+### Exporting
+After saving a circuit to a blueprint, right click in the air. A GUI will appear.
+Click the Export button and save the *.json file wherever you want it.
+
+### Importing
+Right click in the air with an empty blueprint. A GUI will appear.
+Click the Import button. Find the *.json file with the saved circuit and open it.
+The circuit will now be saved to your blueprint.
+
 ## Future Plans
 
 - Tiny Levers.
-- Export/Import circuits to share with friends or use between worlds.
 - Panel covers to hide circuitry and reduce lag potential.
 - Highlight cell grid when placing components to see where component will place
 - One Probe support, so you can see the redstone signal of each tiny component.

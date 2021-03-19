@@ -35,6 +35,7 @@ public class ClientSetup {
         event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST);
         event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_OFF);
         event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT);
+        event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_ON);
         event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
         event.addSprite(Torch.TEXTURE_TORCH_ON);
         event.addSprite(Torch.TEXTURE_TORCH_OFF);
