@@ -6,6 +6,7 @@ import com.dannyandson.tinyredstone.blocks.panelcells.StickyPiston;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
@@ -17,9 +18,11 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +47,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public Integer Color = DyeColor.GRAY.getColorValue();
     private Integer lightOutput = 0;
     private boolean flagLightUpdate = false;
+
+    public Integer lookingAtCell = null;
+    public Direction lookingAtDirection = null;
+    public IPanelCell lookingAtWith = null;
 
     public Map<Direction, Integer> comparatorOverrides = new HashMap<>();
 
@@ -324,6 +331,43 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             if (updateOutputs())
                 world.notifyNeighborsOfStateChange(pos, this.getBlockState().getBlock());
             sync();
+        }
+
+        if (world.isRemote)
+        {
+            if (PanelBlock.isPanelCellItem(Minecraft.getInstance().player.getHeldItemMainhand().getItem())) {
+                RayTraceResult lookingAt = Minecraft.getInstance().objectMouseOver;
+                BlockPos blockPos = new BlockPos(lookingAt.getHitVec());
+                TileEntity te = world.getTileEntity(blockPos);
+                if (te == this)
+                {
+                    double x = lookingAt.getHitVec().x - pos.getX();
+                    double z = lookingAt.getHitVec().z - pos.getZ();
+                    int row = Math.round((float) (x * 8f) - 0.5f);
+                    int cell = Math.round((float) (z * 8f) - 0.5f);
+                    int cellIndex = (row * 8) + cell;
+                    if (!this.cells.containsKey(cellIndex)) {
+                        this.lookingAtCell = (row * 8) + cell;
+                        this.lookingAtDirection = Minecraft.getInstance().player.getHorizontalFacing();
+                        try {
+                            this.lookingAtWith = (IPanelCell) PanelBlock.getPanelCellClassFromItem(Minecraft.getInstance().player.getHeldItemMainhand().getItem()).getConstructors()[0].newInstance();
+                        } catch (InstantiationException e) {
+                            TinyRedstone.LOGGER.error(e.getMessage());
+                        } catch (IllegalAccessException e) {
+                            TinyRedstone.LOGGER.error(e.getMessage());
+                        } catch (InvocationTargetException e) {
+                            TinyRedstone.LOGGER.error(e.getMessage());
+                        }
+                    }
+                    else
+                        this.lookingAtCell=null;
+                }
+                else
+                    this.lookingAtCell=null;
+            }
+            else
+                this.lookingAtCell=null;
+
         }
 
     }

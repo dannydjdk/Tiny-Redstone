@@ -506,4 +506,14 @@ public class PanelBlock extends Block {
         return panelCellItemMap.get(iPanelCellClass);
     }
 
+    public static Class<? extends IPanelCell> getPanelCellClassFromItem(Item item)
+    {
+        return itemPanelCellMap.get(item);
+    }
+
+    public static boolean isPanelCellItem(Item item)
+    {
+        return itemPanelCellMap.containsKey(item);
+    }
+
 }

@@ -16,7 +16,7 @@ public interface IPanelCell {
      * @param combinedLight
      * @param combinedOverlay
      */
-    void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay);
+    void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha);
 
     /**
      * Responding to a change in redstone signal output of an adjacent cells.

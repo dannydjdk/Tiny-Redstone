@@ -34,9 +34,9 @@ public class Torch implements IPanelCell
      * @param combinedOverlay
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
         TextureAtlasSprite sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_ON);
 
         if (this.output) {
@@ -55,51 +55,51 @@ public class Torch implements IPanelCell
         float x1 = 0.375f;
         float x2 = 0.625f;
         float y1 = 0;
-        float y2 = 0.625f;
+        float y2 = 1f;
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(60));
         matrixStack.translate(0,0.03125f,0);
 
 
-        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
-        add(builder, matrixStack, x1,x1,0, u1, v2-0.01953125f,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,x1,0, u2, v2-0.01953125f,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,x2,0, u2, v1,combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,x2,0, u1, v1,combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,x1,0, u1, v2-0.01953125f,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,x1,0, u2, v2-0.01953125f,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,x2,0, u2, v1,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,x2,0, u1, v1,combinedLight,combinedOverlay,alpha);
 
 
     }
 
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn) {
+    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
         renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .color(1.0f, 1.0f, 1.0f, alpha)
                 .tex(u, v)
                 .lightmap((output)?15728880:combinedLightIn)
                 .normal(1, 0, 0)

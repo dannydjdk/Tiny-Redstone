@@ -43,8 +43,8 @@ public class Repeater implements IPanelCell
      * @param combinedOverlay
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
+    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
         TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_ON);
         TextureAtlasSprite sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_ON);
@@ -62,18 +62,18 @@ public class Repeater implements IPanelCell
         matrixStack.translate(0,0,0.25);
 
         //draw base top
-        add(builder, matrixStack, 0,0,0, sprite_repeater.getMinU(), sprite_repeater.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite_repeater.getMaxU(), sprite_repeater.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,1,0, sprite_repeater.getMaxU(), sprite_repeater.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,1,0, sprite_repeater.getMinU(), sprite_repeater.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,0,0, sprite_repeater.getMinU(), sprite_repeater.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite_repeater.getMaxU(), sprite_repeater.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,1,0, sprite_repeater.getMaxU(), sprite_repeater.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,1,0, sprite_repeater.getMinU(), sprite_repeater.getMinV(),combinedLight,combinedOverlay,alpha);
 
         if (ticks>8) {
             matrixStack.push();
             matrixStack.translate(0, 0, 0.01);
-            add(builder, matrixStack, 0.25f, 0.125f, 0, sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight, combinedOverlay);
-            add(builder, matrixStack, 0.75f, 0.125f, 0, sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight, combinedOverlay);
-            add(builder, matrixStack, 0.75f, 0.25f, 0, sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight, combinedOverlay);
-            add(builder, matrixStack, 0.25f, 0.25f, 0, sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight, combinedOverlay);
+            add(builder, matrixStack, 0.25f, 0.125f, 0, sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight, combinedOverlay,alpha);
+            add(builder, matrixStack, 0.75f, 0.125f, 0, sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight, combinedOverlay,alpha);
+            add(builder, matrixStack, 0.75f, 0.25f, 0, sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight, combinedOverlay,alpha);
+            add(builder, matrixStack, 0.25f, 0.25f, 0, sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight, combinedOverlay,alpha);
 
             matrixStack.pop();
         }
@@ -81,91 +81,91 @@ public class Repeater implements IPanelCell
         matrixStack.push();
         //draw static torch top
         matrixStack.translate(0,0,0.125);
-        add(builder,matrixStack,0.4375f,0.75f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.5625f,0.75f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.5625f,0.875f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.4375f,0.875f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0.4375f,0.75f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.5625f,0.75f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.5625f,0.875f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.4375f,0.875f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         //draw moving torch top
         float torch2Y = (ticks<8)? 0.75f - ticks.floatValue()*0.0625f : 0.25f;
 
-        add(builder,matrixStack,0.4375f,torch2Y-0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.5625f,torch2Y-0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.5625f,torch2Y,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.4375f,torch2Y,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0.4375f,torch2Y-0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.5625f,torch2Y-0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.5625f,torch2Y,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.4375f,torch2Y,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
         matrixStack.pop();
 
         //draw back side
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.25,0);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
 
         matrixStack.push();
         //draw static torch side
         matrixStack.translate(.4375f,.25,-0.75f);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         //draw moving torch side
         matrixStack.translate(0,0,.875-torch2Y);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         matrixStack.pop();
 
         //right side
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
 
         matrixStack.push();
         //draw static torch side
         matrixStack.translate(.75,0.25f,-.4375f);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         //draw moving torch side
         matrixStack.translate(torch2Y-.875,0,0);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         matrixStack.pop();
 
         //front side
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
         matrixStack.push();
         //draw static torch front
         matrixStack.translate(.4375f,.25,-0.125f);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         //draw moving torch front
         matrixStack.translate(0,0,torch2Y-.875);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         matrixStack.pop();
 
@@ -173,34 +173,34 @@ public class Repeater implements IPanelCell
         //left side
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
 
         matrixStack.push();
         //draw static torch side
         matrixStack.translate(.125,0.25f,-.4375f);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         //draw moving torch side
         matrixStack.translate(.875-torch2Y,0,0);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay);
+        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
 
         matrixStack.pop();
 
 
     }
 
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn) {
+    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
         renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .color(1.0f, 1.0f, 1.0f, alpha)
                 .tex(u, v)
                 .lightmap(combinedLightIn)
                 .normal(1, 0, 0)

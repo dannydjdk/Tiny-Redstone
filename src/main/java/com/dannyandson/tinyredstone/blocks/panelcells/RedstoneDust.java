@@ -52,7 +52,7 @@ public class RedstoneDust implements IPanelCell {
      * @param combinedOverlay
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         red = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
 
@@ -62,37 +62,37 @@ public class RedstoneDust implements IPanelCell {
         IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
 
         matrixStack.translate(0,0,0.01);
-        addSquare(builder,matrixStack,s6-.01f,s6-.01f,s10+.01f,s10+.01f,sprite_redstone_dust,combinedLight,combinedOverlay);
+        addSquare(builder,matrixStack,s6-.01f,s6-.01f,s10+.01f,s10+.01f,sprite_redstone_dust,combinedLight,combinedOverlay, alpha);
         //matrixStack.translate(0,0,0.5);
         if (rightEnabled) {
-            addSquare(builder,matrixStack,s10,s7,1.01f,s9,sprite_redstone_segment,combinedLight,combinedOverlay);
+            addSquare(builder,matrixStack,s10,s7,1.01f,s9,sprite_redstone_segment,combinedLight,combinedOverlay, alpha);
         }
         if (leftEnabled) {
-            addSquare(builder,matrixStack,-.01f,s7,s6,s9,sprite_redstone_segment,combinedLight,combinedOverlay);
+            addSquare(builder,matrixStack,-.01f,s7,s6,s9,sprite_redstone_segment,combinedLight,combinedOverlay, alpha);
         }
         matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         if (frontEnabled) {
-            addSquare(builder,matrixStack,s10,s7,1.01f,s9,sprite_redstone_segment,combinedLight,combinedOverlay);
+            addSquare(builder,matrixStack,s10,s7,1.01f,s9,sprite_redstone_segment,combinedLight,combinedOverlay, alpha);
         }
         if (backEnabled) {
-            addSquare(builder,matrixStack,-.01f,s7,s6,s9,sprite_redstone_segment,combinedLight,combinedOverlay);
+            addSquare(builder,matrixStack,-.01f,s7,s6,s9,sprite_redstone_segment,combinedLight,combinedOverlay, alpha);
         }
 
 
     }
 
-    private void addSquare (IVertexBuilder builder, MatrixStack matrixStack, float x0, float y0, float x1, float y1,TextureAtlasSprite sprite,  int combinedLight, int combinedOverlay){
+    private void addSquare (IVertexBuilder builder, MatrixStack matrixStack, float x0, float y0, float x1, float y1,TextureAtlasSprite sprite,  int combinedLight, int combinedOverlay, float alpha){
 
-        add(builder, matrixStack, x0,y0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,y0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,y1, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x0,y1, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, x0,y0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay, alpha);
+        add(builder, matrixStack, x1,y0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay, alpha);
+        add(builder, matrixStack, x1,y1, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay, alpha);
+        add(builder, matrixStack, x0,y1, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay, alpha);
     }
 
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float u, float v, int combinedLightIn, int combinedOverlayIn) {
+    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
         renderer.pos(stack.getLast().getMatrix(), x, y, 0)
-                .color(red, green, blue, 1.0f)
+                .color(red, green, blue, alpha)
                 .tex(u, v)
                 .lightmap(combinedLightIn)
                 .normal(1, 0, 0)

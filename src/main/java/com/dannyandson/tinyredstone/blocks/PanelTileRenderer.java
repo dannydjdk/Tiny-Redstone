@@ -32,46 +32,57 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
     @Override
     public void render(PanelTile tileEntity, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
 
-         for(Integer i=0 ; i<64 ; i++)
+        for(Integer i=0 ; i<64 ; i++)
         {
             if (tileEntity.cells.containsKey(i))
             {
                 IPanelCell panelCell = tileEntity.cells.get(i);
                 Direction cellDirection = tileEntity.cellDirections.get(i);
-                int row = Math.round((i.floatValue()/8f)-0.5f);
-                int cell = i%8;
 
-                matrixStack.push();
-
-                    matrixStack.translate(cellSize*(double)row, 0.125, cellSize*(cell));
-                matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
-
-                if (cellDirection== Direction.WEST)
-                {
-                    matrixStack.translate(0,-cellSize,0);
-                    matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
-                }
-                else if (cellDirection== Direction.SOUTH)
-                {
-                    matrixStack.translate(cellSize,-cellSize,0);
-                    matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
-                }
-                else if (cellDirection== Direction.EAST)
-                {
-                    matrixStack.translate(cellSize,0,0);
-                    matrixStack.rotate(Vector3f.ZP.rotationDegrees(270));
-                }
-
-                matrixStack.scale(scale, scale, scale);
-                matrixStack.translate(t2X,t2Y,t2Z);
-
-                panelCell.render(matrixStack, buffer, combinedLight, combinedOverlay);
-
-                matrixStack.pop();
-
+                renderCell(tileEntity,matrixStack,i,panelCell,cellDirection,buffer,combinedLight,combinedOverlay,1.0f);
             }
         }
 
+        if (tileEntity.lookingAtCell!=null)
+        {
+            renderCell(tileEntity,matrixStack,tileEntity.lookingAtCell, tileEntity.lookingAtWith, tileEntity.lookingAtDirection,buffer,combinedLight,combinedOverlay,0.5f);
+        }
+
+
+    }
+
+    private void renderCell(PanelTile tileEntity, MatrixStack matrixStack, Integer index, IPanelCell panelCell, Direction cellDirection, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
+    {
+        int row = Math.round((index.floatValue()/8f)-0.5f);
+        int cell = index%8;
+
+        matrixStack.push();
+
+        matrixStack.translate(cellSize*(double)row, 0.125, cellSize*(cell));
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
+
+        if (cellDirection== Direction.WEST)
+        {
+            matrixStack.translate(0,-cellSize,0);
+            matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
+        }
+        else if (cellDirection== Direction.SOUTH)
+        {
+            matrixStack.translate(cellSize,-cellSize,0);
+            matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
+        }
+        else if (cellDirection== Direction.EAST)
+        {
+            matrixStack.translate(cellSize,0,0);
+            matrixStack.rotate(Vector3f.ZP.rotationDegrees(270));
+        }
+
+        matrixStack.scale(scale, scale, scale);
+        matrixStack.translate(t2X,t2Y,t2Z);
+
+        panelCell.render(matrixStack, buffer, combinedLight, combinedOverlay,alpha);
+
+        matrixStack.pop();
 
     }
 

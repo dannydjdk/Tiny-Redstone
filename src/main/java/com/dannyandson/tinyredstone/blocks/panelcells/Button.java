@@ -32,53 +32,53 @@ public class Button implements IPanelCell {
      * @param combinedOverlay
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
+    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         TextureAtlasSprite sprite = getSprite();
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
 
         matrixStack.translate(0,0,(active)?0.0625:0.125);
         float x1 = 0.3125f, x2 = .6875f, y1 = .375f, y2 = .625f;
         //matrixStack.scale(.375f,.375f,1);
 
-        add(builder, matrixStack, x1,y1,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y1,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,y2,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,y2,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,y1,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y1,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,y2,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,y2,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.125,-y1);
-        add(builder, matrixStack, x1,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x2,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, x1,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, x1,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,.6875);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0.25f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0.25f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0.25f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0.25f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,.25);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, .375f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, .375f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, .375f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, .375f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,0.375);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0.25f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0.25f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay);
-        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay);
+        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0.25f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0.25f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
 
     }
 
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn) {
+    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
         renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, 1.0f)
+                .color(1.0f, 1.0f, 1.0f, alpha)
                 .tex(u, v)
                 .lightmap(combinedLightIn)
                 .normal(1, 0, 0)
