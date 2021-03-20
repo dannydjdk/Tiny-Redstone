@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.Config;
+import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
@@ -19,8 +20,10 @@ public class Torch implements IPanelCell
 {
     private boolean output = false;
 
-    public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation("minecraft","block/redstone_torch");
-    public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation("minecraft","block/redstone_torch_off");
+    public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch");
+    public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_off");
+    public static ResourceLocation TEXTURE_TORCH_TOP_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_top");
+    public static ResourceLocation TEXTURE_TORCH_TOP_OFF = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_top_off");
 
 
     /**
@@ -37,19 +40,22 @@ public class Torch implements IPanelCell
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
-        TextureAtlasSprite sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_ON);
+        TextureAtlasSprite sprite_torch;
+        TextureAtlasSprite sprite_torch_top;
 
         if (this.output) {
             sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_ON);
+            sprite_torch_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_TOP_ON);
         }
         else
         {
             sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_OFF);
+            sprite_torch_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_TOP_OFF);
         }
 
-        float u1 = sprite_torch.getMinU() + 0.0068359375f;
-        float u2 = sprite_torch.getMaxU() - 0.0068359375f;
-        float v1 = sprite_torch.getMinV() + 0.01171875f;
+        float u1 = sprite_torch.getMinU();// + 0.0068359375f;
+        float u2 = sprite_torch.getMaxU();// - 0.0068359375f;
+        float v1 = sprite_torch.getMinV();// + 0.01171875f;
         float v2 = sprite_torch.getMaxV();
 
         float x1 = 0.375f;
@@ -89,10 +95,10 @@ public class Torch implements IPanelCell
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
-        add(builder, matrixStack, x1,x1,0, u1, v2-0.01953125f,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,x1,0, u2, v2-0.01953125f,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,x2,0, u2, v1,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x1,x2,0, u1, v1,combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,x1,0, sprite_torch_top.getMinU(), sprite_torch_top.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,x1,0, sprite_torch_top.getMaxU(), sprite_torch_top.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x2,x2,0, sprite_torch_top.getMaxU(), sprite_torch_top.getMaxV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, x1,x2,0, sprite_torch_top.getMinU(), sprite_torch_top.getMaxV(),combinedLight,combinedOverlay,alpha);
 
 
     }

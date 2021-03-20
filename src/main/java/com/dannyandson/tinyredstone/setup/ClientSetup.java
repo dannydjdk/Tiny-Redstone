@@ -39,6 +39,10 @@ public class ClientSetup {
         event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
         event.addSprite(Torch.TEXTURE_TORCH_ON);
         event.addSprite(Torch.TEXTURE_TORCH_OFF);
+        event.addSprite(Torch.TEXTURE_TORCH_TOP_ON);
+        event.addSprite(Torch.TEXTURE_TORCH_TOP_OFF);
+        event.addSprite(Piston.TEXTURE_PISTON_SIDE_TOP);
+        event.addSprite(Piston.TEXTURE_PISTON_SIDE_BOTTOM);
 
         event.addSprite(Comparator.TEXTURE_COMPARATOR_OFF);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_ON);

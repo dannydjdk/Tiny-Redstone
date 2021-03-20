@@ -1,6 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "tinyredstone:panel_redstone_dust_on"
-  }
-}

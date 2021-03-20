@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
@@ -17,6 +18,8 @@ import net.minecraft.util.math.vector.Vector3f;
 public class Piston implements IPanelCell {
 
     public static ResourceLocation TEXTURE_PISTON_SIDE = new ResourceLocation("minecraft","block/piston_side");
+    public static ResourceLocation TEXTURE_PISTON_SIDE_TOP = new ResourceLocation(TinyRedstone.MODID,"block/piston_side_top");
+    public static ResourceLocation TEXTURE_PISTON_SIDE_BOTTOM = new ResourceLocation(TinyRedstone.MODID,"block/piston_side_bottom");
     public static ResourceLocation TEXTURE_PISTON_TOP = new ResourceLocation("minecraft","block/piston_top");
     public static ResourceLocation TEXTURE_PISTON_BOTTOM = new ResourceLocation("minecraft","block/piston_bottom");
     public static ResourceLocation TEXTURE_PISTON_INNER = new ResourceLocation("minecraft","block/piston_inner");
@@ -112,16 +115,20 @@ public class Piston implements IPanelCell {
     private void drawSide(MatrixStack matrixStack,IVertexBuilder builder,TextureAtlasSprite sprite,int combinedLight,int combinedOverlay, float alpha)
     {
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
-        float sprite_side_minV = (renderExtended)?sprite.getMinV()+0.0078125f:sprite.getMinV();
+        TextureAtlasSprite sprite_side_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE_TOP);
+        TextureAtlasSprite sprite_side_bottom = (renderExtended)
+                ?Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE_BOTTOM)
+                :Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE);
+
 
         matrixStack.push();
 
         if (renderExtended)
             matrixStack.scale(1,.75f,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite_side_minV,combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite_side_minV,combinedLight,combinedOverlay, alpha);
+        add(builder, matrixStack, 0,0,0, sprite_side_bottom.getMinU(), sprite_side_bottom.getMaxV(),combinedLight,combinedOverlay, alpha);
+        add(builder, matrixStack, 1,0,0, sprite_side_bottom.getMaxU(), sprite_side_bottom.getMaxV(),combinedLight,combinedOverlay, alpha);
+        add(builder, matrixStack, 1,1,0, sprite_side_bottom.getMaxU(), sprite_side_bottom.getMinV(),combinedLight,combinedOverlay, alpha);
+        add(builder, matrixStack, 0,1,0, sprite_side_bottom.getMinU(), sprite_side_bottom.getMinV(),combinedLight,combinedOverlay, alpha);
         matrixStack.pop();
 
         if (renderExtended)
@@ -130,18 +137,18 @@ public class Piston implements IPanelCell {
 
             matrixStack.translate(0,1.75,0);
             matrixStack.scale(1,.25f,1);
-            add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV()-0.0234375f,combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV()-0.0234375f,combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay, alpha);
+            add(builder, matrixStack, 0,0,0, sprite_side_top.getMinU(), sprite_side_top.getMaxV(),combinedLight,combinedOverlay, alpha);
+            add(builder, matrixStack, 1,0,0, sprite_side_top.getMaxU(), sprite_side_top.getMaxV(),combinedLight,combinedOverlay, alpha);
+            add(builder, matrixStack, 1,1,0, sprite_side_top.getMaxU(), sprite_side_top.getMinV(),combinedLight,combinedOverlay, alpha);
+            add(builder, matrixStack, 0,1,0, sprite_side_top.getMinU(), sprite_side_top.getMinV(),combinedLight,combinedOverlay, alpha);
 
             matrixStack.scale(.25f,4,1);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
             matrixStack.translate(-1,-2.5,-0.375);
-            add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV()-0.0234375f,combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV()-0.0234375f,combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay, alpha);
+            add(builder, matrixStack, 0,0,0, sprite_side_top.getMinU(), sprite_side_top.getMaxV(),combinedLight,combinedOverlay, alpha);
+            add(builder, matrixStack, 1,0,0, sprite_side_top.getMaxU(), sprite_side_top.getMaxV(),combinedLight,combinedOverlay, alpha);
+            add(builder, matrixStack, 1,1,0, sprite_side_top.getMaxU(), sprite_side_top.getMinV(),combinedLight,combinedOverlay, alpha);
+            add(builder, matrixStack, 0,1,0, sprite_side_top.getMinU(), sprite_side_top.getMinV(),combinedLight,combinedOverlay, alpha);
 
             matrixStack.pop();
         }

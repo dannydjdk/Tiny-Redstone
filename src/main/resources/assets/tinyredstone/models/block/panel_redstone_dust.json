@@ -1,6 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "tinyredstone:tiny_redstone_segment_on"
-  }
-}
