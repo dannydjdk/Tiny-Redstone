@@ -409,8 +409,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             if (moverIndex != null) {
                 if (panelTile.cells.containsKey(moverIndex))
                     panelTile.moveCell(moverIndex, moveDirection, 0);
-                else
-                    panelTile.updateNeighborCells(getAdjacentIndex(index, getPanelSideDirection(index, IPanelCell.PanelCellSide.BACK)));
+                else {
+                    Integer adjacentindex = getAdjacentIndex(index, getPanelSideDirection(index, IPanelCell.PanelCellSide.BACK));
+                    if (adjacentindex!=null)
+                        panelTile.updateNeighborCells(adjacentindex);
+                }
             }
         }
     }
