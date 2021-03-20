@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.panelcells.Piston;
 import com.dannyandson.tinyredstone.blocks.panelcells.StickyPiston;
+import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -945,6 +946,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 if (cell.powerDrops() && world.getBlockState(pos.offset(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
                     cellStrongOutput -= 1;
                     cellWeakOutput -= 1;
+                }
+
+                if (cell instanceof TinyBlock && world.getBlockState(pos.offset(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
+                    cellWeakOutput = cellStrongOutput;
                 }
 
                 if (cellStrongOutput > strong) {
