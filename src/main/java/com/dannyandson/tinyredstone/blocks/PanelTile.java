@@ -656,7 +656,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         Boolean updateOutputs = false;
         if (adjacentIndex == null) {
             updateOutputs = true;
-            updateNeighborTileCell(Direction.WEST, cellIndex);
+            updateNeighborTileCell(direction, cellIndex);
         } else {
             IPanelCell adjacentCell = cells.get(adjacentIndex);
             if (adjacentCell instanceof IObservingPanelCell) {
@@ -746,7 +746,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         int row = Math.round((localCellIndex.floatValue() / 8f) - 0.5f);
         int cell = localCellIndex % 8;
 
-        IPanelCell localCell = this.cells.get(localCellIndex);
         Integer neighborIndex = getAdjacentIndex(localCellIndex, facing);
 
         if (neighborIndex!=null) {
