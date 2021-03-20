@@ -33,9 +33,6 @@ public class Piston implements IPanelCell {
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
-     * @param combinedLight
-     * @param combinedOverlay
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
@@ -187,19 +184,20 @@ public class Piston implements IPanelCell {
     @Override
     public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
         boolean extend =
+                (
+                        ( rightNeighbor!=null && rightNeighbor.getWeakRsOutput()>0) ||
+                                ( frontNeighbor!=null && frontNeighbor.getWeakRsOutput()>0) ||
+                                ( leftNeighbor!=null && leftNeighbor.getWeakRsOutput()>0)
+                )
+                &&
+                        (backNeighbor == null || backNeighbor.isOnPanel())
+                &&
                 ( extended ||
                         (
                                 backNeighbor == null || ( backNeighbor.getNeighborIPanelCell() != null &&
                                 backNeighbor.isPushable() )
                         )
-                )&&
-                        (backNeighbor == null || backNeighbor.isOnPanel())
-                &&
-                        (
-                                ( rightNeighbor!=null && rightNeighbor.getWeakRsOutput()>0) ||
-                                ( frontNeighbor!=null && frontNeighbor.getWeakRsOutput()>0) ||
-                                ( leftNeighbor!=null && leftNeighbor.getWeakRsOutput()>0)
-                        );
+                );
         if (extend!=this.extended)
         {
             this.extended=extend;

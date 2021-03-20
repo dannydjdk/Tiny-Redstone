@@ -352,11 +352,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         this.lookingAtDirection = Minecraft.getInstance().player.getHorizontalFacing();
                         try {
                             this.lookingAtWith = (IPanelCell) PanelBlock.getPanelCellClassFromItem(Minecraft.getInstance().player.getHeldItemMainhand().getItem()).getConstructors()[0].newInstance();
-                        } catch (InstantiationException e) {
-                            TinyRedstone.LOGGER.error(e.getMessage());
-                        } catch (IllegalAccessException e) {
-                            TinyRedstone.LOGGER.error(e.getMessage());
-                        } catch (InvocationTargetException e) {
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                             TinyRedstone.LOGGER.error(e.getMessage());
                         }
                     }
@@ -678,7 +674,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         for(Direction direction : directions)
         {
             IPanelCell cell = getAdjacentCell(cellIndex,direction);
-            if (cell instanceof Piston && cellDirections.get(getAdjacentIndex(cellIndex,direction))==direction && ((Piston) cell).isExtended())
+            if (cell instanceof Piston && getAdjacentCellDirection(cellIndex,direction)==direction && ((Piston) cell).isExtended())
                 return true;
         }
         return false;
@@ -778,7 +774,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 IPanelCell neighborPanelCell = neighborTile.cells.get(neighborCellIndex);
                 IPanelCell.PanelCellSide neighborFacing = neighborTile.getPanelCellSide(neighborCellIndex, facing.getOpposite());
                 if (neighborFacing != null) {
-                    return new PanelCellNeighbor(this,neighborPanelCell,neighborFacing,facing, neighborCellIndex);
+                    return new PanelCellNeighbor(neighborTile,neighborPanelCell,neighborFacing,facing, neighborCellIndex);
                 }
                 return null;
             } else {
@@ -852,9 +848,25 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private IPanelCell getAdjacentCell(Integer cellIndex, Direction direction) {
         Integer index = getAdjacentIndex(cellIndex, direction);
         if (index == null) {
+            TileEntity te = world.getTileEntity(pos.offset(direction));
+            if (te instanceof PanelTile)
+                return ((PanelTile) te).cells.get(getNeighborTileCellIndex(direction,cellIndex));
             return null;
         } else {
             return cells.get(index);
+        }
+
+    }
+
+    private Direction getAdjacentCellDirection(Integer cellIndex, Direction direction) {
+        Integer index = getAdjacentIndex(cellIndex, direction);
+        if (index == null) {
+            TileEntity te = world.getTileEntity(pos.offset(direction));
+            if (te instanceof PanelTile)
+                return ((PanelTile) te).cellDirections.get(getNeighborTileCellIndex(direction,cellIndex));
+            return null;
+        } else {
+            return cellDirections.get(index);
         }
 
     }
