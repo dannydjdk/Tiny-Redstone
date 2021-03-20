@@ -193,6 +193,8 @@ public class Piston implements IPanelCell {
                                 backNeighbor.isPushable() )
                         )
                 )&&
+                        (backNeighbor == null || backNeighbor.isOnPanel())
+                &&
                         (
                                 ( rightNeighbor!=null && rightNeighbor.getWeakRsOutput()>0) ||
                                 ( frontNeighbor!=null && frontNeighbor.getWeakRsOutput()>0) ||

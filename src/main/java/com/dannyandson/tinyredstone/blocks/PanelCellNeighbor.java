@@ -88,6 +88,15 @@ public class PanelCellNeighbor {
     }
 
     /**
+     * Is this neighbor on a Redstone Panel
+     * @return True if this neighbor is on a panel, false if it is a block in the world (you are an edge cell)
+     */
+    public boolean isOnPanel()
+    {
+        return this.index!=null;
+    }
+
+    /**
      * Gets the neighboring cell if neighbor is an iPanelCell
      * @return Either an IPanelCell instance or null if no neighbor is not an IPanelCell
      */

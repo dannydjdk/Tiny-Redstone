@@ -252,8 +252,6 @@ public class PanelBlock extends Block {
         else
             return;
 
-
-        List<Direction> changedPowerFromNeighbors = new ArrayList<>();
         TileEntity tileentity = world.getTileEntity(pos);
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
@@ -268,12 +266,9 @@ public class PanelBlock extends Block {
                 panelTile.comparatorOverrides.put(direction, neighborState.getComparatorInputOverride(world, pos.offset(direction)));
             }
 
-            if (panelTile.weakPowerFromNeighbors.get(direction) == null || panelTile.weakPowerFromNeighbors.get(direction) != powerLevel ||
-                    panelTile.strongPowerFromNeighbors.get(direction) == null || panelTile.strongPowerFromNeighbors.get(direction) != strongPowerLevel) {
-                panelTile.weakPowerFromNeighbors.put(direction, powerLevel);
-                panelTile.strongPowerFromNeighbors.put(direction, strongPowerLevel);
-                change = panelTile.updateSide(direction);
-            }
+            panelTile.weakPowerFromNeighbors.put(direction, powerLevel);
+            panelTile.strongPowerFromNeighbors.put(direction, strongPowerLevel);
+            change = panelTile.updateSide(direction);
 
 
             if (panelTile.updateOutputs()) {
