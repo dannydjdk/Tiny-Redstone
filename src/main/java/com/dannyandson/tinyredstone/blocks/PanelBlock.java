@@ -238,6 +238,8 @@ public class PanelBlock extends Block {
     @Override
     public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
 
+        boolean change = false;
+
         Direction direction = null;
         if (pos.east().equals(neighborPos))
             direction = EAST;
@@ -270,7 +272,7 @@ public class PanelBlock extends Block {
                     panelTile.strongPowerFromNeighbors.get(direction) == null || panelTile.strongPowerFromNeighbors.get(direction) != strongPowerLevel) {
                 panelTile.weakPowerFromNeighbors.put(direction, powerLevel);
                 panelTile.strongPowerFromNeighbors.put(direction, strongPowerLevel);
-                panelTile.updateSide(direction);
+                change = panelTile.updateSide(direction);
             }
 
 
@@ -278,6 +280,10 @@ public class PanelBlock extends Block {
                 if (!world.isRemote)
                     panelTile.markDirty();
                 world.notifyNeighborsOfStateChange(pos, this);
+            }
+            if (change)
+            {
+                panelTile.sync();
             }
         }
     }

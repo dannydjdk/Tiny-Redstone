@@ -7,6 +7,7 @@ import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.*;
+import net.minecraft.block.RedstoneBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -142,11 +143,9 @@ public class RedstoneDust implements IPanelCell {
 
     private int getNeighborOutput(PanelCellNeighbor neighbor)
     {
-        int input = 0;
-
         int s = neighbor.getStrongRsOutput();
         int w = neighbor.getWeakRsOutput();
-        input=(neighbor.powerDrops())?s-1:s;
+        int input=(neighbor.powerDrops())?s-1:s;
         if (w>input)
         {
             BlockState blockState = neighbor.getNeighborBlockState();
@@ -155,7 +154,8 @@ public class RedstoneDust implements IPanelCell {
                     (blockState !=null && (
                     blockState.getBlock() instanceof AbstractButtonBlock ||
                             blockState.getBlock() instanceof LeverBlock ||
-                            blockState.getBlock() instanceof RedstoneTorchBlock
+                            blockState.getBlock() instanceof RedstoneTorchBlock ||
+                            blockState.getBlock() instanceof RedstoneBlock
                     )) ||
                             (iPanelCell !=null && (
                                     iPanelCell instanceof Button

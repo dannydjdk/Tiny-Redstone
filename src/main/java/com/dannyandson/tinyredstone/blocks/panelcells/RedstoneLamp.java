@@ -88,19 +88,24 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
     @Override
     public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
 
-        boolean change =  super.neighborChanged(frontNeighbor, rightNeighbor, backNeighbor, leftNeighbor);
+        boolean change = super.neighborChanged(frontNeighbor, rightNeighbor, backNeighbor, leftNeighbor);
 
         if (
-                (weakSignalStrength+strongSignalStrength>0) ||
+                (weakSignalStrength + strongSignalStrength > 0) ||
                         ((
-                                ((frontNeighbor!=null)?frontNeighbor.getWeakRsOutput():0)+
-                                ((rightNeighbor!=null)?rightNeighbor.getWeakRsOutput():0)+
-                                ((backNeighbor!=null)?backNeighbor.getWeakRsOutput():0)+
-                                ((leftNeighbor!=null)?leftNeighbor.getWeakRsOutput():0)) >0)
-        )
-                this.lit=true;
-            else
-                this.lit=false;
+                                ((frontNeighbor != null) ? frontNeighbor.getWeakRsOutput() : 0) +
+                                        ((rightNeighbor != null) ? rightNeighbor.getWeakRsOutput() : 0) +
+                                        ((backNeighbor != null) ? backNeighbor.getWeakRsOutput() : 0) +
+                                        ((leftNeighbor != null) ? leftNeighbor.getWeakRsOutput() : 0)) > 0)
+        ) {
+            if (!this.lit) {
+                this.lit = true;
+                return true;
+            }
+        } else if (this.lit) {
+            this.lit = false;
+            return true;
+        }
 
         return change;
     }
