@@ -148,19 +148,7 @@ public class RedstoneDust implements IPanelCell {
         int input=(neighbor.powerDrops())?s-1:s;
         if (w>input)
         {
-            BlockState blockState = neighbor.getNeighborBlockState();
-            IPanelCell iPanelCell = neighbor.getNeighborIPanelCell();
-            if (
-                    (blockState !=null && (
-                    blockState.getBlock() instanceof AbstractButtonBlock ||
-                            blockState.getBlock() instanceof LeverBlock ||
-                            blockState.getBlock() instanceof RedstoneTorchBlock ||
-                            blockState.getBlock() instanceof RedstoneBlock
-                    )) ||
-                            (iPanelCell !=null && (
-                                    iPanelCell instanceof Button
-                                    ))
-            )
+            if (neighbor.canConnectRedstone())
                 input=neighbor.getWeakRsOutput();
         }
         return input;
