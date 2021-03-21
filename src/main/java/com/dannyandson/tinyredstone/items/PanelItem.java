@@ -17,7 +17,11 @@ public class PanelItem extends BlockItem {
 
     public PanelItem()
     {
-        super(Registration.REDSTONE_PANEL_BLOCK.get(),new Item.Properties().group(ModSetup.ITEM_GROUP));
+        super(Registration.REDSTONE_PANEL_BLOCK.get(),new Item.Properties()
+                .group(ModSetup.ITEM_GROUP)
+                .setISTER(()->PanelItemRenderer::new)
+        );
+
     }
 
     @Override
