@@ -16,10 +16,12 @@
   "item.tinyredstone.tiny_transparent_block": "Winziger Glasblock",
   "item.tinyredstone.tiny_button": "Winziger Holzknopf",
   "item.tinyredstone.tiny_stone_button": "Winziger Steinknopf",
+  "item.tinyredstone.tiny_lever": "Winziger Hebel",
   "item.tinyredstone.silicon": "Silizium",
   "item.tinyredstone.silicon_compound": "Silizium-Verbindung",
   "item.tinyredstone.tiny_observer": "Winziger Beobachter",
   "item.tinyredstone.blueprint": "Winzige Redstone Blaupause",
+  "item.tinyredstone.tiny_super_repeater": "Winziger Super Redstone-Verstärker",
   "tinyredstone.close" : "Schließen",
   "tinyredstone.gui.repeater.msg" : "Tickverzögerung einstellen (10/Sekunde)",
   "tinyredstone.gui.tinyblock.msg" : "Wähle eine Farbe",
@@ -30,5 +32,6 @@
   "tinyredstone.export": "Exportieren",
   "tinyredstone.cancel": "Abbrechen",
   "tinyredstone.choose_file": "JSON-Datei auswählen",
-  "tinyredstone.save_file": "JSON-Datei speichern unter..."
+  "tinyredstone.save_file": "JSON-Datei speichern unter...",
+  "itemGroup.tinyredstone": "Tiny Redstone"
 }
