@@ -48,6 +48,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public Integer Color = DyeColor.GRAY.getColorValue();
     private Integer lightOutput = 0;
     private boolean flagLightUpdate = false;
+    private boolean flagSync = false;
 
     public Integer lookingAtCell = null;
     public Direction lookingAtDirection = null;
@@ -167,7 +168,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
 
         } catch (NullPointerException exception) {
-            TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.getMessage());
+            TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.toString() + exception.getStackTrace()[0].toString());
         }
 
         return super.write(this.saveToNbt(parentNBTTagCompound));
@@ -231,7 +232,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         int color = parentNBTTagCompound.getInt("color");
         if (this.Color != color) {
             this.Color = color;
-            this.sync();
+            this.flagSync=true;
         }
 
     }
@@ -251,7 +252,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     this.cellDirections.put(i, Direction.byIndex(cellNBT.getInt("direction")));
                 } catch (Exception exception) {
                     TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class " + className +
-                            ": " + exception.getMessage());
+                            ": " + exception.getMessage() + " " + exception.getStackTrace()[0].getFileName() + ":" + exception.getStackTrace()[0].getLineNumber());
                 }
             }
         }
@@ -332,11 +333,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
 
 
-        if (dirty) {
+        if (dirty || flagSync) {
             markDirty();
             if (updateOutputs())
                 world.notifyNeighborsOfStateChange(pos, this.getBlockState().getBlock());
             sync();
+            flagSync=false;
         }
 
         if (world.isRemote)

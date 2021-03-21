@@ -31,6 +31,7 @@
   "tinyredstone.import": "Import",
   "tinyredstone.export": "Export",
   "tinyredstone.cancel": "Cancel",
+  "tinyredstone.done": "Done",
   "tinyredstone.choose_file": "Select JSON File",
   "tinyredstone.save_file": "Save JSON File As...",
   "itemGroup.tinyredstone": "Tiny Redstone"

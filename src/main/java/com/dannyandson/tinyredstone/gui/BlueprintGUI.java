@@ -49,7 +49,7 @@ public class BlueprintGUI  extends Screen {
 
         addButton(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addButton(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addButton(new Button(relX + 20, relY + 50, 80, 20, new TranslationTextComponent("tinyredstone.cancel"), button -> close()));
+        addButton(new Button(relX + 20, relY + 50, 80, 20, new TranslationTextComponent("tinyredstone.done"), button -> close()));
 
         if (this.blueprint.hasTag())
             button=new Button(relX + 20, relY + 20, 80, 20, new TranslationTextComponent("tinyredstone.export"), button -> exportToFile());
@@ -100,7 +100,6 @@ public class BlueprintGUI  extends Screen {
                         new TranslationTextComponent("tinyredstone.save_file").getString(),
                         "blueprint.json", filters, null
                 );
-                close();
                 this.dialogOpen=false;
                 stack.pop();
 
@@ -141,7 +140,6 @@ public class BlueprintGUI  extends Screen {
                         new TranslationTextComponent("tinyredstone.choose_file").getString(),
                         null, filters, "JSON File (*.json)", false
                 );
-                close();
                 this.dialogOpen=false;
 
                 stack.pop();

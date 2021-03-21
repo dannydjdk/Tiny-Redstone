@@ -102,7 +102,7 @@ public class PanelCellNeighbor {
         BlockState blockState = getNeighborBlockState();
         if (blockState!=null)
             return blockState.canConnectRedstone(panelTile.getWorld(),this.blockPos,facingDirection);
-        if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock))
+        if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;
         return false;
     }
