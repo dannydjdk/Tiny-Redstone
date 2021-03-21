@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.items;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
@@ -106,7 +107,7 @@ public class Blueprint extends Item {
     //called when item is right clicked in the air
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        if(worldIn.isRemote)
+        if(worldIn.isRemote && Config.JSON_BLUEPRINT.get())
             BlueprintGUI.open(playerIn.getHeldItem(handIn));
         return super.onItemRightClick(worldIn, playerIn, handIn);
     }
