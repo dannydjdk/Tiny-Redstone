@@ -1,6 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
-import com.dannyandson.tinyredstone.blocks.panelcells.Button;
+import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.Direction;
@@ -102,7 +102,7 @@ public class PanelCellNeighbor {
         BlockState blockState = getNeighborBlockState();
         if (blockState!=null)
             return blockState.canConnectRedstone(panelTile.getWorld(),this.blockPos,facingDirection);
-        if (iPanelCell!=null && iPanelCell instanceof Button)
+        if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock))
             return true;
         return false;
     }

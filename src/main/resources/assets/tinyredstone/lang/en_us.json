@@ -21,6 +21,7 @@
   "item.tinyredstone.tiny_observer": "Tiny Observer",
   "item.tinyredstone.blueprint": "Tiny Redstone Blueprint",
   "item.tinyredstone.tiny_super_repeater": "Tiny Super Repeater",
+  "item.tinyredstone.tiny_lever": "Tiny Lever",
   "tinyredstone.close" : "Close",
   "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
   "tinyredstone.gui.tinyblock.msg" : "Select a color",
