@@ -24,10 +24,10 @@ import java.util.LinkedList;
 public class Repeater implements IPanelCell
 {
     private boolean input = false;
-    private boolean output = false;
+    protected boolean output = false;
     private boolean locked = false;
     private LinkedList<Boolean> queue = new LinkedList<>();
-    private Integer ticks = 2;
+    protected Integer ticks = 2;
 
     public static ResourceLocation TEXTURE_REPEATER_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_repeater_on");
     public static ResourceLocation TEXTURE_REPEATER_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_repeater_off");
@@ -46,12 +46,11 @@ public class Repeater implements IPanelCell
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
         TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(PanelTileRenderer.TEXTURE);
-        TextureAtlasSprite sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_ON);
+        TextureAtlasSprite sprite_repeater = this.getRepeaterTexture();
         TextureAtlasSprite sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_ON);
 
 
         if (!this.output){
-            sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_OFF);
             sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
         }
 
@@ -207,6 +206,14 @@ public class Repeater implements IPanelCell
                 .endVertex();
     }
 
+    protected TextureAtlasSprite getRepeaterTexture()
+    {
+        if (this.output)
+            return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_ON);
+        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_OFF);
+
+    }
+
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
@@ -340,8 +347,8 @@ public class Repeater implements IPanelCell
             ticks+=2;
             return true;
         }
-        else if (panelTile.getWorld().isRemote)
-            RepeaterCellGUI.open(panelTile,cellIndex,this);
+        else
+            ticks=2;
         return false;
     }
 

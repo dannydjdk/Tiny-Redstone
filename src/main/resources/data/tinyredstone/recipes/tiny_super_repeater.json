@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ISI",
+    "IRI",
+    " I "
+  ],
+  "key": {
+    "S": {
+      "tag": "forge:silicon"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:repeater"
+    }
+  },
+  "result": {
+    "item": "tinyredstone:tiny_super_repeater",
+    "count": 4
+  }
+}

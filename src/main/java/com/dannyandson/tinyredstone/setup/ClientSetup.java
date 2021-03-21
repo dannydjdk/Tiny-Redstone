@@ -43,6 +43,8 @@ public class ClientSetup {
         event.addSprite(Torch.TEXTURE_TORCH_TOP_OFF);
         event.addSprite(Piston.TEXTURE_PISTON_SIDE_TOP);
         event.addSprite(Piston.TEXTURE_PISTON_SIDE_BOTTOM);
+        event.addSprite(SuperRepeater.TEXTURE_SUPER_REPEATER_ON);
+        event.addSprite(SuperRepeater.TEXTURE_SUPER_REPEATER_OFF);
 
         event.addSprite(Comparator.TEXTURE_COMPARATOR_OFF);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_ON);

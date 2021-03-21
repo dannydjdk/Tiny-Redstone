@@ -100,7 +100,6 @@ The circuit will now be saved to your blueprint.
 
 - Tiny Levers.
 - Panel covers to hide circuitry and reduce lag potential.
-- Highlight cell grid when placing components to see where component will place
 - One Probe support, so you can see the redstone signal of each tiny component.
 - Possible add-ons - gates, clocks, redstone math (possibly as an add-on mod since I want to keep this mod vanilla flavored)
 - Fixing whatever bugs you find that somehow I didn't find.

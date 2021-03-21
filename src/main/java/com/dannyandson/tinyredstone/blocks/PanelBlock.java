@@ -227,11 +227,9 @@ public class PanelBlock extends Block {
                 panelTile.strongPowerFromNeighbors.put(whichFace, strongPowerLevel);
 
             }
-
-            if (panelTile.updateOutputs())
-                world.notifyNeighborsOfStateChange(pos, this);
         }
     }
+
 
     // Called when a neighbouring block changes.
     // Only called on the server side.

@@ -225,9 +225,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 this.comparatorOverrides.put(Direction.WEST,comparatorOverridesNBT.getInt(Direction.WEST.getIndex()+""));
         }
 
-        this.Color = parentNBTTagCompound.getInt("color");
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
+
+        int color = parentNBTTagCompound.getInt("color");
+        if (this.Color != color) {
+            this.Color = color;
+            this.sync();
+        }
 
     }
 

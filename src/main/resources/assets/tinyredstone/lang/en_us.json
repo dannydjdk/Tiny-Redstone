@@ -20,6 +20,7 @@
   "item.tinyredstone.silicon_compound": "Silicon Compound",
   "item.tinyredstone.tiny_observer": "Tiny Observer",
   "item.tinyredstone.blueprint": "Tiny Redstone Blueprint",
+  "item.tinyredstone.tiny_super_repeater": "Tiny Super Repeater",
   "tinyredstone.close" : "Close",
   "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
   "tinyredstone.gui.tinyblock.msg" : "Select a color",
@@ -30,5 +31,6 @@
   "tinyredstone.export": "Export",
   "tinyredstone.cancel": "Cancel",
   "tinyredstone.choose_file": "Select JSON File",
-  "tinyredstone.save_file": "Save JSON File As..."
+  "tinyredstone.save_file": "Save JSON File As...",
+  "itemGroup.tinyredstone": "Tiny Redstone"
 }
