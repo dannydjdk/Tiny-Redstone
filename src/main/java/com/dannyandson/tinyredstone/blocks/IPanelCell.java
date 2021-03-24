@@ -85,10 +85,10 @@ public interface IPanelCell {
      *
      * @param panelTile the activated PanelTile tile entity that contains this cell
      * @param cellIndex The index of the clicked IPanelCell within the panel (this IPanelCell)
-     * @param segmentClicked Which of nine segment within the cell were clicked. 0 through 8 where 0 is front-right and 8 is back-left;
+     * @param segmentClicked Which of nine segment within the cell were clicked.
      * @return true if a change was made to the cell output
      */
-    boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked);
+    boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked);
 
     CompoundNBT writeNBT();
 

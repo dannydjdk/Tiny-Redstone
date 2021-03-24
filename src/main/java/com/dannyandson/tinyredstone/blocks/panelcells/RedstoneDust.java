@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
+import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -239,28 +240,28 @@ public class RedstoneDust implements IPanelCell {
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked) {
+    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
         if(panelTile.getWorld().isRemote)
            return false;
 
-        if (segmentClicked==1)
+        if (segmentClicked==PanelCellSegment.FRONT)
         {
             frontEnabled=!frontEnabled;
             return true;
         }
-        if (segmentClicked==3){
+        if (segmentClicked==PanelCellSegment.RIGHT){
             rightEnabled=!rightEnabled;
             return true;
         }
-        if (segmentClicked==5){
+        if (segmentClicked==PanelCellSegment.LEFT){
             leftEnabled=!leftEnabled;
             return true;
         }
-        if (segmentClicked==7){
+        if (segmentClicked==PanelCellSegment.BACK){
             backEnabled=!backEnabled;
             return true;
         }
-        if (segmentClicked==4){
+        if (segmentClicked==PanelCellSegment.CENTER){
             if (!frontEnabled||!rightEnabled||!backEnabled||!leftEnabled)
             {
                 frontEnabled=true;

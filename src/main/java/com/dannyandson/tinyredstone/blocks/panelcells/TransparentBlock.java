@@ -1,10 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.IColorablePanelCell;
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
-import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
-import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -185,7 +182,7 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked) {
+    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
         if(panelTile.getWorld().isRemote)
             TinyBlockGUI.open(panelTile,cellIndex,this);
         return false;

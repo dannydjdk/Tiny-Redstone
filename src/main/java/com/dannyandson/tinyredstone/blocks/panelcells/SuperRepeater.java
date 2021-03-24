@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.gui.RepeaterCellGUI;
 import net.minecraft.client.Minecraft;
@@ -21,7 +22,7 @@ public class SuperRepeater extends Repeater{
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked) {
+    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
         if (panelTile.getWorld().isRemote)
             RepeaterCellGUI.open(panelTile,cellIndex,this);
         return false;

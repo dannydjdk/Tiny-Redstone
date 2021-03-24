@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.helper.PanelCellHelper;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
@@ -332,43 +333,17 @@ public class PanelBlock extends Block {
                         removeCell(cellNumber, panelTile, player);
                     } else {
                         //if player clicked on a panel cell, activate it
-                        double segmentX = (x - (row/8d))*8d;
-                        double segmentZ = (z - (cell/8d))*8d;
-                        int segmentRow = Math.round((float)(segmentX*3f)-0.5f);
-                        int segmentColumn = Math.round((float)(segmentZ*3f)-0.5f);
 
-                        int segmentRow1; int segmentColumn1;
-                        Direction cellDirection = panelTile.cellDirections.get(cellNumber);
-                        if (cellDirection == NORTH) {
-                            segmentRow1 = segmentColumn;
-                            segmentColumn1 = ((segmentRow - 1) * -1) + 1;
-                        } else if (cellDirection == EAST) {
-                            segmentRow1 = ((segmentRow - 1) * -1) + 1;
-                            segmentColumn1 = ((segmentColumn - 1) * -1) + 1;
-                        } else if (cellDirection == SOUTH){
-                            segmentRow1 = ((segmentColumn - 1) * -1) + 1;
-                            segmentColumn1 = segmentRow;
-                        }
-                        else
-                        {
-                            segmentRow1 = segmentRow;
-                            segmentColumn1 = segmentColumn;
-                        }
-
-                        int segmentClicked=(segmentRow1*3)+segmentColumn1;
-
-                        if(panelTile.cells.get(cellNumber).onBlockActivated(panelTile, cellNumber, segmentClicked)) {
+                        if(panelTile.cells.get(cellNumber).onBlockActivated(panelTile, cellNumber, PanelCellHelper.getSegment(panelTile.cellDirections.get(cellNumber), x, z, row, cell))) {
                             panelTile.updateCell(cellNumber);
                             panelTile.updateNeighborCells(cellNumber);
                         }
                     }
-                }else if(heldItem == Registration.REDSTONE_WRENCH.get() && player.isSneaking())
-                {
+                } else if(heldItem == Registration.REDSTONE_WRENCH.get() && player.isSneaking()) {
                     //harvest block on sneak right click with wrench
                     this.onBlockHarvested(world,pos,state,player);
                     replaceBlock(state,Blocks.AIR.getDefaultState(),world,pos,1);
-                }
-                else if (itemPanelCellMap.containsKey(heldItem)) {
+                } else if (itemPanelCellMap.containsKey(heldItem)) {
                     //if player is holding an item registered as a panel cell, try to place that cell on the panel
 
                     //but first, check to see if a piston is extended into that space
@@ -401,8 +376,7 @@ public class PanelBlock extends Block {
                         }
                     }
 
-                }else if (heldItem instanceof DyeItem)
-                {
+                } else if (heldItem instanceof DyeItem) {
                     int color = ((DyeItem)heldItem).getDyeColor().getColorValue();
                     if (color!=panelTile.Color) {
                         panelTile.Color = ((DyeItem) heldItem).getDyeColor().getColorValue();
