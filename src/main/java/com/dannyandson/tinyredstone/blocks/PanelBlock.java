@@ -29,9 +29,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static net.minecraft.util.Direction.*;
@@ -54,6 +52,14 @@ public class PanelBlock extends Block {
                 .hardnessAndResistance(2.0f)
 
         );
+    }
+
+    public Class<? extends IPanelCell> getIPanelCellByItem(Item item) {
+        return itemPanelCellMap.get(item);
+    }
+
+    public Item getItemByIPanelCell(Class<? extends IPanelCell> panelCell) {
+        return panelCellItemMap.get(panelCell);
     }
 
     @Override
