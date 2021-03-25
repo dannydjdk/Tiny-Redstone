@@ -25,6 +25,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -288,6 +289,11 @@ public class PanelBlock extends Block {
         }
     }
 
+    @Nullable
+    @Override
+    public ToolType getHarvestTool(BlockState state) {
+        return ToolType.get("wrench");
+    }
 
     /**
      * Called before the Block is set to air in the world. Called regardless of if the player's tool can actually collect
@@ -323,26 +329,25 @@ public class PanelBlock extends Block {
             PanelTile panelTile = (PanelTile) te;
             double x = result.getHitVec().x - pos.getX();
             double z = result.getHitVec().z - pos.getZ();
-            int row = Math.round((float) (x * 8f) - 0.5f);
-            int cell = Math.round((float) (z * 8f) - 0.5f);
+            PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(x, z);
 
-            if (row >= 0 && row < 8 && cell >= 0 && cell < 8) {
+            if (panelCellPos != null) {
                 Item heldItem = player.getHeldItem(hand).getItem();
-                int cellNumber = (row * 8) + cell;
+                int cellIndex = panelCellPos.getIndex();
 
                 if (heldItem == Registration.REDSTONE_WRENCH.get() && !player.isSneaking()) {
                     //rotate
                     panelTile.rotate(Rotation.CLOCKWISE_90);
-                } else if (panelTile.cells.containsKey(cellNumber)) {
+                } else if (panelTile.cells.containsKey(cellIndex)) {
                     if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isSneaking()) {
                         //if player sneak right clicks with wrench, remove cell
-                        removeCell(cellNumber, panelTile, player);
+                        removeCell(cellIndex, panelTile, player);
                     } else {
                         //if player clicked on a panel cell, activate it
 
-                        if(panelTile.cells.get(cellNumber).onBlockActivated(panelTile, cellNumber, PanelCellHelper.getSegment(panelTile.cellDirections.get(cellNumber), x, z, row, cell))) {
-                            panelTile.updateCell(cellNumber);
-                            panelTile.updateNeighborCells(cellNumber);
+                        if(panelTile.cells.get(cellIndex).onBlockActivated(panelTile, cellIndex, PanelCellHelper.getSegment(panelTile.cellDirections.get(cellIndex), x, z, panelCellPos))) {
+                            panelTile.updateCell(cellIndex);
+                            panelTile.updateNeighborCells(cellIndex);
                         }
                     }
                 } else if(heldItem == Registration.REDSTONE_WRENCH.get() && player.isSneaking()) {
@@ -353,20 +358,20 @@ public class PanelBlock extends Block {
                     //if player is holding an item registered as a panel cell, try to place that cell on the panel
 
                     //but first, check to see if a piston is extended into that space
-                    if(!panelTile.checkCellForPistonExtension(cellNumber)) {
+                    if(!panelTile.checkCellForPistonExtension(cellIndex)) {
                         try {
                             //catch any exception thrown while attempting to construct from the registered IPanelCell class
                             Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 
                             if (panelCell instanceof IPanelCell) {
                                 //place the cell on the panel
-                                panelTile.cellDirections.put(cellNumber, player.getHorizontalFacing());
-                                panelTile.cells.put(cellNumber, (IPanelCell) panelCell);
+                                panelTile.cellDirections.put(cellIndex, player.getHorizontalFacing());
+                                panelTile.cells.put(cellIndex, (IPanelCell) panelCell);
 
                                 if (!((IPanelCell) panelCell).isIndependentState()) {
-                                    panelTile.updateCell(cellNumber);
+                                    panelTile.updateCell(cellIndex);
                                 }
-                                panelTile.updateNeighborCells(cellNumber);
+                                panelTile.updateNeighborCells(cellIndex);
 
                                 //remove an item from the player's stack
                                 if (!player.isCreative())
@@ -430,16 +435,13 @@ public class PanelBlock extends Block {
                 PanelTile panelTile = (PanelTile) te;
                 BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
 
-                double x = result.getHitVec().x - pos.getX();
-                double z = result.getHitVec().z - pos.getZ();
-                int row = Math.round((float) (x * 8f) - 0.5f);
-                int cell = Math.round((float) (z * 8f) - 0.5f);
+                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(pos, result.getHitVec());
 
-                if (row >= 0 && row < 8 && cell >= 0 && cell < 8) {
-                    int cellNumber = (row * 8) + cell;
-                    if (panelTile.cells.containsKey(cellNumber)) {
+                if (panelCellPos != null) {
+                    int cellIndex = panelCellPos.getIndex();
+                    if (panelTile.cells.containsKey(cellIndex)) {
                         //if player left clicks with wrench, remove cell
-                        removeCell(cellNumber, panelTile, player);
+                        removeCell(cellIndex, panelTile, player);
 
                     }
                 }

@@ -1,14 +1,15 @@
 package com.dannyandson.tinyredstone.helper;
 
+import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import net.minecraft.util.Direction;
 
 import static net.minecraft.util.Direction.*;
 
 public class PanelCellHelper {
-    public static PanelCellSegment getSegment(Direction cellDirection, double x, double z, int row, int cell) {
-        double segmentX = (x - (row/8d))*8d;
-        double segmentZ = (z - (cell/8d))*8d;
+    public static PanelCellSegment getSegment(Direction cellDirection, double x, double z, PanelCellPos pos) {
+        double segmentX = (x - (pos.getRow()/8d))*8d;
+        double segmentZ = (z - (pos.getCell()/8d))*8d;
         int segmentRow = Math.round((float)(segmentX*3f)-0.5f);
         int segmentColumn = Math.round((float)(segmentZ*3f)-0.5f);
 
