@@ -10,7 +10,7 @@
       "item": "minecraft:smooth_stone_slab"
     },
     "i": {
-      "item": "tinyredstone:silicon"
+      "tag": "forge:silicon"
     },
     "R": {
       "item": "minecraft:redstone"

@@ -20,7 +20,12 @@ Tiny redstone behaves much like regular redstone. It picks up signals from stron
 
 ### Tiny Repeater
 
-Tiny repeaters are similar to their bigger cousins. They will pick up any redstone signal received at the back and output a full (15) signal to the front with a delay. One major difference is that when you right click the tiny repeater the 4th time, a GUI will appear allowing you to increase or decrease the delay up to 100 redstone ticks (10 seconds).
+Tiny repeaters are similar to their bigger cousins. They will pick up any redstone signal received at the back and output a full (15) signal to the front with a delay
+between 1 and 4 ticks set by right clicking.
+
+### Tiny Super Repeater
+
+Similar to Tiny Repeaters, except that when you right click, a GUI will appear allowing you to increase or decrease the delay up to 100 redstone ticks (10 seconds).
 
 ### Tiny Comparator
 
@@ -55,16 +60,19 @@ signal when powered by redstone, and a strong signal when powered by a repeater 
 Colorful little glass-like blocks. They behave like transparent blocks with vanilla redstone in that they
 do not carry a redstone signal, and they can be pushed by tiny pistons.
 
-### Tiny Buttons
+### Tiny Button
 Just like vanilla buttons, but smaller. They output redstone on all 4 sides when activated.
 Wood buttons output for 15 redstone ticks and stone for 10 redstone ticks.
 
-### Tiny Redstone Lamps
+### Tiny Lever
+It's a lever, but tiny!
+
+### Tiny Redstone Lamp
 Like their bigger counterparts, they will light up when given a redstone signal.
 The light they output is very dim. 15 lit lamps will output the max light of 15, so you can control
 exactly how much light you want your panel to output.
 
-### Tiny Observers
+### Tiny Observer
 Work almost exactly like their big brother.
 Outputs a pulse to the back whenever a change is detected in the cell or block in front of it.
 When facing blocks out in the world, it behaves exactly like vanilla observers. When facing cells on the tile,

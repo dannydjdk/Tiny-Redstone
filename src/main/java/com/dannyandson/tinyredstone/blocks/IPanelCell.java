@@ -19,17 +19,6 @@ public interface IPanelCell {
     void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha);
 
     /**
-     * Responding to a change in redstone signal output of an adjacent cells.
-     * This can be called multiple times in a tick.
-     * @param rsFrontStrong strength of incoming redstone signal from Front
-     * @param rsRightStrong strength of incoming redstone signal from Right
-     * @param rsBackStrong strength of incoming redstone signal from Back
-     * @param rsLeftStrong strength of incoming redstone signal from Left
-     * @return boolean indicating whether redstone output of this cell has changed
-     */
-   // boolean inputRs(int rsFrontStrong, int rsRightStrong, int rsBackStrong, int rsLeftStrong,int rsFrontWeak, int rsRightWeak, int rsBackWeak, int rsLeftWeak);
-
-    /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
      * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState

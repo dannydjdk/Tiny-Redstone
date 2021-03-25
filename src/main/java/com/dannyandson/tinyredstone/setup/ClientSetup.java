@@ -23,6 +23,7 @@ public class ClientSetup {
         Minecraft.getInstance().getItemColors().register(new PanelItemColor(),Registration.REDSTONE_PANEL_ITEM.get());
     }
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         if (!event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE)) {
@@ -30,6 +31,7 @@ public class ClientSetup {
         }
 
         event.addSprite(PanelTileRenderer.TEXTURE);
+        event.addSprite(PanelTileRenderer.TEXTURE_CRASHED);
         event.addSprite(Repeater.TEXTURE_REPEATER_ON);
         event.addSprite(Repeater.TEXTURE_REPEATER_OFF);
         event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST);
@@ -54,6 +56,7 @@ public class ClientSetup {
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(TransparentBlock.TEXTURE_TRANSPARENT_BLOCK);
+
     }
 
 

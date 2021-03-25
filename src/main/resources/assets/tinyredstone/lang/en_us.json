@@ -31,8 +31,9 @@
   "tinyredstone.import": "Import",
   "tinyredstone.export": "Export",
   "tinyredstone.cancel": "Cancel",
-  "tinyredstone.done": "Done",
   "tinyredstone.choose_file": "Select JSON File",
   "tinyredstone.save_file": "Save JSON File As...",
-  "itemGroup.tinyredstone": "Tiny Redstone"
+  "itemGroup.tinyredstone": "Tiny Redstone",
+  "tinyredstone.gui.crash.msg": "This panel has crashed.\nPlease check your log file,\n and report crash to mod author if possible.\nYou can only remove components.\nClick 'Enable' to attempt to re-enable panel.",
+  "tinyredstone.enable": "Enable"
 }
