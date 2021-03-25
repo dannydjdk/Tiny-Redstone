@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
@@ -232,7 +231,7 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PanelCellPos pos, Direction sideHit, PanelCellSegment segment) {
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PanelCellPos pos, PanelCellSegment segment) {
         probeInfo.horizontal().item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
                 .text(CompoundText.createLabelInfo("State: ", this.active ? "On" : "Off"));
         return false;

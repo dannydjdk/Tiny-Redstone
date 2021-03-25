@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.ComparatorMode;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -259,7 +258,7 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PanelCellPos pos, Direction sideHit, PanelCellSegment segment) {
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PanelCellPos pos, PanelCellSegment segment) {
         probeInfo.text(CompoundText.createLabelInfo("Mode: ", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString()));
         return false;
     }

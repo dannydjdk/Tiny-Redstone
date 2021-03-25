@@ -12,6 +12,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -93,14 +94,44 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
             }
 
             IPanelCell panelCell = panelTile.cells.get(cellIndex);
-            boolean handled = false;
-            if (panelCell instanceof IPanelCellProbeInfoProvider) {
-                handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, panelCellPos, Direction.NORTH, PanelCellHelper.getSegment(panelTile.cellDirections.get(cellIndex), x, z, panelCellPos));
+            if(panelCell != null) {
+                boolean handled = false;
+                PanelCellSegment segment = PanelCellHelper.getSegment(panelTile.cellDirections.get(cellIndex), x, z, panelCellPos);
+                if (panelCell instanceof IPanelCellProbeInfoProvider) {
+                    handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, panelCellPos, segment);
+                }
+                if(!handled) {
+                    int power = 0;
+                    switch (segment) {
+                        case BACK:
+                            power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
+                            break;
+                        case LEFT:
+                            power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
+                            break;
+                        case FRONT:
+                            power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
+                            break;
+                        case RIGHT:
+                            power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                            break;
+                        case CENTER:
+                            int powerBack = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
+                            int powerLeft = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
+                            int powerFront = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
+                            int powerRight = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                            if(powerBack == powerLeft && powerLeft == powerFront && powerFront == powerRight){
+                                power = powerBack;
+                            }
+                            break;
+                    }
+                    if(power > 0) {
+                        probeInfo.horizontal()
+                                .item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
+                                .text(CompoundText.createLabelInfo("Power: ", power));
+                    }
+                }
             }
-            if(!handled) {
-
-            }
-            //probeHitData.getSideHit();
         }
     }
 }

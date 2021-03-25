@@ -7,8 +7,6 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.CompoundText;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
-import net.minecraft.block.*;
-import net.minecraft.block.RedstoneBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -17,7 +15,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -307,10 +304,12 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PanelCellPos pos, Direction sideHit, PanelCellSegment segment) {
-        probeInfo.horizontal()
-                .item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
-                .text(CompoundText.createLabelInfo("Power: ", signalStrength));
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PanelCellPos pos, PanelCellSegment segment) {
+        if (signalStrength > 0) {
+            probeInfo.horizontal()
+                    .item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
+                    .text(CompoundText.createLabelInfo("Power: ", signalStrength));
+        }
         return true;
     }
 }
