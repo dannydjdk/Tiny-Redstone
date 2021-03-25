@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 
-public class StoneButton extends Button{
+public class StoneButton extends Button {
     public static ResourceLocation TEXTURE_OAK_PLANKS = new ResourceLocation("minecraft","block/stone");
 
     @Override

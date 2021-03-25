@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.helper.ProbeInfoHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.CompoundText;
@@ -305,11 +306,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
     @Override
     public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PanelCellPos pos, PanelCellSegment segment) {
-        if (signalStrength > 0) {
-            probeInfo.horizontal()
-                    .item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
-                    .text(CompoundText.createLabelInfo("Power: ", signalStrength));
-        }
+        ProbeInfoHelper.addPower(probeInfo, this.signalStrength);
         return true;
     }
 }

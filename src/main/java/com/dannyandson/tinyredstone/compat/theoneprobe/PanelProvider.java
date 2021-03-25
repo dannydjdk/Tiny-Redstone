@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.compat.theoneprobe;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.helper.PanelCellHelper;
+import com.dannyandson.tinyredstone.helper.ProbeInfoHelper;
 import mcjty.theoneprobe.Tools;
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.styles.LayoutStyle;
@@ -115,21 +116,42 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                         case RIGHT:
                             power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
                             break;
-                        case CENTER:
-                            int powerBack = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
-                            int powerLeft = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
-                            int powerFront = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
-                            int powerRight = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
-                            if(powerBack == powerLeft && powerLeft == powerFront && powerFront == powerRight){
-                                power = powerBack;
+                        case CENTER: {
+                            int back = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
+                            int left = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
+                            int front = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
+                            int right = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                            if(back == left && left == front && front == right){
+                                power = back;
                             }
                             break;
+                        }
+                        case FRONT_RIGHT: {
+                            int front = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
+                            int right = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                            if(front == right) power = front;
+                            break;
+                        }
+                        case FRONT_LEFT: {
+                            int front = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
+                            int left = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
+                            if(front == left) power = front;
+                            break;
+                        }
+                        case BACK_RIGHT: {
+                            int back = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
+                            int right = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                            if(back == right) power = back;
+                            break;
+                        }
+                        case BACK_LEFT: {
+                            int back = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
+                            int left = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
+                            if(back == left) power = back;
+                            break;
+                        }
                     }
-                    if(power > 0) {
-                        probeInfo.horizontal()
-                                .item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
-                                .text(CompoundText.createLabelInfo("Power: ", power));
-                    }
+                    ProbeInfoHelper.addPower(probeInfo, power);
                 }
             }
         }
