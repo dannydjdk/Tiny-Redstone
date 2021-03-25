@@ -19,6 +19,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
@@ -281,6 +282,21 @@ public class PanelBlock extends Block {
                 panelTile.sync();
             }
         }
+    }
+
+    @Override
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+        TileEntity te = world.getTileEntity(pos);
+        if (te instanceof PanelTile) {
+            PanelTile panelTile = (PanelTile) te;
+            /*PanelCellPos panelCellPos = PanelCellPos.fromHitVec(pos, target.getHitVec());
+
+            if (panelCellPos != null && panelTile.cells.containsKey(panelCellPos.getIndex())) {
+                return panelCellItemMap.get(panelTile.cells.get(panelCellPos.getIndex()).getClass()).getDefaultInstance();
+            }
+            */
+        }
+        return null;
     }
 
 
