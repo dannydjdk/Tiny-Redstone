@@ -33,5 +33,7 @@
   "tinyredstone.cancel": "Abbrechen",
   "tinyredstone.choose_file": "JSON-Datei auswählen",
   "tinyredstone.save_file": "JSON-Datei speichern unter...",
-  "itemGroup.tinyredstone": "Tiny Redstone"
+  "itemGroup.tinyredstone": "Tiny Redstone",
+  "tinyredstone.gui.crash.msg": "Diese Tafel ist abgestürzt.\nBitte überprüfe die Protokolldatei,\n und melde, wenn möglich, den Absturz dem Mod-Autor.\nEs können aktuell Komponenten nur entfernt werden.\nKlicke auf 'Aktivieren', um zu versuchen, das Panel erneut zu aktivieren.",
+  "tinyredstone.enable": "Aktivieren"
 }
