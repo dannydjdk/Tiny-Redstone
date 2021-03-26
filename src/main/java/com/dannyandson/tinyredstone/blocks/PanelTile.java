@@ -35,24 +35,26 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     // One probe support
     // troubleshoot issue with powered neighbor blocks not updating their neighbors
 
+    //panel data (saved)
     public Map<Integer, IPanelCell> cells = new HashMap<>();
     public Map<Integer, Direction> cellDirections = new HashMap<>();
-
     public Map<Direction, Integer> weakPowerFromNeighbors = new HashMap<>();
     public Map<Direction, Integer> strongPowerFromNeighbors = new HashMap<>();
     public Map<Direction, Integer> strongPowerToNeighbors = new HashMap<>();
     public Map<Direction, Integer> weakPowerToNeighbors = new HashMap<>();
+    public Map<Direction, Integer> comparatorOverrides = new HashMap<>();
     public Integer Color = DyeColor.GRAY.getColorValue();
     private Integer lightOutput = 0;
     private boolean flagLightUpdate = false;
-    private boolean flagSync = false;
     private boolean flagCrashed = false;
+    protected IPanelCover panelCover = null;
 
+    //other state fields (not saved)
+    private boolean flagSync = false;
     public Integer lookingAtCell = null;
     public Direction lookingAtDirection = null;
     public IPanelCell lookingAtWith = null;
 
-    public Map<Direction, Integer> comparatorOverrides = new HashMap<>();
 
     public PanelTile() {
         super(Registration.REDSTONE_PANEL_TILE.get());
@@ -118,6 +120,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         compoundNBT.put("cells", cellsNBT);
         compoundNBT.putInt("color", this.Color);
+        if (panelCover!=null)
+            compoundNBT.putString("cover",panelCover.getClass().getCanonicalName());
 
         return compoundNBT;
     }
@@ -232,6 +236,22 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         if (this.Color != color) {
             this.Color = color;
             this.flagSync=true;
+        }
+
+        String coverClass = parentNBTTagCompound.getString("cover");
+        if (coverClass.length()>0)
+        {
+            try {
+                IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
+                panelCover=cover;
+            } catch (Exception exception) {
+                TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class " + coverClass +
+                        ": " + exception.getMessage() + " " + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
+            }
+        }
+        else
+        {
+            panelCover=null;
         }
 
     }
@@ -1056,12 +1076,15 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public int getLightOutput()
     {
-        return this.lightOutput;
+        if(panelCover==null || panelCover.allowsLightOutput())
+            return this.lightOutput;
+        return 0;
     }
 
     public void sync()
     {
-        this.world.notifyBlockUpdate(pos,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+        if (!isCovered())
+            this.world.notifyBlockUpdate(pos,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
     }
 
     protected void handleCrash(Exception e)
@@ -1078,6 +1101,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public void resetCrashFlag()
     {
         this.flagCrashed=false;
+    }
+
+    public boolean isCovered()
+    {
+        return panelCover!=null;
     }
 
 }

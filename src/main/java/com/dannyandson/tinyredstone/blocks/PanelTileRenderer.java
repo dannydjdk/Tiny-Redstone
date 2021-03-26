@@ -35,20 +35,25 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
     @Override
     public void render(PanelTile tileEntity, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
 
-        for(Integer i=0 ; i<64 ; i++)
+        if (tileEntity.isCovered())
         {
-            if (tileEntity.cells.containsKey(i))
-            {
-                IPanelCell panelCell = tileEntity.cells.get(i);
-                Direction cellDirection = tileEntity.cellDirections.get(i);
-
-                renderCell(matrixStack,i,panelCell,cellDirection,buffer,(tileEntity.isCrashed())?0:combinedLight,combinedOverlay,(tileEntity.isCrashed())?0.5f:1.0f);
-            }
+            matrixStack.push();
+            tileEntity.panelCover.render(matrixStack,buffer,combinedLight,combinedOverlay, tileEntity.getColor());
+            matrixStack.pop();
         }
+        else {
+            for (Integer i = 0; i < 64; i++) {
+                if (tileEntity.cells.containsKey(i)) {
+                    IPanelCell panelCell = tileEntity.cells.get(i);
+                    Direction cellDirection = tileEntity.cellDirections.get(i);
 
-        if (tileEntity.lookingAtCell!=null)
-        {
-            renderCell(matrixStack,tileEntity.lookingAtCell, tileEntity.lookingAtWith, tileEntity.lookingAtDirection,buffer,combinedLight,combinedOverlay,0.5f);
+                    renderCell(matrixStack, i, panelCell, cellDirection, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
+                }
+            }
+
+            if (tileEntity.lookingAtCell != null) {
+                renderCell(matrixStack, tileEntity.lookingAtCell, tileEntity.lookingAtWith, tileEntity.lookingAtDirection, buffer, combinedLight, combinedOverlay, 0.5f);
+            }
         }
 
         if (tileEntity.isCrashed())
