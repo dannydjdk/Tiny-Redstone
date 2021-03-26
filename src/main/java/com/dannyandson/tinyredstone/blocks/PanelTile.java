@@ -242,8 +242,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         if (coverClass.length()>0)
         {
             try {
-                IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
-                panelCover=cover;
+                panelCover= (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
             } catch (Exception exception) {
                 TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class " + coverClass +
                         ": " + exception.getMessage() + " " + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
@@ -348,8 +347,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
                 if (dirty || flagSync) {
                     markDirty();
-                    if (updateOutputs())
-                        world.notifyNeighborsOfStateChange(pos, this.getBlockState().getBlock());
+                    updateOutputs();
                     sync();
                     flagSync = false;
                 }
@@ -553,8 +551,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         if (!world.isRemote)
             markDirty();
 
-        if (updateOutputs())
-            world.notifyNeighborsOfStateChange(pos, this.getBlockState().getBlock());
+        updateOutputs();
 
         sync();
 
@@ -603,7 +600,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public boolean updateSide(Direction facing) {
         //row 0 is west
         //cell 0 is north
-        boolean updated = false;
         List<Integer> cellIndices = new ArrayList<>();
         if (facing == Direction.WEST) {
             for (int i = 0; i < 8; i++) {
@@ -660,8 +656,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
 
         if (updateOutputs) {
-            if (updateOutputs())
-                world.notifyNeighborsOfStateChange(pos, this.getBlockState().getBlock());
+            updateOutputs();
         }
 
         return updateCells(indices, iteration+1) || updateOutputs;
@@ -968,6 +963,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         boolean change = false;
         int weak, strong;
 
+        List<Direction> directionsUpdated = new ArrayList<>();
+
         //check edge cells
         for (Direction direction : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
             weak=0;strong=0;
@@ -1000,6 +997,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 change = true;
                 strongPowerToNeighbors.put(direction, strong);
                 weakPowerToNeighbors.put(direction, weak);
+                directionsUpdated.add(direction);
             }
 
         }
@@ -1014,7 +1012,17 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.flagLightUpdate=true;
         }
 
-        if (change) sync();
+        if (change)
+        {
+            sync();
+            world.notifyNeighborsOfStateChange(pos,this.getBlockState().getBlock());
+            for (Direction direction : directionsUpdated) {
+                BlockPos neighborPos = pos.offset(direction);
+                BlockState neighborBlockState = world.getBlockState(neighborPos);
+                if (neighborBlockState!=null && neighborBlockState.isSolid())
+                    world.notifyNeighborsOfStateExcept(neighborPos,neighborBlockState.getBlock(),direction.getOpposite());
+            }
+        }
 
         return change;
     }

@@ -276,7 +276,6 @@ public class PanelBlock extends Block {
             if (panelTile.updateOutputs()) {
                 if (!world.isRemote)
                     panelTile.markDirty();
-                world.notifyNeighborsOfStateChange(pos, this);
             }
             if (change)
             {
@@ -441,8 +440,7 @@ public class PanelBlock extends Block {
                     if (!world.isRemote) {
                         panelTile.markDirty();
                     }
-                    if (panelTile.updateOutputs())
-                        world.notifyNeighborsOfStateChange(pos, this);
+                    panelTile.updateOutputs();
                 }
 
             }catch (Exception e)

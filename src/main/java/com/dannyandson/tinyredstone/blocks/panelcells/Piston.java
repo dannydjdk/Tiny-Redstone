@@ -157,6 +157,7 @@ public class Piston implements IPanelCell {
                 .tex(u, v)
                 .lightmap(combinedLightIn)
                 .normal(1, 0, 0)
+                .overlay(combinedOverlayIn)
                 .endVertex();
 
     }
