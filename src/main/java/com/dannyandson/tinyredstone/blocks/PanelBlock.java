@@ -342,6 +342,7 @@ public class PanelBlock extends Block {
                             if (panelCoverObject instanceof IPanelCover)
                             {
                                 panelTile.panelCover = (IPanelCover) panelCoverObject;
+                                panelTile.flagLightUpdate=true;
 
                                 //remove an item from the player's stack
                                 if (!player.isCreative())
@@ -479,6 +480,7 @@ public class PanelBlock extends Block {
                     if (panelTile.isCovered())
                     {
                         removeCover(panelTile,player);
+                        panelTile.flagLightUpdate=true;
                     }
                     else {
                         BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);

@@ -51,7 +51,7 @@ public class LightCover  implements IPanelCover {
      */
     @Override
     public boolean allowsLightOutput() {
-        return false;
+        return true;
     }
 
 }

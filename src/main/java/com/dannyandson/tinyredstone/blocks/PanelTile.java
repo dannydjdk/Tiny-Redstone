@@ -45,7 +45,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public Map<Direction, Integer> comparatorOverrides = new HashMap<>();
     public Integer Color = DyeColor.GRAY.getColorValue();
     private Integer lightOutput = 0;
-    private boolean flagLightUpdate = false;
+    protected boolean flagLightUpdate = false;
     private boolean flagCrashed = false;
     protected IPanelCover panelCover = null;
 
@@ -130,33 +130,38 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     @Override
     public CompoundNBT write(CompoundNBT parentNBTTagCompound) {
         try {
-            CompoundNBT strongPowerFromNeighbors = new CompoundNBT();
-            strongPowerFromNeighbors.putInt(Direction.NORTH.getIndex() + "", this.strongPowerFromNeighbors.get(Direction.NORTH));
-            strongPowerFromNeighbors.putInt(Direction.SOUTH.getIndex() + "", this.strongPowerFromNeighbors.get(Direction.SOUTH));
-            strongPowerFromNeighbors.putInt(Direction.EAST.getIndex() + "", this.strongPowerFromNeighbors.get(Direction.EAST));
-            strongPowerFromNeighbors.putInt(Direction.WEST.getIndex() + "", this.strongPowerFromNeighbors.get(Direction.WEST));
-            parentNBTTagCompound.put("strong_power_incoming", strongPowerFromNeighbors);
-
-            CompoundNBT weakPowerFromNeighbors = new CompoundNBT();
-            weakPowerFromNeighbors.putInt(Direction.NORTH.getIndex() + "", this.weakPowerFromNeighbors.get(Direction.NORTH));
-            weakPowerFromNeighbors.putInt(Direction.SOUTH.getIndex() + "", this.weakPowerFromNeighbors.get(Direction.SOUTH));
-            weakPowerFromNeighbors.putInt(Direction.EAST.getIndex() + "", this.weakPowerFromNeighbors.get(Direction.EAST));
-            weakPowerFromNeighbors.putInt(Direction.WEST.getIndex() + "", this.weakPowerFromNeighbors.get(Direction.WEST));
-            parentNBTTagCompound.put("weak_power_incoming", weakPowerFromNeighbors);
-
-            CompoundNBT strongPowerToNeighbors = new CompoundNBT();
-            strongPowerToNeighbors.putInt(Direction.NORTH.getIndex() + "", this.strongPowerToNeighbors.get(Direction.NORTH));
-            strongPowerToNeighbors.putInt(Direction.SOUTH.getIndex() + "", this.strongPowerToNeighbors.get(Direction.SOUTH));
-            strongPowerToNeighbors.putInt(Direction.EAST.getIndex() + "", this.strongPowerToNeighbors.get(Direction.EAST));
-            strongPowerToNeighbors.putInt(Direction.WEST.getIndex() + "", this.strongPowerToNeighbors.get(Direction.WEST));
-            parentNBTTagCompound.put("strong_power_outgoing", strongPowerToNeighbors);
-
-            CompoundNBT weakPowerToNeighbors = new CompoundNBT();
-            weakPowerToNeighbors.putInt(Direction.NORTH.getIndex() + "", this.weakPowerToNeighbors.get(Direction.NORTH));
-            weakPowerToNeighbors.putInt(Direction.SOUTH.getIndex() + "", this.weakPowerToNeighbors.get(Direction.SOUTH));
-            weakPowerToNeighbors.putInt(Direction.EAST.getIndex() + "", this.weakPowerToNeighbors.get(Direction.EAST));
-            weakPowerToNeighbors.putInt(Direction.WEST.getIndex() + "", this.weakPowerToNeighbors.get(Direction.WEST));
-            parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
+            if (this.strongPowerFromNeighbors.size()==4) {
+                CompoundNBT strongPowerFromNeighbors = new CompoundNBT();
+                strongPowerFromNeighbors.putInt(Direction.NORTH.getIndex() + "", this.strongPowerFromNeighbors.get(Direction.NORTH));
+                strongPowerFromNeighbors.putInt(Direction.SOUTH.getIndex() + "", this.strongPowerFromNeighbors.get(Direction.SOUTH));
+                strongPowerFromNeighbors.putInt(Direction.EAST.getIndex() + "", this.strongPowerFromNeighbors.get(Direction.EAST));
+                strongPowerFromNeighbors.putInt(Direction.WEST.getIndex() + "", this.strongPowerFromNeighbors.get(Direction.WEST));
+                parentNBTTagCompound.put("strong_power_incoming", strongPowerFromNeighbors);
+            }
+            if (this.weakPowerFromNeighbors.size()==4) {
+                CompoundNBT weakPowerFromNeighbors = new CompoundNBT();
+                weakPowerFromNeighbors.putInt(Direction.NORTH.getIndex() + "", this.weakPowerFromNeighbors.get(Direction.NORTH));
+                weakPowerFromNeighbors.putInt(Direction.SOUTH.getIndex() + "", this.weakPowerFromNeighbors.get(Direction.SOUTH));
+                weakPowerFromNeighbors.putInt(Direction.EAST.getIndex() + "", this.weakPowerFromNeighbors.get(Direction.EAST));
+                weakPowerFromNeighbors.putInt(Direction.WEST.getIndex() + "", this.weakPowerFromNeighbors.get(Direction.WEST));
+                parentNBTTagCompound.put("weak_power_incoming", weakPowerFromNeighbors);
+            }
+            if (this.strongPowerToNeighbors.size()==4) {
+                CompoundNBT strongPowerToNeighbors = new CompoundNBT();
+                strongPowerToNeighbors.putInt(Direction.NORTH.getIndex() + "", this.strongPowerToNeighbors.get(Direction.NORTH));
+                strongPowerToNeighbors.putInt(Direction.SOUTH.getIndex() + "", this.strongPowerToNeighbors.get(Direction.SOUTH));
+                strongPowerToNeighbors.putInt(Direction.EAST.getIndex() + "", this.strongPowerToNeighbors.get(Direction.EAST));
+                strongPowerToNeighbors.putInt(Direction.WEST.getIndex() + "", this.strongPowerToNeighbors.get(Direction.WEST));
+                parentNBTTagCompound.put("strong_power_outgoing", strongPowerToNeighbors);
+            }
+            if (this.weakPowerToNeighbors.size()==4) {
+                CompoundNBT weakPowerToNeighbors = new CompoundNBT();
+                weakPowerToNeighbors.putInt(Direction.NORTH.getIndex() + "", this.weakPowerToNeighbors.get(Direction.NORTH));
+                weakPowerToNeighbors.putInt(Direction.SOUTH.getIndex() + "", this.weakPowerToNeighbors.get(Direction.SOUTH));
+                weakPowerToNeighbors.putInt(Direction.EAST.getIndex() + "", this.weakPowerToNeighbors.get(Direction.EAST));
+                weakPowerToNeighbors.putInt(Direction.WEST.getIndex() + "", this.weakPowerToNeighbors.get(Direction.WEST));
+                parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
+            }
 
             CompoundNBT comparatorOverrideNBT = new CompoundNBT();
             for(Direction cDirection : comparatorOverrides.keySet())
@@ -1091,7 +1096,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public void sync()
     {
-        if (!isCovered())
+        if (!isCovered() || panelCover.allowsLightOutput())
             this.world.notifyBlockUpdate(pos,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
     }
 
@@ -1099,7 +1104,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     {
         this.flagCrashed=true;
 
-        TinyRedstone.LOGGER.error("Redstone Panel Crashed at " + pos.getCoordinatesAsString(),e);
+        TinyRedstone.LOGGER.error("Redstone Panel Crashed at " + pos.getX() + "," + pos.getY() + "," + pos.getZ(),e);
     }
 
     public boolean isCrashed()
