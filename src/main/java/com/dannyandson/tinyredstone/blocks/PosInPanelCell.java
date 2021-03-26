@@ -20,7 +20,7 @@ public class PosInPanelCell extends PanelCellPos {
         return x;
     }
 
-    public double getY() {
+    public double getZ() {
         return z;
     }
 
@@ -36,10 +36,8 @@ public class PosInPanelCell extends PanelCellPos {
         double z = hitVec.z - pos.getZ();
 
         PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(x, z);
-        double segmentX = (x - (panelCellPos.getRow()/8d))*8d;
-        double segmentZ = (z - (panelCellPos.getCell()/8d))*8d;
 
-        return fromCoordinates(panelCellPos, x, z);
+        return fromCoordinates(panelCellPos, (x - (panelCellPos.getRow()/8d))*8d, (z - (panelCellPos.getCell()/8d))*8d);
     }
 
     public PanelCellSegment getSegment(Direction cellDirection) {
