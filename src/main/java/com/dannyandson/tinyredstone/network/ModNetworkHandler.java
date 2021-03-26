@@ -41,6 +41,12 @@ public class ModNetworkHandler {
                 .consumer(BlueprintSync::handle)
                 .add();
 
+        INSTANCE.messageBuilder(CrashFlagResetSync.class,nextID())
+                .encoder(CrashFlagResetSync::toBytes)
+                .decoder(CrashFlagResetSync::new)
+                .consumer(CrashFlagResetSync::handle)
+                .add();
+
     }
 
     public static void sendToClient(Object packet, ServerPlayerEntity player) {

@@ -4,6 +4,8 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.util.Direction;
@@ -14,6 +16,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
     public static ResourceLocation TEXTURE = new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel");
+    public static ResourceLocation TEXTURE_CRASHED = new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_crashed");
 
     public PanelTileRenderer(TileEntityRendererDispatcher rendererDispatcherIn) {
         super(rendererDispatcherIn);
@@ -32,26 +35,41 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
     @Override
     public void render(PanelTile tileEntity, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
 
-        for(Integer i=0 ; i<64 ; i++)
+        if (tileEntity.isCovered())
         {
-            if (tileEntity.cells.containsKey(i))
-            {
-                IPanelCell panelCell = tileEntity.cells.get(i);
-                Direction cellDirection = tileEntity.cellDirections.get(i);
+            matrixStack.push();
+            tileEntity.panelCover.render(matrixStack,buffer,combinedLight,combinedOverlay, tileEntity.getColor());
+            matrixStack.pop();
+        }
+        else {
+            for (Integer i = 0; i < 64; i++) {
+                if (tileEntity.cells.containsKey(i)) {
+                    IPanelCell panelCell = tileEntity.cells.get(i);
+                    Direction cellDirection = tileEntity.cellDirections.get(i);
 
-                renderCell(tileEntity,matrixStack,i,panelCell,cellDirection,buffer,combinedLight,combinedOverlay,1.0f);
+                    renderCell(matrixStack, i, panelCell, cellDirection, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
+                }
+            }
+
+            if (tileEntity.lookingAtCell != null) {
+                renderCell(matrixStack, tileEntity.lookingAtCell, tileEntity.lookingAtWith, tileEntity.lookingAtDirection, buffer, combinedLight, combinedOverlay, 0.5f);
             }
         }
 
-        if (tileEntity.lookingAtCell!=null)
+        if (tileEntity.isCrashed())
         {
-            renderCell(tileEntity,matrixStack,tileEntity.lookingAtCell, tileEntity.lookingAtWith, tileEntity.lookingAtDirection,buffer,combinedLight,combinedOverlay,0.5f);
-        }
+            matrixStack.push();
+            matrixStack.translate(0, 0.126, 1);
+            matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
 
+            TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
+            RenderHelper.drawRectangle(buffer.getBuffer(RenderType.getTranslucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
+            matrixStack.pop();
+        }
 
     }
 
-    private void renderCell(PanelTile tileEntity, MatrixStack matrixStack, Integer index, IPanelCell panelCell, Direction cellDirection, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
+    private void renderCell(MatrixStack matrixStack, Integer index, IPanelCell panelCell, Direction cellDirection, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
     {
         int row = Math.round((index.floatValue()/8f)-0.5f);
         int cell = index%8;

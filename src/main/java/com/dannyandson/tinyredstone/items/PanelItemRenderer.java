@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -71,23 +72,38 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
         matrixStack.pop();
 
         if (stack.getTag() !=null && stack.getTag().contains("BlockEntityTag")) {
-            CompoundNBT cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
-            for (Integer i = 0; i < 64; i++) {
-                if (cellsNBT.contains(i.toString())) {
-                    CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
 
-                    if (cellNBT.contains("data")) {
-                        String className = cellNBT.getString("class");
-                        try {
+            if (stack.getTag().getCompound("BlockEntityTag").contains("cover")) {
+                String coverClass = stack.getTag().getCompound("BlockEntityTag").getString("cover");
+                try {
+                    IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
+                    matrixStack.push();
+                    cover.render(matrixStack, buffer, combinedLight, combinedOverlay, color);
+                    matrixStack.pop();
+                } catch (Exception exception) {
+                    TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class for item render: " + coverClass +
+                            ": " + exception.getMessage() + " " + exception.getStackTrace()[0].toString());
+                }
+            }
+            else {
+                CompoundNBT cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
+                for (Integer i = 0; i < 64; i++) {
+                    if (cellsNBT.contains(i.toString())) {
+                        CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
 
-                            IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
-                            cell.readNBT(cellNBT.getCompound("data"));
-                            Direction cellDirection = Direction.byIndex(cellNBT.getInt("direction"));
-                            renderCell(matrixStack, i, cell, cellDirection, buffer, combinedLight, combinedOverlay);
+                        if (cellNBT.contains("data")) {
+                            String className = cellNBT.getString("class");
+                            try {
 
-                        } catch (Exception exception) {
-                            TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class for item render: " + className +
-                                    ": " + exception.getMessage() + " " + exception.getStackTrace()[0].toString());
+                                IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
+                                cell.readNBT(cellNBT.getCompound("data"));
+                                Direction cellDirection = Direction.byIndex(cellNBT.getInt("direction"));
+                                renderCell(matrixStack, i, cell, cellDirection, buffer, combinedLight, combinedOverlay);
+
+                            } catch (Exception exception) {
+                                TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class for item render: " + className +
+                                        ": " + exception.getMessage() + " " + exception.getStackTrace()[0].toString());
+                            }
                         }
                     }
                 }

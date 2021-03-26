@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTileColor;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
+import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
 import com.dannyandson.tinyredstone.items.PanelItemColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
@@ -23,6 +24,7 @@ public class ClientSetup {
         Minecraft.getInstance().getItemColors().register(new PanelItemColor(),Registration.REDSTONE_PANEL_ITEM.get());
     }
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         if (!event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE)) {
@@ -30,6 +32,8 @@ public class ClientSetup {
         }
 
         event.addSprite(PanelTileRenderer.TEXTURE);
+        event.addSprite(PanelTileRenderer.TEXTURE_CRASHED);
+
         event.addSprite(Repeater.TEXTURE_REPEATER_ON);
         event.addSprite(Repeater.TEXTURE_REPEATER_OFF);
         event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST);
@@ -47,13 +51,14 @@ public class ClientSetup {
         event.addSprite(SuperRepeater.TEXTURE_SUPER_REPEATER_OFF);
         event.addSprite(Lever.TEXTURE_LEVER);
         event.addSprite(Lever.TEXTURE_LEVER_TOP);
-
         event.addSprite(Comparator.TEXTURE_COMPARATOR_OFF);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_ON);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_OFF);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(TransparentBlock.TEXTURE_TRANSPARENT_BLOCK);
+
+        event.addSprite(LightCover.TEXTURE_LIGHT_COVER);
     }
 
 

@@ -4,6 +4,8 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
+import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
+import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
 import com.dannyandson.tinyredstone.items.Blueprint;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.items.PanelItem;
@@ -45,6 +47,9 @@ public class Registration {
         TinyRedstone.registerPanelCell(Observer.class,TINY_OBSERVER.get());
         TinyRedstone.registerPanelCell(SuperRepeater.class,TINY_SUPER_REPEATER.get());
         TinyRedstone.registerPanelCell(Lever.class,TINY_LEVER.get());
+
+        TinyRedstone.registerPanelCover(DarkCover.class,PANEL_COVER_DARK.get());
+        TinyRedstone.registerPanelCover(LightCover.class,PANEL_COVER_LIGHT.get());
     }
 
     public static final RegistryObject<PanelBlock> REDSTONE_PANEL_BLOCK = BLOCKS.register("redstone_panel", PanelBlock::new);
@@ -77,5 +82,8 @@ public class Registration {
             .group(ModSetup.ITEM_GROUP)));
 
     public static final RegistryObject<RedstoneWrench> REDSTONE_WRENCH = ITEMS.register("redstone_wrench", RedstoneWrench::new);
+
+    public static final RegistryObject<Item> PANEL_COVER_DARK = ITEMS.register("dark_panel_cover",PanelCellItem::new);
+    public static final RegistryObject<Item> PANEL_COVER_LIGHT = ITEMS.register("light_panel_cover",PanelCellItem::new);
 
 }
