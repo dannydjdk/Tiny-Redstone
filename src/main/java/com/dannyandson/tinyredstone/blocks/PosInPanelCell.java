@@ -24,41 +24,46 @@ public class PosInPanelCell extends PanelCellPos {
         return z;
     }
 
-    public static PosInPanelCell fromCoordinates(PanelCellPos panelCellPos, double x, double z) {
+    public static PosInPanelCell fromCoordinates(PanelCellPos panelCellPos, double x, double z, Direction direction) {
         if(x >= 0.0 && x <= 1.0 && z >= 0.0 && z <= 1.0) {
-            return new PosInPanelCell(panelCellPos.getRow(), panelCellPos.getCell(), x, z);
+            double rotatedX;
+            double rotatedZ;
+
+            if (direction == NORTH) {
+                rotatedX = z;
+                rotatedZ = 1.0 - x;
+            } else if (direction == EAST) {
+                rotatedX = 1.0 - x;
+                rotatedZ = 1.0 - z;
+            } else if (direction == SOUTH){
+                rotatedX = 1.0 - z;
+                rotatedZ = x;
+            } else {
+                rotatedX = x;
+                rotatedZ = z;
+            }
+
+            return new PosInPanelCell(panelCellPos.getRow(), panelCellPos.getCell(), rotatedX, rotatedZ);
         }
         return null;
     }
 
-    public static PosInPanelCell fromHitVec(BlockPos pos, Vector3d hitVec) {
+    public static PosInPanelCell fromHitVec(BlockPos pos, Vector3d hitVec, PanelTile panelTile) {
         double x = hitVec.x - pos.getX();
         double z = hitVec.z - pos.getZ();
 
         PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(x, z);
 
-        return fromCoordinates(panelCellPos, (x - (panelCellPos.getRow()/8d))*8d, (z - (panelCellPos.getCell()/8d))*8d);
+        x = (x - (panelCellPos.getRow()/8d))*8d;
+        z = (z - (panelCellPos.getCell()/8d))*8d;
+
+        return fromCoordinates(panelCellPos, x, z, panelTile.cellDirections.get(panelCellPos.getIndex()));
     }
 
-    public PanelCellSegment getSegment(Direction cellDirection) {
+    public PanelCellSegment getSegment() {
         int segmentRow = Math.round((float)(this.x*3f)-0.5f);
         int segmentColumn = Math.round((float)(this.z*3f)-0.5f);
 
-        int segmentRow1;
-        int segmentColumn1;
-        if (cellDirection == NORTH) {
-            segmentRow1 = segmentColumn;
-            segmentColumn1 = ((segmentRow - 1) * -1) + 1;
-        } else if (cellDirection == EAST) {
-            segmentRow1 = ((segmentRow - 1) * -1) + 1;
-            segmentColumn1 = ((segmentColumn - 1) * -1) + 1;
-        } else if (cellDirection == SOUTH){
-            segmentRow1 = ((segmentColumn - 1) * -1) + 1;
-            segmentColumn1 = segmentRow;
-        } else {
-            segmentRow1 = segmentRow;
-            segmentColumn1 = segmentColumn;
-        }
-        return PanelCellSegment.fromInteger((segmentRow1*3)+segmentColumn1);
+        return PanelCellSegment.fromInteger((segmentRow*3)+segmentColumn);
     }
 }

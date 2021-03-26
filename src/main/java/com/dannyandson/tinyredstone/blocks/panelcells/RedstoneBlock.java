@@ -187,7 +187,7 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos, PanelCellSegment segment) {
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         ProbeInfoHelper.addPower(probeInfo, 15);
         return true;
     }

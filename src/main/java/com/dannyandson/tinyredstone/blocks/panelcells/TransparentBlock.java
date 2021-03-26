@@ -208,7 +208,7 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos, PanelCellSegment segment) {
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         return true;
     }
 }

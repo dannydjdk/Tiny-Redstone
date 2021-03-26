@@ -305,7 +305,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos, PanelCellSegment segment) {
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         ProbeInfoHelper.addPower(probeInfo, this.signalStrength);
         return true;
     }

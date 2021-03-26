@@ -397,7 +397,7 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos, PanelCellSegment segment) {
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         probeInfo.text(CompoundText.createLabelInfo("Delay: ", this.ticks/2 + " ticks"));
         if(this.locked) {
             probeInfo.text(CompoundText.create().style(TextStyleClass.INFO).text("Locked"));

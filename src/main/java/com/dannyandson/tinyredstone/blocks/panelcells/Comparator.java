@@ -258,7 +258,7 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos, PanelCellSegment segment) {
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         probeInfo.text(CompoundText.createLabelInfo("Mode: ", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString()));
         return false;
     }

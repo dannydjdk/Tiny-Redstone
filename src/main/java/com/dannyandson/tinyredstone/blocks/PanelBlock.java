@@ -333,7 +333,7 @@ public class PanelBlock extends Block {
         if (te instanceof PanelTile && hand==Hand.MAIN_HAND) {
             PanelTile panelTile = (PanelTile) te;
             try {
-                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(pos, result.getHitVec());
+                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(pos, result.getHitVec(), panelTile);
 
                 if (posInPanelCell != null) {
                     Item heldItem = player.getHeldItem(hand).getItem();
@@ -369,7 +369,7 @@ public class PanelBlock extends Block {
                         } else {
                             //if player clicked on a panel cell, activate it
 
-                            if(panelTile.cells.get(cellIndex).onBlockActivated(panelTile, cellIndex, posInPanelCell.getSegment(panelTile.cellDirections.get(cellIndex)))) {
+                            if(panelTile.cells.get(cellIndex).onBlockActivated(panelTile, cellIndex, posInPanelCell.getSegment())) {
                                 panelTile.updateCell(cellIndex);
                                 panelTile.updateNeighborCells(cellIndex);
                             }

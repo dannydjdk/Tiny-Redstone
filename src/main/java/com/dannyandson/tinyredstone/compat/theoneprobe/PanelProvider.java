@@ -76,8 +76,10 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         if (block instanceof  PanelBlock && tileEntity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileEntity;
 
-            PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(pos, probeHitData.getHitVec());
+            PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(pos, probeHitData.getHitVec(), panelTile);
             int cellIndex = posInPanelCell.getIndex();
+
+            PanelCellSegment segment = posInPanelCell.getSegment();
 
             if(probeMode == ProbeMode.DEBUG) {
                 probeInfo.vertical(new LayoutStyle().borderColor(0xff44ff44).spacing(2))
@@ -85,15 +87,16 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                         .text(CompoundText.createLabelInfo("Z: ", posInPanelCell.getZ()))
                         .text(CompoundText.createLabelInfo("Row: ", posInPanelCell.getRow()))
                         .text(CompoundText.createLabelInfo("Cell: ", posInPanelCell.getCell()))
-                        .text(CompoundText.createLabelInfo("Index: ", cellIndex));
+                        .text(CompoundText.createLabelInfo("Index: ", cellIndex))
+                        .text(CompoundText.createLabelInfo("Segment: ", segment.toString()));
             }
 
             IPanelCell panelCell = panelTile.cells.get(cellIndex);
             if(panelCell != null) {
                 boolean handled = false;
-                PanelCellSegment segment = posInPanelCell.getSegment(panelTile.cellDirections.get(cellIndex));
+
                 if (panelCell instanceof IPanelCellProbeInfoProvider) {
-                    handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, posInPanelCell, segment);
+                    handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, posInPanelCell);
                 }
                 if(!handled) {
                     int power = 0;
