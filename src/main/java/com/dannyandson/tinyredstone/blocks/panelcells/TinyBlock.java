@@ -245,7 +245,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellPro
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PanelCellPos pos, PanelCellSegment segment) {
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos, PanelCellSegment segment) {
         ProbeInfoHelper.addPower(probeInfo, this.weakSignalStrength);
         return true;
     }

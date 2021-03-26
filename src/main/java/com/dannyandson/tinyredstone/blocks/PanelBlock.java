@@ -1,7 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.helper.PanelCellHelper;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.*;
@@ -28,7 +27,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
 
 import javax.annotation.Nullable;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -335,13 +333,11 @@ public class PanelBlock extends Block {
         if (te instanceof PanelTile && hand==Hand.MAIN_HAND) {
             PanelTile panelTile = (PanelTile) te;
             try {
-                double x = result.getHitVec().x - pos.getX();
-                double z = result.getHitVec().z - pos.getZ();
-                PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(x, z);
+                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(pos, result.getHitVec());
 
-                if (panelCellPos != null) {
+                if (posInPanelCell != null) {
                     Item heldItem = player.getHeldItem(hand).getItem();
-                    int cellIndex = panelCellPos.getIndex();
+                    int cellIndex = posInPanelCell.getIndex();
 
                     if (panelTile.isCrashed()) {
                         if (world.isRemote)
@@ -373,7 +369,7 @@ public class PanelBlock extends Block {
                         } else {
                             //if player clicked on a panel cell, activate it
 
-                            if(panelTile.cells.get(cellIndex).onBlockActivated(panelTile, cellIndex, PanelCellHelper.getSegment(panelTile.cellDirections.get(cellIndex), x, z, panelCellPos))) {
+                            if(panelTile.cells.get(cellIndex).onBlockActivated(panelTile, cellIndex, posInPanelCell.getSegment(panelTile.cellDirections.get(cellIndex)))) {
                                 panelTile.updateCell(cellIndex);
                                 panelTile.updateNeighborCells(cellIndex);
                             }

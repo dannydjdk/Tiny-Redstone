@@ -5,6 +5,8 @@ import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import mcjty.theoneprobe.api.IProbeInfo;
+import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -15,7 +17,7 @@ import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class TransparentBlock  implements IPanelCell, IColorablePanelCell
+public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPanelCellProbeInfoProvider
 {
     public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation(TinyRedstone.MODID,"block/panel_transparent_block");
     private int color= 16777215;
@@ -203,5 +205,10 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell
     @Override
     public void setColor(int color) {
         this.color=color;
+    }
+
+    @Override
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos, PanelCellSegment segment) {
+        return true;
     }
 }

@@ -7,10 +7,11 @@ public class PanelCellPos {
     private int row;
     private int cell;
 
-    private PanelCellPos(int row, int cell) {
+    protected PanelCellPos(int row, int cell) {
         this.row = row;
         this.cell = cell;
     }
+
 
     public static PanelCellPos fromRowCell(int row, int cell) {
         if (row >= 0 && row < 8 && cell >= 0 && cell < 8) {

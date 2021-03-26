@@ -2,7 +2,6 @@ package com.dannyandson.tinyredstone.compat.theoneprobe;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.helper.PanelCellHelper;
 import com.dannyandson.tinyredstone.helper.ProbeInfoHelper;
 import mcjty.theoneprobe.Tools;
 import mcjty.theoneprobe.api.*;
@@ -13,11 +12,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 import java.util.function.Function;
@@ -80,26 +76,22 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         if (block instanceof  PanelBlock && tileEntity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileEntity;
 
-            Vector3d hitVec = probeHitData.getHitVec();
-            double x = hitVec.x - pos.getX();
-            double z = hitVec.z - pos.getZ();
-
-            PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(x, z);
-            int cellIndex = panelCellPos.getIndex();
+            PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(pos, probeHitData.getHitVec());
+            int cellIndex = posInPanelCell.getIndex();
 
             if(probeMode == ProbeMode.DEBUG) {
                 probeInfo.vertical(new LayoutStyle().borderColor(0xff44ff44).spacing(2))
-                        .text(CompoundText.createLabelInfo("Row: ", panelCellPos.getRow()))
-                        .text(CompoundText.createLabelInfo("Cell: ", panelCellPos.getCell()))
+                        .text(CompoundText.createLabelInfo("Row: ", posInPanelCell.getRow()))
+                        .text(CompoundText.createLabelInfo("Cell: ", posInPanelCell.getCell()))
                         .text(CompoundText.createLabelInfo("Index: ", cellIndex));
             }
 
             IPanelCell panelCell = panelTile.cells.get(cellIndex);
             if(panelCell != null) {
                 boolean handled = false;
-                PanelCellSegment segment = PanelCellHelper.getSegment(panelTile.cellDirections.get(cellIndex), x, z, panelCellPos);
+                PanelCellSegment segment = posInPanelCell.getSegment(panelTile.cellDirections.get(cellIndex));
                 if (panelCell instanceof IPanelCellProbeInfoProvider) {
-                    handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, panelCellPos, segment);
+                    handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, posInPanelCell, segment);
                 }
                 if(!handled) {
                     int power = 0;
