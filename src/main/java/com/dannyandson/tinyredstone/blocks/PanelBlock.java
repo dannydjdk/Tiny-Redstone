@@ -6,6 +6,7 @@ import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -19,11 +20,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.ToolType;
 
 import javax.annotation.Nullable;
@@ -459,7 +462,16 @@ public class PanelBlock extends Block {
     @Override
     public void onBlockClicked(BlockState state, World world, BlockPos pos, PlayerEntity player) {
         Item heldItem = player.getHeldItemMainhand().getItem();
-        if ((heldItem==Registration.REDSTONE_WRENCH.get() || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)) /* && on top */)
+        double playerReachDistance = player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+        Vector3d playerEyes = player.getEyePosition(1f);
+        BlockRayTraceResult blockRayTraceResult = world.rayTraceBlocks(new RayTraceContext(
+                playerEyes, // from
+                playerEyes.add(player.getLook(1f).mul(playerReachDistance, playerReachDistance, playerReachDistance)), // to
+                RayTraceContext.BlockMode.OUTLINE,
+                RayTraceContext.FluidMode.NONE,
+                player
+        ));
+        if ((heldItem==Registration.REDSTONE_WRENCH.get() || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)) && blockRayTraceResult.getFace() == UP)
         {
             TileEntity te = world.getTileEntity(pos);
             if (te instanceof PanelTile) {
