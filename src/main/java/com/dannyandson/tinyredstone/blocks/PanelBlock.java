@@ -284,7 +284,6 @@ public class PanelBlock extends Block {
             if (panelTile.updateOutputs()) {
                 if (!world.isRemote)
                     panelTile.markDirty();
-                world.notifyNeighborsOfStateChange(pos, this);
             }
             if (change)
             {
@@ -372,6 +371,7 @@ public class PanelBlock extends Block {
                                 if (panelCoverObject instanceof IPanelCover)
                                 {
                                     panelTile.panelCover = (IPanelCover) panelCoverObject;
+                                    panelTile.flagLightUpdate=true;
 
                                     //remove an item from the player's stack
                                     if (!player.isCreative())
@@ -430,8 +430,7 @@ public class PanelBlock extends Block {
                     if (!world.isRemote) {
                         panelTile.markDirty();
                     }
-                    if (panelTile.updateOutputs())
-                        world.notifyNeighborsOfStateChange(pos, this);
+                    panelTile.updateOutputs();
                 }
 
             }catch (Exception e)
@@ -470,6 +469,7 @@ public class PanelBlock extends Block {
                     if (panelTile.isCovered())
                     {
                         removeCover(panelTile,player);
+                        panelTile.flagLightUpdate=true;
                     }
                     else {
                         BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);

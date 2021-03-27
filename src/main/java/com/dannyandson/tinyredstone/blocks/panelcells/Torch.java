@@ -6,20 +6,24 @@ import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
+import java.util.LinkedList;
+
 public class Torch implements IPanelCell
 {
-    private boolean output = false;
+    private boolean output = true;
+    private int changePending = 0;
+    private final LinkedList<Boolean> changeHx = new LinkedList<>();
+    private boolean burnout = false;
 
     public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch");
     public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_off");
@@ -33,10 +37,8 @@ public class Torch implements IPanelCell
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
-     * @param combinedLight
-     * @param combinedOverlay
      */
+    @SuppressWarnings("SuspiciousNameCombination")
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
@@ -44,20 +46,15 @@ public class Torch implements IPanelCell
         TextureAtlasSprite sprite_torch;
         TextureAtlasSprite sprite_torch_top;
 
-        if (this.output) {
-            sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_ON);
-            sprite_torch_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_TOP_ON);
+        if (this.getWeakRsOutput(PanelCellSide.FRONT)>0) {
+            sprite_torch = RenderHelper.getSprite(TEXTURE_TORCH_ON);
+            sprite_torch_top = RenderHelper.getSprite(TEXTURE_TORCH_TOP_ON);
         }
         else
         {
-            sprite_torch = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_OFF);
-            sprite_torch_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TORCH_TOP_OFF);
+            sprite_torch = RenderHelper.getSprite(TEXTURE_TORCH_OFF);
+            sprite_torch_top = RenderHelper.getSprite(TEXTURE_TORCH_TOP_OFF);
         }
-
-        float u1 = sprite_torch.getMinU();// + 0.0068359375f;
-        float u2 = sprite_torch.getMaxU();// - 0.0068359375f;
-        float v1 = sprite_torch.getMinV();// + 0.01171875f;
-        float v2 = sprite_torch.getMaxV();
 
         float x1 = 0.375f;
         float x2 = 0.625f;
@@ -66,51 +63,25 @@ public class Torch implements IPanelCell
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(60));
         matrixStack.translate(0,0.03125f,0);
-
-
-        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        add(builder, matrixStack, x1,y1,0, u1, v2,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y1,0, u2, v2,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y2,0, u2, v1,combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x1,y2,0, u1, v1,combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
-        add(builder, matrixStack, x1,x1,0, sprite_torch_top.getMinU(), sprite_torch_top.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,x1,0, sprite_torch_top.getMaxU(), sprite_torch_top.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,x2,0, sprite_torch_top.getMaxU(), sprite_torch_top.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x1,x2,0, sprite_torch_top.getMinU(), sprite_torch_top.getMaxV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,sprite_torch_top,(output)?15728880:combinedLight,alpha);
 
 
-    }
-
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, alpha)
-                .tex(u, v)
-                .lightmap((output)?15728880:combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
     }
 
     /**
@@ -126,25 +97,32 @@ public class Torch implements IPanelCell
     @Override
     public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
     {
-        if (backNeighbor!=null && backNeighbor.getWeakRsOutput() >0 && output)
+        boolean output = (backNeighbor==null || backNeighbor.getWeakRsOutput() ==0);
+
+        if (burnout && output)
         {
-            output=false;
-            return true;
-        }
-        else if ((backNeighbor==null || backNeighbor.getWeakRsOutput() ==0) && !output)
-        {
-            output=true;
-            return true;
+            int changes=0;
+            for (Boolean b : changeHx)
+            {
+                if (b)changes++;
+            }
+            if (changes<=16) burnout=false;
+            this.changePending=2;
         }
 
+        if (!burnout && output!=this.output)
+        {
+            this.output=output;
+            this.changePending=2;
+        }
         return false;
     }
 
     /**
      * Gets redstone output of the given side of the cell
      *
-     * @param outputDirection
-     * @return integer 0-15 indicating the strengh of redstone signal
+     * @param outputDirection direction from which the output is being read
+     * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
     public int getWeakRsOutput(PanelCellSide outputDirection)
@@ -153,7 +131,7 @@ public class Torch implements IPanelCell
     }
     @Override
     public int getStrongRsOutput(PanelCellSide outputDirection) {
-        if (output&&outputDirection!=PanelCellSide.BACK)
+        if (outputDirection!=PanelCellSide.BACK && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
             return 15;
         else
             return 0;
@@ -196,7 +174,7 @@ public class Torch implements IPanelCell
      */
     @Override
     public int lightOutput() {
-        return (output && Config.TORCH_LIGHT.get())?1:0;
+        return (Config.TORCH_LIGHT.get() && this.getWeakRsOutput(PanelCellSide.FRONT)>0)?1:0;
     }
 
     /**
@@ -206,7 +184,23 @@ public class Torch implements IPanelCell
      */
     @Override
     public boolean tick() {
-        return false;
+        changeHx.add(changePending==2);
+        if (changeHx.size()>60) changeHx.pop();
+        int changes = 0;
+        for (Boolean b : changeHx)
+        {
+            if (b)changes++;
+        }
+        if (changes>16) burnout=true;
+
+        if (changePending == 0)
+            return false;
+        if (changePending > 1) {
+            changePending--;
+            return false;
+        }
+        changePending--;
+        return true;
     }
 
     /**
@@ -225,11 +219,31 @@ public class Torch implements IPanelCell
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("output",output);
+        nbt.putInt("changePending",changePending);
+        nbt.putBoolean("burnout",burnout);
+
+        StringBuilder changeHxString = new StringBuilder();
+        for (Object b : changeHx.toArray())
+        {
+            changeHxString.append(((Boolean) b) ? "1" : "0");
+        }
+        nbt.putString("changeHx", changeHxString.toString());
+
         return nbt;
     }
 
     @Override
     public void readNBT(CompoundNBT compoundNBT) {
         this.output = compoundNBT.getBoolean("output");
+        this.changePending = compoundNBT.getInt("changePending");
+        this.burnout = compoundNBT.getBoolean("burnout");
+
+        String changeHxString = compoundNBT.getString("changeHx");
+        for (Byte b : changeHxString.getBytes())
+        {
+            changeHx.add(b==49);
+            if (changeHx.size()>60)changeHx.pop();
+        }
+
     }
 }
