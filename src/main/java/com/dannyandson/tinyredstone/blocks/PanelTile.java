@@ -20,6 +20,7 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.common.util.Constants;
 
@@ -359,7 +360,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     ClientPlayerEntity player = Minecraft.getInstance().player;
                     if (player!=null && PanelBlock.isPanelCellItem(player.getHeldItemMainhand().getItem())) {
                         RayTraceResult lookingAt = Minecraft.getInstance().objectMouseOver;
-                        if (lookingAt != null) {
+                        if (lookingAt != null && lookingAt.getType() == RayTraceResult.Type.BLOCK && ((BlockRayTraceResult)lookingAt).getFace() == Direction.UP) {
                             BlockPos blockPos = new BlockPos(lookingAt.getHitVec());
                             TileEntity te = world.getTileEntity(blockPos);
                             if (te == this) {
