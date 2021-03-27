@@ -53,6 +53,7 @@ public class PosInPanelCell extends PanelCellPos {
         double z = hitVec.z - pos.getZ();
 
         PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(x, z);
+        if(panelCellPos == null) return null;
 
         x = (x - (panelCellPos.getRow()/8d))*8d;
         z = (z - (panelCellPos.getCell()/8d))*8d;

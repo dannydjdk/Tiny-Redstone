@@ -2,7 +2,6 @@ package com.dannyandson.tinyredstone.compat.theoneprobe;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.helper.ProbeInfoHelper;
 import mcjty.theoneprobe.Tools;
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.styles.LayoutStyle;
@@ -12,14 +11,20 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.ITag;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.function.Function;
 
 public class PanelProvider implements IBlockDisplayOverride, Function<ITheOneProbe, Void>, IProbeInfoProvider {
+    private final ResourceLocation MEASURING_DEVICE = new ResourceLocation(TinyRedstone.MODID, "measuring_device");
+
     @Override
     public String getID() {
         return TinyRedstone.MODID + ":panel";
@@ -35,9 +40,19 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
     @Override
     public boolean overrideStandardInfo(ProbeMode probeMode, IProbeInfo probeInfo, PlayerEntity playerEntity, World world, BlockState blockState, IProbeHitData probeHitData) {
         BlockPos pos = probeHitData.getPos();
-
         TileEntity tileEntity = world.getTileEntity(pos);
+
         if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == Direction.UP) {
+            switch (com.dannyandson.tinyredstone.Config.DISPLAY_MODE.get()) {
+                case 0:
+                    break;
+                case 1:
+                    if(probeMode != ProbeMode.EXTENDED && probeMode != ProbeMode.DEBUG) return false;
+                case 2:
+                    ITag<Item> tag = ItemTags.getCollection().get(MEASURING_DEVICE);
+                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) return false;
+            }
+
             PanelTile panelTile = (PanelTile) tileEntity;
             Block block = blockState.getBlock();
 
@@ -77,6 +92,16 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
         if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == Direction.UP) {
+            switch (com.dannyandson.tinyredstone.Config.DISPLAY_MODE.get()) {
+                case 0:
+                    break;
+                case 1:
+                    if(probeMode != ProbeMode.EXTENDED && probeMode != ProbeMode.DEBUG) return;
+                case 2:
+                    ITag<Item> tag = ItemTags.getCollection().get(MEASURING_DEVICE);
+                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) return;
+            }
+
             PanelTile panelTile = (PanelTile) tileEntity;
 
             if(!panelTile.isCovered()) {

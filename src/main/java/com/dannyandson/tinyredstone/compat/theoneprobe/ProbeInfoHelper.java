@@ -1,4 +1,4 @@
-package com.dannyandson.tinyredstone.helper;
+package com.dannyandson.tinyredstone.compat.theoneprobe;
 
 import mcjty.theoneprobe.api.CompoundText;
 import mcjty.theoneprobe.api.IProbeInfo;

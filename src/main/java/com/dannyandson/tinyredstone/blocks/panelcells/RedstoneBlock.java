@@ -1,7 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.helper.ProbeInfoHelper;
+import com.dannyandson.tinyredstone.compat.theoneprobe.ProbeInfoHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.IProbeInfo;
