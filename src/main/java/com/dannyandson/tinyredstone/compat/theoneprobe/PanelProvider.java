@@ -121,7 +121,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
             if(!panelTile.isCovered()) {
 
-                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(pos, probeHitData.getHitVec(), panelTile);
+                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, probeHitData.getHitVec());
                 int cellIndex = posInPanelCell.getIndex();
 
                 PanelCellSegment segment = posInPanelCell.getSegment();

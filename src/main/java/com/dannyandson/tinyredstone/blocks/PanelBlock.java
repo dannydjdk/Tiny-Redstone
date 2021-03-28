@@ -334,7 +334,7 @@ public class PanelBlock extends Block {
         if (te instanceof PanelTile && hand==Hand.MAIN_HAND) {
             PanelTile panelTile = (PanelTile) te;
             try {
-                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(pos, result.getHitVec(), panelTile);
+                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, result.getHitVec());
 
                 if (posInPanelCell != null) {
                     Item heldItem = player.getHeldItem(hand).getItem();
