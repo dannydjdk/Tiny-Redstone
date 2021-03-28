@@ -10,6 +10,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
@@ -32,6 +33,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.ToIntFunction;
 
 import static net.minecraft.util.Direction.*;
 
@@ -42,6 +44,8 @@ public class PanelBlock extends Block {
     private static final VoxelShape BASE = Block.makeCuboidShape(BASE_MIN_CORNER.getX(), BASE_MIN_CORNER.getY(), BASE_MIN_CORNER.getZ(),
             BASE_MAX_CORNER.getX(), BASE_MAX_CORNER.getY(), BASE_MAX_CORNER.getZ());
 
+    protected static final IntegerProperty LIGHT_LEVEL = IntegerProperty.create("light_level", 0, 15);
+
     private static Map<Item, Class<? extends IPanelCell>> itemPanelCellMap = new HashMap<>();
     private static Map<Class<? extends IPanelCell>, Item> panelCellItemMap = new HashMap<>();
     private static Map<Item, Class<? extends IPanelCover>> itemPanelCoverMap = new HashMap<>();
@@ -51,8 +55,9 @@ public class PanelBlock extends Block {
         super(Properties.create(Material.ROCK)
                 .sound(SoundType.STONE)
                 .hardnessAndResistance(2.0f)
-
+                .setLightLevel((state) -> state.get(LIGHT_LEVEL))
         );
+        setDefaultState(this.getDefaultState().with(LIGHT_LEVEL, 0));
     }
 
     public Class<? extends IPanelCell> getIPanelCellByItem(Item item) {
@@ -78,6 +83,7 @@ public class PanelBlock extends Block {
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(BlockStateProperties.FACING);
+        builder.add(LIGHT_LEVEL);
     }
 
     @Nullable
@@ -445,17 +451,22 @@ public class PanelBlock extends Block {
         return super.onBlockActivated(state, world, pos, player, hand, result);
     }
 
-    @Override
-    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos)
-    {
-        int ll = 0;
-        TileEntity te = world.getTileEntity(pos);
-        if (te instanceof PanelTile) {
-            PanelTile panelTile = (PanelTile) te;
-            ll=panelTile.getLightOutput();
-        }
-        return Math.min(ll,world.getMaxLightLevel());
+    //@Override
+    //public int getLightValue(BlockState state, IBlockReader world, BlockPos pos)
+    //{
+    //    int ll = 0;
+    //    TileEntity te = world.getTileEntity(pos);
+    //    if (te instanceof PanelTile) {
+    //        PanelTile panelTile = (PanelTile) te;
+    //        ll=panelTile.getLightOutput();
+    //    }
+    //    return Math.min(ll,world.getMaxLightLevel());
+    //}
+
+    public void changeLightValue(World world, BlockPos pos, BlockState state, int lightValue) {
+        world.setBlockState(pos, Registration.REDSTONE_PANEL_BLOCK.get().getDefaultState().with(LIGHT_LEVEL, Math.min(lightValue,world.getMaxLightLevel())));
     }
+
 
     @SuppressWarnings("deprecation")
     @Override
