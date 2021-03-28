@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ITag;
+import net.minecraft.tags.ITagCollection;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -24,6 +25,7 @@ import java.util.function.Function;
 
 public class PanelProvider implements IBlockDisplayOverride, Function<ITheOneProbe, Void>, IProbeInfoProvider {
     private final ResourceLocation MEASURING_DEVICE = new ResourceLocation(TinyRedstone.MODID, "measuring_device");
+    private final ResourceLocation TINY_COMPONENT = new ResourceLocation(TinyRedstone.MODID, "tiny_component");
 
     @Override
     public String getID() {
@@ -37,21 +39,42 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         return null;
     }
 
+    private boolean show(ProbeMode probeMode, PlayerEntity playerEntity) {
+        switch (com.dannyandson.tinyredstone.Config.DISPLAY_MODE.get()) {
+            case 0:
+                return false;
+            case 1:
+                break;
+            case 2:
+                if(probeMode != ProbeMode.EXTENDED && probeMode != ProbeMode.DEBUG) return false;
+                break;
+            case 3:
+                if(probeMode != ProbeMode.DEBUG) {
+                    ITag<Item> tag = ItemTags.getCollection().get(MEASURING_DEVICE);
+                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) return false;
+                }
+            case 4:
+                if(probeMode != ProbeMode.DEBUG) {
+                    ITagCollection<Item> collection = ItemTags.getCollection();
+                    ITag<Item> tag = collection.get(MEASURING_DEVICE);
+                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) {
+                        tag = collection.get(TINY_COMPONENT);
+                        if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) {
+                            return false;
+                        }
+                    }
+                }
+        }
+        return true;
+    }
+
     @Override
     public boolean overrideStandardInfo(ProbeMode probeMode, IProbeInfo probeInfo, PlayerEntity playerEntity, World world, BlockState blockState, IProbeHitData probeHitData) {
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
 
         if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == Direction.UP) {
-            switch (com.dannyandson.tinyredstone.Config.DISPLAY_MODE.get()) {
-                case 0:
-                    break;
-                case 1:
-                    if(probeMode != ProbeMode.EXTENDED && probeMode != ProbeMode.DEBUG) return false;
-                case 2:
-                    ITag<Item> tag = ItemTags.getCollection().get(MEASURING_DEVICE);
-                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) return false;
-            }
+            if(!show(probeMode, playerEntity)) return false;
 
             PanelTile panelTile = (PanelTile) tileEntity;
             Block block = blockState.getBlock();
@@ -92,15 +115,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
         if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == Direction.UP) {
-            switch (com.dannyandson.tinyredstone.Config.DISPLAY_MODE.get()) {
-                case 0:
-                    break;
-                case 1:
-                    if(probeMode != ProbeMode.EXTENDED && probeMode != ProbeMode.DEBUG) return;
-                case 2:
-                    ITag<Item> tag = ItemTags.getCollection().get(MEASURING_DEVICE);
-                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) return;
-            }
+            if(!show(probeMode, playerEntity)) return;
 
             PanelTile panelTile = (PanelTile) tileEntity;
 

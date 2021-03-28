@@ -38,8 +38,8 @@ public class Config {
 
         CLIENT_BUILDER.comment("Performance Settings").push(CATEGORY_PERFORMANCE);
 
-        DISPLAY_MODE = CLIENT_BUILDER.comment("When should the information be displayed in theoneprobe? 0 = always, 1 = only in extended or debug, 2 = when you have a wrench in your hand")
-                .defineInRange("display_mode", 0, 0, 2);
+        DISPLAY_MODE = CLIENT_BUILDER.comment("When should the information be displayed in theoneprobe? 0 = no, 1 = always, 2 = only in extended or debug, 3 = when you have a wrench in your hand, 4 = when you have any component in your hand")
+                .defineInRange("display_mode", 0, 0, 4);
 
         CLIENT_BUILDER.pop();
 
