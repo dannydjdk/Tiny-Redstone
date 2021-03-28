@@ -1,23 +1,23 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
-import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
-import com.dannyandson.tinyredstone.blocks.PanelTile;
-import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
+import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import mcjty.theoneprobe.api.CompoundText;
+import mcjty.theoneprobe.api.IProbeInfo;
+import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.properties.ComparatorMode;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class Comparator implements IPanelCell
-{
+public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     private Integer input1 = 0;
     private Integer input2 = 0;
     private Integer output = 0;
@@ -230,7 +230,7 @@ public class Comparator implements IPanelCell
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked) {
+    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
         this.subtract=!this.subtract;
         return updateOutput();
     }
@@ -257,4 +257,9 @@ public class Comparator implements IPanelCell
         this.subtract = compoundNBT.getBoolean("subtract");
     }
 
+    @Override
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
+        probeInfo.text(CompoundText.createLabelInfo("Mode: ", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString()));
+        return false;
+    }
 }

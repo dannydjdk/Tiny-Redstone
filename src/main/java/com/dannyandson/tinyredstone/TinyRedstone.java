@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
+import com.dannyandson.tinyredstone.compat.CompatHandler;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
@@ -48,6 +49,9 @@ public class TinyRedstone {
 
         //load configs
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
+
+        CompatHandler.register();
     }
 
     public static void registerPanelCell(Class<? extends IPanelCell> iPanelCellClass, Item correspondingItem)

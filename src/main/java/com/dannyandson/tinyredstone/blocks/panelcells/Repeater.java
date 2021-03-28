@@ -1,13 +1,13 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
-import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
-import com.dannyandson.tinyredstone.blocks.PanelTile;
-import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
-import com.dannyandson.tinyredstone.gui.RepeaterCellGUI;
+import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import mcjty.theoneprobe.api.CompoundText;
+import mcjty.theoneprobe.api.IProbeInfo;
+import mcjty.theoneprobe.api.ProbeMode;
+import mcjty.theoneprobe.api.TextStyleClass;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -21,8 +21,7 @@ import net.minecraft.util.math.vector.Vector3f;
 import javax.annotation.Nullable;
 import java.util.LinkedList;
 
-public class Repeater implements IPanelCell
-{
+public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
     private boolean input = false;
     protected boolean output = false;
     private boolean locked = false;
@@ -341,7 +340,7 @@ public class Repeater implements IPanelCell
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked) {
+    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
         if (ticks<8)
         {
             ticks+=2;
@@ -395,5 +394,14 @@ public class Repeater implements IPanelCell
         if (ticks<2)this.ticks=2;
         else if(ticks>200)this.ticks=200;
         else this.ticks=ticks;
+    }
+
+    @Override
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
+        probeInfo.text(CompoundText.createLabelInfo("Delay: ", this.ticks/2 + " ticks"));
+        if(this.locked) {
+            probeInfo.text(CompoundText.create().style(TextStyleClass.INFO).text("Locked"));
+        }
+        return false;
     }
 }

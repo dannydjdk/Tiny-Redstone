@@ -1,12 +1,12 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import com.dannyandson.tinyredstone.blocks.IColorablePanelCell;
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
-import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
-import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.theoneprobe.ProbeInfoHelper;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import mcjty.theoneprobe.api.IProbeInfo;
+import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -18,7 +18,7 @@ import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class TinyBlock implements IPanelCell, IColorablePanelCell {
+public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellProbeInfoProvider {
 
     public static ResourceLocation TEXTURE_TINY_BLOCK = new ResourceLocation("minecraft","block/white_wool");
 
@@ -217,7 +217,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell {
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, Integer segmentClicked) {
+    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
         if(panelTile.getWorld().isRemote)
             TinyBlockGUI.open(panelTile,cellIndex,this);
         return false;
@@ -242,5 +242,11 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell {
         this.strongSignalStrength=compoundNBT.getInt("strong");
         this.weakSignalStrength=compoundNBT.getInt("weak");
         this.color=compoundNBT.getInt("color");
+    }
+
+    @Override
+    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
+        ProbeInfoHelper.addPower(probeInfo, this.weakSignalStrength);
+        return true;
     }
 }

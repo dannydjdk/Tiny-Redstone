@@ -3,7 +3,6 @@ package com.dannyandson.tinyredstone.gui;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IColorablePanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
-import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.TinyBlockColorSync;
 import com.mojang.blaze3d.matrix.MatrixStack;
