@@ -104,12 +104,12 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellProbeInfoProvider {
      * @return integer 0-15 indicating the strengh of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection)
+    public int getWeakRsOutput(Side outputDirection)
     {
         return getStrongRsOutput(outputDirection);
     }
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
+    public int getStrongRsOutput(Side outputDirection) {
         return 15;
     }
 

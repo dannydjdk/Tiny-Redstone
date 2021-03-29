@@ -13,8 +13,6 @@ public interface IPanelCell {
      * @param matrixStack positioned for this cell
      *                    scaled to 1/8 block size such that length and width of cell are 1.0
      *                    starting point is (0,0,0)
-     * @param combinedLight
-     * @param combinedOverlay
      */
     void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha);
 
@@ -36,8 +34,8 @@ public interface IPanelCell {
      * @param outputDirection (1=Front,2=Right,3=Back,4=Left)
      * @return integer 0-15 indicating the strength of redstone signal
      */
-    int getWeakRsOutput(PanelCellSide outputDirection);
-    int getStrongRsOutput(PanelCellSide outputDirection);
+    int getWeakRsOutput(Side outputDirection);
+    int getStrongRsOutput(Side outputDirection);
 
     /**
      * Does the power level drop when transmitting between these cells (such as with redstone dust)?
@@ -83,5 +81,4 @@ public interface IPanelCell {
 
     void readNBT(CompoundNBT compoundNBT);
 
-    enum PanelCellSide {FRONT,RIGHT,BACK,LEFT}
 }

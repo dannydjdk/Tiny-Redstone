@@ -110,12 +110,12 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
      * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection) {
+    public int getWeakRsOutput(Side outputDirection) {
         return (active)?15:0;
     }
 
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
+    public int getStrongRsOutput(Side outputDirection) {
         return 0;
     }
 

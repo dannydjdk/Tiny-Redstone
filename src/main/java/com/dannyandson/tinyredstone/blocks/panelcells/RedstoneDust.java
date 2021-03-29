@@ -153,12 +153,12 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         return input;
     }
 
-    private boolean sideEnabled(PanelCellSide side)
+    private boolean sideEnabled(Side side)
     {
-        return ( side==PanelCellSide.FRONT&&this.frontEnabled ) ||
-                (side==PanelCellSide.RIGHT&&this.rightEnabled) ||
-                (side==PanelCellSide.BACK&&this.backEnabled) ||
-                (side==PanelCellSide.LEFT&&this.leftEnabled);
+        return ( side== Side.FRONT&&this.frontEnabled ) ||
+                (side== Side.RIGHT&&this.rightEnabled) ||
+                (side== Side.BACK&&this.backEnabled) ||
+                (side== Side.LEFT&&this.leftEnabled);
     }
 
     /**
@@ -168,7 +168,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
      * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection) {
+    public int getWeakRsOutput(Side outputDirection) {
         if (sideEnabled(outputDirection))
             return Math.max(this.signalStrength, 0);
         else
@@ -176,7 +176,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
+    public int getStrongRsOutput(Side outputDirection) {
         return getWeakRsOutput(outputDirection);
     }
 

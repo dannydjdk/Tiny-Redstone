@@ -3,30 +3,29 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 public class PanelCellNeighbor {
     private IPanelCell iPanelCell=null;
     private BlockPos blockPos=null;
-    private Direction facingDirection=null;
-    private IPanelCell.PanelCellSide panelCellSide=null;
+    private Side neighborDirection =null;
+    private Side neighborsSide =null;
     private final PanelTile panelTile;
     private Integer index=null;
 
-    PanelCellNeighbor(PanelTile panelTile,IPanelCell panelCell, IPanelCell.PanelCellSide panelCellSide, Direction facing, Integer index)
+    PanelCellNeighbor(PanelTile panelTile, IPanelCell panelCell, Side neighborsSide, Side neighborDirection, Integer index)
     {
         this.iPanelCell=panelCell;
         this.panelTile=panelTile;
-        this.panelCellSide=panelCellSide;
+        this.neighborsSide =neighborsSide;
         this.index=index;
-        this.facingDirection=facing;
+        this.neighborDirection =neighborDirection;
     }
-    PanelCellNeighbor(PanelTile panelTile,BlockPos blockPos,Direction facingDirection)
+    PanelCellNeighbor(PanelTile panelTile,BlockPos blockPos,Side neighborDirection)
     {
         this.blockPos=blockPos;
         this.panelTile=panelTile;
-        this.facingDirection= facingDirection;
+        this.neighborDirection = neighborDirection;
     }
 
     /**
@@ -36,22 +35,22 @@ public class PanelCellNeighbor {
      */
     public int getWeakRsOutput() {
         if (iPanelCell!=null){
-            return iPanelCell.getWeakRsOutput(panelCellSide);
+            return iPanelCell.getWeakRsOutput(neighborsSide);
         }
         else if (blockPos!=null)
         {
-            return panelTile.weakPowerFromNeighbors.get(facingDirection);
+            return panelTile.weakPowerFromNeighbors.get(neighborDirection);
         }
         return 0;
     }
 
     public int getStrongRsOutput() {
         if (iPanelCell!=null){
-            return iPanelCell.getStrongRsOutput(panelCellSide);
+            return iPanelCell.getStrongRsOutput(neighborsSide);
         }
         else if (blockPos!=null)
         {
-            return panelTile.strongPowerFromNeighbors.get(facingDirection);
+            return panelTile.strongPowerFromNeighbors.get(neighborDirection);
         }
         return 0;
     }
@@ -59,14 +58,14 @@ public class PanelCellNeighbor {
     public boolean hasComparatorOverride()
     {
         if (blockPos!=null)
-            return panelTile.comparatorOverrides.containsKey(facingDirection);
+            return panelTile.comparatorOverrides.containsKey(neighborDirection);
         return false;
     }
 
     public int getComparatorOverride()
     {
-        if (blockPos!=null && panelTile.comparatorOverrides.containsKey(facingDirection))
-            return panelTile.comparatorOverrides.get(facingDirection);
+        if (hasComparatorOverride())
+            return panelTile.comparatorOverrides.get(neighborDirection);
         return 0;
     }
 
@@ -85,7 +84,7 @@ public class PanelCellNeighbor {
 
     public boolean isPushable()
     {
-        return panelTile.canExtendTo(this.index,this.facingDirection,0);
+        return panelTile.canExtendTo(this.index,this.neighborDirection,0);
     }
 
     /**
@@ -101,7 +100,7 @@ public class PanelCellNeighbor {
     {
         BlockState blockState = getNeighborBlockState();
         if (blockState!=null)
-            return blockState.canConnectRedstone(panelTile.getWorld(),this.blockPos,facingDirection);
+            return blockState.canConnectRedstone(panelTile.getWorld(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
         if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;
         return false;

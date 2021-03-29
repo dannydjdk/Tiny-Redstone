@@ -255,13 +255,13 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
      * @return integer 0-15 indicating the strengh of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection)
+    public int getWeakRsOutput(Side outputDirection)
     {
         return getStrongRsOutput(outputDirection);
     }
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
-        if (output&&outputDirection==PanelCellSide.FRONT)
+    public int getStrongRsOutput(Side outputDirection) {
+        if (output&&outputDirection== Side.FRONT)
             return 15;
         else
             return 0;

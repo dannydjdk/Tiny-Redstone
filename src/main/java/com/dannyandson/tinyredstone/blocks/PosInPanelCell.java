@@ -1,10 +1,9 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
-
-import static net.minecraft.util.Direction.*;
 
 public class PosInPanelCell extends PanelCellPos {
     private double x;
@@ -55,15 +54,15 @@ public class PosInPanelCell extends PanelCellPos {
             double rotatedX;
             double rotatedZ;
 
-            Direction direction = panelTile.cellDirections.get(panelCellPos.getIndex());
+            Side direction = panelTile.cellDirections.get(panelCellPos.getIndex());
 
-            if (direction == NORTH) {
+            if (direction == Side.FRONT) {
                 rotatedX = z;
                 rotatedZ = 1.0 - x;
-            } else if (direction == EAST) {
+            } else if (direction == Side.RIGHT) {
                 rotatedX = 1.0 - x;
                 rotatedZ = 1.0 - z;
-            } else if (direction == SOUTH){
+            } else if (direction == Side.BACK){
                 rotatedX = 1.0 - z;
                 rotatedZ = x;
             } else {
@@ -71,7 +70,7 @@ public class PosInPanelCell extends PanelCellPos {
                 rotatedZ = z;
             }
 
-            return new PosInPanelCell(panelCellPos.getRow(), panelCellPos.getCell(), rotatedX, rotatedZ);
+            return new PosInPanelCell(panelCellPos.getRow(), panelCellPos.getColumn(), rotatedX, rotatedZ);
         }
         return null;
     }
@@ -79,12 +78,25 @@ public class PosInPanelCell extends PanelCellPos {
     public static PosInPanelCell fromHitVec(PanelTile panelTile, BlockPos pos, Vector3d hitVec) {
         double x = hitVec.x - pos.getX();
         double z = hitVec.z - pos.getZ();
+        Direction facing = panelTile.getBlockState().get(BlockStateProperties.FACING);
+
+        if (facing==Direction.NORTH)
+            z = 1-(hitVec.y-pos.getY());
+        else if (facing==Direction.EAST)
+            x = hitVec.y-pos.getY();
+        else if (facing==Direction.SOUTH)
+            z = hitVec.y-pos.getY();
+        else if (facing==Direction.WEST)
+            x = 1-(hitVec.y-pos.getY());
+        else if (facing==Direction.UP)
+            z = 1-z;
+
 
         PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(x, z);
         if(panelCellPos == null) return null;
 
         x = (x - (panelCellPos.getRow()/8d))*8d;
-        z = (z - (panelCellPos.getCell()/8d))*8d;
+        z = (z - (panelCellPos.getColumn()/8d))*8d;
 
         return fromCoordinates(panelTile, panelCellPos, x, z);
     }

@@ -152,13 +152,13 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
      * @return integer 0-15 indicating the strengh of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection)
+    public int getWeakRsOutput(Side outputDirection)
     {
         return getStrongRsOutput(outputDirection);
     }
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
-        if (outputDirection==PanelCellSide.FRONT && this.output>0)
+    public int getStrongRsOutput(Side outputDirection) {
+        if (outputDirection== Side.FRONT && this.output>0)
             return this.output;
 
         return 0;

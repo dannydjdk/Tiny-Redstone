@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
-      "model": "tinyredstone:block/redstone_panel"
-    }
+    "facing=up": {"model": "tinyredstone:block/redstone_panel","x": 180},
+    "facing=north": {"model": "tinyredstone:block/redstone_panel", "x": -90},
+    "facing=east": {"model": "tinyredstone:block/redstone_panel", "x": 90, "y": -90},
+    "facing=south": {"model": "tinyredstone:block/redstone_panel","x": 90},
+    "facing=west": {"model": "tinyredstone:block/redstone_panel", "x": 90, "y": 90},
+    "facing=down": {"model": "tinyredstone:block/redstone_panel"}
   }
 }

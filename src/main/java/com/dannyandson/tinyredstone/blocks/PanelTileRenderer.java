@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
@@ -35,6 +36,31 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
     @Override
     public void render(PanelTile tileEntity, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
 
+        matrixStack.push();
+
+        switch (tileEntity.getBlockState().get(BlockStateProperties.FACING))
+        {
+            case UP:
+                matrixStack.rotate(Vector3f.XP.rotationDegrees(180));
+                matrixStack.translate(0,-1,-1);
+                break;
+            case NORTH:
+                matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+                matrixStack.translate(0,0,-1);
+                break;
+            case EAST:
+                matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
+                matrixStack.translate(0,-1,0);
+                break;
+            case SOUTH:
+                matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+                matrixStack.translate(0,-1,0);
+                break;
+            case WEST:
+                matrixStack.rotate(Vector3f.ZP.rotationDegrees(-90));
+                matrixStack.translate(-1,0,0);
+                break;
+        }
         if (tileEntity.isCovered())
         {
             matrixStack.push();
@@ -45,7 +71,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             for (Integer i = 0; i < 64; i++) {
                 if (tileEntity.cells.containsKey(i)) {
                     IPanelCell panelCell = tileEntity.cells.get(i);
-                    Direction cellDirection = tileEntity.cellDirections.get(i);
+                    Side cellDirection = tileEntity.cellDirections.get(i);
 
                     renderCell(matrixStack, i, panelCell, cellDirection, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
                 }
@@ -67,9 +93,11 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             matrixStack.pop();
         }
 
+        matrixStack.pop();
+
     }
 
-    private void renderCell(MatrixStack matrixStack, Integer index, IPanelCell panelCell, Direction cellDirection, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
+    private void renderCell(MatrixStack matrixStack, Integer index, IPanelCell panelCell, Side cellDirection, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
     {
         int row = Math.round((index.floatValue()/8f)-0.5f);
         int cell = index%8;
@@ -79,17 +107,17 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
         matrixStack.translate(cellSize*(double)row, 0.125, cellSize*(cell));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
 
-        if (cellDirection== Direction.WEST)
+        if (cellDirection== Side.LEFT)
         {
             matrixStack.translate(0,-cellSize,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
         }
-        else if (cellDirection== Direction.SOUTH)
+        else if (cellDirection== Side.BACK)
         {
             matrixStack.translate(cellSize,-cellSize,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
         }
-        else if (cellDirection== Direction.EAST)
+        else if (cellDirection== Side.RIGHT)
         {
             matrixStack.translate(cellSize,0,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(270));

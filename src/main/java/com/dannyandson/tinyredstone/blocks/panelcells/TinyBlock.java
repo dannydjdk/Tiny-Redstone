@@ -149,12 +149,12 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellPro
      * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection) {
+    public int getWeakRsOutput(Side outputDirection) {
         return this.weakSignalStrength;
     }
 
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
+    public int getStrongRsOutput(Side outputDirection) {
         return this.strongSignalStrength;
     }
 

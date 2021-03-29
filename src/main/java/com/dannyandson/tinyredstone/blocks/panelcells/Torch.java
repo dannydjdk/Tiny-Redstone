@@ -42,7 +42,7 @@ public class Torch implements IPanelCell
         TextureAtlasSprite sprite_torch;
         TextureAtlasSprite sprite_torch_top;
 
-        if (this.getWeakRsOutput(PanelCellSide.FRONT)>0) {
+        if (this.getWeakRsOutput(Side.FRONT)>0) {
             sprite_torch = RenderHelper.getSprite(TEXTURE_TORCH_ON);
             sprite_torch_top = RenderHelper.getSprite(TEXTURE_TORCH_TOP_ON);
         }
@@ -121,13 +121,13 @@ public class Torch implements IPanelCell
      * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection)
+    public int getWeakRsOutput(Side outputDirection)
     {
         return getStrongRsOutput(outputDirection);
     }
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
-        if (outputDirection!=PanelCellSide.BACK && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
+    public int getStrongRsOutput(Side outputDirection) {
+        if (outputDirection!= Side.BACK && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
             return 15;
         else
             return 0;
@@ -170,7 +170,7 @@ public class Torch implements IPanelCell
      */
     @Override
     public int lightOutput() {
-        return (Config.TORCH_LIGHT.get() && this.getWeakRsOutput(PanelCellSide.FRONT)>0)?1:0;
+        return (Config.TORCH_LIGHT.get() && this.getWeakRsOutput(Side.FRONT)>0)?1:0;
     }
 
     /**

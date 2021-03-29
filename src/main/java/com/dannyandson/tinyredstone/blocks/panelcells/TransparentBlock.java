@@ -117,12 +117,12 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
      * @return integer 0-15 indicating the strengh of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection)
+    public int getWeakRsOutput(Side outputDirection)
     {
         return 0;
     }
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
+    public int getStrongRsOutput(Side outputDirection) {
         return 0;
     }
 

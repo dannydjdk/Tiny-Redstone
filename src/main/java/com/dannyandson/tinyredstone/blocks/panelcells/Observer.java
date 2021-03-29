@@ -112,12 +112,12 @@ public class Observer implements IPanelCell, IObservingPanelCell {
      * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection) {
-        return (outputDirection==PanelCellSide.BACK && output)?15:0;
+    public int getWeakRsOutput(Side outputDirection) {
+        return (outputDirection== Side.BACK && output)?15:0;
     }
 
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
+    public int getStrongRsOutput(Side outputDirection) {
         return getWeakRsOutput(outputDirection);
     }
 

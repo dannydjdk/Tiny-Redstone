@@ -1,10 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
-import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
-import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
-import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
@@ -215,12 +212,12 @@ public class Piston implements IPanelCell {
      * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
-    public int getWeakRsOutput(PanelCellSide outputDirection) {
+    public int getWeakRsOutput(Side outputDirection) {
         return 0;
     }
 
     @Override
-    public int getStrongRsOutput(PanelCellSide outputDirection) {
+    public int getStrongRsOutput(Side outputDirection) {
         return 0;
     }
 

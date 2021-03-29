@@ -37,15 +37,32 @@ import static net.minecraft.util.Direction.*;
 
 public class PanelBlock extends Block {
 
-    private static final Vector3d BASE_MIN_CORNER = new Vector3d(0.0, 0.0, 0.0);
-    private static final Vector3d BASE_MAX_CORNER = new Vector3d(16.0, 2.0, 16.0);
-    private static final VoxelShape BASE = Block.makeCuboidShape(BASE_MIN_CORNER.getX(), BASE_MIN_CORNER.getY(), BASE_MIN_CORNER.getZ(),
-            BASE_MAX_CORNER.getX(), BASE_MAX_CORNER.getY(), BASE_MAX_CORNER.getZ());
+    private static final Map<Direction,VoxelShape> BASE = new HashMap<>();
+    static{
+        BASE.put(UP ,
+                Block.makeCuboidShape(0, 16, 0,16, 14, 16)
+        );
+        BASE.put(DOWN ,
+                Block.makeCuboidShape(0,0,0,16,2,16)
+        );
+        BASE.put(NORTH ,
+                Block.makeCuboidShape(0, 0, 0,16, 16, 2)
+        );
+        BASE.put(EAST ,
+                Block.makeCuboidShape(16,0,0,14,16,16)
+        );
+        BASE.put(SOUTH ,
+                Block.makeCuboidShape(0,0,16,16,16,14)
+        );
+        BASE.put(WEST ,
+                Block.makeCuboidShape(0,0,0,2,16,16)
+        );
+    }
 
-    private static Map<Item, Class<? extends IPanelCell>> itemPanelCellMap = new HashMap<>();
-    private static Map<Class<? extends IPanelCell>, Item> panelCellItemMap = new HashMap<>();
-    private static Map<Item, Class<? extends IPanelCover>> itemPanelCoverMap = new HashMap<>();
-    private static Map<Class<? extends IPanelCover>, Item> panelCoverItemMap = new HashMap<>();
+    private static final Map<Item, Class<? extends IPanelCell>> itemPanelCellMap = new HashMap<>();
+    private static final Map<Class<? extends IPanelCell>, Item> panelCellItemMap = new HashMap<>();
+    private static final Map<Item, Class<? extends IPanelCover>> itemPanelCoverMap = new HashMap<>();
+    private static final Map<Class<? extends IPanelCover>, Item> panelCoverItemMap = new HashMap<>();
 
     public PanelBlock() {
         super(Properties.create(Material.ROCK)
@@ -83,25 +100,25 @@ public class PanelBlock extends Block {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return getDefaultState().with(BlockStateProperties.FACING, context.getNearestLookingDirection());
+        return getDefaultState().with(BlockStateProperties.FACING, context.getFace().getOpposite());
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public VoxelShape getShape(BlockState state, IBlockReader source, BlockPos pos, ISelectionContext selectionContext) {
-        return BASE;
+        return BASE.get(state.get(BlockStateProperties.FACING));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-        return BASE;
+        return BASE.get(state.get(BlockStateProperties.FACING));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
-        return BASE;
+        return BASE.get(state.get(BlockStateProperties.FACING));
     }
 
     @SuppressWarnings("deprecation")
@@ -188,7 +205,7 @@ public class PanelBlock extends Block {
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
 
-            Integer power = panelTile.weakPowerToNeighbors.get(directionFromNeighborToThis.getOpposite());
+            Integer power = panelTile.weakPowerToNeighbors.get(panelTile.getSideFromDirection(directionFromNeighborToThis.getOpposite()));
 
             return (power == null) ? 0 : power;
 
@@ -213,7 +230,7 @@ public class PanelBlock extends Block {
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
 
-            Integer power = panelTile.strongPowerToNeighbors.get(directionFromNeighborToThis.getOpposite());
+            Integer power = panelTile.strongPowerToNeighbors.get(panelTile.getSideFromDirection(directionFromNeighborToThis.getOpposite()));
 
             return (power == null) ? 0 : power;
         }
@@ -223,19 +240,19 @@ public class PanelBlock extends Block {
     @Override
     public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
         super.onBlockPlacedBy(world, pos, state, placer, stack);
-        Direction[] directions = new Direction[]{WEST, EAST, NORTH, SOUTH};
         TileEntity tileentity = world.getTileEntity(pos);
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
 
-            for (Direction whichFace : directions) {
+            for (Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT}) {
+                Direction whichFace = panelTile.getDirectionFromSide(panelSide);
                 BlockPos neighborPos = pos.offset(whichFace);
 
                 int powerLevel = world.getRedstonePower(neighborPos, whichFace.getOpposite());
                 int strongPowerLevel = world.getStrongPower(neighborPos, whichFace.getOpposite());
 
-                panelTile.weakPowerFromNeighbors.put(whichFace, powerLevel);
-                panelTile.strongPowerFromNeighbors.put(whichFace, strongPowerLevel);
+                panelTile.weakPowerFromNeighbors.put(panelSide, powerLevel);
+                panelTile.strongPowerFromNeighbors.put(panelSide, strongPowerLevel);
 
             }
         }
@@ -258,6 +275,10 @@ public class PanelBlock extends Block {
             direction = WEST;
         else if (pos.north().equals(neighborPos))
             direction = NORTH;
+        else if (pos.up().equals(neighborPos))
+            direction = UP;
+        else if (pos.down().equals(neighborPos))
+            direction = DOWN;
         else
             return;
 
@@ -266,6 +287,8 @@ public class PanelBlock extends Block {
             boolean change = false;
 
             PanelTile panelTile = (PanelTile) tileentity;
+            Side side = panelTile.getSideFromDirection(direction);
+
             if(panelTile.pingOutwardObservers(direction))
                 change=true;
 
@@ -274,11 +297,11 @@ public class PanelBlock extends Block {
 
             BlockState neighborState = world.getBlockState(pos.offset(direction));
             if (neighborState.hasComparatorInputOverride() && !world.isRemote) {
-                panelTile.comparatorOverrides.put(direction, neighborState.getComparatorInputOverride(world, pos.offset(direction)));
+                panelTile.comparatorOverrides.put(side, neighborState.getComparatorInputOverride(world, pos.offset(direction)));
             }
 
-            panelTile.weakPowerFromNeighbors.put(direction, powerLevel);
-            panelTile.strongPowerFromNeighbors.put(direction, strongPowerLevel);
+            panelTile.weakPowerFromNeighbors.put(side, powerLevel);
+            panelTile.strongPowerFromNeighbors.put(side, strongPowerLevel);
             if(panelTile.updateSide(direction))
                 change=true;
 
@@ -366,7 +389,7 @@ public class PanelBlock extends Block {
                     {
                         //Allows testing of crash management in Dev environment.
                         throw new Exception("Test Exception");
-                    } else if(result.getFace() == Direction.UP) {
+                    } else if(result.getFace() == state.get(BlockStateProperties.FACING).getOpposite()) {
                         if(itemPanelCoverMap.containsKey(heldItem) && !panelTile.isCovered()){
                             try {
                                 Object panelCoverObject = itemPanelCoverMap.get(heldItem).getConstructors()[0].newInstance();
@@ -407,9 +430,9 @@ public class PanelBlock extends Block {
 
                                     if (panelCell instanceof IPanelCell) {
                                         //place the cell on the panel
-                                        panelTile.cellDirections.put(cellIndex, player.getHorizontalFacing());
+                                        Direction playerFacing= panelTile.getPlayerDirectionFacing(player);
+                                        panelTile.cellDirections.put(cellIndex, panelTile.getSideFromDirection(playerFacing));
                                         panelTile.cells.put(cellIndex, (IPanelCell) panelCell);
-
                                         if (!((IPanelCell) panelCell).isIndependentState()) {
                                             panelTile.updateCell(cellIndex);
                                         }
@@ -470,7 +493,7 @@ public class PanelBlock extends Block {
                 RayTraceContext.FluidMode.NONE,
                 player
         ));
-        if ((heldItem==Registration.REDSTONE_WRENCH.get() || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)) && blockRayTraceResult.getFace() == UP)
+        if ((heldItem==Registration.REDSTONE_WRENCH.get() || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)) && blockRayTraceResult.getFace() == state.get(BlockStateProperties.FACING).getOpposite())
         {
             TileEntity te = world.getTileEntity(pos);
             if (te instanceof PanelTile) {
@@ -484,8 +507,7 @@ public class PanelBlock extends Block {
                     }
                     else {
                         BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
-                        PanelCellPos panelCellPos = PanelCellPos.fromHitVec(pos, result.getHitVec());
-
+                        PanelCellPos panelCellPos = PanelCellPos.fromHitVec(pos,state.get(BlockStateProperties.FACING), result.getHitVec());
 
                         if (panelCellPos != null) {
                             int cellIndex = panelCellPos.getIndex();

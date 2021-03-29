@@ -11,11 +11,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ITagCollection;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -73,7 +73,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
 
-        if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == Direction.UP) {
+        if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == blockState.get(BlockStateProperties.FACING).getOpposite()) {
             if(!show(probeMode, playerEntity)) return false;
 
             PanelTile panelTile = (PanelTile) tileEntity;
@@ -81,7 +81,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
             if(!panelTile.isCovered() && block instanceof PanelBlock) {
                 PanelBlock panelBlock = (PanelBlock) block;
-                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(pos, probeHitData.getHitVec());
+                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(pos,blockState.get(BlockStateProperties.FACING),probeHitData.getHitVec());
                 int cellIndex = panelCellPos.getIndex();
 
                 IPanelCell panelCell = panelTile.cells.get(cellIndex);
@@ -114,7 +114,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
     public void addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PlayerEntity playerEntity, World world, BlockState blockState, IProbeHitData probeHitData) {
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
-        if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == Direction.UP) {
+        if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == blockState.get(BlockStateProperties.FACING).getOpposite()) {
             if(!show(probeMode, playerEntity)) return;
 
             PanelTile panelTile = (PanelTile) tileEntity;
@@ -131,7 +131,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                             .text(CompoundText.createLabelInfo("X: ", posInPanelCell.getX()))
                             .text(CompoundText.createLabelInfo("Z: ", posInPanelCell.getZ()))
                             .text(CompoundText.createLabelInfo("Row: ", posInPanelCell.getRow()))
-                            .text(CompoundText.createLabelInfo("Cell: ", posInPanelCell.getCell()))
+                            .text(CompoundText.createLabelInfo("Column: ", posInPanelCell.getColumn()))
                             .text(CompoundText.createLabelInfo("Index: ", cellIndex))
                             .text(CompoundText.createLabelInfo("Segment: ", segment.toString()));
                 }
@@ -147,48 +147,48 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                         int power = 0;
                         switch (segment) {
                             case BACK:
-                                power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
+                                power = panelCell.getWeakRsOutput(Side.BACK);
                                 break;
                             case LEFT:
-                                power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
+                                power = panelCell.getWeakRsOutput(Side.LEFT);
                                 break;
                             case FRONT:
-                                power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
+                                power = panelCell.getWeakRsOutput(Side.FRONT);
                                 break;
                             case RIGHT:
-                                power = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                                power = panelCell.getWeakRsOutput(Side.RIGHT);
                                 break;
                             case CENTER: {
-                                int back = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
-                                int left = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
-                                int front = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
-                                int right = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                                int back = panelCell.getWeakRsOutput(Side.BACK);
+                                int left = panelCell.getWeakRsOutput(Side.LEFT);
+                                int front = panelCell.getWeakRsOutput(Side.FRONT);
+                                int right = panelCell.getWeakRsOutput(Side.RIGHT);
                                 if (back == left && left == front && front == right) {
                                     power = back;
                                 }
                                 break;
                             }
                             case FRONT_RIGHT: {
-                                int front = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
-                                int right = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                                int front = panelCell.getWeakRsOutput(Side.FRONT);
+                                int right = panelCell.getWeakRsOutput(Side.RIGHT);
                                 if (front == right) power = front;
                                 break;
                             }
                             case FRONT_LEFT: {
-                                int front = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.FRONT);
-                                int left = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
+                                int front = panelCell.getWeakRsOutput(Side.FRONT);
+                                int left = panelCell.getWeakRsOutput(Side.LEFT);
                                 if (front == left) power = front;
                                 break;
                             }
                             case BACK_RIGHT: {
-                                int back = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
-                                int right = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.RIGHT);
+                                int back = panelCell.getWeakRsOutput(Side.BACK);
+                                int right = panelCell.getWeakRsOutput(Side.RIGHT);
                                 if (back == right) power = back;
                                 break;
                             }
                             case BACK_LEFT: {
-                                int back = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.BACK);
-                                int left = panelCell.getWeakRsOutput(IPanelCell.PanelCellSide.LEFT);
+                                int back = panelCell.getWeakRsOutput(Side.BACK);
+                                int left = panelCell.getWeakRsOutput(Side.LEFT);
                                 if (back == left) power = back;
                                 break;
                             }
