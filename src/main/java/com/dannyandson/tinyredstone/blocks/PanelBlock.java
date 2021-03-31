@@ -3,9 +3,9 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -211,34 +211,11 @@ public class PanelBlock extends Block {
         return 0;
     }
 
-    @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-        super.onBlockPlacedBy(world, pos, state, placer, stack);
-        TileEntity tileentity = world.getTileEntity(pos);
-        if (tileentity instanceof PanelTile) {
-            PanelTile panelTile = (PanelTile) tileentity;
-
-            for (Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT}) {
-                Direction whichFace = panelTile.getDirectionFromSide(panelSide);
-                BlockPos neighborPos = pos.offset(whichFace);
-
-                int powerLevel = world.getRedstonePower(neighborPos, whichFace.getOpposite());
-                int strongPowerLevel = world.getStrongPower(neighborPos, whichFace.getOpposite());
-
-                panelTile.weakPowerFromNeighbors.put(panelSide, powerLevel);
-                panelTile.strongPowerFromNeighbors.put(panelSide, strongPowerLevel);
-
-            }
-        }
-    }
-
-
     // Called when a neighbouring block changes.
     // Only called on the server side.
     @Override
     @SuppressWarnings("deprecation")
     public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
-
 
         Direction direction;
         if (pos.east().equals(neighborPos))
@@ -258,35 +235,35 @@ public class PanelBlock extends Block {
 
         TileEntity tileentity = world.getTileEntity(pos);
         if (tileentity instanceof PanelTile) {
-            boolean change = false;
+                boolean change = false;
+                PanelTile panelTile = (PanelTile) tileentity;
+            try {
 
-            PanelTile panelTile = (PanelTile) tileentity;
-            Side side = panelTile.getSideFromDirection(direction);
+                Side side = panelTile.getSideFromDirection(direction);
+                //side would be null if neighbor is above or below panel, and therefore irrelevant
+                if (side != null) {
 
-            if(panelTile.pingOutwardObservers(direction))
-                change=true;
+                    if (panelTile.pingOutwardObservers(direction))
+                        change = true;
 
-            int powerLevel = world.getRedstonePower(neighborPos, direction);
-            int strongPowerLevel = world.getStrongPower(neighborPos, direction);
+                    BlockState neighborState = world.getBlockState(pos.offset(direction));
+                    if (neighborState.hasComparatorInputOverride() && !world.isRemote) {
+                        panelTile.comparatorOverrides.put(side, neighborState.getComparatorInputOverride(world, pos.offset(direction)));
+                    }
 
-            BlockState neighborState = world.getBlockState(pos.offset(direction));
-            if (neighborState.hasComparatorInputOverride() && !world.isRemote) {
-                panelTile.comparatorOverrides.put(side, neighborState.getComparatorInputOverride(world, pos.offset(direction)));
-            }
+                    if (panelTile.updateSide(direction))
+                        change = true;
 
-            panelTile.weakPowerFromNeighbors.put(side, powerLevel);
-            panelTile.strongPowerFromNeighbors.put(side, strongPowerLevel);
-            if(panelTile.updateSide(direction))
-                change=true;
-
-
-            if (panelTile.updateOutputs()) {
-                if (!world.isRemote)
-                    panelTile.markDirty();
-            }
-            if (change)
-            {
-                panelTile.sync();
+                    if (panelTile.updateOutputs()) {
+                        if (!world.isRemote)
+                            panelTile.markDirty();
+                    }
+                    if (change) {
+                        panelTile.sync();
+                    }
+                }
+            } catch (Exception e) {
+                panelTile.handleCrash(e);
             }
         }
     }

@@ -7,13 +7,10 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -31,63 +28,30 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
-        //TODO render these as actually transparent
 
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_TRANSPARENT_BLOCK);
+        IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
+        TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
 
 
 
         matrixStack.translate(0,0,1.0);
-
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-
-    }
-
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        //renderer.addVertex(x,y,z,
-         //       ColorHelper.PackedColor.getRed(color)/255f,ColorHelper.PackedColor.getGreen(color)/255f, ColorHelper.PackedColor.getBlue(color)/255f, ColorHelper.PackedColor.getAlpha(color)/255f
-         //       ,u,v,combinedOverlayIn,combinedLightIn,1,0,0);
-
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(ColorHelper.PackedColor.getRed(color),ColorHelper.PackedColor.getGreen(color), ColorHelper.PackedColor.getBlue(color), (int)(alpha*255f))
-                .tex(u, v)
-                .overlay(combinedOverlayIn)
-                .lightmap(combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
-
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
     }
 
@@ -110,8 +74,8 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     /**
      * Gets redstone output of the given side of the cell
      *
-     * @param outputDirection
-     * @return integer 0-15 indicating the strengh of redstone signal
+     * @param outputDirection side of the panel toward which output is being queried
+     * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
     public int getWeakRsOutput(Side outputDirection)

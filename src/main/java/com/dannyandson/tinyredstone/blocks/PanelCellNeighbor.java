@@ -39,7 +39,7 @@ public class PanelCellNeighbor {
         }
         else if (blockPos!=null)
         {
-            return panelTile.weakPowerFromNeighbors.get(neighborDirection);
+            return panelTile.getWorld().getRedstonePower(blockPos,panelTile.getDirectionFromSide(neighborDirection));
         }
         return 0;
     }
@@ -50,7 +50,7 @@ public class PanelCellNeighbor {
         }
         else if (blockPos!=null)
         {
-            return panelTile.strongPowerFromNeighbors.get(neighborDirection);
+            return panelTile.getWorld().getStrongPower(blockPos,panelTile.getDirectionFromSide(neighborDirection));
         }
         return 0;
     }

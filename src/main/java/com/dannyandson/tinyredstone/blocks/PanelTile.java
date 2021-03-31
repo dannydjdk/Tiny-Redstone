@@ -39,8 +39,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     //panel data (saved)
     private Map<Integer, IPanelCell> cells = new HashMap<>();
     private Map<Integer, Side> cellDirections = new HashMap<>();
-    protected Map<Side, Integer> weakPowerFromNeighbors = new HashMap<>();
-    protected Map<Side, Integer> strongPowerFromNeighbors = new HashMap<>();
     protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> comparatorOverrides = new HashMap<>();
@@ -132,22 +130,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     @Override
     public CompoundNBT write(CompoundNBT parentNBTTagCompound) {
         try {
-            if (this.strongPowerFromNeighbors.size()==4) {
-                CompoundNBT strongPowerFromNeighbors = new CompoundNBT();
-                strongPowerFromNeighbors.putInt(Side.FRONT.ordinal() + "", this.strongPowerFromNeighbors.get(Side.FRONT));
-                strongPowerFromNeighbors.putInt(Side.RIGHT.ordinal() + "", this.strongPowerFromNeighbors.get(Side.RIGHT));
-                strongPowerFromNeighbors.putInt(Side.BACK.ordinal() + "", this.strongPowerFromNeighbors.get(Side.BACK));
-                strongPowerFromNeighbors.putInt(Side.LEFT.ordinal() + "", this.strongPowerFromNeighbors.get(Side.LEFT));
-                parentNBTTagCompound.put("strong_power_incoming", strongPowerFromNeighbors);
-            }
-            if (this.weakPowerFromNeighbors.size()==4) {
-                CompoundNBT weakPowerFromNeighbors = new CompoundNBT();
-                weakPowerFromNeighbors.putInt(Side.FRONT.ordinal() + "", this.weakPowerFromNeighbors.get(Side.FRONT));
-                weakPowerFromNeighbors.putInt(Side.RIGHT.ordinal() + "", this.weakPowerFromNeighbors.get(Side.RIGHT));
-                weakPowerFromNeighbors.putInt(Side.BACK.ordinal() + "",  this.weakPowerFromNeighbors.get(Side.BACK));
-                weakPowerFromNeighbors.putInt(Side.LEFT.ordinal() + "",  this.weakPowerFromNeighbors.get(Side.LEFT));
-                parentNBTTagCompound.put("weak_power_incoming", weakPowerFromNeighbors);
-            }
             if (this.strongPowerToNeighbors.size()==4) {
                 CompoundNBT strongPowerToNeighbors = new CompoundNBT();
                 strongPowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.strongPowerToNeighbors.get(Side.FRONT));
@@ -191,21 +173,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
 
         this.loadCellsFromNBT(parentNBTTagCompound);
-
-        CompoundNBT strongPowerFromNeighbors = parentNBTTagCompound.getCompound("strong_power_incoming");
-        if (!strongPowerFromNeighbors.isEmpty()) {
-            this.strongPowerFromNeighbors.put(Side.FRONT,   strongPowerFromNeighbors.getInt(Side.FRONT.ordinal() + ""));
-            this.strongPowerFromNeighbors.put(Side.RIGHT,   strongPowerFromNeighbors.getInt(Side.RIGHT.ordinal() + ""));
-            this.strongPowerFromNeighbors.put(Side.BACK,    strongPowerFromNeighbors.getInt(Side.BACK.ordinal() + ""));
-            this.strongPowerFromNeighbors.put(Side.LEFT,    strongPowerFromNeighbors.getInt(Side.LEFT.ordinal() + ""));
-        }
-        CompoundNBT weakPowerFromNeighbors = parentNBTTagCompound.getCompound("weak_power_incoming");
-        if (!weakPowerFromNeighbors.isEmpty()) {
-            this.weakPowerFromNeighbors.put(Side.FRONT, weakPowerFromNeighbors.getInt(Side.FRONT.ordinal() + ""));
-            this.weakPowerFromNeighbors.put(Side.RIGHT, weakPowerFromNeighbors.getInt(Side.RIGHT.ordinal() + ""));
-            this.weakPowerFromNeighbors.put(Side.BACK,  weakPowerFromNeighbors.getInt(Side.BACK.ordinal()  + ""));
-            this.weakPowerFromNeighbors.put(Side.LEFT,  weakPowerFromNeighbors.getInt(Side.LEFT.ordinal()  + ""));
-        }
 
         CompoundNBT strongPowerToNeighbors = parentNBTTagCompound.getCompound("strong_power_outgoing");
         if (!strongPowerToNeighbors.isEmpty()) {
@@ -286,6 +253,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         else if (direction==Direction.EAST) this.cellDirections.put(i,Side.RIGHT);
                         else if (direction==Direction.SOUTH) this.cellDirections.put(i,Side.BACK);
                         else if (direction==Direction.WEST) this.cellDirections.put(i,Side.LEFT);
+
+                        //TODO for panels placed before the direction update, set facing to DOWN
 
                     }
                     else
