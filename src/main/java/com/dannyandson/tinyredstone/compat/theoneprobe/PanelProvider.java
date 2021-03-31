@@ -81,10 +81,9 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
             if(!panelTile.isCovered() && block instanceof PanelBlock) {
                 PanelBlock panelBlock = (PanelBlock) block;
-                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(pos,blockState.get(BlockStateProperties.FACING),probeHitData.getHitVec());
-                int cellIndex = panelCellPos.getIndex();
+                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.get(BlockStateProperties.FACING),probeHitData.getHitVec());
 
-                IPanelCell panelCell = panelTile.cells.get(cellIndex);
+                IPanelCell panelCell = panelCellPos.getIPanelCell();
                 if(panelCell != null) {
                     String modName = Tools.getModName(block);
                     IProbeConfig config = Config.getRealConfig();
@@ -122,11 +121,11 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
             if(!panelTile.isCovered()) {
 
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, probeHitData.getHitVec());
-                int cellIndex = posInPanelCell.getIndex();
 
                 PanelCellSegment segment = posInPanelCell.getSegment();
 
                 if (probeMode == ProbeMode.DEBUG) {
+                    int cellIndex = posInPanelCell.getIndex();
                     probeInfo.vertical(new LayoutStyle().borderColor(0xff44ff44).spacing(2))
                             .text(CompoundText.createLabelInfo("X: ", posInPanelCell.getX()))
                             .text(CompoundText.createLabelInfo("Z: ", posInPanelCell.getZ()))
@@ -136,7 +135,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                             .text(CompoundText.createLabelInfo("Segment: ", segment.toString()));
                 }
 
-                IPanelCell panelCell = panelTile.cells.get(cellIndex);
+                IPanelCell panelCell = posInPanelCell.getIPanelCell();
                 if (panelCell != null) {
                     boolean handled = false;
 

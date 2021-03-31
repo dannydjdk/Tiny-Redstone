@@ -8,17 +8,17 @@ import net.minecraft.util.math.BlockPos;
 public class PanelCellNeighbor {
     private IPanelCell iPanelCell=null;
     private BlockPos blockPos=null;
-    private Side neighborDirection =null;
+    private final Side neighborDirection;
     private Side neighborsSide =null;
     private final PanelTile panelTile;
-    private Integer index=null;
+    private PanelCellPos cellPos;
 
-    PanelCellNeighbor(PanelTile panelTile, IPanelCell panelCell, Side neighborsSide, Side neighborDirection, Integer index)
+    PanelCellNeighbor(PanelCellPos cellPos, IPanelCell panelCell, Side neighborsSide, Side neighborDirection)
     {
         this.iPanelCell=panelCell;
-        this.panelTile=panelTile;
+        this.panelTile= cellPos.getPanelTile();
         this.neighborsSide =neighborsSide;
-        this.index=index;
+        this.cellPos=cellPos;
         this.neighborDirection =neighborDirection;
     }
     PanelCellNeighbor(PanelTile panelTile,BlockPos blockPos,Side neighborDirection)
@@ -84,7 +84,7 @@ public class PanelCellNeighbor {
 
     public boolean isPushable()
     {
-        return panelTile.canExtendTo(this.index,this.neighborDirection,0);
+        return panelTile.canExtendTo(this.cellPos,this.neighborDirection,0);
     }
 
     /**
@@ -93,7 +93,7 @@ public class PanelCellNeighbor {
      */
     public boolean isOnPanel()
     {
-        return this.index!=null;
+        return this.cellPos!=null;
     }
 
     public boolean canConnectRedstone()

@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.Repeater;
 import net.minecraft.network.PacketBuffer;
@@ -42,7 +43,8 @@ public class RepeaterTickSync {
             TileEntity te =  ctx.get().getSender().getServerWorld().getTileEntity(this.pos);
             if (te instanceof PanelTile)
             {
-                IPanelCell cell = ((PanelTile)te).cells.get(this.cellIndex);
+                PanelCellPos cellPos = PanelCellPos.fromIndex((PanelTile) te,this.cellIndex);
+                IPanelCell cell = cellPos.getIPanelCell();
                 if (cell instanceof Repeater)
                 {
                     ((Repeater)cell).setTicks(this.ticks);

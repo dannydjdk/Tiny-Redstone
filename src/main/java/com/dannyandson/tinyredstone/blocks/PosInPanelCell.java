@@ -6,11 +6,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class PosInPanelCell extends PanelCellPos {
-    private double x;
-    private double z;
+    private final double x;
+    private final double z;
 
-    protected PosInPanelCell(int row, int cell, double x, double z) {
-        super(row, cell);
+    protected PosInPanelCell(PanelTile panelTile, int row, int cell, double x, double z) {
+        super(panelTile,row, cell);
         this.x = x;
         this.z = z;
     }
@@ -54,7 +54,7 @@ public class PosInPanelCell extends PanelCellPos {
             double rotatedX;
             double rotatedZ;
 
-            Side direction = panelTile.cellDirections.get(panelCellPos.getIndex());
+            Side direction = panelCellPos.getCellFacing();
 
             if (direction == Side.FRONT) {
                 rotatedX = z;
@@ -70,7 +70,7 @@ public class PosInPanelCell extends PanelCellPos {
                 rotatedZ = z;
             }
 
-            return new PosInPanelCell(panelCellPos.getRow(), panelCellPos.getColumn(), rotatedX, rotatedZ);
+            return new PosInPanelCell(panelTile, panelCellPos.getRow(), panelCellPos.getColumn(), rotatedX, rotatedZ);
         }
         return null;
     }
@@ -92,7 +92,7 @@ public class PosInPanelCell extends PanelCellPos {
             z = 1-z;
 
 
-        PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(x, z);
+        PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(panelTile, x, z);
         if(panelCellPos == null) return null;
 
         x = (x - (panelCellPos.getRow()/8d))*8d;

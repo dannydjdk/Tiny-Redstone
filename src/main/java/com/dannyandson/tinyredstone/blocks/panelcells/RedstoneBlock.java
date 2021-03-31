@@ -114,16 +114,6 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     /**
-     * Does the power level drop when transmitting between these cells (such as with redstone dust)?
-     *
-     * @return true if power level should drop, false if not
-     */
-    @Override
-    public boolean powerDrops() {
-        return false;
-    }
-
-    /**
      * Is this a component that does not change state based on neighbors (such as a redstone block, or potentiometer)?
      *
      * @return true if this cell's state is unaffected by neighbors
@@ -141,38 +131,6 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellProbeInfoProvider {
     @Override
     public boolean isPushable() {
         return true;
-    }
-
-    /**
-     * If this cell outputs light, return the level here. Otherwise, return 0.
-     *
-     * @return Light level to output 0-15
-     */
-    @Override
-    public int lightOutput() {
-        return 0;
-    }
-
-    /**
-     * Called at the beginning of each tick if isTicking() returned true on last call.
-     *
-     * @return boolean indicating whether redstone output of this cell has changed
-     */
-    @Override
-    public boolean tick() {
-        return false;
-    }
-
-    /**
-     * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
-     *
-     * @param panelTile the activated PanelTile tile entity that contains this cell
-     * @param cellIndex The index of the clicked IPanelCell within the panel
-     * @return true if a change was made to the cell output
-     */
-    @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
-        return false;
     }
 
     @Override

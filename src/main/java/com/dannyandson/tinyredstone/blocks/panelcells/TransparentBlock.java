@@ -28,9 +28,6 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
-     * @param combinedLight
-     * @param combinedOverlay
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
@@ -179,14 +176,15 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
      *
-     * @param panelTile the activated PanelTile tile entity that contains this cell
-     * @param cellIndex The index of the clicked IPanelCell within the panel
+     * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
+     * @param segmentClicked Which of nine segment within the cell were clicked.
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
+        PanelTile panelTile = cellPos.getPanelTile();
         if(panelTile.getWorld().isRemote)
-            TinyBlockGUI.open(panelTile,cellIndex,this);
+            TinyBlockGUI.open(panelTile, cellPos.getIndex(), this);
         return false;
     }
 

@@ -26,6 +26,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.common.util.Constants;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -33,24 +34,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class PanelTile extends TileEntity implements ITickableTileEntity {
 
-    //TODO
-    // add-on - gates, clock
-    // One probe support
-    // troubleshoot issue with powered neighbor blocks not updating their neighbors
-
     //panel data (saved)
-    public Map<Integer, IPanelCell> cells = new HashMap<>();
-    public Map<Integer, Side> cellDirections = new HashMap<>();
-    public Map<Side, Integer> weakPowerFromNeighbors = new HashMap<>();
-    public Map<Side, Integer> strongPowerFromNeighbors = new HashMap<>();
-    public Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
-    public Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
-    public Map<Side, Integer> comparatorOverrides = new HashMap<>();
+    private Map<Integer, IPanelCell> cells = new HashMap<>();
+    private Map<Integer, Side> cellDirections = new HashMap<>();
+    protected Map<Side, Integer> weakPowerFromNeighbors = new HashMap<>();
+    protected Map<Side, Integer> strongPowerFromNeighbors = new HashMap<>();
+    protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
+    protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
+    protected Map<Side, Integer> comparatorOverrides = new HashMap<>();
 
-    public Integer Color = DyeColor.GRAY.getColorValue();
+    protected Integer Color = DyeColor.GRAY.getColorValue();
     private Integer lightOutput = 0;
     protected boolean flagLightUpdate = false;
     private boolean flagCrashed = false;
@@ -58,9 +53,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     //other state fields (not saved)
     private boolean flagSync = false;
-    public Integer lookingAtCell = null;
-    public Side lookingAtDirection = null;
-    public IPanelCell lookingAtWith = null;
+    protected Integer lookingAtCell = null;
+    protected Side lookingAtDirection = null;
+    protected IPanelCell lookingAtWith = null;
 
 
     public PanelTile() {
@@ -274,6 +269,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         for (Integer i = 0; i < 64; i++) {
             CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
             if (cellNBT.contains("data")) {
+                if (this.cells.size()==0)
+                    this.flagSync=true;
                 String className = cellNBT.getString("class");
                 try {
                     IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
@@ -289,6 +286,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         else if (direction==Direction.EAST) this.cellDirections.put(i,Side.RIGHT);
                         else if (direction==Direction.SOUTH) this.cellDirections.put(i,Side.BACK);
                         else if (direction==Direction.WEST) this.cellDirections.put(i,Side.LEFT);
+
                     }
                     else
                         this.cellDirections.put(i, Side.valueOf(cellNBT.getString("facing")));
@@ -321,19 +319,18 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 //if we have a neighbor with a comparator override (outputs through comparator), check for change
                 if (!this.world.isRemote)
                     for (Side side : comparatorOverrides.keySet()) {
-                        Direction direction = getDirectionFromSide(side);
-                        BlockPos neighborPos = pos.offset(direction);
+                        BlockPos neighborPos = pos.offset(getDirectionFromSide(side));
                         BlockState neighborState = world.getBlockState(neighborPos);
                         if (neighborState.hasComparatorInputOverride()) {
-                            int comparatorInputOverride = neighborState.getComparatorInputOverride(world, pos.offset(direction));
-                            if (comparatorInputOverride != comparatorOverrides.get(direction)) {
+                            int comparatorInputOverride = neighborState.getComparatorInputOverride(world, neighborPos);
+                            if (comparatorInputOverride != comparatorOverrides.get(side)) {
                                 this.comparatorOverrides.put(side, comparatorInputOverride);
-                                updateSide(direction);
+                                updateSide(side);
                                 dirty = true;
                             }
                         } else {
-                            comparatorOverrides.remove(direction);
-                            if (updateSide(direction)) {
+                            comparatorOverrides.remove(side);
+                            if (updateSide(side)) {
                                 dirty = true;
                             }
                         }
@@ -351,7 +348,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                                 pistons = new ArrayList<>();
                             pistons.add(index);
                         } else {
-                            updateNeighborCells(index);
+                            updateNeighborCells(PanelCellPos.fromIndex(this,index));
                         }
                         dirty = true;
                     }
@@ -370,6 +367,13 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 }
 
 
+                if (flagSync)
+                {
+                    updateSide(Side.FRONT);
+                    updateSide(Side.RIGHT);
+                    updateSide(Side.BACK);
+                    updateSide(Side.LEFT);
+                }
                 if (dirty || flagSync) {
                     markDirty();
                     updateOutputs();
@@ -387,7 +391,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                             TileEntity te = world.getTileEntity(blockPos);
                             if (te == this) {
                                 PosInPanelCell posInPanelCell =  PosInPanelCell.fromHitVec(this,pos,lookingAt.getHitVec());
-                                if (!this.cells.containsKey(posInPanelCell.getIndex())) {
+                                if (posInPanelCell!=null && !this.cells.containsKey(posInPanelCell.getIndex())) {
                                     lookingAtCell=posInPanelCell.getIndex();
                                     this.lookingAtDirection = getSideFromDirection(getPlayerDirectionFacing(player));
                                     try {
@@ -412,29 +416,16 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private void updatePiston(int index) {
         IPanelCell panelCell = cells.get(index);
         if (panelCell instanceof Piston) {
-
             PanelTile panelTile = this;
-            Side movingToward = getPanelCellSide(index,Side.BACK);
-            Direction moveDirection = getPanelSideDirection(index, movingToward);
-            Integer moverIndex = getAdjacentIndex(index, movingToward);
-            if (moverIndex == null) {
-                TileEntity te = world.getTileEntity(pos.offset(moveDirection));
-                if (te instanceof PanelTile) {
-                    panelTile = (PanelTile) te;
-                    moverIndex = getNeighborTileCellIndex(moveDirection, index);
-                }
-            }
+            PanelCellPos pistonPos = PanelCellPos.fromIndex(this,index);
+
+            //get the side of the panel that the piston head is facing (back of tiny piston cell)
+            Side movingToward = cellDirections.get(index).getOpposite();
+            PanelCellPos moverPos = pistonPos.offset(movingToward);
+
             if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston) {
-                Integer adjacentIndex = moverIndex;
-                moverIndex = getAdjacentIndex(moverIndex, movingToward);
-                if (moverIndex == null) {
-                    TileEntity te = world.getTileEntity(pos.offset(moveDirection));
-                    if (te instanceof PanelTile) {
-                        panelTile = (PanelTile) te;
-                        moverIndex = getNeighborTileCellIndex(moveDirection, adjacentIndex);
-                    }
-                }
-                moveDirection = moveDirection.getOpposite();
+                moverPos = moverPos.offset(movingToward);
+                movingToward = movingToward.getOpposite();
             }
 
             world.playSound(
@@ -443,63 +434,62 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     SoundCategory.BLOCKS, 0.25f, 2f, false
             );
 
-            if (moverIndex != null) {
-                if (panelTile.cells.containsKey(moverIndex))
-                    panelTile.moveCell(moverIndex, moveDirection, 0);
+            if (moverPos != null) {
+                PanelTile moverPanelTile = moverPos.getPanelTile();
+                if (moverPanelTile.cells.containsKey(moverPos.getIndex()))
+                    panelTile.moveCell(moverPos, movingToward, 0);
                 else {
-                    Integer adjacentindex = getAdjacentIndex(index, getPanelCellSide(index, Side.BACK));
-                    if (adjacentindex!=null)
-                        panelTile.updateNeighborCells(adjacentindex);
+                    panelTile.updateNeighborCells(moverPos);
                 }
             }
         }
     }
 
-    private void moveCell(int index, Direction direction, Integer iteration)
-    {
-        if (iteration>12)return;
+    /**
+     * move a component to an adjacent position and iterate into adjacent cells
+     * @param cellPos position to move a cell from
+     * @param towardSide direction to move it toward
+     * @param iteration how many times have we iterated
+     * @return whether the move was successful and/or if adjacent cell can move into this pos
+     */
+    private boolean moveCell(PanelCellPos cellPos, Side towardSide, Integer iteration) {
+        if (iteration > 12) return false;
 
-        if(cells.containsKey(index) && cells.get(index).isPushable())
-        {
-            IPanelCell cell = cells.get(index);
-            Integer newindex = getAdjacentIndex(index, getSideFromDirection(direction));
-            PanelTile panelTile = this;
-            if (newindex == null) {
-                //newindex is null, so we are on the edge of the block
-                TileEntity te = world.getTileEntity(pos.offset(direction));
-                if (te instanceof PanelTile) {
-                    panelTile = (PanelTile) te;
-                    newindex = this.getNeighborTileCellIndex(direction, index);
-                }
-            }
+        IPanelCell cell = cellPos.getIPanelCell();
 
-            if (newindex != null) {
-                if (cell != null) {
-                    if (panelTile.cells.containsKey(newindex))
-                    {
-                        panelTile.moveCell(newindex,direction,iteration+1);
-                    }
-                    panelTile.cells.put(newindex, cell);
-                    this.cells.remove(index);
-                    panelTile.cellDirections.put(newindex, this.cellDirections.get(index));
-                    this.cellDirections.remove(index);
-                    this.updateNeighborCells(index);
-                    panelTile.updateNeighborCells(newindex);
-                    panelTile.markDirty();
-                }
-            }
-        }
+        if (cell == null) return true;
+        if (!cell.isPushable()) return false;
 
+        PanelCellPos newPos = cellPos.offset(towardSide);
+
+        //try to move the neighbor first and make sure it's successful
+        if (newPos==null || ( newPos.getIPanelCell() != null && !newPos.getPanelTile().moveCell(newPos,towardSide,iteration+1)))
+            return false;
+
+        int oldIndex = cellPos.getIndex();
+        int newIndex = newPos.getIndex();
+        newPos.getPanelTile().cells.put(newIndex, cell);
+        newPos.getPanelTile().cellDirections.put(newIndex,cellPos.getCellFacing());
+        cellPos.getPanelTile().cells.remove(oldIndex);
+        cellPos.getPanelTile().cellDirections.remove(oldIndex);
+
+        newPos.getPanelTile().updateNeighborCells(newPos);
+        cellPos.getPanelTile().updateNeighborCells(cellPos);
+
+        newPos.getPanelTile().markDirty();
+        cellPos.getPanelTile().markDirty();
+
+        return true;
     }
 
-    public boolean canExtendTo(Integer index, Side side, Integer iteration)
+    public boolean canExtendTo(PanelCellPos cellPos, Side side, Integer iteration)
     {
         if (iteration>12)return false;
 
-        IPanelCell iPanelCell = this.cells.get(index);
+        IPanelCell iPanelCell = cellPos.getIPanelCell();
 
         //check if a piston has extended into this block
-        if (checkCellForPistonExtension(index))
+        if (checkCellForPistonExtension(cellPos))
             return false;
 
         //if this is an empty cell, we know it can be pushed into
@@ -511,24 +501,15 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             return false;
 
         //otherwise, check if we're on the edge of a tile
-        Integer adjacentIndex = this.getAdjacentIndex(index,side);
-        if (adjacentIndex==null)
+        PanelCellPos adjacentPos = cellPos.offset(side);
+        if (adjacentPos==null)
         {
-            Direction direction = getDirectionFromSide(side);
-            TileEntity te = world.getTileEntity(pos.offset(direction));
-            if (te instanceof PanelTile)
-            {
-                //if we're next to another panel tile, tell it to check it's adjacent cell
-                PanelTile neighborTile = (PanelTile) te;
-                Integer neighborIndex = getNeighborTileCellIndex(direction,index);
-                return neighborTile.canExtendTo(neighborIndex,side,iteration+1);
-            }
-            else //we must be at the edge of the tile and facing some other type of block, so we can't extend
-                return false;
+            //we must be at the edge of the tile and facing some other type of block, so we can't extend
+            return false;
         }
         else {
             //we can be pushed and are not on the edge, so check the next cell and see if it can also be pushed
-            return canExtendTo(adjacentIndex,side,iteration+1);
+            return adjacentPos.getPanelTile().canExtendTo(adjacentPos,side,iteration+1);
         }
     }
 
@@ -541,28 +522,20 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         for (Integer i = 0; i < 64; i++) {
             if (this.cells.containsKey(i)) {
-                PanelCellPos cellPos1 = PanelCellPos.fromIndex(i);
+                PanelCellPos cellPos1 = PanelCellPos.fromIndex(this,i);
                 PanelCellPos cellPos2;
                 Side side1 = this.cellDirections.get(i);
                 Side side2;
 
-                //int row1 = Math.round((i.floatValue() / 8f) - 0.5f);
-                //int cell1 = i % 8;
-                //int row2, cell2;
-
                 if (rotationIn == Rotation.COUNTERCLOCKWISE_90) {
-                    cellPos2 = PanelCellPos.fromRowColumn(cellPos1.getColumn(),((cellPos1.getRow() - 4) * -1) + 3);
+                    cellPos2 = PanelCellPos.fromRowColumn(this,cellPos1.getColumn(),((cellPos1.getRow() - 4) * -1) + 3);
                     side2 = side1.rotateYCCW();
-                    //row2 = cell1;
-                    //cell2 = ((row1 - 4) * -1) + 3;
                 } else if (rotationIn == Rotation.CLOCKWISE_180) {
-                    cellPos2 = PanelCellPos.fromRowColumn(((cellPos1.getRow() - 4) * -1) + 3,((cellPos1.getColumn() - 4) * -1) + 3);
+                    cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getRow() - 4) * -1) + 3,((cellPos1.getColumn() - 4) * -1) + 3);
                     side2 = side1.getOpposite();
-                    //row2 = ((row1 - 4) * -1) + 3;
-                    //cell2 = ((cell1 - 4) * -1) + 3;
                 } else {
                     //default rotation 90°
-                    cellPos2 = PanelCellPos.fromRowColumn(((cellPos1.getColumn() - 4) * -1) + 3,cellPos1.getRow());
+                    cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getColumn() - 4) * -1) + 3,cellPos1.getRow());
                     side2 = side1.rotateYCW();
                 }
 
@@ -633,58 +606,57 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return updateSide(getSideFromDirection(facing));
     }
     public boolean updateSide(Side side){
-        List<Integer> cellIndices = new ArrayList<>();
+        boolean updated = false;
+
         if (side==Side.LEFT) {
             for (int i = 0; i < 8; i++) {
                 if (cells.containsKey(i)) {
-                    cellIndices.add(i);
+                    if (updateCell(i))
+                        updated=true;
                 }
             }
         } else if (side==Side.FRONT) {
             for (int i = 0; i < 64; i += 8) {
                 if (cells.containsKey(i)) {
-                    cellIndices.add(i);
+                    if (updateCell(i))
+                        updated=true;
                 }
             }
         } else if (side==Side.RIGHT) {
             for (int i = 56; i < 64; i++) {
                 if (cells.containsKey(i)) {
-                    cellIndices.add(i);
+                    if (updateCell(i))
+                        updated=true;
                 }
             }
         } else if (side==Side.BACK) {
             for (int i = 7; i < 64; i += 8) {
                 if (cells.containsKey(i)) {
-                    cellIndices.add(i);
+                    if (updateCell(i))
+                        updated=true;
                 }
             }
         }
 
 
-        return updateCells(cellIndices, 0);
+        return updated;
     }
 
-    protected boolean updateCell(Integer cellIndex) {
-        List<Integer> indices = new ArrayList<>();
-        indices.add(cellIndex);
-        return updateCells(indices, 1);
+    public boolean updateNeighborCells(PanelCellPos cellPos) {
+        return updateNeighborCells(cellPos, 1);
     }
 
-    public boolean updateNeighborCells(Integer cellIndex) {
-        return updateNeighborCells(cellIndex, 1);
-    }
-
-    private boolean updateNeighborCells(Integer cellIndex, Integer iteration) {
-        List<Integer> indices = new ArrayList<>();
+    private boolean updateNeighborCells(PanelCellPos cellPos, Integer iteration) {
+        List<PanelCellPos> cellPosList = new ArrayList<>();
         boolean updateOutputs = false;
 
-        if (updateNeighbor(cellIndex,Side.FRONT,indices))
+        if (updateNeighbor(cellPos,Side.FRONT,cellPosList))
             updateOutputs=true;
-        if (updateNeighbor(cellIndex,Side.RIGHT,indices))
+        if (updateNeighbor(cellPos,Side.RIGHT,cellPosList))
             updateOutputs=true;
-        if (updateNeighbor(cellIndex,Side.BACK,indices))
+        if (updateNeighbor(cellPos,Side.BACK,cellPosList))
             updateOutputs=true;
-        if (updateNeighbor(cellIndex,Side.LEFT,indices))
+        if (updateNeighbor(cellPos,Side.LEFT,cellPosList))
             updateOutputs=true;
 
 
@@ -692,52 +664,61 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             updateOutputs();
         }
 
-        return updateCells(indices, iteration+1) || updateOutputs;
-    }
-
-    private boolean updateNeighbor(Integer cellIndex, Side side, List<Integer> indices)
-    {
-        Integer adjacentIndex = getAdjacentIndex(cellIndex, side);
-
-        boolean updateOutputs = false;
-        if (adjacentIndex == null) {
-            updateOutputs = true;
-            updateNeighborTileCell(getDirectionFromSide(side), cellIndex);
-        } else {
-            IPanelCell adjacentCell = cells.get(adjacentIndex);
-            if (adjacentCell instanceof IObservingPanelCell) {
-                Side direction1 = cellDirections.get(adjacentIndex);
-                Side direction2 = side.getOpposite();
-                if (direction1 == direction2) {
-                    ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
-                }
-            }
-            else if (adjacentCell!=null && !adjacentCell.isIndependentState())
-                indices.add(adjacentIndex);
+        boolean updated = false;
+        for (PanelCellPos updatePos : cellPosList)
+        {
+            if(updateCell(updatePos,iteration+1))
+                updated=true;
         }
-        return updateOutputs;
+        return updated || updateOutputs;
     }
 
-    public boolean checkCellForPistonExtension(Integer cellIndex) {
+    private boolean updateNeighbor(PanelCellPos cellPos, Side side, List<PanelCellPos> cellPosList) {
+        PanelCellPos neighborPos = cellPos.offset(side);
+
+        if (neighborPos == null)
+            return true;
+
+        IPanelCell adjacentCell = neighborPos.getIPanelCell();
+        if (adjacentCell instanceof IObservingPanelCell) {
+            Side direction1 = neighborPos.getCellFacing();
+            Side direction2 = side.getOpposite();
+            if (direction1 == direction2) {
+                ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
+            }
+        } else if (adjacentCell != null && !adjacentCell.isIndependentState())
+            cellPosList.add(neighborPos);
+
+        return false;
+    }
+
+    public boolean checkCellForPistonExtension(PanelCellPos cellPos) {
         for(Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT})
         {
-            IPanelCell cell = getAdjacentCell(cellIndex,panelSide);
-            if (cell instanceof Piston && getAdjacentCellDirection(cellIndex,panelSide)==panelSide && ((Piston) cell).isExtended())
-                return true;
+            PanelCellPos neighborPos = cellPos.offset(panelSide);
+            if (neighborPos!=null) {
+                IPanelCell cell = neighborPos.getIPanelCell();
+                if (cell instanceof Piston && neighborPos.getCellFacing() == panelSide && ((Piston) cell).isExtended())
+                    return true;
+            }
         }
         return false;
     }
 
-
+    protected boolean updateCell(Integer cellIndex) {
+        PanelCellPos cellPos = PanelCellPos.fromIndex(this,cellIndex);
+        return updateCell(cellPos, 1);
+    }
+    protected boolean updateCell(PanelCellPos cellPos) {
+        return updateCell(cellPos, 1);
+    }
     /**
      * Update a cell with a potential input change
      *
-     * @param indices list of cell indexes to update
+     * @param cellPos position of cell to update
      * @return true if this update caused the panel output to change
      */
-    public boolean updateCells(List<Integer> indices, int iteration) {
-        //row 0 is west
-        //column 0 is north
+    private boolean updateCell(PanelCellPos cellPos, int iteration) {
 
         boolean change = false;
         if (iteration > 63) {
@@ -745,125 +726,79 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             return false;
         }
 
-        for (Integer index : indices) {
-            IPanelCell thisCell = cells.get(index);
+        //if this cell position is on a different panel than this one, call this method on that panel
+        if (cellPos.getPanelTile()!=this)
+            return cellPos.getPanelTile().updateCell(cellPos,iteration);
 
-            if (thisCell != null) {
-                if (!thisCell.isIndependentState()) {
+        IPanelCell thisCell = cellPos.getIPanelCell();
 
-                    Side frontDirection =  cellDirections.get(index);
-                    Side backDirection = frontDirection.getOpposite();
-                    Side rightDirection = frontDirection.rotateYCW();
-                    Side leftDirection = frontDirection.rotateYCCW();
+        if (thisCell != null && !thisCell.isIndependentState()){
+                Side frontDirection = cellPos.getCellFacing();
+                Side backDirection = frontDirection.getOpposite();
+                Side rightDirection = frontDirection.rotateYCW();
+                Side leftDirection = frontDirection.rotateYCCW();
 
-                    PanelCellNeighbor front = getNeighbor(frontDirection, index);
-                    PanelCellNeighbor back = getNeighbor(backDirection, index);
-                    PanelCellNeighbor right = getNeighbor(rightDirection, index);
-                    PanelCellNeighbor left = getNeighbor(leftDirection, index);
+                PanelCellNeighbor front = getNeighbor(frontDirection, cellPos);
+                PanelCellNeighbor back = getNeighbor(backDirection, cellPos);
+                PanelCellNeighbor right = getNeighbor(rightDirection, cellPos);
+                PanelCellNeighbor left = getNeighbor(leftDirection, cellPos);
 
-                    if (thisCell.neighborChanged(front, right, back, left)) {
-                        updateNeighborCells(index, iteration + 1);
-                        change = true;
-                    }
+                if (thisCell.neighborChanged(front, right, back, left)) {
+                    updateNeighborCells(cellPos, iteration + 1);
+                    change = true;
                 }
-            }
-
         }
+
+
         if (change)
             this.markDirty();
         return change;
     }
 
     /**
-     * Gets the weak and strong redstone output of the neighboring cell or block.
-     * If the neighbor block is also a PanelTile, it queries for the adjacent cell.
-     * If it is any other block, it uses the cached value queried from the facing side of the block
+     * Gets a PanelCellNeighbor object providing data about the neighboring cell or block.
      *
      * @param side Toward which side of the panel the adjacent cell or block is relative to this cell.
-     * @param localCellIndex Index of the panel cell on this panel.
+     * @param localCellPos Position of the panel cell on this panel.
      * @return an Integer array of size 2. First element is weak power. Second is strong power.
      */
-    private PanelCellNeighbor getNeighbor(Side side, Integer localCellIndex) {
+    @CheckForNull
+    private PanelCellNeighbor getNeighbor(Side side, PanelCellPos localCellPos) {
 
-        PanelCellPos localPos = PanelCellPos.fromIndex(localCellIndex);
-        PanelCellPos neighborPos = localPos.offset(side);
+        PanelCellPos neighborPos = localCellPos.offset(side);
 
-        if (neighborPos!=null) {
-            Integer neighborIndex = neighborPos.getIndex();
-            PanelCellNeighbor panelCellNeighbor=null;
+        if (neighborPos != null) {
+            IPanelCell neighborCell = neighborPos.getIPanelCell();
 
-            if (this.cells.containsKey(neighborIndex)) {
-                IPanelCell neighborCell = this.cells.get(neighborIndex);
-                Side neighborSide = getPanelCellSide(neighborIndex, side.getOpposite());
-                panelCellNeighbor = new PanelCellNeighbor(this, neighborCell, neighborSide, side, neighborIndex);
-            }
-            else if(checkCellForPistonExtension(neighborIndex))
-            {
-                panelCellNeighbor = new PanelCellNeighbor(this,null, null, side, neighborIndex);
+            if (neighborCell != null) {
+                Side neighborSide = neighborPos.getPanelTile().getPanelCellSide(neighborPos, side.getOpposite());
+                return new PanelCellNeighbor(neighborPos, neighborCell, neighborSide, side);
+            } else if (checkCellForPistonExtension(neighborPos)) {
+                return new PanelCellNeighbor(neighborPos, null, null, side);
             }
 
-            return panelCellNeighbor;
-
-        } else if (cellPanelEdge(localCellIndex,side)) {
-            TileEntity te = world.getTileEntity(pos.offset(getDirectionFromSide(side)));
-            if (te instanceof PanelTile) {
-                PanelTile neighborTile = ((PanelTile) te);
-                PanelCellPos neighborPos2;
-                if (side == Side.FRONT || side==Side.BACK) {
-                    neighborPos2 = PanelCellPos.fromRowColumn(localPos.getRow(),(localPos.getColumn() - 7) * -1);
-                } else { //EAST & WEST
-                    neighborPos2 = PanelCellPos.fromRowColumn((localPos.getRow() - 7) * -1,localPos.getColumn());
-                }
-                Integer neighbor2Index = neighborPos2.getIndex();
-                IPanelCell neighborPanelCell = neighborTile.cells.get(neighbor2Index);
-                Side neighborFacing = neighborTile.getPanelCellSide(neighbor2Index, side.getOpposite());
-                if (neighborFacing != null) {
-                    return new PanelCellNeighbor(neighborTile,neighborPanelCell,neighborFacing,side,neighbor2Index);
-                }
-                return null;
-            } else {
-                BlockPos blockPos = this.pos.offset(getDirectionFromSide(side));
-                return new PanelCellNeighbor(this,blockPos,side);
-            }
+        } else {
+            BlockPos blockPos = this.pos.offset(getDirectionFromSide(side));
+            return new PanelCellNeighbor(this, blockPos, side);
         }
+
 
         return null;
     }
 
-    private void updateNeighborTileCell(Direction facing, Integer localCellIndex) {
-        //row 0 is west
-        //column 0 is north
-
-        TileEntity te = world.getTileEntity(pos.offset(facing));
-        if (te instanceof PanelTile) {
-            PanelTile neighborTile = ((PanelTile) te);
-            int neighborCellIndex = getNeighborTileCellIndex(facing,localCellIndex);
-            neighborTile.updateCell(neighborCellIndex);
-        }
+    private Side getPanelCellSide(PanelCellPos cellPos, Direction facing) {
+        return getPanelCellSide(cellPos,getSideFromDirection(facing));
     }
 
-    private int getNeighborTileCellIndex(Direction facing, Integer localCellIndex)
+    /**
+     * Get which side of the cell is facing the given side of the panel
+     * @param cellPos position of cell being queried
+     * @param panelSide the side of the redstone panel
+     * @return the side of the cell that is facing the given side of the panel
+     */
+    private Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
     {
-        int row = Math.round((localCellIndex.floatValue() / 8f) - 0.5f);
-        int cell = localCellIndex % 8;
-        int neighborRow, neighborCell;
-        if (facing == Direction.NORTH || facing == Direction.SOUTH) {
-            neighborRow = row;
-            neighborCell = (cell - 7) * -1;
-        } else {
-            neighborRow = (row - 7) * -1;
-            neighborCell = cell;
-        }
-        return (neighborRow * 8) + neighborCell;
-    }
-
-    private Side getPanelCellSide(int cellIndex, Direction facing) {
-        return getPanelCellSide(cellIndex,getSideFromDirection(facing));
-    }
-
-    private Side getPanelCellSide(int cellIndex,Side panelSide)
-    {
-        Side cellDirection = cellDirections.get(cellIndex);
+        Side cellDirection = cellPos.getPanelTile().getCellFacing(cellPos);
 
         if (cellDirection == null) return null;
 
@@ -877,115 +812,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             return Side.RIGHT;
 
         return null;
-    }
-
-    private Direction getPanelSideDirection(int cellIndex, Side side) {
-        Direction cellDirection = getDirectionFromSide(cellDirections.get(cellIndex));
-        if (cellDirection == null) return null;
-
-        if (side == Side.FRONT)
-            return cellDirection;
-        if (side == Side.BACK)
-            return cellDirection.getOpposite();
-        if (side == Side.RIGHT)
-            return cellDirection.rotateY();
-        if (side == Side.LEFT)
-            return cellDirection.rotateYCCW();
-
-        return null;
-    }
-
-    private IPanelCell getAdjacentCell(Integer cellIndex, Side side) {
-        Integer index = getAdjacentIndex(cellIndex, side);
-        Direction direction = getDirectionFromSide(side);
-        if (index == null) {
-            TileEntity te = world.getTileEntity(pos.offset(direction));
-            if (te instanceof PanelTile)
-                return ((PanelTile) te).cells.get(getNeighborTileCellIndex(direction,cellIndex));
-            return null;
-        } else {
-            return cells.get(index);
-        }
-
-    }
-
-    private Side getAdjacentCellDirection(Integer cellIndex, Side side) {
-        Integer index = getAdjacentIndex(cellIndex, side);
-        Direction direction = getDirectionFromSide(side);
-        if (index == null) {
-            TileEntity te = world.getTileEntity(pos.offset(direction));
-            if (te instanceof PanelTile)
-                return ((PanelTile) te).cellDirections.get(getNeighborTileCellIndex(direction,cellIndex));
-            return null;
-        } else {
-            return cellDirections.get(index);
-        }
-
-    }
-
-    /**
-     * Gets the index of the cell adjacent to the passed index in the specified direction.
-     * Returns null if the index is off this tile.
-     *
-     * @param cellIndex The index of the cell whose neighbor you want to find
-     * @param side The direction of the neighbor from the cell.
-     * @return integer representing the neighbor's cell index, or null if we're at the edge of the panel
-     */
-    @Deprecated
-    private Integer getAdjacentIndex(Integer cellIndex, Side side) {
-
-        if (cellIndex==null) return null;
-
-        PanelCellPos cellPos = PanelCellPos.fromIndex(cellIndex);
-
-
-        if (side==Side.FRONT) {
-            if (cellPos.getColumn() <= 0) {
-                return null;
-            } else {
-                return cellIndex - 1;
-            }
-        }
-        if (side==Side.BACK) {
-            if (cellPos.getColumn() >= 7) {
-                return null;
-            } else {
-                return cellIndex + 1;
-            }
-        }
-        if (side==Side.LEFT) {
-            if (cellPos.getRow() <= 0) {
-                return null;
-            } else {
-                return cellIndex - 8;
-            }
-        }
-        if (side==Side.RIGHT) {
-            if (cellPos.getRow() >= 7) {
-                return null;
-            } else {
-                return cellIndex + 8;
-            }
-        }
-
-        return null;
-
-    }
-
-    private boolean cellPanelEdge(Integer cellIndex, Side side) {
-
-        PanelCellPos cellPos = PanelCellPos.fromIndex(cellIndex);
-
-        if (cellPos.getRow() == 0 && side==Side.LEFT)
-            return true;
-        if (cellPos.getRow() == 7 && side==Side.RIGHT)
-            return true;
-        if (cellPos.getColumn() == 0 && side==Side.FRONT)
-            return true;
-        if (cellPos.getColumn() == 7 && side==Side.BACK)
-            return true;
-
-        return false;
     }
 
     /**
@@ -1004,8 +830,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             weak=0;strong=0;
             List<Integer> indices = getEdgeCellIndices(direction);
             for (int i:indices) {
-                IPanelCell cell = cells.get(i);
-                Side side = getPanelCellSide(i, direction);
+                PanelCellPos cellPos = PanelCellPos.fromIndex(this,i);
+                IPanelCell cell = cellPos.getIPanelCell();
+                Side side = getPanelCellSide(cellPos, direction);
                 int cellStrongOutput = cell.getStrongRsOutput(side);
                 int cellWeakOutput = cell.getWeakRsOutput(side);
 
@@ -1278,7 +1105,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 }
         }
 
-        //this should not be reached
+
         return null;
     }
 
@@ -1294,6 +1121,78 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 return facing;
         }
         return  player.getHorizontalFacing();
+    }
+
+    @CheckForNull
+    public IPanelCell getIPanelCell(PanelCellPos cellPos){
+        if (cellPos==null)return null;
+        return this.cells.get(cellPos.getIndex());
+    }
+
+    @CheckForNull
+    public Side getCellFacing(PanelCellPos cellPos){
+        if (cellPos==null)return null;
+        return this.cellDirections.get(cellPos.getIndex());
+    }
+
+    public int getCellCount()
+    {
+        return cells.size();
+    }
+
+    public void removeCell(PanelCellPos cellPos)
+    {
+        if (cellPos.getIPanelCell() != null) {
+            int cellIndex = cellPos.getIndex();
+            //remove from panel
+            cellDirections.remove(cellIndex);
+            cells.remove(cellIndex);
+            updateNeighborCells(cellPos);
+
+            sync();
+        }
+    }
+
+    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing)
+    {
+        int cellIndex = cellPos.getIndex();
+        cellDirections.put(cellIndex, facing);
+        cells.put(cellIndex, panelCell);
+        if (!panelCell.isIndependentState()) {
+            updateCell(cellIndex);
+        }
+        updateNeighborCells(cellPos);
+    }
+
+    public boolean hasCellsOnFace(Direction direction)
+    {
+        Side facing = getSideFromDirection(direction);
+        if (facing==Side.LEFT) {
+            for (int i = 0; i < 8; i++) {
+                if (cells.containsKey(i)) {
+                    return true;
+                }
+            }
+        } else if (facing == Side.FRONT) {
+            for (int i = 0; i < 64; i += 8) {
+                if (cells.containsKey(i)) {
+                    return true;
+                }
+            }
+        } else if (facing == Side.RIGHT) {
+            for (int i = 56; i < 64; i++) {
+                if (cells.containsKey(i)) {
+                    return true;
+                }
+            }
+        } else if (facing == Side.BACK) {
+            for (int i = 7; i < 64; i += 8) {
+                if (cells.containsKey(i)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 

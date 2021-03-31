@@ -5,6 +5,7 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.gui.BlueprintGUI;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import net.minecraft.client.util.ITooltipFlag;
@@ -63,12 +64,19 @@ public class Blueprint extends Item {
             if (context.getItem().getTag() !=null && context.getItem().getTag().contains("blueprint"))
             {
                 PlayerEntity player = context.getPlayer();
-                if (panelTile.cells.size()==0 && player!=null)
+                if (panelTile.getCellCount()==0 && player!=null)
                 {
                     CompoundNBT blueprintNBT = context.getItem().getChildTag("blueprint");
                     Map<Item,Integer> items = getRequiredComponents(blueprintNBT);
                     if (player.isCreative() || playerHasSufficientComponents(items, player)) {
+
                         panelTile.loadCellsFromNBT(blueprintNBT);
+                        panelTile.updateSide(Side.FRONT);
+                        panelTile.updateSide(Side.RIGHT);
+                        panelTile.updateSide(Side.BACK);
+                        panelTile.updateSide(Side.LEFT);
+                        panelTile.markDirty();
+
                         if (!player.isCreative())
                         {
                             for (Item item : items.keySet())

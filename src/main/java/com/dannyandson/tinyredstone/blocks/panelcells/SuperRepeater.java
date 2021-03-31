@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.gui.RepeaterCellGUI;
@@ -17,14 +18,15 @@ public class SuperRepeater extends Repeater {
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
      *
-     * @param panelTile the activated PanelTile tile entity that contains this cell
-     * @param cellIndex The index of the clicked IPanelCell within the panel
+     * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
+     * @param segmentClicked Which of nine segment within the cell were clicked.
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
+        PanelTile panelTile = cellPos.getPanelTile();
         if (panelTile.getWorld().isRemote)
-            RepeaterCellGUI.open(panelTile,cellIndex,this);
+            RepeaterCellGUI.open(panelTile, cellPos.getIndex(), this);
         return false;
     }
 

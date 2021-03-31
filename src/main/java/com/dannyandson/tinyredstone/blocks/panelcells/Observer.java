@@ -122,16 +122,6 @@ public class Observer implements IPanelCell, IObservingPanelCell {
     }
 
     /**
-     * Does the power level drop when transmitting between these cells (such as with redstone dust)?
-     *
-     * @return true if power level should drop, false if not
-     */
-    @Override
-    public boolean powerDrops() {
-        return false;
-    }
-
-    /**
      * Is this a component that does not change state based on neighbors (such as a redstone block, or potentiometer)?
      *
      * @return true if this cell's state is unaffected by neighbors
@@ -149,16 +139,6 @@ public class Observer implements IPanelCell, IObservingPanelCell {
     @Override
     public boolean isPushable() {
         return true;
-    }
-
-    /**
-     * If this cell outputs light, return the level here. Otherwise, return 0.
-     *
-     * @return Light level to output 0-15
-     */
-    @Override
-    public int lightOutput() {
-        return 0;
     }
 
     /**
@@ -192,18 +172,6 @@ public class Observer implements IPanelCell, IObservingPanelCell {
         return false;
     }
 
-    /**
-     * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
-     *
-     * @param panelTile      the activated PanelTile tile entity that contains this cell
-     * @param cellIndex      The index of the clicked IPanelCell within the panel (this IPanelCell)
-     * @param segmentClicked Which of nine segment within the cell were clicked. 0 through 8 where 0 is front-right and 8 is back-left;
-     * @return true if a change was made to the cell output
-     */
-    @Override
-    public boolean onBlockActivated(PanelTile panelTile, Integer cellIndex, PanelCellSegment segmentClicked) {
-        return false;
-    }
 
     @Override
     public CompoundNBT writeNBT() {

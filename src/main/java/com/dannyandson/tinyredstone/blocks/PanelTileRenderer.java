@@ -69,9 +69,10 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
         }
         else {
             for (Integer i = 0; i < 64; i++) {
-                if (tileEntity.cells.containsKey(i)) {
-                    IPanelCell panelCell = tileEntity.cells.get(i);
-                    Side cellDirection = tileEntity.cellDirections.get(i);
+                PanelCellPos pos = PanelCellPos.fromIndex(tileEntity,i);
+                IPanelCell panelCell = pos.getIPanelCell();
+                if (panelCell!=null) {
+                    Side cellDirection = pos.getCellFacing();
 
                     renderCell(matrixStack, i, panelCell, cellDirection, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
                 }
