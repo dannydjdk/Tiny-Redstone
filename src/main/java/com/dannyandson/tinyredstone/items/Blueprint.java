@@ -70,7 +70,7 @@ public class Blueprint extends Item {
                     Map<Item,Integer> items = getRequiredComponents(blueprintNBT);
                     if (player.isCreative() || playerHasSufficientComponents(items, player)) {
 
-                        panelTile.loadCellsFromNBT(blueprintNBT);
+                        panelTile.loadCellsFromNBT(blueprintNBT,false);
                         panelTile.updateSide(Side.FRONT);
                         panelTile.updateSide(Side.RIGHT);
                         panelTile.updateSide(Side.BACK);

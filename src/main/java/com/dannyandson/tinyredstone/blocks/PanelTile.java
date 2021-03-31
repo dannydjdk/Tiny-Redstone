@@ -7,8 +7,6 @@ import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.CompoundNBT;
@@ -22,13 +20,10 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,9 +46,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     //other state fields (not saved)
     private boolean flagSync = false;
-    protected Integer lookingAtCell = null;
-    protected Side lookingAtDirection = null;
-    protected IPanelCell lookingAtWith = null;
+    protected PanelCellGhostPos panelCellGhostPos;
+
+    //for backward compat. Remove on next major update (2.x.x).
+    private boolean fixLegacyFacing = false;
 
 
     public PanelTile() {
@@ -119,7 +115,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
 
         compoundNBT.put("cells", cellsNBT);
-        compoundNBT.putInt("color", this.Color);
+        if(this.Color!=DyeColor.GRAY.getColorValue())
+            compoundNBT.putInt("color", this.Color);
         if (panelCover!=null)
             compoundNBT.putString("cover",panelCover.getClass().getCanonicalName());
 
@@ -172,7 +169,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
 
-        this.loadCellsFromNBT(parentNBTTagCompound);
+        this.loadCellsFromNBT(parentNBTTagCompound,true);
 
         CompoundNBT strongPowerToNeighbors = parentNBTTagCompound.getCompound("strong_power_outgoing");
         if (!strongPowerToNeighbors.isEmpty()) {
@@ -206,10 +203,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
         this.flagCrashed = parentNBTTagCompound.getBoolean("flagCrashed");
 
-        int color = parentNBTTagCompound.getInt("color");
-        if (this.Color != color) {
-            this.Color = color;
-            this.flagSync=true;
+        if (parentNBTTagCompound.contains("color")) {
+            int color = parentNBTTagCompound.getInt("color");
+            if (this.Color != color) {
+                this.Color = color;
+                this.flagSync = true;
+            }
         }
 
         String coverClass = parentNBTTagCompound.getString("cover");
@@ -229,7 +228,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     }
 
-    public void loadCellsFromNBT(CompoundNBT parentNBTTagCompound)
+    public void loadCellsFromNBT(CompoundNBT parentNBTTagCompound,boolean fixFacing)
     {
         CompoundNBT cellsNBT = parentNBTTagCompound.getCompound("cells");
 
@@ -254,7 +253,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         else if (direction==Direction.SOUTH) this.cellDirections.put(i,Side.BACK);
                         else if (direction==Direction.WEST) this.cellDirections.put(i,Side.LEFT);
 
-                        //TODO for panels placed before the direction update, set facing to DOWN
+                        //for panels placed before the direction update, set facing to DOWN
+                        if (fixFacing)
+                            this.fixLegacyFacing = true;
 
                     }
                     else
@@ -285,6 +286,13 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         try {
             if (!flagCrashed) {
                 boolean dirty = false;
+                //backward compatibility. Remove on major update (2.x.x).
+                if (fixLegacyFacing){
+                    world.setBlockState(pos, Registration.REDSTONE_PANEL_BLOCK.get().getDefaultState().with(BlockStateProperties.FACING,Direction.DOWN));
+                    fixLegacyFacing=false;
+                    dirty=true;
+                }
+
                 //if we have a neighbor with a comparator override (outputs through comparator), check for change
                 if (!this.world.isRemote)
                     for (Side side : comparatorOverrides.keySet()) {
@@ -351,28 +359,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 }
 
                 if (world.isRemote) {
-                    Integer lookingAtCell=null;
-                    ClientPlayerEntity player = Minecraft.getInstance().player;
-                    if (player!=null && PanelBlock.isPanelCellItem(player.getHeldItemMainhand().getItem())) {
-                        RayTraceResult lookingAt = Minecraft.getInstance().objectMouseOver;
-                        if (lookingAt != null && lookingAt.getType() == RayTraceResult.Type.BLOCK && ((BlockRayTraceResult)lookingAt).getFace() == getBlockState().get(BlockStateProperties.FACING).getOpposite()) {
-                            BlockPos blockPos = new BlockPos(lookingAt.getHitVec());
-                            TileEntity te = world.getTileEntity(blockPos);
-                            if (te == this) {
-                                PosInPanelCell posInPanelCell =  PosInPanelCell.fromHitVec(this,pos,lookingAt.getHitVec());
-                                if (posInPanelCell!=null && !this.cells.containsKey(posInPanelCell.getIndex())) {
-                                    lookingAtCell=posInPanelCell.getIndex();
-                                    this.lookingAtDirection = getSideFromDirection(getPlayerDirectionFacing(player));
-                                    try {
-                                        this.lookingAtWith = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getHeldItemMainhand().getItem()).getConstructors()[0].newInstance();
-                                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                                        TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    this.lookingAtCell = lookingAtCell;
+                    this.panelCellGhostPos = PanelTileRenderer.getPlayerLookingAtCell(this);
                 }
             }
         }catch(Exception e)
@@ -690,7 +677,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private boolean updateCell(PanelCellPos cellPos, int iteration) {
 
         boolean change = false;
-        if (iteration > 63) {
+        if (iteration > 127) {
             TinyRedstone.LOGGER.warn("Redstone panel iterated too many times.");
             return false;
         }
