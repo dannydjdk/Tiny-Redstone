@@ -2,10 +2,13 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
+import com.dannyandson.tinyredstone.blocks.PanelTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 
 public class StoneButton extends Button {
     public static ResourceLocation TEXTURE_OAK_PLANKS = new ResourceLocation("minecraft","block/stone");
@@ -21,6 +24,12 @@ public class StoneButton extends Button {
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked){
         if (!active)
         {
+            PanelTile panelTile = cellPos.getPanelTile();
+            panelTile.getWorld().playSound(
+                    panelTile.getPos().getX(), panelTile.getPos().getY(), panelTile.getPos().getZ(),
+                    SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON,
+                    SoundCategory.BLOCKS, 0.25f, 2f, false
+            );
             this.active=true;
             this.ticksRemaining =20;
             return true;

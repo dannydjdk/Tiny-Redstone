@@ -6,13 +6,13 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
@@ -28,9 +28,6 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
-     * @param combinedLight
-     * @param combinedOverlay
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
@@ -40,50 +37,25 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
 
         matrixStack.translate(0,0,(active)?0.0625:0.125);
         float x1 = 0.3125f, x2 = .6875f, y1 = .375f, y2 = .625f;
-        //matrixStack.scale(.375f,.375f,1);
 
-        add(builder, matrixStack, x1,y1,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y1,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,y2,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x1,y2,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.125,-y1);
-        add(builder, matrixStack, x1,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x2,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, x1,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,0,0.125f,sprite,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,.6875);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0.25f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0.25f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.25f,0,0.125f,sprite,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,.25);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, .375f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, .375f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,.375f,0,.125f,sprite,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,0.375);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0.25f,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0.25f,0.125f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.125f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.25f,0,0.125f,sprite,combinedLight,alpha);
 
-    }
-
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, alpha)
-                .tex(u, v)
-                .lightmap(combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
     }
 
     /**
@@ -120,16 +92,6 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     /**
-     * Does the power level drop when transmitting between these cells (such as with redstone dust)?
-     *
-     * @return true if power level should drop, false if not
-     */
-    @Override
-    public boolean powerDrops() {
-        return false;
-    }
-
-    /**
      * Is this a component that does not change state based on neighbors (such as a redstone block, or potentiometer)?
      *
      * @return true if this cell's state is unaffected by neighbors
@@ -147,16 +109,6 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
     @Override
     public boolean isPushable() {
         return false;
-    }
-
-    /**
-     * If this cell outputs light, return the level here. Otherwise, return 0.
-     *
-     * @return Light level to output 0-15
-     */
-    @Override
-    public int lightOutput() {
-        return 0;
     }
 
     /**
@@ -189,6 +141,12 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
         if (!active)
         {
+            PanelTile panelTile = cellPos.getPanelTile();
+            panelTile.getWorld().playSound(
+                    panelTile.getPos().getX(), panelTile.getPos().getY(), panelTile.getPos().getZ(),
+                    SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON,
+                    SoundCategory.BLOCKS, 0.25f, 2f, false
+            );
             this.active=true;
             this.ticksRemaining =30;
             return true;
@@ -212,7 +170,7 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
 
     protected TextureAtlasSprite getSprite()
     {
-        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OAK_PLANKS);
+        return RenderHelper.getSprite(TEXTURE_OAK_PLANKS);
     }
 
     @Override

@@ -153,7 +153,11 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
             RayTraceResult lookingAt = Minecraft.getInstance().objectMouseOver;
             Direction panelFacing = panelTile.getBlockState().get(BlockStateProperties.FACING);
-            if (lookingAt != null && lookingAt.getType() == RayTraceResult.Type.BLOCK && ((BlockRayTraceResult)lookingAt).getFace() == panelFacing.getOpposite()) {
+            if (lookingAt != null &&
+                    lookingAt.getType() == RayTraceResult.Type.BLOCK &&
+                    ((BlockRayTraceResult)lookingAt).getFace() == panelFacing.getOpposite() &&
+                    Minecraft.getInstance().objectMouseOver!=null
+            ) {
 
                 Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
                 BlockPos blockPos = new BlockPos(lookVector);

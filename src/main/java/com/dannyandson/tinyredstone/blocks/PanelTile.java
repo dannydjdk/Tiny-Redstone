@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.panelcells.Button;
 import com.dannyandson.tinyredstone.blocks.panelcells.Piston;
 import com.dannyandson.tinyredstone.blocks.panelcells.StickyPiston;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
@@ -325,6 +326,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                                 pistons = new ArrayList<>();
                             pistons.add(index);
                         } else {
+                            if(panelCell instanceof Button)
+                            {
+                                world.playSound(
+                                        pos.getX(), pos.getY(), pos.getZ(),
+                                        SoundEvents.BLOCK_STONE_BUTTON_CLICK_OFF,
+                                        SoundCategory.BLOCKS, 0.25f, 2f, false
+                                );
+                            }
                             updateNeighborCells(PanelCellPos.fromIndex(this,index));
                         }
                         dirty = true;
