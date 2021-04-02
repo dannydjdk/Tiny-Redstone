@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
+import com.dannyandson.tinyredstone.items.PanelItem;
 import com.dannyandson.tinyredstone.setup.Registration;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.*;
@@ -375,6 +376,9 @@ public class PanelBlock extends Block {
                             //but first, check to see if a piston is extended into that space
                             if (!panelTile.checkCellForPistonExtension(posInPanelCell)) {
                                 try {
+                                    if(heldItem instanceof PanelItem) {
+                                        
+                                    }
                                     //catch any exception thrown while attempting to construct from the registered IPanelCell class
                                     Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 

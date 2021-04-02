@@ -45,7 +45,7 @@ public class TinyRedstone {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 
         // Register ourselves for server and other game events we are interested in
-        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new ClientBinding());
 
         //load configs
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
@@ -69,22 +69,4 @@ public class TinyRedstone {
         LOGGER.info("Binding Renderer for Redstone Panel tile entity.", Registration.REDSTONE_PANEL_BLOCK.get());
         ClientRegistry.bindTileEntityRenderer(Registration.REDSTONE_PANEL_TILE.get(), PanelTileRenderer::new);
     }
-
-    @SubscribeEvent
-    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event)
-    {
-        //allow creative players to remove cells by left clicking with wrench or cell item
-        if (event.getPlayer().isCreative() &&
-                event.getWorld().getBlockState(event.getPos()).getBlock() instanceof PanelBlock &&
-                (
-                    event.getPlayer().getHeldItemMainhand().getItem()==Registration.REDSTONE_WRENCH.get() ||
-                            event.getPlayer().getHeldItemMainhand().getItem() instanceof PanelCellItem
-                )) {
-                BlockState blockState = event.getWorld().getBlockState(event.getPos());
-                PanelBlock panelBlock = (PanelBlock)blockState.getBlock();
-                panelBlock.onBlockClicked(blockState,event.getWorld(),event.getPos(), event.getPlayer());
-                event.setCanceled(true);
-        }
-    }
-
 }
