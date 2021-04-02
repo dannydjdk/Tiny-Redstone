@@ -104,14 +104,6 @@ Right click in the air with an empty blueprint. A GUI will appear.
 Click the Import button. Find the *.json file with the saved circuit and open it.
 The circuit will now be saved to your blueprint.
 
-## Future Plans
-
-- Tiny Levers.
-- Panel covers to hide circuitry and reduce lag potential.
-- One Probe support, so you can see the redstone signal of each tiny component.
-- Possible add-ons - gates, clocks, redstone math (possibly as an add-on mod since I want to keep this mod vanilla flavored)
-- Fixing whatever bugs you find that somehow I didn't find.
-
 ## Permissions
 
 Yes, I would love to see this mod in your open source modpack. Curseforge packs are always okay, anywhere else, a link back to this page is appreciated. But you were already doing that for all mods anyway, right?

@@ -46,7 +46,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     protected IPanelCover panelCover = null;
 
     //other state fields (not saved)
-    private boolean flagSync = false;
+    private boolean flagUpdate = false;
+    private boolean flagSync = true;
     protected PanelCellGhostPos panelCellGhostPos;
 
     //for backward compat. Remove on next major update (2.x.x).
@@ -208,7 +209,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             int color = parentNBTTagCompound.getInt("color");
             if (this.Color != color) {
                 this.Color = color;
-                this.flagSync = true;
+                this.flagUpdate = true;
             }
         }
 
@@ -237,7 +238,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
             if (cellNBT.contains("data")) {
                 if (this.cells.size()==0)
-                    this.flagSync=true;
+                    this.flagUpdate =true;
                 String className = cellNBT.getString("class");
                 try {
                     IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
@@ -353,18 +354,22 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 }
 
 
-                if (flagSync)
+                if (flagUpdate)
                 {
                     updateSide(Side.FRONT);
                     updateSide(Side.RIGHT);
                     updateSide(Side.BACK);
                     updateSide(Side.LEFT);
                 }
-                if (dirty || flagSync) {
+                if (dirty || flagUpdate) {
                     markDirty();
                     updateOutputs();
+                }
+
+                if (flagSync || dirty || flagUpdate) {
                     sync();
-                    flagSync = false;
+                    flagSync=false;
+                    flagUpdate=false;
                 }
 
                 if (world.isRemote) {
@@ -442,7 +447,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         cellPos.getPanelTile().updateNeighborCells(cellPos);
 
         newPos.getPanelTile().markDirty();
+        newPos.getPanelTile().flagSync=true;
         cellPos.getPanelTile().markDirty();
+        cellPos.getPanelTile().flagSync=true;
 
         return true;
     }
