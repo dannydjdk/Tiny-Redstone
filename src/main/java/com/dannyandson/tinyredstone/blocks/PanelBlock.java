@@ -296,9 +296,11 @@ public class PanelBlock extends Block {
     public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
         if(!player.isCreative()) {
             ItemStack itemstack = getItemWithNBT(worldIn, pos, state);
-            ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
-            itementity.setDefaultPickupDelay();
-            worldIn.addEntity(itementity);
+            if(itemstack != null) {
+                ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
+                itementity.setDefaultPickupDelay();
+                worldIn.addEntity(itementity);
+            }
         }
         super.onBlockHarvested(worldIn, pos, state, player);
     }
@@ -314,7 +316,9 @@ public class PanelBlock extends Block {
                 return panelCellItemMap.get(cell.getClass()).getDefaultInstance();
             }
         }
-        return getItemWithNBT(world, pos, state);
+        ItemStack itemStack = getItemWithNBT(world, pos, state);
+        if(itemStack == null) return super.getPickBlock(state, target, world, pos, player);
+        return itemStack;
     }
 
     @SuppressWarnings("deprecation")
