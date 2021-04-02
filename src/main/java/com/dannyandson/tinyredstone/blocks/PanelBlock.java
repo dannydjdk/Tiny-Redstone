@@ -20,6 +20,7 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
@@ -274,30 +275,47 @@ public class PanelBlock extends Block {
         return ToolType.get("wrench");
     }
 
+    private ItemStack getItemWithNBT(IBlockReader worldIn, BlockPos pos, BlockState state) {
+        TileEntity tileentity = worldIn.getTileEntity(pos);
+        if (tileentity instanceof PanelTile) {
+            PanelTile panelTile = (PanelTile) tileentity;
+            ItemStack itemstack = getItem(worldIn, pos, state);
+            CompoundNBT compoundnbt = panelTile.saveToNbt(new CompoundNBT());
+            if (!compoundnbt.isEmpty()) {
+                itemstack.setTagInfo("BlockEntityTag", compoundnbt);
+            }
+            return itemstack;
+        }
+        return null;
+    }
+
     /**
      * Called before the Block is set to air in the world. Called regardless of if the player's tool can actually collect
      * this block
      */
     public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
-        TileEntity tileentity = worldIn.getTileEntity(pos);
-        if (tileentity instanceof PanelTile && !player.isCreative()) {
-            PanelTile panelTile = (PanelTile) tileentity;
-            if (!worldIn.isRemote) {
-                ItemStack itemstack = getItem(worldIn, pos, state);
-                CompoundNBT compoundnbt = panelTile.saveToNbt(new CompoundNBT());
-                if (!compoundnbt.isEmpty()) {
-                    itemstack.setTagInfo("BlockEntityTag", compoundnbt);
-                }
-
-                ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
-                itementity.setDefaultPickupDelay();
-                worldIn.addEntity(itementity);
-            }
+        if(!player.isCreative()) {
+            ItemStack itemstack = getItemWithNBT(worldIn, pos, state);
+            ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
+            itementity.setDefaultPickupDelay();
+            worldIn.addEntity(itementity);
         }
-
         super.onBlockHarvested(worldIn, pos, state, player);
     }
 
+    @Override
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+        TileEntity te = world.getTileEntity(pos);
+        if (te instanceof PanelTile) {
+            PanelTile panelTile = (PanelTile) te;
+            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.get(BlockStateProperties.FACING), target.getHitVec());
+            IPanelCell cell = panelTile.getIPanelCell(panelCellPos);
+            if (cell != null) {
+                return panelCellItemMap.get(cell.getClass()).getDefaultInstance();
+            }
+        }
+        return getItemWithNBT(world, pos, state);
+    }
 
     @SuppressWarnings("deprecation")
     @Override
