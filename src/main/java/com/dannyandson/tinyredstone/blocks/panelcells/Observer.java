@@ -31,62 +31,44 @@ public class Observer implements IPanelCell, IObservingPanelCell {
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
-     * @param combinedLight
-     * @param combinedOverlay
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
 
-        TextureAtlasSprite sprite_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_TOP);
+        TextureAtlasSprite sprite_top = RenderHelper.getSprite(TEXTURE_OBSERVER_TOP);
         TextureAtlasSprite sprite_back;
         if (output)
-            sprite_back = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_BACK_ON);
+            sprite_back = RenderHelper.getSprite(TEXTURE_OBSERVER_BACK_ON);
         else
-            sprite_back = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_BACK);
-        TextureAtlasSprite sprite_front = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_FRONT);
-        TextureAtlasSprite sprite_side = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OBSERVER_SIDE);
+            sprite_back = RenderHelper.getSprite((TEXTURE_OBSERVER_BACK));
+        TextureAtlasSprite sprite_front = RenderHelper.getSprite((TEXTURE_OBSERVER_FRONT));
+        TextureAtlasSprite sprite_side = RenderHelper.getSprite((TEXTURE_OBSERVER_SIDE));
 
         matrixStack.translate(0,0,1.0);
-        matrixStack.push();
-        matrixStack.translate(1,1,0);
-        matrixStack.rotate(Vector3f.ZN.rotationDegrees(180));
-        addRectangle(builder,matrixStack,sprite_top,combinedLight,combinedOverlay,alpha);
-        matrixStack.pop();
+        addRectangle(builder,matrixStack,sprite_top,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        addRectangle(builder,matrixStack,sprite_back,combinedLight,combinedOverlay,alpha);
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.translate(0,0,1);
+        addRectangle(builder,matrixStack,sprite_front,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        addRectangle(builder,matrixStack,sprite_side,combinedLight,combinedOverlay,alpha);
+        addRectangle(builder,matrixStack,sprite_side,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        addRectangle(builder,matrixStack,sprite_front,combinedLight,combinedOverlay,alpha);
+        addRectangle(builder,matrixStack,sprite_back,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        addRectangle(builder,matrixStack,sprite_side,combinedLight,combinedOverlay,alpha);
+        addRectangle(builder,matrixStack,sprite_side,combinedLight,alpha);
 
     }
 
-    private void addRectangle(IVertexBuilder builder, MatrixStack matrixStack, TextureAtlasSprite sprite,int combinedLight, int combinedOverlay, float alpha)
+    private void addRectangle(IVertexBuilder builder, MatrixStack matrixStack, TextureAtlasSprite sprite,int combinedLight, float alpha)
     {
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,1,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,1,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-    }
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, alpha)
-                .tex(u, v)
-                .lightmap(combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
     }
     /**
      * Called when neighboring redstone signal output changes.
@@ -201,14 +183,11 @@ public class Observer implements IPanelCell, IObservingPanelCell {
 
     @Override
     public boolean frontNeighborUpdated() {
-        queue.clear();
-
-        queue.add(output);
-        queue.add(output);
-        queue.add(true);
-        queue.add(true);
-        queue.add(true);
-        queue.add(true);
+        if(queue.isEmpty()) {
+            queue.add(false);
+            queue.add(true);
+            queue.add(true);
+        }
 
         return false;
     }
