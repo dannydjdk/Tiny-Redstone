@@ -42,7 +42,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
     private boolean show(ProbeMode probeMode, PlayerEntity playerEntity) {
         switch (com.dannyandson.tinyredstone.Config.DISPLAY_MODE.get()) {
             case 0:
-                return false;
+                return probeMode == ProbeMode.DEBUG;
             case 1:
                 break;
             case 2:
