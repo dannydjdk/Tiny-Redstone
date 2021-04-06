@@ -316,8 +316,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
                     }
 
+                //call the tick() method in all our cells and grab any updated pistons
                 List<Integer> pistons = null;
-                //call the tick() method in all our cells
                 for (Integer index : this.cells.keySet()) {
                     IPanelCell panelCell = this.cells.get(index);
                     boolean update = panelCell.tick();
@@ -342,6 +342,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
                 }
 
+                //if any pistons updated state, try to update them
                 if (pistons != null) {
                     for (Integer index : pistons) {
                         updatePiston(index);
@@ -847,7 +848,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         if (change)
         {
-            sync();
+            flagSync();
             world.notifyNeighborsOfStateChange(pos,this.getBlockState().getBlock());
             for (Direction direction : directionsUpdated) {
                 BlockPos neighborPos = pos.offset(direction);
@@ -1165,6 +1166,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             }
         }
         return false;
+    }
+    public void flagSync()
+    {
+        this.flagSync=true;
     }
 }
 

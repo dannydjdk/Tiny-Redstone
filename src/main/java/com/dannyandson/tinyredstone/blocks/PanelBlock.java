@@ -3,7 +3,6 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
-import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.ItemEntity;
@@ -261,7 +260,7 @@ public class PanelBlock extends Block {
                             panelTile.markDirty();
                     }
                     if (change) {
-                        panelTile.sync();
+                        panelTile.flagSync();
                     }
                 }
             } catch (Exception e) {
