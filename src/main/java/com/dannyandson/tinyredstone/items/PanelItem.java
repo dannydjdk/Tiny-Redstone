@@ -3,7 +3,6 @@ package com.dannyandson.tinyredstone.items;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -31,9 +30,5 @@ public class PanelItem extends BlockItem {
     public  void  addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
     {
         list.add(new TranslationTextComponent("message.item.redstone_panel"));
-    }
-
-    public void altScroll(PlayerEntity player, ItemStack mainHand, double wheelDelta) {
-
     }
 }

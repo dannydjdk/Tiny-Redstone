@@ -405,10 +405,12 @@ public class PanelBlock extends Block {
                                     Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 
                                     if (panelCell instanceof IPanelCell) {
-                                        //place the cell on the panel
-                                        Direction playerFacing= panelTile.getPlayerDirectionFacing(player);
 
-                                        panelTile.addCell(posInPanelCell,(IPanelCell) panelCell,panelTile.getSideFromDirection(playerFacing));
+                                        panelTile.addCell(posInPanelCell,(IPanelCell) panelCell,
+                                                panelTile.overrideFacing == null
+                                                        ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player))
+                                                        : panelTile.overrideFacing
+                                        );
 
                                         //remove an item from the player's stack
                                         if (!player.isCreative())

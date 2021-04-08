@@ -83,12 +83,12 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                 PanelCellPos pos = PanelCellPos.fromIndex(tileEntity,i);
                 IPanelCell panelCell = pos.getIPanelCell();
                 if (panelCell!=null) {
-                    renderCell(matrixStack, pos, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
+                    renderCell(matrixStack, pos, null, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
                 }
             }
 
             if (tileEntity.panelCellGhostPos != null) {
-                renderCell(matrixStack, tileEntity.panelCellGhostPos, buffer, combinedLight, combinedOverlay, 0.5f);
+                renderCell(matrixStack, tileEntity.panelCellGhostPos, tileEntity.overrideFacing, buffer, combinedLight, combinedOverlay, 0.5f);
             }
         }
 
@@ -107,24 +107,26 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
     }
 
-    private void renderCell(MatrixStack matrixStack, PanelCellPos pos, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
+    private void renderCell(MatrixStack matrixStack, PanelCellPos pos, Side overrideFacing, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
     {
         matrixStack.push();
 
         matrixStack.translate(cellSize*(double)pos.getRow(), 0.125, cellSize*(pos.getColumn()));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
 
-        if (pos.getCellFacing()== Side.LEFT)
+        Side facing = overrideFacing == null ? pos.getCellFacing() : overrideFacing;
+
+        if (facing == Side.LEFT)
         {
             matrixStack.translate(0,-cellSize,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
         }
-        else if (pos.getCellFacing()== Side.BACK)
+        else if (facing == Side.BACK)
         {
             matrixStack.translate(cellSize,-cellSize,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
         }
-        else if (pos.getCellFacing()== Side.RIGHT)
+        else if (facing == Side.RIGHT)
         {
             matrixStack.translate(cellSize,0,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(270));

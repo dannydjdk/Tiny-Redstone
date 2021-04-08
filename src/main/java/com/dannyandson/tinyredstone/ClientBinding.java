@@ -1,14 +1,18 @@
 package com.dannyandson.tinyredstone;
 
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
+import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
-import com.dannyandson.tinyredstone.items.PanelItem;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,15 +35,26 @@ public class ClientBinding {
     @SubscribeEvent
     public void wheelEvent(final InputEvent.MouseScrollEvent mouseScrollEvent) {
         if (mouseScrollEvent.isCanceled()) return;
-        final double wheelDelta = mouseScrollEvent.getScrollDelta();
+        final int wheelDelta = (int) mouseScrollEvent.getScrollDelta();
         if (wheelDelta == 0) return;
         final PlayerEntity player = Minecraft.getInstance().player;
         if (player == null) return;
+        World world = Minecraft.getInstance().world;
         final ItemStack mainHand = player.getHeldItemMainhand();
         final Item mainHandItem = mainHand.getItem();
-        if (key_alt && mainHandItem instanceof PanelItem) {
-            ((PanelItem) mainHandItem).altScroll(player, mainHand, wheelDelta);
-            mouseScrollEvent.setCanceled(true);
+
+        if (mainHandItem instanceof PanelCellItem) {
+            Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
+            BlockPos blockPos = new BlockPos(lookVector);
+            TileEntity te = world.getTileEntity(blockPos);
+            if(te instanceof PanelTile) {
+                if(key_alt) {
+                    ((PanelTile) te).overrideRotate(player, wheelDelta < 0);
+                    mouseScrollEvent.setCanceled(true);
+                } else {
+                    ((PanelTile) te).resetOverrideRotate();
+                }
+            }
         }
     }
 

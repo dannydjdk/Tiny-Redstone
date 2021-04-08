@@ -49,6 +49,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private boolean flagUpdate = false;
     private boolean flagSync = true;
     protected PanelCellGhostPos panelCellGhostPos;
+    protected Side overrideFacing = Side.FRONT;
 
     //for backward compat. Remove on next major update (2.x.x).
     private boolean fixLegacyFacing = false;
@@ -99,6 +100,30 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.cellDirections.clear();
         }
         this.read(blockState, tag);
+    }
+
+    public void resetOverrideRotate() {
+        this.overrideFacing = null;
+    }
+
+    public void overrideRotate(PlayerEntity playerEntity, boolean invert) {
+        Side currentSide = this.overrideFacing == null
+                ? this.getSideFromDirection(this.getPlayerDirectionFacing(playerEntity))
+                : this.overrideFacing;
+        switch (currentSide) {
+            case BACK:
+                this.overrideFacing = invert ? Side.RIGHT : Side.LEFT;
+                break;
+            case LEFT:
+                this.overrideFacing = invert ? Side.BACK : Side.FRONT;
+                break;
+            case FRONT:
+                this.overrideFacing = invert ? Side.LEFT : Side.RIGHT;
+                break;
+            case RIGHT:
+                this.overrideFacing = invert ? Side.FRONT : Side.BACK;
+                break;
+        }
     }
 
     public CompoundNBT saveToNbt(CompoundNBT compoundNBT) {
