@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -363,7 +364,7 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
     }
     public void setTicks(Integer ticks){
         if (ticks<2)this.ticks=2;
-        else if(ticks>200)this.ticks=200;
+        else if(ticks>Config.SUPER_REPEATER_MAX.get()*2)this.ticks=Config.SUPER_REPEATER_MAX.get()*2;
         else this.ticks=ticks;
     }
 
