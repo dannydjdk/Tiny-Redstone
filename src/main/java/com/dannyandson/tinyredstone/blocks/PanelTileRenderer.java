@@ -88,7 +88,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             }
 
             if (tileEntity.panelCellGhostPos != null) {
-                renderCell(matrixStack, tileEntity.panelCellGhostPos, tileEntity.overrideFacing, buffer, combinedLight, combinedOverlay, 0.5f);
+                renderCell(matrixStack, tileEntity.panelCellGhostPos, RotationLock.getRotationLock(), buffer, combinedLight, combinedOverlay, 0.5f);
             }
         }
 

@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone;
 
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
@@ -14,6 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -32,6 +34,7 @@ public class ClientBinding {
             if(key == GLFW.GLFW_KEY_LEFT_ALT) key_alt = false;
         }
     }
+
     @SubscribeEvent
     public void wheelEvent(final InputEvent.MouseScrollEvent mouseScrollEvent) {
         if (mouseScrollEvent.isCanceled()) return;
@@ -44,18 +47,25 @@ public class ClientBinding {
         final Item mainHandItem = mainHand.getItem();
 
         if (mainHandItem instanceof PanelCellItem) {
-            Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
-            BlockPos blockPos = new BlockPos(lookVector);
-            TileEntity te = world.getTileEntity(blockPos);
-            if(te instanceof PanelTile) {
-                if(key_alt) {
-                    ((PanelTile) te).overrideRotate(player, wheelDelta < 0);
-                    mouseScrollEvent.setCanceled(true);
+            if(key_alt) {
+                Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
+                BlockPos blockPos = new BlockPos(lookVector);
+                TileEntity te = world.getTileEntity(blockPos);
+                if (te instanceof PanelTile) {
+                    RotationLock.lockRotation((PanelTile) te, player, wheelDelta < 0);
                 } else {
-                    ((PanelTile) te).resetOverrideRotate();
+                    RotationLock.lockRotation(wheelDelta < 0);
                 }
+                mouseScrollEvent.setCanceled(true);
+            } else {
+                RotationLock.removeLock();
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
+        RotationLock.removeLock();
     }
 
     @SubscribeEvent

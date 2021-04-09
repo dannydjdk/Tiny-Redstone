@@ -41,6 +41,18 @@ public class ModNetworkHandler {
                 .consumer(BlueprintSync::handle)
                 .add();
 
+        INSTANCE.messageBuilder(RotationLockSync.class,nextID())
+                .encoder(RotationLockSync::toBytes)
+                .decoder(RotationLockSync::new)
+                .consumer(RotationLockSync::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RotationLockRemoveSync.class,nextID())
+                .encoder(RotationLockRemoveSync::toBytes)
+                .decoder(RotationLockRemoveSync::new)
+                .consumer(RotationLockRemoveSync::handle)
+                .add();
+
         INSTANCE.messageBuilder(CrashFlagResetSync.class,nextID())
                 .encoder(CrashFlagResetSync::toBytes)
                 .decoder(CrashFlagResetSync::new)
