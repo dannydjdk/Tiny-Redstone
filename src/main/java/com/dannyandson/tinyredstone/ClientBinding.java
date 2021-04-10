@@ -7,6 +7,7 @@ import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -18,21 +19,16 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 public class ClientBinding {
-    boolean key_alt;
 
-    @SubscribeEvent
-    public void onKeyInput(InputEvent.KeyInputEvent event) {
-        int action = event.getAction();
-        if(action == GLFW.GLFW_PRESS) {
-            int key = event.getKey();
-            if(key == GLFW.GLFW_KEY_LEFT_ALT) key_alt = true;
-        } else if(action == GLFW.GLFW_RELEASE) {
-            int key = event.getKey();
-            if(key == GLFW.GLFW_KEY_LEFT_ALT) key_alt = false;
-        }
+    public static KeyBinding rotationLockReset;
+
+    public static void registerKeyBindings() {
+        rotationLockReset =  new KeyBinding("key." + TinyRedstone.MODID + ".rotation_lock_reset", GLFW.GLFW_KEY_LEFT_ALT, "TinyRedstone");
+        ClientRegistry.registerKeyBinding(rotationLockReset);
     }
 
     @SubscribeEvent
@@ -47,7 +43,7 @@ public class ClientBinding {
         final Item mainHandItem = mainHand.getItem();
 
         if (mainHandItem instanceof PanelCellItem) {
-            if(key_alt) {
+            if(rotationLockReset.isKeyDown()) {
                 Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
                 BlockPos blockPos = new BlockPos(lookVector);
                 TileEntity te = world.getTileEntity(blockPos);

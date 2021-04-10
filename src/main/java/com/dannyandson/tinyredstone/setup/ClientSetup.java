@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.setup;
 
+import com.dannyandson.tinyredstone.ClientBinding;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTileColor;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
@@ -22,6 +23,7 @@ public class ClientSetup {
         PanelTileRenderer.register();
         Minecraft.getInstance().getBlockColors().register(new PanelTileColor(), Registration.REDSTONE_PANEL_BLOCK.get());
         Minecraft.getInstance().getItemColors().register(new PanelItemColor(),Registration.REDSTONE_PANEL_ITEM.get());
+        ClientBinding.registerKeyBindings();
     }
 
     @SuppressWarnings("unused")
