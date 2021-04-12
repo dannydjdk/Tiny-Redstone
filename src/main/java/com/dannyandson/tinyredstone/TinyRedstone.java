@@ -5,6 +5,7 @@ import com.dannyandson.tinyredstone.blocks.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.compat.CompatHandler;
+import com.dannyandson.tinyredstone.gui.ToolbarOverlay;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -33,15 +34,16 @@ public class TinyRedstone {
         Registration.register();
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ModSetup::init);
-        if(FMLEnvironment.dist.isClient())
+        if(FMLEnvironment.dist.isClient()) {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientSetup::init);
+            MinecraftForge.EVENT_BUS.register(new ClientBinding());
+            MinecraftForge.EVENT_BUS.register(new ToolbarOverlay());
+        }
 
+        MinecraftForge.EVENT_BUS.register(new CommonBinding());
 
         // Register the doClientStuff method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
-
-        // Register ourselves for server and other game events we are interested in
-        MinecraftForge.EVENT_BUS.register(new ClientBinding());
 
         //load configs
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);

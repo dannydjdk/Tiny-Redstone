@@ -1,11 +1,8 @@
 package com.dannyandson.tinyredstone;
 
-import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
-import com.dannyandson.tinyredstone.setup.Registration;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,19 +13,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 public class ClientBinding {
 
-    public static KeyBinding rotationLockReset;
+    public static KeyBinding rotationLock;
 
     public static void registerKeyBindings() {
-        rotationLockReset =  new KeyBinding("key." + TinyRedstone.MODID + ".rotation_lock_reset", GLFW.GLFW_KEY_LEFT_ALT, "TinyRedstone");
-        ClientRegistry.registerKeyBinding(rotationLockReset);
+        rotationLock =  new KeyBinding("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, "TinyRedstone");
+        ClientRegistry.registerKeyBinding(rotationLock);
     }
 
     @SubscribeEvent
@@ -43,7 +38,7 @@ public class ClientBinding {
         final Item mainHandItem = mainHand.getItem();
 
         if (mainHandItem instanceof PanelCellItem) {
-            if(rotationLockReset.isKeyDown()) {
+            if(rotationLock.isKeyDown()) {
                 Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
                 BlockPos blockPos = new BlockPos(lookVector);
                 TileEntity te = world.getTileEntity(blockPos);
@@ -56,29 +51,6 @@ public class ClientBinding {
             } else {
                 RotationLock.removeLock();
             }
-        }
-    }
-
-    @SubscribeEvent
-    public void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
-        RotationLock.removeLock();
-    }
-
-    @SubscribeEvent
-    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        //allow creative players to remove cells by left clicking with wrench or cell item
-        if (
-                event.getPlayer().isCreative()
-                && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof PanelBlock
-                && (
-                        event.getPlayer().getHeldItemMainhand().getItem()== Registration.REDSTONE_WRENCH.get()
-                        || event.getPlayer().getHeldItemMainhand().getItem() instanceof PanelCellItem
-                )
-        ) {
-            BlockState blockState = event.getWorld().getBlockState(event.getPos());
-            PanelBlock panelBlock = (PanelBlock)blockState.getBlock();
-            panelBlock.onBlockClicked(blockState,event.getWorld(),event.getPos(), event.getPlayer());
-            event.setCanceled(true);
         }
     }
 }

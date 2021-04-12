@@ -83,12 +83,12 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                 PanelCellPos pos = PanelCellPos.fromIndex(tileEntity,i);
                 IPanelCell panelCell = pos.getIPanelCell();
                 if (panelCell!=null) {
-                    renderCell(matrixStack, pos, null, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
+                    renderCell(matrixStack, pos, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
                 }
             }
 
             if (tileEntity.panelCellGhostPos != null) {
-                renderCell(matrixStack, tileEntity.panelCellGhostPos, RotationLock.getRotationLock(), buffer, combinedLight, combinedOverlay, 0.5f);
+                renderCell(matrixStack, tileEntity.panelCellGhostPos, buffer, combinedLight, combinedOverlay, 0.5f);
             }
         }
 
@@ -107,14 +107,14 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
     }
 
-    private void renderCell(MatrixStack matrixStack, PanelCellPos pos, Side overrideFacing, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
+    private void renderCell(MatrixStack matrixStack, PanelCellPos pos, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
     {
         matrixStack.push();
 
         matrixStack.translate(cellSize*(double)pos.getRow(), 0.125, cellSize*(pos.getColumn()));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
 
-        Side facing = overrideFacing == null ? pos.getCellFacing() : overrideFacing;
+        Side facing = pos.getCellFacing();
 
         if (facing == Side.LEFT)
         {
@@ -167,10 +167,16 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                 if (te == panelTile) {
                     PosInPanelCell posInPanelCell =  PosInPanelCell.fromHitVec(panelTile,panelTile.getPos(),lookingAt.getHitVec());
                     if (posInPanelCell!=null && posInPanelCell.getIPanelCell()==null) {
-                        Side lookingTowardSide = panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player));
                         try {
                             IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getHeldItemMainhand().getItem()).getConstructors()[0].newInstance();
-                            return PanelCellGhostPos.fromPosInPanelCell(posInPanelCell,panelCell,lookingTowardSide);
+                            Side rotationLock = RotationLock.getRotationLock();
+                            return PanelCellGhostPos.fromPosInPanelCell(
+                                    posInPanelCell,
+                                    panelCell,
+                                    rotationLock == null ?
+                                            panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player))
+                                            : rotationLock
+                            );
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                             TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());
                         }
