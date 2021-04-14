@@ -12,11 +12,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class ClientBinding {
 
     public static KeyBinding rotationLock;
@@ -27,7 +30,7 @@ public class ClientBinding {
     }
 
     @SubscribeEvent
-    public void wheelEvent(final InputEvent.MouseScrollEvent mouseScrollEvent) {
+    public static void wheelEvent(final InputEvent.MouseScrollEvent mouseScrollEvent) {
         if (mouseScrollEvent.isCanceled()) return;
         final int wheelDelta = (int) mouseScrollEvent.getScrollDelta();
         if (wheelDelta == 0) return;

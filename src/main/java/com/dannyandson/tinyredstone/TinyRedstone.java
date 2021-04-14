@@ -36,11 +36,11 @@ public class TinyRedstone {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ModSetup::init);
         if(FMLEnvironment.dist.isClient()) {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientSetup::init);
-            MinecraftForge.EVENT_BUS.register(new ClientBinding());
-            MinecraftForge.EVENT_BUS.register(new ToolbarOverlay());
+            //MinecraftForge.EVENT_BUS.register(new ClientBinding());
+            //MinecraftForge.EVENT_BUS.register(new ToolbarOverlay());
         }
 
-        MinecraftForge.EVENT_BUS.register(new CommonBinding());
+        //MinecraftForge.EVENT_BUS.register(new CommonBinding());
 
         // Register the doClientStuff method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);

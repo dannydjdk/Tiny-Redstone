@@ -9,10 +9,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
+@Mod.EventBusSubscriber
 public class CommonBinding {
     @SubscribeEvent
-    public void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
+    public static void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
         PlayerEntity player = event.getPlayer();
         if(player.world.isRemote) {
             RotationLock.removeLock(false);

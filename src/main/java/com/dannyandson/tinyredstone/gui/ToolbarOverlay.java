@@ -13,13 +13,16 @@ import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.opengl.GL11;
 
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class ToolbarOverlay {
     @SubscribeEvent
-    public void onRenderGUI(final RenderGameOverlayEvent.Post event) {
+    public static void onRenderGUI(final RenderGameOverlayEvent.Post event) {
         if(event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR) {
             final Minecraft mcInstance = Minecraft.getInstance();
             final ClientPlayerEntity player = mcInstance.player;
