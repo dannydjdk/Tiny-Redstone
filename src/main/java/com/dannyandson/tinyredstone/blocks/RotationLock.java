@@ -18,14 +18,23 @@ public class RotationLock {
 
     @OnlyIn(Dist.CLIENT)
     public static void removeLock() {
+        removeLock(true);
+    }
+    @OnlyIn(Dist.CLIENT)
+    public static void removeLock(boolean sendToServer) {
         if(rotationLock != null) {
             rotationLock = null;
-            ModNetworkHandler.sendToServer(new RotationLockRemoveSync());
+            if(sendToServer) ModNetworkHandler.sendToServer(new RotationLockRemoveSync());
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void lockRotation(Side side, boolean invert) {
+        lockRotation(side, invert, true);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void lockRotation(Side side, boolean invert, boolean sendToServer) {
         switch (side) {
             case BACK:
                 side = invert ? Side.RIGHT : Side.LEFT;
@@ -42,22 +51,32 @@ public class RotationLock {
         }
         if(side != rotationLock) {
             rotationLock = side;
-            ModNetworkHandler.sendToServer(new RotationLockSync(side));
+            if(sendToServer) ModNetworkHandler.sendToServer(new RotationLockSync(side));
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void lockRotation(boolean invert) {
-        lockRotation(rotationLock == null
-                ? Side.FRONT
-                : rotationLock, invert);
+        lockRotation(invert, true);
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean invert) {
+        lockRotation(panelTile, playerEntity, invert, true);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void lockRotation(boolean invert, boolean sendToServer) {
+        lockRotation(rotationLock == null
+                ? Side.FRONT
+                : rotationLock, invert, sendToServer);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean invert, boolean sendToServer) {
         lockRotation(rotationLock == null
                 ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(playerEntity))
-                : rotationLock, invert);
+                : rotationLock, invert, sendToServer);
     }
 
     @OnlyIn(Dist.CLIENT)

@@ -1,4 +1,5 @@
 {
+  "key.tinyredstone.rotation_lock": "Sperre Drehung (verwende Scrollen)",
   "block.tinyredstone.redstone_panel" : "Redstone Tafel",
   "message.item.redstone_panel" : "§7Tafel welches winzige Redstone-Komponente aufnehmen kann.\nKlicke rechts mit einem Farbstoff um die Farbe zu ändern.§r",
   "message.item.redstone_wrench": "§7Klicke rechts auf die Tafel um sie zu drehen.\nKlicke links um einzelne winzige Redstone-Komponenten zu entfernen.§r",

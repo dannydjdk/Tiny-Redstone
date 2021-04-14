@@ -5,6 +5,7 @@ import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -12,18 +13,22 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class CommonBinding {
     @SubscribeEvent
     public void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
-        RotationLock.removeLock();
+        PlayerEntity player = event.getPlayer();
+        if(player.world.isRemote) {
+            RotationLock.removeLock(false);
+        } else {
+            RotationLock.removeServerLock(player);
+        }
     }
 
     @SubscribeEvent
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         //allow creative players to remove cells by left clicking with wrench or cell item
-        if (
-                event.getPlayer().isCreative()
-                        && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof PanelBlock
-                        && (
-                        event.getPlayer().getHeldItemMainhand().getItem()== Registration.REDSTONE_WRENCH.get()
-                                || event.getPlayer().getHeldItemMainhand().getItem() instanceof PanelCellItem
+        if (event.getPlayer().isCreative()
+                && event.getWorld().getBlockState(event.getPos()).getBlock() instanceof PanelBlock
+                && (
+                        event.getPlayer().getHeldItemMainhand().getItem()==Registration.REDSTONE_WRENCH.get()
+                        || event.getPlayer().getHeldItemMainhand().getItem() instanceof PanelCellItem
                 )
         ) {
             BlockState blockState = event.getWorld().getBlockState(event.getPos());
