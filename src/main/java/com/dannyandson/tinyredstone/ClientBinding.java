@@ -19,7 +19,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
 public class ClientBinding {
 
     public static KeyBinding rotationLock;

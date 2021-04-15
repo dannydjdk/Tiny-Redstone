@@ -1,8 +1,11 @@
 package com.dannyandson.tinyredstone.gui;
 
+import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
@@ -12,14 +15,13 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.opengl.GL11;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
 public class ToolbarOverlay {
     @SubscribeEvent
     public static void onRenderGUI(final RenderGameOverlayEvent.Post event) {
@@ -41,7 +43,7 @@ public class ToolbarOverlay {
                     if(rotationLock != null) {
                         Tessellator tessellator = Tessellator.getInstance();
                         BufferBuilder bufferBuilder = tessellator.getBuffer();
-                        Matrix4f matrix4f = event.getMatrixStack().getLast().getMatrix();
+                        MatrixStack matrixStack = event.getMatrixStack();
                         RenderSystem.enableBlend();
                         RenderSystem.disableTexture();
                         RenderSystem.defaultBlendFunc();
@@ -49,24 +51,16 @@ public class ToolbarOverlay {
 
                         switch (rotationLock) {
                             case BACK:
-                                bufferBuilder.pos(matrix4f, x, y, 0.0F).color(181, 181, 181, 255).endVertex();
-                                bufferBuilder.pos(matrix4f, x+1.5f, y+3, 0.0F).color(181, 181, 181, 255).endVertex();
-                                bufferBuilder.pos(matrix4f, x+3, y, 0.0F).color(181, 181, 181, 255).endVertex();
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y, x+1.5f, y+3, x+3, y, 0xaaaaaa, 1.0f);
                                 break;
                             case LEFT:
-                                bufferBuilder.pos(matrix4f, x, y+1.5f, 0.0F).color(181, 181, 181, 255).endVertex();
-                                bufferBuilder.pos(matrix4f, x+3, y+3, 0.0F).color(181, 181, 181, 255).endVertex();
-                                bufferBuilder.pos(matrix4f, x+3, y, 0.0F).color(181, 181, 181, 255).endVertex();
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+1.5f, x+3, y+3, x+3, y, 0xaaaaaa, 1.0f);
                                 break;
                             case FRONT:
-                                bufferBuilder.pos(matrix4f, x+1.5f, y, 0.0F).color(181, 181, 181, 255).endVertex();
-                                bufferBuilder.pos(matrix4f, x, y+3, 0.0F).color(181, 181, 181, 255).endVertex();
-                                bufferBuilder.pos(matrix4f, x+3, y+3, 0.0F).color(181, 181, 181, 255).endVertex();
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+1.5f, y, x, y+3, x+3, y+3, 0xaaaaaa, 1.0f);
                                 break;
                             case RIGHT:
-                                bufferBuilder.pos(matrix4f, x, y, 0.0F).color(181, 181, 181, 255).endVertex();
-                                bufferBuilder.pos(matrix4f, x, y+3, 0.0F).color(181, 181, 181, 255).endVertex();
-                                bufferBuilder.pos(matrix4f, x+3, y+1.5f, 0.0F).color(181, 181, 181, 255).endVertex();
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y, x, y+3, x+3, y+1.5f, 0xaaaaaa, 1.0f);
                                 break;
                         }
 

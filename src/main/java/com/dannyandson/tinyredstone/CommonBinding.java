@@ -11,7 +11,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(modid = TinyRedstone.MODID)
 public class CommonBinding {
     @SubscribeEvent
     public static void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {

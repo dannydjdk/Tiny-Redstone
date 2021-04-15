@@ -5,12 +5,10 @@ import com.dannyandson.tinyredstone.blocks.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.compat.CompatHandler;
-import com.dannyandson.tinyredstone.gui.ToolbarOverlay;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.item.Item;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -36,11 +34,7 @@ public class TinyRedstone {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ModSetup::init);
         if(FMLEnvironment.dist.isClient()) {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientSetup::init);
-            //MinecraftForge.EVENT_BUS.register(new ClientBinding());
-            //MinecraftForge.EVENT_BUS.register(new ToolbarOverlay());
         }
-
-        //MinecraftForge.EVENT_BUS.register(new CommonBinding());
 
         // Register the doClientStuff method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
