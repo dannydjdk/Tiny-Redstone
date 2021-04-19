@@ -51,16 +51,20 @@ public class ToolbarOverlay {
 
                         switch (rotationLock) {
                             case BACK:
-                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y, x+1.5f, y+3, x+3, y, 0xaaaaaa, 1.0f);
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+1, x+1.5f, y+3+1, x+3, y+1, 0xaaaaaa, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+0.75f, x+3-0.75f, y, y+1, 0xaaaaaa, 1.0f);
                                 break;
                             case LEFT:
                                 RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+1.5f, x+3, y+3, x+3, y, 0xaaaaaa, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+3, x+3+1, y+0.75f, y+3-0.75f, 0xaaaaaa, 1.0f);
                                 break;
                             case FRONT:
                                 RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+1.5f, y, x, y+3, x+3, y+3, 0xaaaaaa, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+0.75f, x+3-0.75f, y+3, y+3+1, 0xaaaaaa, 1.0f);
                                 break;
                             case RIGHT:
-                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y, x, y+3, x+3, y+1.5f, 0xaaaaaa, 1.0f);
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+1, y, x+1, y+3, x+3+1, y+1.5f, 0xaaaaaa, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+1, y+0.75f, y+3-0.75f, 0xaaaaaa, 1.0f);
                                 break;
                         }
 

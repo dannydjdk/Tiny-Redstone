@@ -31,6 +31,19 @@ public class RenderHelper {
         add(builder, matrix4f, x3, y3, 0.0F, color, alpha);
     }
 
+    public static void drawTriangleRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, int color, float alpha) {
+        // x1 = x+0.25f, x2 = x+3-0.25f, y1 = y, y2 = y+1
+        Matrix4f matrix4f = matrixStack.getLast().getMatrix();
+        add(builder, matrix4f, x1, y1, 0.0F, color, alpha);
+        add(builder, matrix4f, x2, y2, 0.0F, color, alpha);
+        add(builder, matrix4f, x2, y1, 0.0F, color, alpha);
+
+        add(builder, matrix4f, x1, y1, 0.0F, color, alpha);
+        add(builder, matrix4f, x1, y2, 0.0F, color, alpha);
+        add(builder, matrix4f, x2, y2, 0.0F, color, alpha);
+        //drawTriangle(builder, matrixStack, x1, y1, x2, y2, x2, y1)
+    }
+
     public static void add(IVertexBuilder renderer, Matrix4f matrix4f, float x, float y, float z, int color, float alpha) {
         renderer.pos(matrix4f, x, y, z)
                 .color(ColorHelper.PackedColor.getRed(color),ColorHelper.PackedColor.getGreen(color), ColorHelper.PackedColor.getBlue(color), (int)(alpha*255f))
