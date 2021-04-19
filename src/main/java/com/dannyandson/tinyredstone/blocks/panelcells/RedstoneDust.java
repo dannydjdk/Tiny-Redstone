@@ -7,12 +7,11 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -34,11 +33,11 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     private static final float s10 = 0.625f;
 
 
-    private int signalStrength = 0;
-    private boolean frontEnabled = true;
-    private boolean rightEnabled = false;
-    private boolean backEnabled = true;
-    private boolean leftEnabled = false;
+    protected int signalStrength = 0;
+    protected boolean frontEnabled = true;
+    protected boolean rightEnabled = false;
+    protected boolean backEnabled = true;
+    protected boolean leftEnabled = false;
 
     private float red = .25f;
     private float green = 0;
@@ -55,48 +54,32 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         red = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
+        int color = ColorHelper.PackedColor.packColor(255,Math.round(red*255),0,0);
 
-        TextureAtlasSprite sprite_redstone_dust = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_DUST);
-        TextureAtlasSprite sprite_redstone_segment = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_DUST_SEGMENT);
+        TextureAtlasSprite sprite_redstone_dust = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST);
+        TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
 
         IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
 
         matrixStack.translate(0,0,0.01);
-        addSquare(builder,matrixStack,s6-.01f,s6-.01f,s10+.01f,s10+.01f,sprite_redstone_dust,combinedLight,combinedOverlay, alpha);
-        //matrixStack.translate(0,0,0.5);
+        RenderHelper.drawRectangle(builder,matrixStack,s6-.01f,s10+.01f,s6-.01f,s10+.01f,sprite_redstone_dust,combinedLight,color, alpha);
+
         if (rightEnabled) {
-            addSquare(builder,matrixStack,s10,s7,1.01f,s9,sprite_redstone_segment,combinedLight,combinedOverlay, alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
         }
         if (leftEnabled) {
-            addSquare(builder,matrixStack,-.01f,s7,s6,s9,sprite_redstone_segment,combinedLight,combinedOverlay, alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
         }
         matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         if (frontEnabled) {
-            addSquare(builder,matrixStack,s10,s7,1.01f,s9,sprite_redstone_segment,combinedLight,combinedOverlay, alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
         }
         if (backEnabled) {
-            addSquare(builder,matrixStack,-.01f,s7,s6,s9,sprite_redstone_segment,combinedLight,combinedOverlay, alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
         }
 
 
-    }
-
-    private void addSquare (IVertexBuilder builder, MatrixStack matrixStack, float x0, float y0, float x1, float y1,TextureAtlasSprite sprite,  int combinedLight, int combinedOverlay, float alpha){
-
-        add(builder, matrixStack, x0,y0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, x1,y0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, x1,y1, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, x0,y1, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay, alpha);
-    }
-
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, 0)
-                .color(red, green, blue, alpha)
-                .tex(u, v)
-                .lightmap(combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
     }
 
     /**
@@ -140,7 +123,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         return false;
     }
 
-    private int getNeighborOutput(PanelCellNeighbor neighbor)
+    protected int getNeighborOutput(PanelCellNeighbor neighbor)
     {
         int s = neighbor.getStrongRsOutput();
         int w = neighbor.getWeakRsOutput();
@@ -153,7 +136,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         return input;
     }
 
-    private boolean sideEnabled(Side side)
+    protected boolean sideEnabled(Side side)
     {
         return ( side== Side.FRONT&&this.frontEnabled ) ||
                 (side== Side.RIGHT&&this.rightEnabled) ||

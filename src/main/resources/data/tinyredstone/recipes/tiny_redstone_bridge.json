@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "tag": "forge:silicon"
+    },
+    {
+      "tag": "forge:silicon"
+    }
+  ],
+  "result": {
+    "item": "tinyredstone:tiny_redstone_bridge",
+    "count": 4
+  }
+}

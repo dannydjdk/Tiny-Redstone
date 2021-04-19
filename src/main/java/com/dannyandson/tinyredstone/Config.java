@@ -13,6 +13,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue TORCH_LIGHT;
     public static ForgeConfigSpec.IntValue DISPLAY_MODE;
     public static ForgeConfigSpec.BooleanValue JSON_BLUEPRINT;
+    public static ForgeConfigSpec.IntValue SUPER_REPEATER_MAX;
 
     static {
 
@@ -29,6 +30,10 @@ public class Config {
 
         TORCH_LIGHT = SERVER_BUILDER.comment("Should redstone torches output light to the surrounding area? (default:false)")
                 .define("torch_light",false);
+
+        SUPER_REPEATER_MAX = SERVER_BUILDER.comment("Maximum redstone tick delay for super repeaters. 10 redstone ticks = 1 second." +
+                "\nLarge numbers require more memory. (default:100)")
+                .defineInRange("super_repeater_max",100,4,Integer.MAX_VALUE);
 
         SERVER_BUILDER.pop();
 

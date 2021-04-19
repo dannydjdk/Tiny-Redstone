@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -9,10 +10,8 @@ import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
 import mcjty.theoneprobe.api.TextStyleClass;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -22,10 +21,10 @@ import javax.annotation.Nullable;
 import java.util.LinkedList;
 
 public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
-    private boolean input = false;
+    protected boolean input = false;
     protected boolean output = false;
-    private boolean locked = false;
-    private LinkedList<Boolean> queue = new LinkedList<>();
+    protected boolean locked = false;
+    private final LinkedList<Boolean> queue = new LinkedList<>();
     protected Integer ticks = 2;
 
     public static ResourceLocation TEXTURE_REPEATER_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_repeater_on");
@@ -37,133 +36,95 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
-     * @param combinedLight
-     * @param combinedOverlay
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(PanelTileRenderer.TEXTURE);
+        TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = this.getRepeaterTexture();
-        TextureAtlasSprite sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_ON);
+        TextureAtlasSprite sprite_torch_head = RenderHelper.getSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_ON);
 
 
         if (!this.output){
-            sprite_torch_head = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
+            sprite_torch_head = RenderHelper.getSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
         }
 
         if (locked)
-            sprite_torch_head=Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation("minecraft","block/bedrock"));
+            sprite_torch_head=RenderHelper.getSprite(new ResourceLocation("minecraft","block/bedrock"));
 
 
         matrixStack.translate(0,0,0.25);
 
         //draw base top
-        add(builder, matrixStack, 0,0,0, sprite_repeater.getMinU(), sprite_repeater.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite_repeater.getMaxU(), sprite_repeater.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,1,0, sprite_repeater.getMaxU(), sprite_repeater.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,1,0, sprite_repeater.getMinU(), sprite_repeater.getMinV(),combinedLight,combinedOverlay,alpha);
+        matrixStack.push();
+        matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
+        matrixStack.translate(-1,-1,0);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_repeater,combinedLight,alpha);
+        matrixStack.pop();
+
 
         if (ticks>8) {
             matrixStack.push();
             matrixStack.translate(0, 0, 0.01);
-            add(builder, matrixStack, 0.25f, 0.125f, 0, sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight, combinedOverlay,alpha);
-            add(builder, matrixStack, 0.75f, 0.125f, 0, sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight, combinedOverlay,alpha);
-            add(builder, matrixStack, 0.75f, 0.25f, 0, sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight, combinedOverlay,alpha);
-            add(builder, matrixStack, 0.25f, 0.25f, 0, sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight, combinedOverlay,alpha);
-
+            RenderHelper.drawRectangle(builder,matrixStack,0.25f,0.75f,0.125f,0.25f,sprite_torch_head,combinedLight,alpha);
             matrixStack.pop();
         }
 
         matrixStack.push();
         //draw static torch top
         matrixStack.translate(0,0,0.125);
-        add(builder,matrixStack,0.4375f,0.75f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.5625f,0.75f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.5625f,0.875f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.4375f,0.875f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0.4375f,0.5625f,0.75f,0.875f,sprite_torch_head,combinedLight,alpha);
 
         //draw moving torch top
         float torch2Y = (ticks<8)? 0.75f - ticks.floatValue()*0.0625f : 0.25f;
+        RenderHelper.drawRectangle(builder,matrixStack,0.4375f,0.5625f,torch2Y-0.125f,torch2Y,sprite_torch_head,combinedLight,alpha);
 
-        add(builder,matrixStack,0.4375f,torch2Y-0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.5625f,torch2Y-0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.5625f,torch2Y,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.4375f,torch2Y,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
         matrixStack.pop();
 
         //draw back side
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.25,0);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 
         matrixStack.push();
         //draw static torch side
         matrixStack.translate(.4375f,.25,-0.75f);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
 
         //draw moving torch side
         matrixStack.translate(0,0,.875-torch2Y);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
 
         matrixStack.pop();
 
         //right side
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 
         matrixStack.push();
         //draw static torch side
         matrixStack.translate(.75,0.25f,-.4375f);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
 
         //draw moving torch side
         matrixStack.translate(torch2Y-.875,0,0);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
 
         matrixStack.pop();
 
         //front side
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
         matrixStack.push();
         //draw static torch front
         matrixStack.translate(.4375f,.25,-0.125f);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
 
         //draw moving torch front
         matrixStack.translate(0,0,torch2Y-.875);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
 
         matrixStack.pop();
 
@@ -171,45 +132,27 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
         //left side
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 
         matrixStack.push();
         //draw static torch side
         matrixStack.translate(.125,0.25f,-.4375f);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
 
         //draw moving torch side
         matrixStack.translate(.875-torch2Y,0,0);
-        add(builder,matrixStack,0f,0f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMaxV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0.125f,0.125f,0,sprite_torch_head.getMaxU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
-        add(builder,matrixStack,0f,0.125f,0,sprite_torch_head.getMinU(), sprite_torch_head.getMinV(), combinedLight,combinedOverlay,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
 
         matrixStack.pop();
 
 
     }
 
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, alpha)
-                .tex(u, v)
-                .lightmap(combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
-    }
-
     protected TextureAtlasSprite getRepeaterTexture()
     {
         if (this.output)
-            return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_ON);
-        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REPEATER_OFF);
+            return RenderHelper.getSprite(TEXTURE_REPEATER_ON);
+        return RenderHelper.getSprite(TEXTURE_REPEATER_OFF);
 
     }
 
@@ -251,8 +194,7 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
     /**
      * Gets redstone output of the given side of the cell
      *
-     * @param outputDirection
-     * @return integer 0-15 indicating the strengh of redstone signal
+     * @return integer 0-15 indicating the strength of redstone signal
      */
     @Override
     public int getWeakRsOutput(Side outputDirection)
@@ -291,13 +233,14 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
         while (this.queue.size()>this.ticks)
             this.queue.remove();
 
-        Boolean newOutput = this.queue.remove();
-        this.queue.add(input);
+        if (this.ticks>0) {
+            Boolean newOutput = this.queue.remove();
+            this.queue.add(input);
 
-        if (!this.locked && this.output!=newOutput)
-        {
-            this.output=newOutput;
-            return true;
+            if (!this.locked && this.output != newOutput) {
+                this.output = newOutput;
+                return true;
+            }
         }
 
         return false;
@@ -329,13 +272,12 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
         nbt.putBoolean("input",input);
         nbt.putBoolean("locked",locked);
 
-        String queueString = "";
-        int i=0;
+        StringBuilder queueString = new StringBuilder();
         for (Object b : queue.toArray())
         {
-            queueString += ((Boolean)b)?"1":"0";
+            queueString.append(((Boolean) b) ? "1" : "0");
         }
-        nbt.putString("queue",queueString);
+        nbt.putString("queue", queueString.toString());
 
 
         nbt.putInt("ticks",this.ticks);
@@ -362,8 +304,8 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
         return this.ticks;
     }
     public void setTicks(Integer ticks){
-        if (ticks<2)this.ticks=2;
-        else if(ticks>200)this.ticks=200;
+        if (ticks<0)this.ticks=0;
+        else if(ticks>Config.SUPER_REPEATER_MAX.get()*2)this.ticks=Config.SUPER_REPEATER_MAX.get()*2;
         else this.ticks=ticks;
     }
 

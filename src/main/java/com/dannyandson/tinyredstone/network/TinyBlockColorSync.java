@@ -48,7 +48,7 @@ public class TinyBlockColorSync {
                 if (cell instanceof IColorablePanelCell)
                 {
                     ((IColorablePanelCell)cell).setColor(this.color);
-                    ((PanelTile) te).sync();
+                    ((PanelTile) te).flagSync();
                 }
             }
             ctx.get().setPacketHandled(true);

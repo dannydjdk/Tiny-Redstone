@@ -48,7 +48,7 @@ public class RepeaterTickSync {
                 if (cell instanceof Repeater)
                 {
                     ((Repeater)cell).setTicks(this.ticks);
-                    ((PanelTile) te).sync();
+                    ((PanelTile) te).flagSync();
                 }
             }
             ctx.get().setPacketHandled(true);

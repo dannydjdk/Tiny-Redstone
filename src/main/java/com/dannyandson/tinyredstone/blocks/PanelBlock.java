@@ -27,6 +27,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.ToolType;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -259,7 +260,7 @@ public class PanelBlock extends Block {
                             panelTile.markDirty();
                     }
                     if (change) {
-                        panelTile.sync();
+                        panelTile.flagSync();
                     }
                 }
             } catch (Exception e) {
@@ -368,6 +369,10 @@ public class PanelBlock extends Block {
                                 {
                                     panelTile.panelCover = (IPanelCover) panelCoverObject;
                                     panelTile.flagLightUpdate=true;
+
+                                    //do one last sync after covering panel
+                                    if (!world.isRemote)
+                                        world.notifyBlockUpdate(pos,state,state, Constants.BlockFlags.BLOCK_UPDATE);
 
                                     //remove an item from the player's stack
                                     if (!player.isCreative())
