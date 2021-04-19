@@ -158,7 +158,6 @@ public class RedstoneBridge extends RedstoneDust {
 
     @Override
     public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        ProbeInfoHelper.addPower(probeInfo, this.signalStrength);
-        return true;
+        return false;
     }
 }
