@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
 import java.util.LinkedList;
@@ -210,4 +211,11 @@ public class Torch implements IPanelCell
         }
 
     }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return new PanelCellVoxelShape(new Vector3d(.25d,0d,.25d),new Vector3d(.75d,1d,.75d));
+    }
+
 }

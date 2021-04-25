@@ -155,6 +155,9 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("active",this.active);
@@ -177,5 +180,11 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
     public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         ProbeInfoHelper.addPower(probeInfo, this.active ? 15 : 0);
         return true;
+    }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return PanelCellVoxelShape.BUTTONSHAPE;
     }
 }

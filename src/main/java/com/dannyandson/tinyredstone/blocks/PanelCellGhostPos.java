@@ -6,13 +6,13 @@ public class PanelCellGhostPos extends PanelCellPos{
     IPanelCell panelCell;
     Side facing;
 
-    protected PanelCellGhostPos(PanelTile panelTile, int row, int column) {
-        super(panelTile, row, column);
+    protected PanelCellGhostPos(PanelTile panelTile, int row, int column, int level) {
+        super(panelTile, row, column, level);
     }
 
-    public static PanelCellGhostPos fromPosInPanelCell(PosInPanelCell posInPanelCell, IPanelCell panelCell, Side facing) {
+    public static PanelCellGhostPos fromPosInPanelCell(PanelCellPos posInPanelCell, IPanelCell panelCell, Side facing) {
 
-        PanelCellGhostPos pos = new PanelCellGhostPos(posInPanelCell.getPanelTile(),posInPanelCell.getRow(),posInPanelCell.getColumn());
+        PanelCellGhostPos pos = new PanelCellGhostPos(posInPanelCell.getPanelTile(),posInPanelCell.getRow(),posInPanelCell.getColumn(), posInPanelCell.getLevel());
         pos.panelCell=panelCell;
         pos.facing=facing;
         return pos;

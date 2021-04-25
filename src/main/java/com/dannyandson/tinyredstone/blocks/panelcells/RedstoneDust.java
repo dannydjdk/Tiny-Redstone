@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
@@ -59,7 +60,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         TextureAtlasSprite sprite_redstone_dust = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST);
         TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
 
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());;
 
         matrixStack.translate(0,0,0.01);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.01f,s10+.01f,s6-.01f,s10+.01f,sprite_redstone_dust,combinedLight,color, alpha);
@@ -234,6 +235,9 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("strength",this.signalStrength);
@@ -258,5 +262,11 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         ProbeInfoHelper.addPower(probeInfo, this.signalStrength);
         return true;
+    }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return new PanelCellVoxelShape(new Vector3d(0d,0d,0d),new Vector3d(1d,0.1d,1d));
     }
 }

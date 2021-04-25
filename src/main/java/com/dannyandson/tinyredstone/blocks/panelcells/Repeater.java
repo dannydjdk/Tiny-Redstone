@@ -266,6 +266,9 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("output",output);
@@ -316,5 +319,11 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
             probeInfo.text(CompoundText.create().style(TextStyleClass.INFO).text("Locked"));
         }
         return false;
+    }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return PanelCellVoxelShape.QUARTERCELLSLAB;
     }
 }

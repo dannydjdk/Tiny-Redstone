@@ -153,6 +153,9 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("color",color);

@@ -3,20 +3,29 @@ package com.dannyandson.tinyredstone.blocks;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class PosInPanelCell extends PanelCellPos {
     private final double x;
     private final double z;
+    private final double y;
 
-    protected PosInPanelCell(PanelTile panelTile, int row, int cell, double x, double z) {
-        super(panelTile,row, cell);
+    protected PosInPanelCell(PanelTile panelTile, int row, int level, int cell, double x, double y, double z) {
+        super(panelTile,row, cell,level);
         this.x = x;
+        this.y = y;
         this.z = z;
     }
 
     public double getX() {
         return x;
+    }
+
+    public double getY() {
+        return y;
     }
 
     public double getZ() {
@@ -49,7 +58,7 @@ public class PosInPanelCell extends PanelCellPos {
         return null;
     }
 
-    public static PosInPanelCell fromCoordinates(PanelTile panelTile, PanelCellPos panelCellPos, double x, double z) {
+    public static PosInPanelCell fromCoordinates(PanelTile panelTile, PanelCellPos panelCellPos, double x, double y, double z) {
         if(x >= 0.0 && x <= 1.0 && z >= 0.0 && z <= 1.0) {
             double rotatedX;
             double rotatedZ;
@@ -70,34 +79,61 @@ public class PosInPanelCell extends PanelCellPos {
                 rotatedZ = z;
             }
 
-            return new PosInPanelCell(panelTile, panelCellPos.getRow(), panelCellPos.getColumn(), rotatedX, rotatedZ);
+            return new PosInPanelCell(panelTile, panelCellPos.getRow(),panelCellPos.getLevel(), panelCellPos.getColumn(), rotatedX,y, rotatedZ);
         }
         return null;
     }
 
-    public static PosInPanelCell fromHitVec(PanelTile panelTile, BlockPos pos, Vector3d hitVec) {
-        double x = hitVec.x - pos.getX();
-        double z = hitVec.z - pos.getZ();
-        Direction facing = panelTile.getBlockState().get(BlockStateProperties.FACING);
+    public static PosInPanelCell fromHitVec(PanelTile panelTile, BlockPos pos, BlockRayTraceResult result) {
 
-        if (facing==Direction.NORTH)
-            z = 1-(hitVec.y-pos.getY());
-        else if (facing==Direction.EAST)
-            x = hitVec.y-pos.getY();
-        else if (facing==Direction.SOUTH)
-            z = hitVec.y-pos.getY();
-        else if (facing==Direction.WEST)
-            x = 1-(hitVec.y-pos.getY());
-        else if (facing==Direction.UP)
-            z = 1-z;
+        Direction panelFacing = panelTile.getBlockState().get(BlockStateProperties.FACING);
+        Vector3f vector3f = result.getFace().getOpposite().toVector3f();
+        vector3f.mul(.001f);
+        Vector3d hitVec = result.getHitVec().add(new Vector3d(vector3f));
+
+        double relX,relY,relZ;
+
+        if (panelFacing==Direction.NORTH) {
+            relX = hitVec.x - pos.getX();
+            relY = hitVec.z-pos.getZ();
+            relZ = 1 - (hitVec.y - pos.getY());
+        }
+        else if (panelFacing==Direction.EAST) {
+            relX = hitVec.y - pos.getY();
+            relY = 1-(hitVec.x - pos.getX());
+            relZ = hitVec.z - pos.getZ();
+        }
+        else if (panelFacing==Direction.SOUTH) {
+            relX = hitVec.x - pos.getX();
+            relY = 1-(hitVec.z-pos.getZ());
+            relZ = hitVec.y - pos.getY();
+        }
+        else if (panelFacing==Direction.WEST) {
+            relX =1-(hitVec.y - pos.getY());
+            relY = hitVec.x-pos.getX();
+            relZ = hitVec.z - pos.getZ();
+        }
+        else if (panelFacing==Direction.UP) {
+            relX = hitVec.x - pos.getX();
+            relY = 1 - (hitVec.y - pos.getY());
+            relZ = 1 - (hitVec.z - pos.getZ());
+        }
+        else{
+            relX = hitVec.x - pos.getX();
+            relZ = hitVec.z - pos.getZ();
+            relY = hitVec.y - pos.getY();
+        }
 
 
-        PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(panelTile, x, z);
+        if (relY<.125 && relY>.0625)
+            relY+=.002f;
+        PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(panelTile, relX, relY,relZ);
         if(panelCellPos == null) return null;
 
-        x = (x - (panelCellPos.getRow()/8d))*8d;
-        z = (z - (panelCellPos.getColumn()/8d))*8d;
+        relX = (relX - (panelCellPos.getRow()/8d))*8d;
+        relY = ((relY-1f/8f) - (panelCellPos.getLevel()/8d))*8d;
+        relZ = (relZ - (panelCellPos.getColumn()/8d))*8d;
 
-        return fromCoordinates(panelTile, panelCellPos, x, z);
+        return fromCoordinates(panelTile, panelCellPos, relX,relY,relZ);
     }
 }

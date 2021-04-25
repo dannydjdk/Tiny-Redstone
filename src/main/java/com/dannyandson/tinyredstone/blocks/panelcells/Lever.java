@@ -219,6 +219,9 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("active",this.active);
@@ -235,5 +238,11 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
         probeInfo.horizontal().item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
                 .text(CompoundText.createLabelInfo("State: ", this.active ? "On" : "Off"));
         return true;
+    }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return PanelCellVoxelShape.BUTTONSHAPE;
     }
 }

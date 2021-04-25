@@ -1,9 +1,6 @@
 package com.dannyandson.tinyredstone;
 
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
-import com.dannyandson.tinyredstone.blocks.IPanelCover;
-import com.dannyandson.tinyredstone.blocks.PanelBlock;
-import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
+import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.compat.CompatHandler;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
@@ -11,6 +8,7 @@ import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -87,4 +85,17 @@ public class TinyRedstone {
         }
     }
 
+    @SubscribeEvent
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event)
+    {
+        if (event.getPlayer().isSneaking() && PanelBlock.isPanelCellItem(event.getItemStack().getItem()))
+        {
+            TileEntity te = event.getWorld().getTileEntity(event.getPos());
+            if (te instanceof PanelTile)
+            {
+                Registration.REDSTONE_PANEL_BLOCK.get().onBlockActivated(te.getBlockState(),event.getWorld(),event.getPos(),event.getPlayer(),event.getHand(),event.getHitVec());
+                event.setCanceled(true);
+            }
+        }
+    }
 }

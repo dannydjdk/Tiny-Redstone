@@ -74,10 +74,18 @@ public interface IPanelCell {
      * @param segmentClicked Which of nine segment within the cell were clicked.
      * @return true if a change was made to the cell output
      */
-    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked){return false;};
+    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked){return false;}
+
+    default boolean hasActivation(){return false;}
 
     CompoundNBT writeNBT();
 
     void readNBT(CompoundNBT compoundNBT);
+
+    /**
+     * Get the shape of the cell for defining the hit box
+     * @return PanelCellVoxelShape object defining the cell shape
+     */
+    default PanelCellVoxelShape getShape() {return PanelCellVoxelShape.FULLCELL;}
 
 }

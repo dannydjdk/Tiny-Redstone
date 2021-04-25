@@ -47,7 +47,7 @@ public class RedstoneBridge extends RedstoneDust {
         TextureAtlasSprite sprite_redstone_dust = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST);
         TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
 
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
 
         matrixStack.translate(0,0,0.05);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.05f,s10+.05f,s6-.05f,s10+.05f,sprite_redstone_dust,combinedLight,0xFF888888, alpha);

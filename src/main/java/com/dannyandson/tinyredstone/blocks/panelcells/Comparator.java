@@ -236,6 +236,9 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public CompoundNBT writeNBT() {
 
         CompoundNBT nbt = new CompoundNBT();
@@ -261,5 +264,11 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         probeInfo.text(CompoundText.createLabelInfo("Mode: ", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString()));
         return false;
+    }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return PanelCellVoxelShape.QUARTERCELLSLAB;
     }
 }

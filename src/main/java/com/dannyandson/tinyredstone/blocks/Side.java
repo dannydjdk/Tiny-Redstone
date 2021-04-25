@@ -1,7 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
 public enum Side {
-    FRONT, RIGHT, BACK, LEFT;
+    FRONT, RIGHT, BACK, LEFT, TOP, BOTTOM;
 
     public Side getOpposite() {
         switch (this){
@@ -9,6 +9,8 @@ public enum Side {
             case RIGHT:return LEFT;
             case BACK:return FRONT;
             case LEFT:return RIGHT;
+            case TOP:return BOTTOM;
+            case BOTTOM:return TOP;
         }
         return null;
     }

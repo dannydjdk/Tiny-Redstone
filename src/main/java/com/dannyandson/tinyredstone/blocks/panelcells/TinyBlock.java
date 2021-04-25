@@ -184,6 +184,9 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellPro
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public void setColor(int color) {
         this.color = color;
     }
