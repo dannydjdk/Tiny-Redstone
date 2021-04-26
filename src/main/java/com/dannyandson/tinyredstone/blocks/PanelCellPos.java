@@ -163,7 +163,7 @@ public class PanelCellPos {
         }
         else if (side==Side.BOTTOM) {
             if (level > 0) {
-                cellPos =  new PanelCellPos(panelTile,row+1,column,level-1);
+                cellPos =  new PanelCellPos(panelTile,row,column,level-1);
             }
         }
 

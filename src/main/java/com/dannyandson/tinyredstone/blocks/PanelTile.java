@@ -52,6 +52,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private boolean flagUpdate = false;
     private boolean flagSync = true;
     protected PanelCellGhostPos panelCellGhostPos;
+    private VoxelShape voxelShape = null;
 
     //for backward compat. Remove on next major update (2.x.x).
     private boolean fixLegacyFacing = false;
@@ -272,7 +273,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 }
             }
         }
-
+        clearVoxelShape();
     }
 
     /**
@@ -457,8 +458,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         newPos.getPanelTile().markDirty();
         newPos.getPanelTile().flagSync=true;
+        newPos.getPanelTile().clearVoxelShape();
         cellPos.getPanelTile().markDirty();
         cellPos.getPanelTile().flagSync=true;
+        cellPos.getPanelTile().clearVoxelShape();
 
         return true;
     }
@@ -539,6 +542,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         updateOutputs();
 
+        clearVoxelShape();
         sync();
 
     }
@@ -639,6 +643,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             updateOutputs=true;
         if (updateNeighbor(cellPos,Side.LEFT,cellPosList))
             updateOutputs=true;
+        if (updateNeighbor(cellPos,Side.TOP,cellPosList))
+            updateOutputs=true;
+        if (updateNeighbor(cellPos,Side.BOTTOM,cellPosList))
+            updateOutputs=true;
 
 
         if (updateOutputs) {
@@ -674,7 +682,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     }
 
     public boolean checkCellForPistonExtension(PanelCellPos cellPos) {
-        for(Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT})
+        for(Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT,Side.TOP,Side.BOTTOM})
         {
             PanelCellPos neighborPos = cellPos.offset(panelSide);
             if (neighborPos!=null) {
@@ -714,18 +722,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         IPanelCell thisCell = cellPos.getIPanelCell();
 
         if (thisCell != null && !thisCell.isIndependentState()){
-            /*
-                Side frontDirection = cellPos.getCellFacing();
-                Side backDirection = frontDirection.getOpposite();
-                Side rightDirection = frontDirection.rotateYCW();
-                Side leftDirection = frontDirection.rotateYCCW();
-
-                PanelCellNeighbor front = getNeighbor(frontDirection, cellPos);
-                PanelCellNeighbor back = getNeighbor(backDirection, cellPos);
-                PanelCellNeighbor right = getNeighbor(rightDirection, cellPos);
-                PanelCellNeighbor left = getNeighbor(leftDirection, cellPos);
-
-             */
 
                 if (thisCell.neighborChanged(cellPos)) {
                     updateNeighborCells(cellPos, iteration + 1);
@@ -795,9 +791,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         if (cellDirection==panelSide.rotateYCCW())
             return Side.RIGHT;
         if (cellDirection==panelSide.rotateBack())
-            return Side.BOTTOM;
-        if (cellDirection==panelSide.rotateForward())
             return Side.TOP;
+        if (cellDirection==panelSide.rotateForward())
+            return Side.BOTTOM;
 
         return null;
     }
@@ -1181,6 +1177,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             cells.remove(cellIndex);
             updateNeighborCells(cellPos);
 
+            clearVoxelShape();
             sync();
         }
     }
@@ -1194,6 +1191,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             updateCell(cellIndex);
         }
         updateNeighborCells(cellPos);
+        clearVoxelShape();
     }
 
     public boolean hasCellsOnFace(Direction direction)
@@ -1232,64 +1230,70 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     }
 
     public VoxelShape getVoxelShape(){
-        VoxelShape shape;
-        switch (this.getBlockState().get(BlockStateProperties.FACING)) {
-            case UP:
-                shape = Block.makeCuboidShape(0, 16, 0, 16, 14, 16);
-                break;
-            case NORTH:
-                shape = Block.makeCuboidShape(0, 0, 0, 16, 16, 2);
-                break;
-            case EAST:
-                shape = Block.makeCuboidShape(16, 0, 0, 14, 16, 16);
-                break;
-            case SOUTH:
-                shape = Block.makeCuboidShape(0, 0, 16, 16, 16, 14);
-                break;
-            case WEST:
-                shape = Block.makeCuboidShape(0, 0, 0, 2, 16, 16);
-                break;
-            default: //DOWN
-                shape = Block.makeCuboidShape(0, 0, 0, 16, 2, 16);
-        }
 
-        if (!isCovered()) {
-            for (Integer index : cells.keySet()) {
-                PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
-                IPanelCell cell = cellPos.getIPanelCell();
-                if (cell != null) {
-                    PanelCellVoxelShape cellShape = cell.getShape();
-                    float rowStart = cellPos.getRow()*2f + (float) cellShape.getPoint1().x*2f;
-                    float rowEnd = cellPos.getRow()*2f + (float) cellShape.getPoint2().x*2f;
-                    float columnStart = cellPos.getColumn()*2f + (float) cellShape.getPoint1().z*2f;
-                    float columnEnd = cellPos.getColumn()*2f + (float) cellShape.getPoint2().z*2f;
-                    float levelStart = 2+cellPos.getLevel()*2f + (float) cellShape.getPoint1().y*2f;
-                    float levelEnd = 2+cellPos.getLevel()*2f + (float) cellShape.getPoint2().y*2f;
+        if (voxelShape==null) {
+            switch (this.getBlockState().get(BlockStateProperties.FACING)) {
+                case UP:
+                    voxelShape = Block.makeCuboidShape(0, 16, 0, 16, 14, 16);
+                    break;
+                case NORTH:
+                    voxelShape = Block.makeCuboidShape(0, 0, 0, 16, 16, 2);
+                    break;
+                case EAST:
+                    voxelShape = Block.makeCuboidShape(16, 0, 0, 14, 16, 16);
+                    break;
+                case SOUTH:
+                    voxelShape = Block.makeCuboidShape(0, 0, 16, 16, 16, 14);
+                    break;
+                case WEST:
+                    voxelShape = Block.makeCuboidShape(0, 0, 0, 2, 16, 16);
+                    break;
+                default: //DOWN
+                    voxelShape = Block.makeCuboidShape(0, 0, 0, 16, 2, 16);
+            }
 
-                    switch (this.getBlockState().get(BlockStateProperties.FACING)) {
-                        case UP:
-                            shape = VoxelShapes.or(shape, Block.makeCuboidShape(rowStart, 16-levelStart, 16 - columnStart, rowEnd, 16-levelEnd, 16 - columnEnd));
-                            break;
-                        case NORTH:
-                            shape = VoxelShapes.or(shape,Block.makeCuboidShape(rowStart, 16-columnStart, levelStart, rowEnd, 16-columnEnd, levelEnd));
-                            break;
-                        case EAST:
-                            shape = VoxelShapes.or(shape,Block.makeCuboidShape(16-levelStart, rowStart, columnStart, 16-levelEnd, rowEnd, columnEnd));
-                            break;
-                        case SOUTH:
-                            shape = VoxelShapes.or(shape,Block.makeCuboidShape(rowStart, columnStart, 16-levelStart, rowEnd, columnEnd, 16-levelEnd));
-                            break;
-                        case WEST:
-                            shape = VoxelShapes.or(shape,Block.makeCuboidShape(levelStart, 16-rowStart, columnStart, levelEnd, 16-rowEnd, columnEnd));
-                            break;
-                        default: //DOWN
-                            shape = VoxelShapes.or(shape, Block.makeCuboidShape(rowStart, levelStart, columnStart, rowEnd,levelEnd,columnEnd));
+            if (!isCovered()) {
+                for (Integer index : cells.keySet()) {
+                    PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
+                    IPanelCell cell = cellPos.getIPanelCell();
+                    if (cell != null) {
+                        PanelCellVoxelShape cellShape = cell.getShape();
+                        float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
+                        float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
+                        float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
+                        float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
+                        float levelStart = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
+                        float levelEnd = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
+
+                        switch (this.getBlockState().get(BlockStateProperties.FACING)) {
+                            case UP:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(rowStart, 16 - levelStart, 16 - columnStart, rowEnd, 16 - levelEnd, 16 - columnEnd));
+                                break;
+                            case NORTH:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(rowStart, 16 - columnStart, levelStart, rowEnd, 16 - columnEnd, levelEnd));
+                                break;
+                            case EAST:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(16 - levelStart, rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd));
+                                break;
+                            case SOUTH:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd, 16 - levelEnd));
+                                break;
+                            case WEST:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(levelStart, 16 - rowStart, columnStart, levelEnd, 16 - rowEnd, columnEnd));
+                                break;
+                            default: //DOWN
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
+                        }
                     }
                 }
             }
         }
 
-        return shape;
+        return voxelShape;
+    }
+    public void clearVoxelShape()
+    {
+        voxelShape=null;
     }
 }
 

@@ -101,7 +101,6 @@ public class PanelBlock extends Block {
         return getDefaultState().with(BlockStateProperties.FACING, context.getFace().getOpposite());
     }
 
-    //TODO save voxelshape and update when interacting (to prevent lag)
     @Override
     @SuppressWarnings("deprecation")
     public VoxelShape getShape(BlockState state, IBlockReader source, BlockPos pos, ISelectionContext context) {
@@ -116,7 +115,7 @@ public class PanelBlock extends Block {
     @SuppressWarnings("deprecation")
     @Override
     public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-        return BASE.get(state.get(BlockStateProperties.FACING));
+        return getShape(state, worldIn, pos, context);
     }
 
     @SuppressWarnings("deprecation")

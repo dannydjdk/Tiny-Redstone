@@ -4,10 +4,8 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -35,8 +33,6 @@ public class Piston implements IPanelCell {
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        //TODO render bottom of components
-        TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_PISTON_SIDE);
         TextureAtlasSprite sprite_bottom = RenderHelper.getSprite(TEXTURE_PISTON_BOTTOM);
         TextureAtlasSprite sprite_inner = RenderHelper.getSprite(TEXTURE_PISTON_INNER);
         TextureAtlasSprite sprite_inner_top = RenderHelper.getSprite(TEXTURE_PISTON_TOP);
@@ -54,28 +50,28 @@ public class Piston implements IPanelCell {
         //draw top
         matrixStack.push();
         matrixStack.translate(0,0,1.0);
-        drawSide(matrixStack,builder,sprite,combinedLight,combinedOverlay, alpha);
+        drawSide(matrixStack,builder,combinedLight, alpha);
         matrixStack.pop();
 
         //draw right side
         matrixStack.push();
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-1,0,1);
-        drawSide(matrixStack,builder,sprite,combinedLight,combinedOverlay, alpha);
+        drawSide(matrixStack,builder,combinedLight, alpha);
         matrixStack.pop();
 
         //draw left side
         matrixStack.push();
         matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
         matrixStack.translate(0,0,0);
-        drawSide(matrixStack,builder,sprite,combinedLight,combinedOverlay, alpha);
+        drawSide(matrixStack,builder,combinedLight, alpha);
         matrixStack.pop();
 
         //draw bottom side
         matrixStack.push();
         matrixStack.rotate(Vector3f.YP.rotationDegrees(180));
         matrixStack.translate(-1,0,0);
-        drawSide(matrixStack,builder,sprite,combinedLight,combinedOverlay, alpha);
+        drawSide(matrixStack,builder,combinedLight, alpha);
         matrixStack.pop();
 
         //draw front (bottom texture of piston)
@@ -104,7 +100,7 @@ public class Piston implements IPanelCell {
 
     }
 
-    private void drawSide(MatrixStack matrixStack,IVertexBuilder builder,TextureAtlasSprite sprite,int combinedLight,int combinedOverlay, float alpha)
+    private void drawSide(MatrixStack matrixStack,IVertexBuilder builder,int combinedLight, float alpha)
     {
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
         TextureAtlasSprite sprite_side_top = RenderHelper.getSprite(TEXTURE_PISTON_SIDE_TOP);
@@ -139,16 +135,7 @@ public class Piston implements IPanelCell {
         }
 
     }
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, alpha)
-                .tex(u, v)
-                .lightmap(combinedLightIn)
-                .normal(1, 0, 0)
-                .overlay(combinedOverlayIn)
-                .endVertex();
 
-    }
     protected TextureAtlasSprite getSprite_top()
     {
         return RenderHelper.getSprite(TEXTURE_PISTON_TOP);
@@ -162,12 +149,12 @@ public class Piston implements IPanelCell {
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
      * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
-     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
+     * @param cellPos PanelCellPos object for this cell. Can be used to query panel tile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
     public boolean neighborChanged(PanelCellPos cellPos){
-        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.RIGHT),
                 leftNeighbor = cellPos.getNeighbor(Side.LEFT),
                 backNeighbor = cellPos.getNeighbor(Side.BACK),
                 frontNeighbor = cellPos.getNeighbor(Side.FRONT),
