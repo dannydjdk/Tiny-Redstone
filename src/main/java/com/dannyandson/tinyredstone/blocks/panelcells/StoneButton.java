@@ -3,8 +3,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -39,7 +38,7 @@ public class StoneButton extends Button {
 
     protected TextureAtlasSprite getSprite()
     {
-        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_OAK_PLANKS);
+        return RenderHelper.getSprite(TEXTURE_OAK_PLANKS);
     }
 
 

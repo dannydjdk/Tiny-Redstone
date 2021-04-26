@@ -7,16 +7,25 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nullable;
-
 public class SuperRepeater extends Repeater {
 
     public static ResourceLocation TEXTURE_SUPER_REPEATER_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_super_repeater_on");
     public static ResourceLocation TEXTURE_SUPER_REPEATER_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_super_repeater_off");
 
+    /**
+     * Called when neighboring redstone signal output changes.
+     * This can be called multiple times in a tick.
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
+     * @return boolean indicating whether redstone output of this cell has changed
+     */
     @Override
-    public boolean neighborChanged(@Nullable PanelCellNeighbor frontNeighbor,@Nullable PanelCellNeighbor rightNeighbor,@Nullable  PanelCellNeighbor backNeighbor,@Nullable  PanelCellNeighbor leftNeighbor)
-    {
+    public boolean neighborChanged(PanelCellPos cellPos){
+
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
+                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
+                backNeighbor = cellPos.getNeighbor(Side.BACK);
+
         boolean changed=false;
         if (backNeighbor!=null && backNeighbor.getWeakRsOutput() >0 && !input)
         {

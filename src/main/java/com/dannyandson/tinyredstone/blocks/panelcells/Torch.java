@@ -84,16 +84,15 @@ public class Torch implements IPanelCell
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * @param frontNeighbor object to access info about front neighbor
-     * @param rightNeighbor object to access info about right neighbor
-     * @param backNeighbor object to access info about back neighbor
-     * @param leftNeighbor object to access info about left neighbor
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
-    {
+    public boolean neighborChanged(PanelCellPos cellPos){
+
+        PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK);
+
         boolean output = (backNeighbor==null || backNeighbor.getWeakRsOutput() ==0);
 
         if (burnout && output)
@@ -121,6 +120,7 @@ public class Torch implements IPanelCell
      * @param outputDirection direction from which the output is being read
      * @return integer 0-15 indicating the strength of redstone signal
      */
+    //TODO Should output to redstone below and to sides but not blocks
     @Override
     public int getWeakRsOutput(Side outputDirection)
     {
@@ -128,7 +128,7 @@ public class Torch implements IPanelCell
     }
     @Override
     public int getStrongRsOutput(Side outputDirection) {
-        if (outputDirection!= Side.BACK && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
+        if (outputDirection!= Side.BACK && outputDirection!= Side.BOTTOM && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
             return 15;
         else
             return 0;

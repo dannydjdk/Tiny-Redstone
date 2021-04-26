@@ -399,7 +399,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             PanelCellPos pistonPos = PanelCellPos.fromIndex(this,index);
 
             //get the side of the panel that the piston head is facing (back of tiny piston cell)
-            Side movingToward = cellDirections.get(index).getOpposite();
+            Side movingToward = pistonPos.getCellFacing().getOpposite();
             PanelCellPos moverPos = pistonPos.offset(movingToward);
 
             if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston) {
@@ -714,6 +714,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         IPanelCell thisCell = cellPos.getIPanelCell();
 
         if (thisCell != null && !thisCell.isIndependentState()){
+            /*
                 Side frontDirection = cellPos.getCellFacing();
                 Side backDirection = frontDirection.getOpposite();
                 Side rightDirection = frontDirection.rotateYCW();
@@ -724,7 +725,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 PanelCellNeighbor right = getNeighbor(rightDirection, cellPos);
                 PanelCellNeighbor left = getNeighbor(leftDirection, cellPos);
 
-                if (thisCell.neighborChanged(front, right, back, left)) {
+             */
+
+                if (thisCell.neighborChanged(cellPos)) {
                     updateNeighborCells(cellPos, iteration + 1);
                     change = true;
                 }
@@ -740,8 +743,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * Gets a PanelCellNeighbor object providing data about the neighboring cell or block.
      *
      * @param side Toward which side of the panel the adjacent cell or block is relative to this cell.
-     * @param localCellPos Position of the panel cell on this panel.
-     * @return an Integer array of size 2. First element is weak power. Second is strong power.
+     * @param localCellPos Position of the panel cell on this panel whose neighbor you are querying.
+     * @return PanelCellNeighbor object.
      */
     @CheckForNull
     private PanelCellNeighbor getNeighbor(Side side, PanelCellPos localCellPos) {
@@ -777,7 +780,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * @param panelSide the side of the redstone panel
      * @return the side of the cell that is facing the given side of the panel
      */
-    private Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
+    protected Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
     {
         Side cellDirection = cellPos.getPanelTile().getCellFacing(cellPos);
 
@@ -791,6 +794,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             return Side.LEFT;
         if (cellDirection==panelSide.rotateYCCW())
             return Side.RIGHT;
+        if (cellDirection==panelSide.rotateBack())
+            return Side.BOTTOM;
+        if (cellDirection==panelSide.rotateForward())
+            return Side.TOP;
 
         return null;
     }
@@ -1119,17 +1126,23 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     }
 
     protected Direction getPlayerDirectionFacing(PlayerEntity player){
-        Direction panelFacing = getBlockState().get(BlockStateProperties.FACING);
+        /*Direction panelFacing = getBlockState().get(BlockStateProperties.FACING);
         if (panelFacing==Direction.UP||panelFacing==Direction.DOWN){
             return  player.getHorizontalFacing();
         }
+
+         */
         Direction[] playerFacings = Direction.getFacingDirections(player);
+        return playerFacings[0];
+        /*
         for(Direction facing : playerFacings)
         {
             if (facing!=panelFacing && facing!=panelFacing.getOpposite())
                 return facing;
         }
         return  player.getHorizontalFacing();
+
+         */
     }
 
     @CheckForNull

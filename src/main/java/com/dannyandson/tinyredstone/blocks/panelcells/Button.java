@@ -58,37 +58,19 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
 
     }
 
-    /**
-     * Called when neighboring redstone signal output changes.
-     * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * WARNING! Check for null values!
-     *
-     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
-     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
-     * @param backNeighbor  object to access info about back neighbor or NULL if no neighbor exists
-     * @param leftNeighbor  object to access info about left neighbor or NULL if no neighbor exists
-     * @return boolean indicating whether redstone output of this cell has changed
-     */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
+    public boolean neighborChanged(PanelCellPos cellPos) {
         return false;
     }
 
-    /**
-     * Gets redstone output of the given side of the cell
-     *
-     * @param outputDirection (1=Front,2=Right,3=Back,4=Left)
-     * @return integer 0-15 indicating the strength of redstone signal
-     */
     @Override
     public int getWeakRsOutput(Side outputDirection) {
-        return (active)?15:0;
+        return (active && outputDirection!=Side.TOP)?15:0;
     }
 
     @Override
     public int getStrongRsOutput(Side outputDirection) {
-        return 0;
+        return (active && outputDirection==Side.BOTTOM)?15:0;
     }
 
     /**

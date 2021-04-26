@@ -129,6 +129,16 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             matrixStack.translate(cellSize,0,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(270));
         }
+        else if (pos.getCellFacing()==Side.BOTTOM)
+        {
+            matrixStack.translate(0,-cellSize,0);
+            matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+        }
+        else if (pos.getCellFacing()==Side.TOP)
+        {
+            matrixStack.translate(0,0,cellSize);
+            matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        }
 
         matrixStack.scale(scale, scale, scale);
         matrixStack.translate(t2X,t2Y,t2Z);

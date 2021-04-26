@@ -101,6 +101,7 @@ public class PanelBlock extends Block {
         return getDefaultState().with(BlockStateProperties.FACING, context.getFace().getOpposite());
     }
 
+    //TODO save voxelshape and update when interacting (to prevent lag)
     @Override
     @SuppressWarnings("deprecation")
     public VoxelShape getShape(BlockState state, IBlockReader source, BlockPos pos, ISelectionContext context) {
@@ -115,7 +116,7 @@ public class PanelBlock extends Block {
     @SuppressWarnings("deprecation")
     @Override
     public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-        return this.getShape(state, worldIn, pos, context);
+        return BASE.get(state.get(BlockStateProperties.FACING));
     }
 
     @SuppressWarnings("deprecation")
@@ -408,6 +409,8 @@ public class PanelBlock extends Block {
                                 Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 
                                 if (panelCell instanceof IPanelCell) {
+                                    //TODO allow placement facing TOP and BOTTOM
+                                    // troubleshoot issue with placement against bottom of component
                                     //place the cell on the panel
                                     Direction playerFacing = panelTile.getPlayerDirectionFacing(player);
 

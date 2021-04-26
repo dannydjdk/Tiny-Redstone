@@ -1,13 +1,10 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
-import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
+import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ColorHelper;
@@ -36,8 +33,8 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
         TextureAtlasSprite sprite;
 
-        if (lit) sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_LAMP_ON);
-        else sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_LAMP);
+        if (lit) sprite = RenderHelper.getSprite(TEXTURE_REDSTONE_LAMP_ON);
+        else sprite = RenderHelper.getSprite(TEXTURE_REDSTONE_LAMP);
 
         matrixStack.translate(0,0,1.0);
 
@@ -85,10 +82,24 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
                 .endVertex();
     }
 
+    /**
+     * Called when neighboring redstone signal output changes.
+     * This can be called multiple times in a tick.
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
+     * @return boolean indicating whether redstone output of this cell has changed
+     */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
+    public boolean neighborChanged(PanelCellPos cellPos){
 
-        boolean change = super.neighborChanged(frontNeighbor, rightNeighbor, backNeighbor, leftNeighbor);
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
+                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
+                backNeighbor = cellPos.getNeighbor(Side.BACK),
+                frontNeighbor = cellPos.getNeighbor(Side.FRONT),
+                topNeighbor = cellPos.getNeighbor(Side.TOP),
+                bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
+
+        boolean change = super.neighborChanged(cellPos);
 
         if (
                 (weakSignalStrength + strongSignalStrength > 0) ||
@@ -96,7 +107,9 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
                                 ((frontNeighbor != null) ? frontNeighbor.getWeakRsOutput() : 0) +
                                         ((rightNeighbor != null) ? rightNeighbor.getWeakRsOutput() : 0) +
                                         ((backNeighbor != null) ? backNeighbor.getWeakRsOutput() : 0) +
-                                        ((leftNeighbor != null) ? leftNeighbor.getWeakRsOutput() : 0)) > 0)
+                                        ((leftNeighbor != null) ? leftNeighbor.getWeakRsOutput() : 0)+
+                                        ((topNeighbor != null) ? topNeighbor.getWeakRsOutput() : 0)+
+                                        ((bottomNeighbor != null) ? bottomNeighbor.getWeakRsOutput() : 0)) > 0)
         ) {
             if (!this.lit) {
                 this.lit = true;

@@ -35,10 +35,11 @@ public class Piston implements IPanelCell {
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE);
-        TextureAtlasSprite sprite_bottom = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_BOTTOM);
-        TextureAtlasSprite sprite_inner = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_INNER);
-        TextureAtlasSprite sprite_inner_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_TOP);
+        //TODO render bottom of components
+        TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_PISTON_SIDE);
+        TextureAtlasSprite sprite_bottom = RenderHelper.getSprite(TEXTURE_PISTON_BOTTOM);
+        TextureAtlasSprite sprite_inner = RenderHelper.getSprite(TEXTURE_PISTON_INNER);
+        TextureAtlasSprite sprite_inner_top = RenderHelper.getSprite(TEXTURE_PISTON_TOP);
 
 
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
@@ -70,21 +71,23 @@ public class Piston implements IPanelCell {
         drawSide(matrixStack,builder,sprite,combinedLight,combinedOverlay, alpha);
         matrixStack.pop();
 
+        //draw bottom side
+        matrixStack.push();
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(180));
+        matrixStack.translate(-1,0,0);
+        drawSide(matrixStack,builder,sprite,combinedLight,combinedOverlay, alpha);
+        matrixStack.pop();
+
         //draw front (bottom texture of piston)
         matrixStack.push();
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,0,0);
-        add(builder, matrixStack, 0,0,0, sprite_bottom.getMinU(), sprite_bottom.getMaxV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 1,0,0, sprite_bottom.getMaxU(), sprite_bottom.getMaxV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 1,1,0, sprite_bottom.getMaxU(), sprite_bottom.getMinV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 0,1,0, sprite_bottom.getMinU(), sprite_bottom.getMinV(),combinedLight,combinedOverlay, alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_bottom,combinedLight,alpha);
+
         if (renderExtended)
         {
             matrixStack.translate(0,0,-1.75);
-            add(builder, matrixStack, 0,0,0, sprite_inner_top.getMinU(), sprite_inner_top.getMaxV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,0,0, sprite_inner_top.getMaxU(), sprite_inner_top.getMaxV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,1,0, sprite_inner_top.getMaxU(), sprite_inner_top.getMinV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 0,1,0, sprite_inner_top.getMinU(), sprite_inner_top.getMinV(),combinedLight,combinedOverlay, alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_inner_top,combinedLight,alpha);
         }
         matrixStack.pop();
 
@@ -94,36 +97,29 @@ public class Piston implements IPanelCell {
         if (renderExtended)
         {
             matrixStack.translate(0,0,-0.25);
-            add(builder, matrixStack, 0, 0, 0, sprite_inner.getMinU(), sprite_inner.getMaxV(), combinedLight, combinedOverlay, alpha);
-            add(builder, matrixStack, 1, 0, 0, sprite_inner.getMaxU(), sprite_inner.getMaxV(), combinedLight, combinedOverlay, alpha);
-            add(builder, matrixStack, 1, 1, 0, sprite_inner.getMaxU(), sprite_inner.getMinV(), combinedLight, combinedOverlay, alpha);
-            add(builder, matrixStack, 0, 1, 0, sprite_inner.getMinU(), sprite_inner.getMinV(), combinedLight, combinedOverlay, alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_inner,combinedLight,alpha);
             matrixStack.translate(0,0,1.25);
         }
-        add(builder, matrixStack, 0, 0, 0, sprite_top.getMinU(), sprite_top.getMaxV(), combinedLight, combinedOverlay, alpha);
-        add(builder, matrixStack, 1, 0, 0, sprite_top.getMaxU(), sprite_top.getMaxV(), combinedLight, combinedOverlay, alpha);
-        add(builder, matrixStack, 1, 1, 0, sprite_top.getMaxU(), sprite_top.getMinV(), combinedLight, combinedOverlay, alpha);
-        add(builder, matrixStack, 0, 1, 0, sprite_top.getMinU(), sprite_top.getMinV(), combinedLight, combinedOverlay, alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_top,combinedLight,alpha);
 
     }
 
     private void drawSide(MatrixStack matrixStack,IVertexBuilder builder,TextureAtlasSprite sprite,int combinedLight,int combinedOverlay, float alpha)
     {
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
-        TextureAtlasSprite sprite_side_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE_TOP);
+        TextureAtlasSprite sprite_side_top = RenderHelper.getSprite(TEXTURE_PISTON_SIDE_TOP);
         TextureAtlasSprite sprite_side_bottom = (renderExtended)
-                ?Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE_BOTTOM)
-                :Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_SIDE);
+                ?RenderHelper.getSprite(TEXTURE_PISTON_SIDE_BOTTOM)
+                :RenderHelper.getSprite(TEXTURE_PISTON_SIDE);
 
 
         matrixStack.push();
 
         if (renderExtended)
             matrixStack.scale(1,.75f,1);
-        add(builder, matrixStack, 0,0,0, sprite_side_bottom.getMinU(), sprite_side_bottom.getMaxV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 1,0,0, sprite_side_bottom.getMaxU(), sprite_side_bottom.getMaxV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 1,1,0, sprite_side_bottom.getMaxU(), sprite_side_bottom.getMinV(),combinedLight,combinedOverlay, alpha);
-        add(builder, matrixStack, 0,1,0, sprite_side_bottom.getMinU(), sprite_side_bottom.getMinV(),combinedLight,combinedOverlay, alpha);
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(180));
+        matrixStack.translate(0,-1,1);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_bottom,combinedLight,alpha);
         matrixStack.pop();
 
         if (renderExtended)
@@ -132,18 +128,12 @@ public class Piston implements IPanelCell {
 
             matrixStack.translate(0,1.75,0);
             matrixStack.scale(1,.25f,1);
-            add(builder, matrixStack, 0,0,0, sprite_side_top.getMinU(), sprite_side_top.getMaxV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,0,0, sprite_side_top.getMaxU(), sprite_side_top.getMaxV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,1,0, sprite_side_top.getMaxU(), sprite_side_top.getMinV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 0,1,0, sprite_side_top.getMinU(), sprite_side_top.getMinV(),combinedLight,combinedOverlay, alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_top,combinedLight,alpha);
 
             matrixStack.scale(.25f,4,1);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
             matrixStack.translate(-1,-2.5,-0.375);
-            add(builder, matrixStack, 0,0,0, sprite_side_top.getMinU(), sprite_side_top.getMaxV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,0,0, sprite_side_top.getMaxU(), sprite_side_top.getMaxV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 1,1,0, sprite_side_top.getMaxU(), sprite_side_top.getMinV(),combinedLight,combinedOverlay, alpha);
-            add(builder, matrixStack, 0,1,0, sprite_side_top.getMinU(), sprite_side_top.getMinV(),combinedLight,combinedOverlay, alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_top,combinedLight,alpha);
 
             matrixStack.pop();
         }
@@ -161,7 +151,7 @@ public class Piston implements IPanelCell {
     }
     protected TextureAtlasSprite getSprite_top()
     {
-        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_TOP);
+        return RenderHelper.getSprite(TEXTURE_PISTON_TOP);
     }
 
     public boolean isExtended(){
@@ -171,22 +161,26 @@ public class Piston implements IPanelCell {
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * WARNING! Check for null values!
-     *
-     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
-     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
-     * @param backNeighbor  object to access info about back neighbor or NULL if no neighbor exists
-     * @param leftNeighbor  object to access info about left neighbor or NULL if no neighbor exists
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
+    public boolean neighborChanged(PanelCellPos cellPos){
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
+                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
+                backNeighbor = cellPos.getNeighbor(Side.BACK),
+                frontNeighbor = cellPos.getNeighbor(Side.FRONT),
+                topNeighbor = cellPos.getNeighbor(Side.TOP),
+                bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
+
         boolean extend =
                 (
                         ( rightNeighbor!=null && rightNeighbor.getWeakRsOutput()>0) ||
                                 ( frontNeighbor!=null && frontNeighbor.getWeakRsOutput()>0) ||
-                                ( leftNeighbor!=null && leftNeighbor.getWeakRsOutput()>0)
+                                ( leftNeighbor!=null && leftNeighbor.getWeakRsOutput()>0) ||
+                                ( topNeighbor!=null && topNeighbor.getWeakRsOutput()>0) ||
+                                ( bottomNeighbor!=null && bottomNeighbor.getWeakRsOutput()>0)
                 )
                 &&
                         (backNeighbor == null || backNeighbor.isOnPanel())

@@ -159,16 +159,17 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * @param frontNeighbor object to access info about front neighbor
-     * @param rightNeighbor object to access info about right neighbor
-     * @param backNeighbor object to access info about back neighbor
-     * @param leftNeighbor object to access info about left neighbor
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(@Nullable PanelCellNeighbor frontNeighbor,@Nullable PanelCellNeighbor rightNeighbor,@Nullable  PanelCellNeighbor backNeighbor,@Nullable  PanelCellNeighbor leftNeighbor)
-    {
+    public boolean neighborChanged(PanelCellPos cellPos){
+
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
+                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
+                backNeighbor = cellPos.getNeighbor(Side.BACK);
+
         if (backNeighbor!=null && backNeighbor.getWeakRsOutput() >0 && !input)
         {
             input=true;

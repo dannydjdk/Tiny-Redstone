@@ -6,10 +6,8 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -31,7 +29,7 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellProbeInfoProvider {
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_REDSTONE_BLOCK);
+        TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_REDSTONE_BLOCK);
 
 
 
@@ -84,15 +82,12 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellProbeInfoProvider {
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * @param frontNeighbor object to access info about front neighbor
-     * @param rightNeighbor object to access info about right neighbor
-     * @param backNeighbor object to access info about back neighbor
-     * @param leftNeighbor object to access info about left neighbor
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
+    public boolean neighborChanged(PanelCellPos cellPos)
     {
         return false;
     }

@@ -216,4 +216,48 @@ public class PanelCellPos {
         return this.panelTile.getCellFacing(this);
     }
 
+    /**
+     * Gets a PanelCellNeighbor object providing data about the neighboring cell or block.
+     *
+     * @param side The direction of the neighbor relative to this cell's facing direction.
+     * @return PanelCellNeighbor object.
+     */
+    @CheckForNull
+    public PanelCellNeighbor getNeighbor(Side side) {
+        Side cellFacing = this.getCellFacing();
+        Side towardPanelSide;
+        if (cellFacing==Side.FRONT)
+            towardPanelSide=side;
+        else if (cellFacing==Side.BACK)
+            towardPanelSide=side.getOpposite();
+        else if (cellFacing==Side.RIGHT)
+            towardPanelSide=side.rotateYCW();
+        else if (cellFacing==Side.LEFT)
+            towardPanelSide=side.rotateYCCW();
+        else if (cellFacing==Side.TOP)
+            towardPanelSide=side.rotateBack();
+        else// if (cellFacing==Side.BOTTOM)
+            towardPanelSide=side.rotateForward();
+
+        PanelCellPos neighborPos = this.offset(towardPanelSide);
+
+        if (neighborPos != null) {
+            IPanelCell neighborCell = neighborPos.getIPanelCell();
+
+            if (neighborCell != null) {
+                Side neighborSide = neighborPos.getPanelTile().getPanelCellSide(neighborPos, side.getOpposite());
+                return new PanelCellNeighbor(neighborPos, neighborCell, neighborSide, side);
+            } else if (neighborPos.getPanelTile().checkCellForPistonExtension(neighborPos)) {
+                return new PanelCellNeighbor(neighborPos, null, null, side);
+            }
+
+        } else {
+            BlockPos blockPos = this.panelTile.getPos().offset(this.panelTile.getDirectionFromSide(side));
+            return new PanelCellNeighbor(this.panelTile, blockPos, side);
+        }
+
+
+        return null;
+    }
+
 }

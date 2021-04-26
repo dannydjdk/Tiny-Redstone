@@ -91,17 +91,19 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellPro
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * WARNING! Check for null values!
-     *
-     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
-     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
-     * @param backNeighbor  object to access info about back neighbor or NULL if no neighbor exists
-     * @param leftNeighbor  object to access info about left neighbor or NULL if no neighbor exists
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
+    public boolean neighborChanged(PanelCellPos cellPos){
+
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
+                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
+                backNeighbor = cellPos.getNeighbor(Side.BACK),
+                frontNeighbor = cellPos.getNeighbor(Side.FRONT),
+                topNeighbor = cellPos.getNeighbor(Side.TOP),
+                bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
 
         int weak=0,strong=0;
         if (frontNeighbor!=null) {
@@ -127,6 +129,18 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellPro
                 weak = Math.max(weak,leftNeighbor.getWeakRsOutput());
             else if (!(leftNeighbor.getNeighborIPanelCell() instanceof TinyBlock))
                 strong = Math.max(strong,leftNeighbor.getStrongRsOutput());
+        }
+        if (topNeighbor!=null) {
+            if (topNeighbor.powerDrops())
+                weak = Math.max(weak,topNeighbor.getWeakRsOutput());
+            else if (!(topNeighbor.getNeighborIPanelCell() instanceof TinyBlock))
+                strong = Math.max(strong,topNeighbor.getStrongRsOutput());
+        }
+        if (bottomNeighbor!=null) {
+            if (bottomNeighbor.powerDrops())
+                weak = Math.max(weak,bottomNeighbor.getWeakRsOutput());
+            else if (!(bottomNeighbor.getNeighborIPanelCell() instanceof TinyBlock))
+                strong = Math.max(strong,bottomNeighbor.getStrongRsOutput());
         }
 
         weak=Math.max(weak,strong);

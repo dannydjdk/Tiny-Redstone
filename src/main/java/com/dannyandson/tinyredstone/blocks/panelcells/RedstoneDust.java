@@ -83,20 +83,25 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
     }
 
+    //TODO special redstone dust behavior when climbing blocks
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * @param frontNeighbor object to access info about front neighbor
-     * @param rightNeighbor object to access info about right neighbor
-     * @param backNeighbor object to access info about back neighbor
-     * @param leftNeighbor object to access info about left neighbor
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
-    {
-        int front=0, right=0,back=0, left=0;
+    public boolean neighborChanged(PanelCellPos cellPos){
+
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
+                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
+                backNeighbor = cellPos.getNeighbor(Side.BACK),
+                frontNeighbor = cellPos.getNeighbor(Side.FRONT),
+                topNeighbor = cellPos.getNeighbor(Side.TOP),
+                bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
+
+        int front=0, right=0,back=0, left=0,top=0,bottom=0;
         if (frontEnabled && frontNeighbor!=null)
         {
             front = getNeighborOutput(frontNeighbor);
@@ -113,9 +118,13 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         {
             left=getNeighborOutput(leftNeighbor);
         }
+        if (topNeighbor!=null)
+            top = topNeighbor.getStrongRsOutput();
+        if (bottomNeighbor!=null)
+            top = bottomNeighbor.getStrongRsOutput();
 
 
-        int signal = Math.max( Math.max(Math.max(front, right),Math.max(back, left)) , 0);
+        int signal = Math.max(Math.max( Math.max(Math.max(front, right),Math.max(back, left)),Math.max(top,bottom)) , 0);
         if (signal!=this.signalStrength)
         {
             this.signalStrength=signal;
@@ -153,7 +162,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
      */
     @Override
     public int getWeakRsOutput(Side outputDirection) {
-        if (sideEnabled(outputDirection))
+        if (sideEnabled(outputDirection)||outputDirection==Side.BOTTOM)
             return Math.max(this.signalStrength, 0);
         else
             return 0;

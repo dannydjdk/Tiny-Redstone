@@ -21,7 +21,7 @@ public enum Side {
             case BACK:return LEFT;
             case LEFT:return FRONT;
         }
-        return null;
+        return this;
     }
     public Side rotateYCCW() {
         switch (this){
@@ -30,8 +30,24 @@ public enum Side {
             case BACK:return RIGHT;
             case LEFT:return BACK;
         }
-        return null;
+        return this;
     }
-
-
+    public Side rotateBack() {
+        switch (this){
+            case FRONT:return TOP;
+            case TOP:return BACK;
+            case BACK:return BOTTOM;
+            case BOTTOM:return FRONT;
+        }
+        return this;
+    }
+    public Side rotateForward() {
+        switch (this){
+            case FRONT:return BOTTOM;
+            case BOTTOM:return BACK;
+            case BACK:return TOP;
+            case TOP:return FRONT;
+        }
+        return this;
+    }
 }
