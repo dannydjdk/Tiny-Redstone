@@ -408,10 +408,9 @@ public class PanelBlock extends Block {
                                 Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 
                                 if (panelCell instanceof IPanelCell) {
-                                    //TODO allow placement facing TOP and BOTTOM
-                                    // troubleshoot issue with placement against bottom of component
+
                                     //place the cell on the panel
-                                    Direction playerFacing = panelTile.getPlayerDirectionFacing(player);
+                                    Direction playerFacing = panelTile.getPlayerDirectionFacing(player,((IPanelCell) panelCell).canPlaceVertical());
 
                                     pos1.getPanelTile().addCell(pos1, (IPanelCell) panelCell, panelTile.getSideFromDirection(playerFacing));
 

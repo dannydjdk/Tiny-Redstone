@@ -178,9 +178,9 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                             cellPos = cellPos.offset(panelTile.getSideFromDirection(result.getFace()));
                         }
                         if (cellPos!=null && cellPos.getIPanelCell()==null) {
-                            Side lookingTowardSide = panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player));
                             try {
                                 IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getHeldItemMainhand().getItem()).getConstructors()[0].newInstance();
+                                Side lookingTowardSide = panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()));
                                 return PanelCellGhostPos.fromPosInPanelCell(cellPos, panelCell, lookingTowardSide);
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                                 TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());

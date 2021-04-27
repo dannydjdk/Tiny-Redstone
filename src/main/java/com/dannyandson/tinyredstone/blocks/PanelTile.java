@@ -1,10 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.panelcells.Button;
-import com.dannyandson.tinyredstone.blocks.panelcells.Piston;
-import com.dannyandson.tinyredstone.blocks.panelcells.StickyPiston;
-import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
+import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -723,8 +720,16 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         if (thisCell != null && !thisCell.isIndependentState()){
 
+            //TODO consider making this more efficient by only updating affected sides
                 if (thisCell.neighborChanged(cellPos)) {
                     updateNeighborCells(cellPos, iteration + 1);
+                    if (thisCell instanceof RedstoneDust) {
+                        PanelCellPos above = cellPos.offset(Side.TOP), below = cellPos.offset(Side.BOTTOM);
+                        if (above !=null)
+                            updateNeighborCells(above,iteration+1);
+                        if (below!=null)
+                            updateNeighborCells(below,iteration+1);
+                    }
                     change = true;
                 }
         }
@@ -733,37 +738,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         if (change)
             this.markDirty();
         return change;
-    }
-
-    /**
-     * Gets a PanelCellNeighbor object providing data about the neighboring cell or block.
-     *
-     * @param side Toward which side of the panel the adjacent cell or block is relative to this cell.
-     * @param localCellPos Position of the panel cell on this panel whose neighbor you are querying.
-     * @return PanelCellNeighbor object.
-     */
-    @CheckForNull
-    private PanelCellNeighbor getNeighbor(Side side, PanelCellPos localCellPos) {
-
-        PanelCellPos neighborPos = localCellPos.offset(side);
-
-        if (neighborPos != null) {
-            IPanelCell neighborCell = neighborPos.getIPanelCell();
-
-            if (neighborCell != null) {
-                Side neighborSide = neighborPos.getPanelTile().getPanelCellSide(neighborPos, side.getOpposite());
-                return new PanelCellNeighbor(neighborPos, neighborCell, neighborSide, side);
-            } else if (checkCellForPistonExtension(neighborPos)) {
-                return new PanelCellNeighbor(neighborPos, null, null, side);
-            }
-
-        } else {
-            BlockPos blockPos = this.pos.offset(getDirectionFromSide(side));
-            return new PanelCellNeighbor(this, blockPos, side);
-        }
-
-
-        return null;
     }
 
     private Side getPanelCellSide(PanelCellPos cellPos, Direction facing) {
@@ -790,9 +764,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             return Side.LEFT;
         if (cellDirection==panelSide.rotateYCCW())
             return Side.RIGHT;
-        if (cellDirection==panelSide.rotateBack())
-            return Side.TOP;
         if (cellDirection==panelSide.rotateForward())
+            return Side.TOP;
+        if (cellDirection==panelSide.rotateBack())
             return Side.BOTTOM;
 
         return null;
@@ -1121,24 +1095,18 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return null;
     }
 
-    protected Direction getPlayerDirectionFacing(PlayerEntity player){
-        /*Direction panelFacing = getBlockState().get(BlockStateProperties.FACING);
-        if (panelFacing==Direction.UP||panelFacing==Direction.DOWN){
-            return  player.getHorizontalFacing();
-        }
+    protected Direction getPlayerDirectionFacing(PlayerEntity player, boolean allowVertical){
 
-         */
+        Direction panelFacing = getBlockState().get(BlockStateProperties.FACING);
+
         Direction[] playerFacings = Direction.getFacingDirections(player);
-        return playerFacings[0];
-        /*
         for(Direction facing : playerFacings)
         {
-            if (facing!=panelFacing && facing!=panelFacing.getOpposite())
+            if (allowVertical || (facing!=panelFacing && facing!=panelFacing.getOpposite()))
                 return facing;
         }
         return  player.getHorizontalFacing();
 
-         */
     }
 
     @CheckForNull

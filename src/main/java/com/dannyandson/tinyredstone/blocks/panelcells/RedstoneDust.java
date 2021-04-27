@@ -48,19 +48,18 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
      * Drawing the cell on the panel
      *
      * @param matrixStack     positioned for this cell and scaled such that length and width are 1.0 and height is 0.5 above panel base
-     * @param combinedLight
-     * @param combinedOverlay
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
+        //TODO render redstone crawling up block when connecting to redstone on adjacent block
         red = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         int color = ColorHelper.PackedColor.packColor(255,Math.round(red*255),0,0);
 
         TextureAtlasSprite sprite_redstone_dust = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST);
         TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
 
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());;
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
 
         matrixStack.translate(0,0,0.01);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.01f,s10+.01f,s6-.01f,s10+.01f,sprite_redstone_dust,combinedLight,color, alpha);
@@ -83,7 +82,6 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
     }
 
-    //TODO special redstone dust behavior when climbing blocks
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
@@ -94,35 +92,41 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     @Override
     public boolean neighborChanged(PanelCellPos cellPos){
 
-        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
-                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
-                backNeighbor = cellPos.getNeighbor(Side.BACK),
-                frontNeighbor = cellPos.getNeighbor(Side.FRONT),
-                topNeighbor = cellPos.getNeighbor(Side.TOP),
-                bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
-
         int front=0, right=0,back=0, left=0,top=0,bottom=0;
-        if (frontEnabled && frontNeighbor!=null)
-        {
-            front = getNeighborOutput(frontNeighbor);
-        }
-        if (rightEnabled && rightNeighbor!=null)
-        {
-            right=getNeighborOutput(rightNeighbor);
-        }
-        if (backEnabled && backNeighbor!=null)
-        {
-            back=getNeighborOutput(backNeighbor);
-        }
-        if (leftEnabled && leftNeighbor!=null)
-        {
-            left=getNeighborOutput(leftNeighbor);
-        }
-        if (topNeighbor!=null)
-            top = topNeighbor.getStrongRsOutput();
-        if (bottomNeighbor!=null)
-            top = bottomNeighbor.getStrongRsOutput();
 
+        //cell positions above and below cell for checking redstone stepping up or down
+        PanelCellPos above=null,below;
+
+        PanelCellNeighbor topNeighbor = cellPos.getNeighbor(Side.TOP);
+        if (topNeighbor!=null) {
+            top = topNeighbor.getStrongRsOutput();
+        }
+        else {
+            above = cellPos.offset(Side.TOP);
+        }
+
+        PanelCellNeighbor bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
+        if (bottomNeighbor!=null) {
+            bottom = bottomNeighbor.getStrongRsOutput();
+        }
+        below=cellPos.offset(Side.BOTTOM);
+
+        if (frontEnabled)
+        {
+            front = checkSideInput(cellPos,Side.FRONT,above,below);
+        }
+        if (rightEnabled)
+        {
+            right = checkSideInput(cellPos,Side.RIGHT,above,below);
+        }
+        if (backEnabled)
+        {
+            back = checkSideInput(cellPos,Side.BACK,above,below);
+        }
+        if (leftEnabled)
+        {
+            left = checkSideInput(cellPos,Side.LEFT,above,below);
+        }
 
         int signal = Math.max(Math.max( Math.max(Math.max(front, right),Math.max(back, left)),Math.max(top,bottom)) , 0);
         if (signal!=this.signalStrength)
@@ -131,6 +135,30 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
             return true;
         }
         return false;
+    }
+
+    protected int checkSideInput(PanelCellPos cellPos, Side side, PanelCellPos above, PanelCellPos below)
+    {
+        PanelCellNeighbor neighbor = cellPos.getNeighbor(side);
+        int input = 0;
+
+        if (neighbor!=null)
+            input = getNeighborOutput(neighbor);
+
+        if (!(neighbor!=null && neighbor.getNeighborIPanelCell() instanceof TransparentBlock) && above!=null)
+        {
+            PanelCellNeighbor aboveNeighbor =  above.getNeighbor(side,cellPos.getCellFacing());
+            if (aboveNeighbor!=null && aboveNeighbor.getNeighborIPanelCell() instanceof RedstoneDust)
+                input=Math.max(input,getNeighborOutput(aboveNeighbor));
+        }
+        if (below!=null && neighbor==null)
+        {
+            PanelCellNeighbor belowNeighbor =  below.getNeighbor(side,cellPos.getCellFacing());
+            if (belowNeighbor!=null && belowNeighbor.getNeighborIPanelCell() instanceof RedstoneDust)
+                input=Math.max(input,getNeighborOutput(belowNeighbor));
+        }
+
+        return input;
     }
 
     protected int getNeighborOutput(PanelCellNeighbor neighbor)
@@ -202,6 +230,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
      */
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
+        //TODO fix issue with inputs at different levels not changing when source is disabled
         if(cellPos.getPanelTile().getWorld().isRemote)
            return false;
 

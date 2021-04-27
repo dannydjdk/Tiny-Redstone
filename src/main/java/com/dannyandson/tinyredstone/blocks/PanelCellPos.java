@@ -220,13 +220,20 @@ public class PanelCellPos {
      * Gets a PanelCellNeighbor object providing data about the neighboring cell or block.
      *
      * @param side The direction of the neighbor relative to this cell's facing direction.
-     * @return PanelCellNeighbor object.
+     * @return PanelCellNeighbor object, null for an empty cell.
      */
     @CheckForNull
     public PanelCellNeighbor getNeighbor(Side side) {
         Side cellFacing = this.getCellFacing();
+        return getNeighbor(side,cellFacing);
+    }
+
+    public PanelCellNeighbor getNeighbor(Side side, Side cellFacing)
+    {
         Side towardPanelSide;
         if (cellFacing==Side.FRONT)
+            towardPanelSide=side;
+        else if ((side==Side.TOP || side==Side.BOTTOM) && cellFacing!=Side.TOP && cellFacing!=Side.BOTTOM)
             towardPanelSide=side;
         else if (cellFacing==Side.BACK)
             towardPanelSide=side.getOpposite();
@@ -245,7 +252,7 @@ public class PanelCellPos {
             IPanelCell neighborCell = neighborPos.getIPanelCell();
 
             if (neighborCell != null) {
-                Side neighborSide = neighborPos.getPanelTile().getPanelCellSide(neighborPos, side.getOpposite());
+                Side neighborSide = neighborPos.getPanelTile().getPanelCellSide(neighborPos, towardPanelSide.getOpposite());
                 return new PanelCellNeighbor(neighborPos, neighborCell, neighborSide, side);
             } else if (neighborPos.getPanelTile().checkCellForPistonExtension(neighborPos)) {
                 return new PanelCellNeighbor(neighborPos, null, null, side);

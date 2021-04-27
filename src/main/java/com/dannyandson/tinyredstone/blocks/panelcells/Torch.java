@@ -120,18 +120,17 @@ public class Torch implements IPanelCell
      * @param outputDirection direction from which the output is being read
      * @return integer 0-15 indicating the strength of redstone signal
      */
-    //TODO Should output to redstone below and to sides but not blocks
     @Override
     public int getWeakRsOutput(Side outputDirection)
     {
-        return getStrongRsOutput(outputDirection);
-    }
-    @Override
-    public int getStrongRsOutput(Side outputDirection) {
         if (outputDirection!= Side.BACK && outputDirection!= Side.BOTTOM && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
             return 15;
         else
             return 0;
+    }
+    @Override
+    public int getStrongRsOutput(Side outputDirection) {
+        return 0;
     }
 
     /**

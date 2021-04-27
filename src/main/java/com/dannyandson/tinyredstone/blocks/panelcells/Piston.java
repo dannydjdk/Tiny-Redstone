@@ -212,6 +212,9 @@ public class Piston implements IPanelCell {
         return !extended;
     }
 
+    @Override
+    public boolean canPlaceVertical(){return true;}
+
     /**
      * Called each each tick.
      *

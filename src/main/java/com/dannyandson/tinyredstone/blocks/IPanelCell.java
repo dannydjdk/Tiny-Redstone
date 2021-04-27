@@ -51,6 +51,8 @@ public interface IPanelCell {
      */
     default boolean isPushable(){return false;}
 
+    default boolean canPlaceVertical(){return false;}
+
     /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
      * @return Light level to output 0-15

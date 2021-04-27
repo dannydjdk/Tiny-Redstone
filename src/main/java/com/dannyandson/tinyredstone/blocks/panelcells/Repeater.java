@@ -166,7 +166,7 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
     @Override
     public boolean neighborChanged(PanelCellPos cellPos){
 
-        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.RIGHT),
                 leftNeighbor = cellPos.getNeighbor(Side.LEFT),
                 backNeighbor = cellPos.getNeighbor(Side.BACK);
 
