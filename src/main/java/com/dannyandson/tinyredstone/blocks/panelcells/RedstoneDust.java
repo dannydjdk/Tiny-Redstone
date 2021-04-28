@@ -16,6 +16,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
     public static ResourceLocation TEXTURE_REDSTONE_DUST_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_on");
@@ -40,6 +44,8 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     protected boolean backEnabled = true;
     protected boolean leftEnabled = false;
 
+    protected List<Side> crawlUpSide = new ArrayList();
+
     private float red = .25f;
     private float green = 0;
     private float blue = 0;
@@ -52,7 +58,6 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        //TODO render redstone crawling up block when connecting to redstone on adjacent block
         red = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         int color = ColorHelper.PackedColor.packColor(255,Math.round(red*255),0,0);
 
@@ -66,17 +71,49 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
         if (rightEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+            if (crawlUpSide.contains(Side.RIGHT))
+            {
+                matrixStack.push();
+                matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+                matrixStack.translate(0,0,1.01);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+                matrixStack.pop();
+            }
         }
         if (leftEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+            if (crawlUpSide.contains(Side.LEFT))
+            {
+                matrixStack.push();
+                matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+                matrixStack.translate(-1,0,0.01);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+                matrixStack.pop();
+            }
         }
         matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         if (frontEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+            if (crawlUpSide.contains(Side.FRONT))
+            {
+                matrixStack.push();
+                matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+                matrixStack.translate(0,0,1.01);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+                matrixStack.pop();
+            }
         }
         if (backEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+            if (crawlUpSide.contains(Side.BACK))
+            {
+                matrixStack.push();
+                matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+                matrixStack.translate(-1,0,.01);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+                matrixStack.pop();
+            }
         }
 
 
@@ -93,6 +130,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     public boolean neighborChanged(PanelCellPos cellPos){
 
         int front=0, right=0,back=0, left=0,top=0,bottom=0;
+        crawlUpSide.clear();
 
         //cell positions above and below cell for checking redstone stepping up or down
         PanelCellPos above=null,below;
@@ -100,6 +138,8 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         PanelCellNeighbor topNeighbor = cellPos.getNeighbor(Side.TOP);
         if (topNeighbor!=null) {
             top = topNeighbor.getStrongRsOutput();
+            if (topNeighbor.getNeighborIPanelCell() instanceof TransparentBlock)
+                above = cellPos.offset(Side.TOP);
         }
         else {
             above = cellPos.offset(Side.TOP);
@@ -148,14 +188,17 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         if (!(neighbor!=null && neighbor.getNeighborIPanelCell() instanceof TransparentBlock) && above!=null)
         {
             PanelCellNeighbor aboveNeighbor =  above.getNeighbor(side,cellPos.getCellFacing());
-            if (aboveNeighbor!=null && aboveNeighbor.getNeighborIPanelCell() instanceof RedstoneDust)
-                input=Math.max(input,getNeighborOutput(aboveNeighbor));
+            if (aboveNeighbor!=null && aboveNeighbor.getNeighborIPanelCell() instanceof RedstoneDust) {
+                input = Math.max(input, getNeighborOutput(aboveNeighbor));
+            }
         }
-        if (below!=null && neighbor==null)
+        if (below!=null && (neighbor==null || neighbor.getNeighborIPanelCell() instanceof TransparentBlock))
         {
             PanelCellNeighbor belowNeighbor =  below.getNeighbor(side,cellPos.getCellFacing());
-            if (belowNeighbor!=null && belowNeighbor.getNeighborIPanelCell() instanceof RedstoneDust)
-                input=Math.max(input,getNeighborOutput(belowNeighbor));
+            if (belowNeighbor!=null && belowNeighbor.getNeighborIPanelCell() instanceof RedstoneDust) {
+                input = Math.max(input, getNeighborOutput(belowNeighbor));
+                crawlUpSide.add(side);
+            }
         }
 
         return input;
@@ -230,7 +273,6 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
      */
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
-        //TODO fix issue with inputs at different levels not changing when source is disabled
         if(cellPos.getPanelTile().getWorld().isRemote)
            return false;
 
@@ -283,6 +325,12 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         nbt.putBoolean("right",rightEnabled);
         nbt.putBoolean("back",backEnabled);
         nbt.putBoolean("left",leftEnabled);
+        StringJoiner crawlUpSides = new StringJoiner(",");
+        for(Side side : crawlUpSide)
+        {
+            crawlUpSides.add(side.name());
+        }
+        nbt.putString("crawlUpSides",crawlUpSides.toString());
         return nbt;
     }
 
@@ -293,6 +341,11 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         this.rightEnabled = compoundNBT.getBoolean("right");
         this.backEnabled = compoundNBT.getBoolean("back");
         this.leftEnabled = compoundNBT.getBoolean("left");
+        String crawlUpSides = compoundNBT.getString("crawlUpSides");
+        if (!crawlUpSides.equals(""))
+            for (String side : crawlUpSides.split(",")) {
+                this.crawlUpSide.add(Side.valueOf(side));
+            }
     }
 
 
@@ -305,6 +358,6 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
     @Override
     public PanelCellVoxelShape getShape()
     {
-        return new PanelCellVoxelShape(new Vector3d(0d,0d,0d),new Vector3d(1d,0.1d,1d));
+        return new PanelCellVoxelShape(new Vector3d(0d,0d,0d),new Vector3d(1d,0.05d,1d));
     }
 }

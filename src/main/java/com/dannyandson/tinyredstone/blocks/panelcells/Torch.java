@@ -91,9 +91,10 @@ public class Torch implements IPanelCell
     @Override
     public boolean neighborChanged(PanelCellPos cellPos){
 
-        PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK);
+        PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK),
+            bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
 
-        boolean output = (backNeighbor==null || backNeighbor.getWeakRsOutput() ==0);
+        boolean output = ( (backNeighbor==null || backNeighbor.getWeakRsOutput() ==0) && (bottomNeighbor==null || bottomNeighbor.getWeakRsOutput()==0));
 
         if (burnout && output)
         {
@@ -130,6 +131,8 @@ public class Torch implements IPanelCell
     }
     @Override
     public int getStrongRsOutput(Side outputDirection) {
+        if (outputDirection==Side.TOP && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
+            return 15;
         return 0;
     }
 

@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.*;
@@ -216,6 +217,7 @@ public class PanelBlock extends Block {
 
     // Called when a neighbouring block changes.
     // Only called on the server side.
+    //TODO manage neighbor changes from above and below panel
     @Override
     @SuppressWarnings("deprecation")
     public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
@@ -391,6 +393,13 @@ public class PanelBlock extends Block {
                         if (posInPanelCell.getIPanelCell().onBlockActivated(posInPanelCell, posInPanelCell.getSegment())) {
                             panelTile.updateCell(posInPanelCell);
                             panelTile.updateNeighborCells(posInPanelCell);
+                            if (posInPanelCell.getIPanelCell() instanceof RedstoneDust) {
+                                PanelCellPos above = posInPanelCell.offset(Side.TOP), below = posInPanelCell.offset(Side.BOTTOM);
+                                if (above !=null)
+                                    panelTile.updateNeighborCells(above);
+                                if (below!=null)
+                                    panelTile.updateNeighborCells(below);
+                            }
                         }
                         handled = true;
                     } else if (itemPanelCellMap.containsKey(heldItem) && !panelTile.isCovered()) {

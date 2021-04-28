@@ -758,6 +758,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         if (cellDirection==panelSide)
             return Side.FRONT;
+        if ((panelSide==Side.TOP||panelSide==Side.BOTTOM)&&cellDirection!=Side.TOP&&cellDirection!=Side.BOTTOM)
+            return panelSide;
         if (cellDirection==panelSide.getOpposite())
             return Side.BACK;
         if (cellDirection==panelSide.rotateYCW())
@@ -1140,10 +1142,24 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     {
         if (cellPos.getIPanelCell() != null) {
             int cellIndex = cellPos.getIndex();
+            boolean isRedstoneDust = cellPos.getIPanelCell() instanceof RedstoneDust;
+
             //remove from panel
             cellDirections.remove(cellIndex);
             cells.remove(cellIndex);
+
+            //let neighbors know about vacancy
             updateNeighborCells(cellPos);
+            //for tiny redstone dust, alert the whole neighborhood
+            if (isRedstoneDust)
+            {
+                PanelCellPos above = cellPos.offset(Side.TOP),
+                        below = cellPos.offset(Side.BOTTOM);
+                if (above!=null)
+                    updateNeighborCells(above);
+                if (below!=null)
+                    updateNeighborCells(below);
+            }
 
             clearVoxelShape();
             sync();

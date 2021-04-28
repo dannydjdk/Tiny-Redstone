@@ -45,7 +45,7 @@ public class Observer implements IPanelCell, IObservingPanelCell {
         TextureAtlasSprite sprite_front = RenderHelper.getSprite((TEXTURE_OBSERVER_FRONT));
         TextureAtlasSprite sprite_side = RenderHelper.getSprite((TEXTURE_OBSERVER_SIDE));
 
-        matrixStack.translate(0,0,1.0);
+        matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_top,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
@@ -63,6 +63,11 @@ public class Observer implements IPanelCell, IObservingPanelCell {
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_side,combinedLight,alpha);
+
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.translate(-1,0,1);
+        addRectangle(builder,matrixStack,sprite_top,combinedLight,alpha);
 
     }
 
@@ -118,6 +123,9 @@ public class Observer implements IPanelCell, IObservingPanelCell {
     public boolean isPushable() {
         return true;
     }
+
+    @Override
+    public boolean canPlaceVertical(){return true;}
 
     /**
      * Called each each tick.

@@ -1,7 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.theoneprobe.ProbeInfoHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.IProbeInfo;
@@ -55,18 +54,47 @@ public class RedstoneBridge extends RedstoneDust {
 
         if (rightEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
-        }
+            if (crawlUpSide.contains(Side.RIGHT))
+            {
+                matrixStack.push();
+                matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+                matrixStack.translate(0,0,1.01);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
+                matrixStack.pop();
+            }        }
         if (leftEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
-        }
+            if (crawlUpSide.contains(Side.LEFT))
+            {
+                matrixStack.push();
+                matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+                matrixStack.translate(-1,0,0.01);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
+                matrixStack.pop();
+            }       }
         matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         if (frontEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
-        }
+            if (crawlUpSide.contains(Side.FRONT))
+            {
+                matrixStack.push();
+                matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+                matrixStack.translate(0,0,1.01);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
+                matrixStack.pop();
+            }       }
         if (backEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
-        }
+            if (crawlUpSide.contains(Side.BACK))
+            {
+                matrixStack.push();
+                matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+                matrixStack.translate(-1,0,.01);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
+                matrixStack.pop();
+            }        }
+
     }
 
 
@@ -79,27 +107,37 @@ public class RedstoneBridge extends RedstoneDust {
      */
     @Override
     public boolean neighborChanged(PanelCellPos cellPos)    {
-        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.BACK),
-                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
-                backNeighbor = cellPos.getNeighbor(Side.BACK),
-                frontNeighbor = cellPos.getNeighbor(Side.FRONT);
-
         int front=0, right=0,back=0, left=0;
-        if (frontEnabled && frontNeighbor!=null)
-        {
-            front = getNeighborOutput(frontNeighbor);
+        crawlUpSide.clear();
+
+        //cell positions above and below cell for checking redstone stepping up or down
+        PanelCellPos above=null,below;
+
+        PanelCellNeighbor topNeighbor = cellPos.getNeighbor(Side.TOP);
+        if (topNeighbor!=null) {
+            if (topNeighbor.getNeighborIPanelCell() instanceof TransparentBlock)
+                above = cellPos.offset(Side.TOP);
         }
-        if (rightEnabled && rightNeighbor!=null)
-        {
-            right=getNeighborOutput(rightNeighbor);
+        else {
+            above = cellPos.offset(Side.TOP);
         }
-        if (backEnabled && backNeighbor!=null)
+        below=cellPos.offset(Side.BOTTOM);
+
+        if (frontEnabled)
         {
-            back=getNeighborOutput(backNeighbor);
+            front = checkSideInput(cellPos,Side.FRONT,above,below);
         }
-        if (leftEnabled && leftNeighbor!=null)
+        if (rightEnabled)
         {
-            left=getNeighborOutput(leftNeighbor);
+            right = checkSideInput(cellPos,Side.RIGHT,above,below);
+        }
+        if (backEnabled)
+        {
+            back = checkSideInput(cellPos,Side.BACK,above,below);
+        }
+        if (leftEnabled)
+        {
+            left = checkSideInput(cellPos,Side.LEFT,above,below);
         }
 
 
@@ -131,11 +169,10 @@ public class RedstoneBridge extends RedstoneDust {
         if (sideEnabled(outputDirection)) {
             if (outputDirection==Side.FRONT||outputDirection==Side.BACK)
                 return Math.max(this.signalStrength2, 0);
-            else
+            else if (outputDirection==Side.LEFT||outputDirection==Side.RIGHT)
                 return Math.max(this.signalStrength, 0);
         }
-        else
-            return 0;
+        return 0;
     }
 
     @Override

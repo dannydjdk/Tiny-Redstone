@@ -253,7 +253,7 @@ public class PanelCellPos {
 
             if (neighborCell != null) {
                 Side neighborSide = neighborPos.getPanelTile().getPanelCellSide(neighborPos, towardPanelSide.getOpposite());
-                return new PanelCellNeighbor(neighborPos, neighborCell, neighborSide, side);
+                return new PanelCellNeighbor(neighborPos, neighborCell, neighborSide, towardPanelSide);
             } else if (neighborPos.getPanelTile().checkCellForPistonExtension(neighborPos)) {
                 return new PanelCellNeighbor(neighborPos, null, null, side);
             }
