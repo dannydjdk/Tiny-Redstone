@@ -2,7 +2,6 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.compat.theoneprobe.ProbeInfoHelper;
-import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.IProbeInfo;
@@ -155,24 +154,6 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellPro
     public boolean isPushable() {
         return true;
     }
-
-    /**
-     * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
-     *
-     * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
-     * @param segmentClicked Which of nine segment within the cell were clicked.
-     * @return true if a change was made to the cell output
-     */
-    @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
-        PanelTile panelTile = cellPos.getPanelTile();
-        if(panelTile.getWorld().isRemote)
-            TinyBlockGUI.open(panelTile, cellPos.getIndex(), this);
-        return false;
-    }
-
-    @Override
-    public boolean hasActivation(){return true;}
 
     @Override
     public void setColor(int color) {

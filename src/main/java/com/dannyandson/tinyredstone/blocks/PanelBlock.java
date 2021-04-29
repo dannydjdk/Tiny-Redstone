@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
+import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
@@ -354,6 +355,9 @@ public class PanelBlock extends Block {
                         this.onBlockHarvested(world, pos, state, player);
                         replaceBlock(state, Blocks.AIR.getDefaultState(), world, pos, 1);
                         handled = true;
+                    } else if (heldItem == Registration.TINY_COLOR_SELECTOR.get() && posInPanelCell.getIPanelCell() instanceof IColorablePanelCell) {
+                        if(world.isRemote)
+                            TinyBlockGUI.open(panelTile, posInPanelCell.getIndex(), (IColorablePanelCell)posInPanelCell.getIPanelCell());
                     } else if (heldItem instanceof DyeItem) {
                         //dye the panel if right clicking with a dye
                         int color = ((DyeItem) heldItem).getDyeColor().getColorValue();
@@ -387,7 +391,7 @@ public class PanelBlock extends Block {
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                             TinyRedstone.LOGGER.error("Exception thrown while" + e.getMessage());
                         }
-                    } else if (posInPanelCell!=null && posInPanelCell.getIPanelCell() != null && !panelTile.isCovered() && posInPanelCell.getIPanelCell().hasActivation() && !player.isSneaking()) {
+                    } else if (posInPanelCell.getIPanelCell() != null && !panelTile.isCovered() && posInPanelCell.getIPanelCell().hasActivation() && !player.isSneaking()) {
 
                         //if player clicked on a panel cell, activate it
                         if (posInPanelCell.getIPanelCell().onBlockActivated(posInPanelCell, posInPanelCell.getSegment())) {
@@ -405,7 +409,7 @@ public class PanelBlock extends Block {
                     } else if (itemPanelCellMap.containsKey(heldItem) && !panelTile.isCovered()) {
                         //if player is holding an item registered as a panel cell, try to place that cell on the panel
                         PanelCellPos pos1 = posInPanelCell;
-                        if(pos1==null || pos1.getIPanelCell()!=null)
+                        if(pos1.getIPanelCell()!=null)
                         {
                             pos1 = posInPanelCell.offset(panelTile.getSideFromDirection(result.getFace()));
                         }
