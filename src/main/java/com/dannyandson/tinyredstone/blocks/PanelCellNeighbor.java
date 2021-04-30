@@ -13,6 +13,13 @@ public class PanelCellNeighbor {
     private final PanelTile panelTile;
     private PanelCellPos cellPos;
 
+    /**
+     * Construct a PanelCellNeighbor object for querying an IPanelCell
+     * @param cellPos Cell position of the neighbor
+     * @param panelCell IPanelCell of the neighbor
+     * @param neighborsSide Side of the neighbor facing the querying cell.
+     * @param neighborDirection Direction of the neighbor from the querying cell relative to the panel facing
+     */
     PanelCellNeighbor(PanelCellPos cellPos, IPanelCell panelCell, Side neighborsSide, Side neighborDirection)
     {
         this.iPanelCell=panelCell;
@@ -21,6 +28,13 @@ public class PanelCellNeighbor {
         this.cellPos=cellPos;
         this.neighborDirection =neighborDirection;
     }
+
+    /**
+     * Construct a PanelCellNeighbor object for querying a block in the world
+     * @param panelTile PanelTile of the querying cell
+     * @param blockPos Position of the neighbor block
+     * @param neighborDirection Direction of the neighbor block relative to the panel facing
+     */
     PanelCellNeighbor(PanelTile panelTile,BlockPos blockPos,Side neighborDirection)
     {
         this.blockPos=blockPos;

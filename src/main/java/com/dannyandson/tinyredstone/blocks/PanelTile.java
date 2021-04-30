@@ -1,11 +1,9 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.panelcells.Button;
-import com.dannyandson.tinyredstone.blocks.panelcells.Piston;
-import com.dannyandson.tinyredstone.blocks.panelcells.StickyPiston;
-import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
+import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.setup.Registration;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,6 +19,8 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.CheckForNull;
@@ -49,6 +49,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private boolean flagUpdate = false;
     private boolean flagSync = true;
     protected PanelCellGhostPos panelCellGhostPos;
+    private VoxelShape voxelShape = null;
 
     //for backward compat. Remove on next major update (2.x.x).
     private boolean fixLegacyFacing = false;
@@ -236,8 +237,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     {
         CompoundNBT cellsNBT = parentNBTTagCompound.getCompound("cells");
 
-        for (Integer i = 0; i < 64; i++) {
-            CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
+        for (String index : cellsNBT.keySet()) {
+            CompoundNBT cellNBT = cellsNBT.getCompound(index);
             if (cellNBT.contains("data")) {
                 if (this.cells.size()==0)
                     this.flagUpdate =true;
@@ -245,6 +246,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 try {
                     IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
                     cell.readNBT(cellNBT.getCompound("data"));
+                    Integer i = Integer.parseInt(index);
                     this.cells.put(i, cell);
 
 
@@ -270,7 +272,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 }
             }
         }
-
+        clearVoxelShape();
     }
 
     /**
@@ -375,7 +377,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 }
 
                 if (world.isRemote) {
-                    this.panelCellGhostPos = PanelTileRenderer.getPlayerLookingAtCell(this);
+                    PanelCellGhostPos gPos = PanelTileRenderer.getPlayerLookingAtCell(this);
+                    if (gPos!=null)
+                        gPos.getPanelTile().panelCellGhostPos=gPos;
+                    else
+                        this.panelCellGhostPos=null;
                 }
             }
         }catch(Exception e)
@@ -392,10 +398,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             PanelCellPos pistonPos = PanelCellPos.fromIndex(this,index);
 
             //get the side of the panel that the piston head is facing (back of tiny piston cell)
-            Side movingToward = cellDirections.get(index).getOpposite();
+            Side movingToward = pistonPos.getCellFacing().getOpposite();
             PanelCellPos moverPos = pistonPos.offset(movingToward);
 
-            if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston) {
+            if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston && moverPos!=null) {
                 moverPos = moverPos.offset(movingToward);
                 movingToward = movingToward.getOpposite();
             }
@@ -414,6 +420,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     panelTile.updateNeighborCells(moverPos);
                 }
             }
+            PanelCellPos abovePiston = pistonPos.offset(Side.TOP);
+            if (abovePiston!=null && abovePiston.getIPanelCell()!=null)
+                panelTile.updateCell(abovePiston);
         }
     }
 
@@ -450,8 +459,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         newPos.getPanelTile().markDirty();
         newPos.getPanelTile().flagSync=true;
+        newPos.getPanelTile().clearVoxelShape();
         cellPos.getPanelTile().markDirty();
         cellPos.getPanelTile().flagSync=true;
+        cellPos.getPanelTile().clearVoxelShape();
 
         return true;
     }
@@ -502,14 +513,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 Side side2;
 
                 if (rotationIn == Rotation.COUNTERCLOCKWISE_90) {
-                    cellPos2 = PanelCellPos.fromRowColumn(this,cellPos1.getColumn(),((cellPos1.getRow() - 4) * -1) + 3);
+                    cellPos2 = PanelCellPos.fromRowColumn(this,cellPos1.getColumn(),((cellPos1.getRow() - 4) * -1) + 3, cellPos1.getLevel());
                     side2 = side1.rotateYCCW();
                 } else if (rotationIn == Rotation.CLOCKWISE_180) {
-                    cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getRow() - 4) * -1) + 3,((cellPos1.getColumn() - 4) * -1) + 3);
+                    cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getRow() - 4) * -1) + 3,((cellPos1.getColumn() - 4) * -1) + 3, cellPos1.getLevel());
                     side2 = side1.getOpposite();
                 } else {
                     //default rotation 90°
-                    cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getColumn() - 4) * -1) + 3,cellPos1.getRow());
+                    cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getColumn() - 4) * -1) + 3,cellPos1.getRow(), cellPos1.getLevel());
                     side2 = side1.rotateYCW();
                 }
 
@@ -532,6 +543,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         updateOutputs();
 
+        clearVoxelShape();
         sync();
 
     }
@@ -632,6 +644,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             updateOutputs=true;
         if (updateNeighbor(cellPos,Side.LEFT,cellPosList))
             updateOutputs=true;
+        if (updateNeighbor(cellPos,Side.TOP,cellPosList))
+            updateOutputs=true;
+        if (updateNeighbor(cellPos,Side.BOTTOM,cellPosList))
+            updateOutputs=true;
 
 
         if (updateOutputs) {
@@ -660,14 +676,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             if (direction1 == direction2) {
                 ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
             }
-        } else if (adjacentCell != null && !adjacentCell.isIndependentState())
+        } else if (adjacentCell != null && (!adjacentCell.isIndependentState()||(side==Side.TOP&&adjacentCell.needsSolidBase())))
             cellPosList.add(neighborPos);
 
         return false;
     }
 
     public boolean checkCellForPistonExtension(PanelCellPos cellPos) {
-        for(Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT})
+        for(Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT,Side.TOP,Side.BOTTOM})
         {
             PanelCellPos neighborPos = cellPos.offset(panelSide);
             if (neighborPos!=null) {
@@ -706,58 +722,33 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         IPanelCell thisCell = cellPos.getIPanelCell();
 
-        if (thisCell != null && !thisCell.isIndependentState()){
-                Side frontDirection = cellPos.getCellFacing();
-                Side backDirection = frontDirection.getOpposite();
-                Side rightDirection = frontDirection.rotateYCW();
-                Side leftDirection = frontDirection.rotateYCCW();
+        if (thisCell != null) {
 
-                PanelCellNeighbor front = getNeighbor(frontDirection, cellPos);
-                PanelCellNeighbor back = getNeighbor(backDirection, cellPos);
-                PanelCellNeighbor right = getNeighbor(rightDirection, cellPos);
-                PanelCellNeighbor left = getNeighbor(leftDirection, cellPos);
-
-                if (thisCell.neighborChanged(front, right, back, left)) {
-                    updateNeighborCells(cellPos, iteration + 1);
+            if (thisCell.needsSolidBase()) {
+                PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
+                if (basePos != null && (basePos.getIPanelCell() == null || !basePos.getIPanelCell().isPushable())) {
+                    Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, this, null);
                     change = true;
                 }
+            }
+            //TODO consider making this more efficient by only updating affected sides
+            if (!change && !thisCell.isIndependentState() && thisCell.neighborChanged(cellPos)) {
+                updateNeighborCells(cellPos, iteration + 1);
+                if (thisCell instanceof RedstoneDust) {
+                    PanelCellPos above = cellPos.offset(Side.TOP), below = cellPos.offset(Side.BOTTOM);
+                    if (above != null)
+                        updateNeighborCells(above, iteration + 1);
+                    if (below != null)
+                        updateNeighborCells(below, iteration + 1);
+                }
+                change = true;
+            }
         }
 
 
         if (change)
             this.markDirty();
         return change;
-    }
-
-    /**
-     * Gets a PanelCellNeighbor object providing data about the neighboring cell or block.
-     *
-     * @param side Toward which side of the panel the adjacent cell or block is relative to this cell.
-     * @param localCellPos Position of the panel cell on this panel.
-     * @return an Integer array of size 2. First element is weak power. Second is strong power.
-     */
-    @CheckForNull
-    private PanelCellNeighbor getNeighbor(Side side, PanelCellPos localCellPos) {
-
-        PanelCellPos neighborPos = localCellPos.offset(side);
-
-        if (neighborPos != null) {
-            IPanelCell neighborCell = neighborPos.getIPanelCell();
-
-            if (neighborCell != null) {
-                Side neighborSide = neighborPos.getPanelTile().getPanelCellSide(neighborPos, side.getOpposite());
-                return new PanelCellNeighbor(neighborPos, neighborCell, neighborSide, side);
-            } else if (checkCellForPistonExtension(neighborPos)) {
-                return new PanelCellNeighbor(neighborPos, null, null, side);
-            }
-
-        } else {
-            BlockPos blockPos = this.pos.offset(getDirectionFromSide(side));
-            return new PanelCellNeighbor(this, blockPos, side);
-        }
-
-
-        return null;
     }
 
     private Side getPanelCellSide(PanelCellPos cellPos, Direction facing) {
@@ -770,7 +761,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * @param panelSide the side of the redstone panel
      * @return the side of the cell that is facing the given side of the panel
      */
-    private Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
+    protected Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
     {
         Side cellDirection = cellPos.getPanelTile().getCellFacing(cellPos);
 
@@ -778,12 +769,18 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         if (cellDirection==panelSide)
             return Side.FRONT;
+        if ((panelSide==Side.TOP||panelSide==Side.BOTTOM)&&cellDirection!=Side.TOP&&cellDirection!=Side.BOTTOM)
+            return panelSide;
         if (cellDirection==panelSide.getOpposite())
             return Side.BACK;
         if (cellDirection==panelSide.rotateYCW())
             return Side.LEFT;
         if (cellDirection==panelSide.rotateYCCW())
             return Side.RIGHT;
+        if (cellDirection==panelSide.rotateForward())
+            return Side.TOP;
+        if (cellDirection==panelSide.rotateBack())
+            return Side.BOTTOM;
 
         return null;
     }
@@ -1008,6 +1005,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     case WEST:
                         return Direction.UP;
                 }
+            case TOP:
+                return facing.getOpposite();
+            case BOTTOM:
+                return facing;
         }
         //this should not be reached
         return null;
@@ -1024,6 +1025,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         return Side.FRONT;
                     case UP:
                         return Side.BACK;
+                    case NORTH:
+                        return Side.BOTTOM;
+                    case SOUTH:
+                        return Side.TOP;
                 }
                 break;
             case EAST:
@@ -1033,6 +1038,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     case SOUTH:
                     case UP:
                         return Side.RIGHT;
+                    case EAST:
+                        return Side.BOTTOM;
+                    case WEST:
+                        return Side.TOP;
                 }
                 break;
             case SOUTH:
@@ -1043,6 +1052,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     case EAST:
                     case WEST:
                         return Side.BACK;
+                    case SOUTH:
+                        return Side.BOTTOM;
+                    case NORTH:
+                        return Side.TOP;
                 }
                 break;
             case WEST:
@@ -1052,6 +1065,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     case NORTH:
                     case SOUTH:
                         return Side.LEFT;
+                    case WEST:
+                        return Side.BOTTOM;
+                    case EAST:
+                        return Side.TOP;
                 }
                 break;
             case UP:
@@ -1064,6 +1081,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         return Side.BACK;
                     case WEST:
                         return Side.LEFT;
+                    case UP:
+                        return Side.BOTTOM;
+                    case DOWN:
+                        return Side.TOP;
                 }
                 break;
             case DOWN:
@@ -1076,6 +1097,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         return Side.BACK;
                     case EAST:
                         return Side.LEFT;
+                    case DOWN:
+                        return Side.BOTTOM;
+                    case UP:
+                        return Side.TOP;
                 }
         }
 
@@ -1083,18 +1108,18 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return null;
     }
 
-    protected Direction getPlayerDirectionFacing(PlayerEntity player){
+    protected Direction getPlayerDirectionFacing(PlayerEntity player, boolean allowVertical){
+
         Direction panelFacing = getBlockState().get(BlockStateProperties.FACING);
-        if (panelFacing==Direction.UP||panelFacing==Direction.DOWN){
-            return  player.getHorizontalFacing();
-        }
+
         Direction[] playerFacings = Direction.getFacingDirections(player);
         for(Direction facing : playerFacings)
         {
-            if (facing!=panelFacing && facing!=panelFacing.getOpposite())
+            if (allowVertical || (facing!=panelFacing && facing!=panelFacing.getOpposite()))
                 return facing;
         }
         return  player.getHorizontalFacing();
+
     }
 
     @CheckForNull
@@ -1109,6 +1134,16 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return this.cellDirections.get(cellPos.getIndex());
     }
 
+    public List<PanelCellPos> getCellPositions()
+    {
+        List<PanelCellPos> poss = new ArrayList<>();
+        for (Integer index : cells.keySet())
+        {
+            poss.add(PanelCellPos.fromIndex(this,index));
+        }
+        return poss;
+    }
+
     public int getCellCount()
     {
         return cells.size();
@@ -1118,11 +1153,26 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     {
         if (cellPos.getIPanelCell() != null) {
             int cellIndex = cellPos.getIndex();
+            boolean isRedstoneDust = cellPos.getIPanelCell() instanceof RedstoneDust;
+
             //remove from panel
             cellDirections.remove(cellIndex);
             cells.remove(cellIndex);
-            updateNeighborCells(cellPos);
 
+            //let neighbors know about vacancy
+            updateNeighborCells(cellPos);
+            //for tiny redstone dust, alert the whole neighborhood
+            if (isRedstoneDust)
+            {
+                PanelCellPos above = cellPos.offset(Side.TOP),
+                        below = cellPos.offset(Side.BOTTOM);
+                if (above!=null)
+                    updateNeighborCells(above);
+                if (below!=null)
+                    updateNeighborCells(below);
+            }
+
+            clearVoxelShape();
             sync();
         }
     }
@@ -1136,6 +1186,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             updateCell(cellIndex);
         }
         updateNeighborCells(cellPos);
+        clearVoxelShape();
     }
 
     public boolean hasCellsOnFace(Direction direction)
@@ -1171,6 +1222,73 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public void flagSync()
     {
         this.flagSync=true;
+    }
+
+    public VoxelShape getVoxelShape(){
+
+        if (voxelShape==null) {
+            switch (this.getBlockState().get(BlockStateProperties.FACING)) {
+                case UP:
+                    voxelShape = Block.makeCuboidShape(0, 16, 0, 16, 14, 16);
+                    break;
+                case NORTH:
+                    voxelShape = Block.makeCuboidShape(0, 0, 0, 16, 16, 2);
+                    break;
+                case EAST:
+                    voxelShape = Block.makeCuboidShape(16, 0, 0, 14, 16, 16);
+                    break;
+                case SOUTH:
+                    voxelShape = Block.makeCuboidShape(0, 0, 16, 16, 16, 14);
+                    break;
+                case WEST:
+                    voxelShape = Block.makeCuboidShape(0, 0, 0, 2, 16, 16);
+                    break;
+                default: //DOWN
+                    voxelShape = Block.makeCuboidShape(0, 0, 0, 16, 2, 16);
+            }
+
+            if (!isCovered()) {
+                for (Integer index : cells.keySet()) {
+                    PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
+                    IPanelCell cell = cellPos.getIPanelCell();
+                    if (cell != null) {
+                        PanelCellVoxelShape cellShape = cell.getShape();
+                        float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
+                        float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
+                        float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
+                        float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
+                        float levelStart = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
+                        float levelEnd = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
+
+                        switch (this.getBlockState().get(BlockStateProperties.FACING)) {
+                            case UP:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(rowStart, 16 - levelStart, 16 - columnStart, rowEnd, 16 - levelEnd, 16 - columnEnd));
+                                break;
+                            case NORTH:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(rowStart, 16 - columnStart, levelStart, rowEnd, 16 - columnEnd, levelEnd));
+                                break;
+                            case EAST:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(16 - levelStart, rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd));
+                                break;
+                            case SOUTH:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd, 16 - levelEnd));
+                                break;
+                            case WEST:
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(levelStart, 16 - rowStart, columnStart, levelEnd, 16 - rowEnd, columnEnd));
+                                break;
+                            default: //DOWN
+                                voxelShape = VoxelShapes.or(voxelShape, Block.makeCuboidShape(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
+                        }
+                    }
+                }
+            }
+        }
+
+        return voxelShape;
+    }
+    public void clearVoxelShape()
+    {
+        voxelShape=null;
     }
 }
 

@@ -42,17 +42,17 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(PanelTileRenderer.TEXTURE);
-        TextureAtlasSprite sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_COMPARATOR_OFF);
+        TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
+        TextureAtlasSprite sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_OFF);
 
         if (this.output>0 && this.subtract) {
-            sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_Comparator_SUBTRACT_ON);
+            sprite_repeater = RenderHelper.getSprite(TEXTURE_Comparator_SUBTRACT_ON);
         }
         else if(this.output>0){
-            sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_COMPARATOR_ON);
+            sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_ON);
         }
         else if(this.subtract){
-            sprite_repeater = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_COMPARATOR_SUBTRACT_OFF);
+            sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_SUBTRACT_OFF);
         }
 
 
@@ -106,16 +106,17 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * @param frontNeighbor object to access info about front neighbor or null if no neighbor
-     * @param rightNeighbor object to access info about right neighbor or null if no neighbor
-     * @param backNeighbor object to access info about back neighbor or null if no neighbor
-     * @param leftNeighbor object to access info about left neighbor or null if no neighbor
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
+    public boolean neighborChanged(PanelCellPos cellPos)
     {
+        PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK),
+                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
+                rightNeighbor = cellPos.getNeighbor(Side.RIGHT);
+
         this.input1 = (backNeighbor==null)?0: Math.max(Math.max(backNeighbor.getStrongRsOutput(), backNeighbor.getWeakRsOutput()), backNeighbor.getComparatorOverride());
         this.input2 = Math.max((leftNeighbor==null)?0: leftNeighbor.getStrongRsOutput(), (rightNeighbor==null)?0:rightNeighbor.getStrongRsOutput());
 
@@ -194,6 +195,9 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
         return false;
     }
 
+    @Override
+    public boolean needsSolidBase(){return true;}
+
     /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
      *
@@ -236,6 +240,9 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public CompoundNBT writeNBT() {
 
         CompoundNBT nbt = new CompoundNBT();
@@ -261,5 +268,11 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
         probeInfo.text(CompoundText.createLabelInfo("Mode: ", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString()));
         return false;
+    }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return PanelCellVoxelShape.QUARTERCELLSLAB;
     }
 }

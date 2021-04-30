@@ -19,19 +19,15 @@ public interface IPanelCell {
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * WARNING! Check for null values!
-     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
-     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
-     * @param backNeighbor object to access info about back neighbor or NULL if no neighbor exists
-     * @param leftNeighbor object to access info about left neighbor or NULL if no neighbor exists
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
-    boolean neighborChanged(@Nullable PanelCellNeighbor frontNeighbor, @Nullable PanelCellNeighbor rightNeighbor, @Nullable  PanelCellNeighbor backNeighbor, @Nullable  PanelCellNeighbor leftNeighbor);
+    boolean neighborChanged(PanelCellPos cellPos);
 
     /**
      * Gets redstone output of the given side of the cell
-     * @param outputDirection (1=Front,2=Right,3=Back,4=Left)
+     * @param outputDirection Enum indicating direction of query (Front,Right,Back,Left,Top,Bottom)
      * @return integer 0-15 indicating the strength of redstone signal
      */
     int getWeakRsOutput(Side outputDirection);
@@ -55,6 +51,10 @@ public interface IPanelCell {
      */
     default boolean isPushable(){return false;}
 
+    default boolean canPlaceVertical(){return false;}
+
+    default boolean needsSolidBase(){return false;}
+
     /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
      * @return Light level to output 0-15
@@ -74,10 +74,18 @@ public interface IPanelCell {
      * @param segmentClicked Which of nine segment within the cell were clicked.
      * @return true if a change was made to the cell output
      */
-    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked){return false;};
+    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked){return false;}
+
+    default boolean hasActivation(){return false;}
 
     CompoundNBT writeNBT();
 
     void readNBT(CompoundNBT compoundNBT);
+
+    /**
+     * Get the shape of the cell for defining the hit box
+     * @return PanelCellVoxelShape object defining the cell shape
+     */
+    default PanelCellVoxelShape getShape() {return PanelCellVoxelShape.FULLCELL;}
 
 }

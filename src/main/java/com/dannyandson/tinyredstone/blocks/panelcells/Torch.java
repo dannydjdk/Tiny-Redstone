@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
 import java.util.LinkedList;
@@ -86,17 +87,17 @@ public class Torch implements IPanelCell
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * @param frontNeighbor object to access info about front neighbor
-     * @param rightNeighbor object to access info about right neighbor
-     * @param backNeighbor object to access info about back neighbor
-     * @param leftNeighbor object to access info about left neighbor
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor)
-    {
-        boolean output = (backNeighbor==null || backNeighbor.getWeakRsOutput() ==0);
+    public boolean neighborChanged(PanelCellPos cellPos){
+
+        PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK),
+            bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
+
+        boolean output = ( (backNeighbor==null || backNeighbor.getWeakRsOutput() ==0) && (bottomNeighbor==null || bottomNeighbor.getWeakRsOutput()==0));
 
         if (burnout && output)
         {
@@ -126,14 +127,16 @@ public class Torch implements IPanelCell
     @Override
     public int getWeakRsOutput(Side outputDirection)
     {
-        return getStrongRsOutput(outputDirection);
-    }
-    @Override
-    public int getStrongRsOutput(Side outputDirection) {
-        if (outputDirection!= Side.BACK && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
+        if (outputDirection!= Side.BACK && outputDirection!= Side.BOTTOM && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
             return 15;
         else
             return 0;
+    }
+    @Override
+    public int getStrongRsOutput(Side outputDirection) {
+        if (outputDirection==Side.TOP && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
+            return 15;
+        return 0;
     }
 
     /**
@@ -213,4 +216,11 @@ public class Torch implements IPanelCell
         }
 
     }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return new PanelCellVoxelShape(new Vector3d(.25d,0d,.25d),new Vector3d(.75d,1d,.75d));
+    }
+
 }

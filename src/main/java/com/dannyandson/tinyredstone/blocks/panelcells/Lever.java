@@ -7,10 +7,8 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.CompoundText;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -19,8 +17,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3f;
-
-import javax.annotation.Nullable;
 
 public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
 
@@ -37,9 +33,9 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
-        TextureAtlasSprite sprite_cobble = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_COBBLESTONE);
-        TextureAtlasSprite sprite_lever = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_LEVER);
-        TextureAtlasSprite sprite_lever_top = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_LEVER_TOP);
+        TextureAtlasSprite sprite_cobble = RenderHelper.getSprite(TEXTURE_COBBLESTONE);
+        TextureAtlasSprite sprite_lever = RenderHelper.getSprite(TEXTURE_LEVER);
+        TextureAtlasSprite sprite_lever_top = RenderHelper.getSprite(TEXTURE_LEVER_TOP);
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)? RenderType.getSolid():RenderType.getTranslucent());
 
         matrixStack.push();
@@ -116,20 +112,16 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
                 .normal(1, 0, 0)
                 .endVertex();
     }
+
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * WARNING! Check for null values!
-     *
-     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
-     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
-     * @param backNeighbor  object to access info about back neighbor or NULL if no neighbor exists
-     * @param leftNeighbor  object to access info about left neighbor or NULL if no neighbor exists
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(@Nullable PanelCellNeighbor frontNeighbor, @Nullable PanelCellNeighbor rightNeighbor, @Nullable PanelCellNeighbor backNeighbor, @Nullable PanelCellNeighbor leftNeighbor) {
+    public boolean neighborChanged(PanelCellPos cellPos){
         return false;
     }
 
@@ -141,12 +133,12 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
      */
     @Override
     public int getWeakRsOutput(Side outputDirection) {
-        return (active)?15:0;
+        return (active && outputDirection!=Side.TOP)?15:0;
     }
 
     @Override
     public int getStrongRsOutput(Side outputDirection) {
-        return 0;
+        return (active && outputDirection==Side.BOTTOM)?15:0;
     }
 
     /**
@@ -178,6 +170,9 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
     public boolean isPushable() {
         return false;
     }
+
+    @Override
+    public boolean needsSolidBase(){return true;}
 
     /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
@@ -219,6 +214,9 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
+    public boolean hasActivation(){return true;}
+
+    @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("active",this.active);
@@ -235,5 +233,11 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
         probeInfo.horizontal().item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
                 .text(CompoundText.createLabelInfo("State: ", this.active ? "On" : "Off"));
         return true;
+    }
+
+    @Override
+    public PanelCellVoxelShape getShape()
+    {
+        return PanelCellVoxelShape.BUTTONSHAPE;
     }
 }

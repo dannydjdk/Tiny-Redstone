@@ -43,7 +43,7 @@ public class Observer implements IPanelCell, IObservingPanelCell {
         TextureAtlasSprite sprite_front = RenderHelper.getSprite((TEXTURE_OBSERVER_FRONT));
         TextureAtlasSprite sprite_side = RenderHelper.getSprite((TEXTURE_OBSERVER_SIDE));
 
-        matrixStack.translate(0,0,1.0);
+        matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_top,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
@@ -62,26 +62,27 @@ public class Observer implements IPanelCell, IObservingPanelCell {
         matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_side,combinedLight,alpha);
 
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.translate(-1,0,1);
+        addRectangle(builder,matrixStack,sprite_top,combinedLight,alpha);
+
     }
 
     private void addRectangle(IVertexBuilder builder, MatrixStack matrixStack, TextureAtlasSprite sprite,int combinedLight, float alpha)
     {
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
     }
+
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
-     * Passes PanelCellNeighbor objects - an object wrapping another IPanelCell or a BlockState
-     * WARNING! Check for null values!
-     *
-     * @param frontNeighbor object to access info about front neighbor or NULL if no neighbor exists
-     * @param rightNeighbor object to access info about right neighbor or NULL if no neighbor exists
-     * @param backNeighbor  object to access info about back neighbor or NULL if no neighbor exists
-     * @param leftNeighbor  object to access info about left neighbor or NULL if no neighbor exists
+     * Passes PanelCellPos object for this cell which can be used to query PanelTile for PanelCellNeighbor objects - objects wrapping another IPanelCell or a BlockState
+     * @param cellPos PanelCellPos object for this cell. Can be used to query paneltile about neighbors
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellNeighbor frontNeighbor, PanelCellNeighbor rightNeighbor, PanelCellNeighbor backNeighbor, PanelCellNeighbor leftNeighbor) {
+    public boolean neighborChanged(PanelCellPos cellPos) {
         return false;
     }
 
@@ -120,6 +121,9 @@ public class Observer implements IPanelCell, IObservingPanelCell {
     public boolean isPushable() {
         return true;
     }
+
+    @Override
+    public boolean canPlaceVertical(){return true;}
 
     /**
      * Called each each tick.

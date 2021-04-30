@@ -19,6 +19,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 
 import java.util.function.Function;
@@ -73,7 +74,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
 
-        if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == blockState.get(BlockStateProperties.FACING).getOpposite()) {
+        if (tileEntity instanceof PanelTile) {
             if(!show(probeMode, playerEntity)) return false;
 
             PanelTile panelTile = (PanelTile) tileEntity;
@@ -81,7 +82,9 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
             if(!panelTile.isCovered() && block instanceof PanelBlock) {
                 PanelBlock panelBlock = (PanelBlock) block;
-                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.get(BlockStateProperties.FACING),probeHitData.getHitVec());
+                BlockRayTraceResult result = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
+                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.get(BlockStateProperties.FACING),result);
+
 
                 IPanelCell panelCell = panelCellPos.getIPanelCell();
                 if(panelCell != null) {
@@ -120,7 +123,8 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
             if(!panelTile.isCovered()) {
 
-                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, probeHitData.getHitVec());
+                BlockRayTraceResult rtr = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
+                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, rtr);
 
                 PanelCellSegment segment = posInPanelCell.getSegment();
 

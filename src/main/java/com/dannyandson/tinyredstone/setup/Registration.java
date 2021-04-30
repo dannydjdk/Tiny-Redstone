@@ -6,10 +6,7 @@ import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
-import com.dannyandson.tinyredstone.items.Blueprint;
-import com.dannyandson.tinyredstone.items.PanelCellItem;
-import com.dannyandson.tinyredstone.items.PanelItem;
-import com.dannyandson.tinyredstone.items.RedstoneWrench;
+import com.dannyandson.tinyredstone.items.*;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
@@ -84,6 +81,7 @@ public class Registration {
             .group(ModSetup.ITEM_GROUP)));
 
     public static final RegistryObject<RedstoneWrench> REDSTONE_WRENCH = ITEMS.register("redstone_wrench", RedstoneWrench::new);
+    public static final RegistryObject<RedstoneWrench> TINY_COLOR_SELECTOR = ITEMS.register("tiny_color_selector", TinyColorSelector::new);
 
     public static final RegistryObject<Item> PANEL_COVER_DARK = ITEMS.register("dark_panel_cover",PanelCellItem::new);
     public static final RegistryObject<Item> PANEL_COVER_LIGHT = ITEMS.register("light_panel_cover",PanelCellItem::new);

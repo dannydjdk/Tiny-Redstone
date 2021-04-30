@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " YR",
+    " BL",
+    "W  "
+  ],
+  "key": {
+    "W": {
+      "item": "tinyredstone:redstone_wrench"
+    },
+    "Y": {
+      "item": "minecraft:yellow_dye"
+    },
+    "R": {
+      "item": "minecraft:red_dye"
+    },
+    "B": {
+      "item": "minecraft:blue_dye"
+    },
+    "L": {
+      "item": "minecraft:black_dye"
+    }
+  },
+  "result": {
+    "item": "tinyredstone:tiny_color_selector"
+  }
+}

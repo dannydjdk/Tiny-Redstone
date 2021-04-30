@@ -4,13 +4,12 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
+import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.DyeColor;
@@ -30,7 +29,7 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
     @Override
     public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
     {
-        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(PanelTileRenderer.TEXTURE);
+        TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
         Integer color = DyeColor.GRAY.getColorValue();
         if (stack.getTag()!=null && stack.getTag().contains("BlockEntityTag") ) {
@@ -87,7 +86,7 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
             }
             else {
                 CompoundNBT cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
-                for (Integer i = 0; i < 64; i++) {
+                for (Integer i = 0; i < 256; i++) {
                     if (cellsNBT.contains(i.toString())) {
                         CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
 
@@ -123,12 +122,13 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
         float rotation1 = 270f;
         double cellSize = 1d/8d;
 
-        int row = Math.round((index.floatValue()/8f)-0.5f);
+        int level = Math.round((index.floatValue()/64f)-0.5f);
+        int row = Math.round(((index.floatValue()%64)/8f)-0.5f);
         int cell = index%8;
 
         matrixStack.push();
 
-        matrixStack.translate(cellSize*(double)row, 0.125, cellSize*(cell));
+        matrixStack.translate(cellSize*(double)row, 0.125+(cellSize*(double)level), cellSize*(cell));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
 
         if (cellDirection== Direction.WEST)

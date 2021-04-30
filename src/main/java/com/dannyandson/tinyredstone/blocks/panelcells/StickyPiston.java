@@ -1,7 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 
@@ -29,7 +28,7 @@ public class StickyPiston extends Piston {
     @Override
     protected TextureAtlasSprite getSprite_top()
     {
-        return Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(TEXTURE_PISTON_TOP);
+        return RenderHelper.getSprite(TEXTURE_PISTON_TOP);
     }
 
 
