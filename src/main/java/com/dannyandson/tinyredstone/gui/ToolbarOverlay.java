@@ -68,6 +68,8 @@ public class ToolbarOverlay {
                                 RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+1, y, x+1, y+3, x+3+1, y+1.5f, color, 1.0f);
                                 RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+1, y+0.75f, y+3-0.75f, color, 1.0f);
                                 break;
+                            case TOP:
+                            case BOTTOM:
                         }
 
                         bufferBuilder.finishDrawing();

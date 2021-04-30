@@ -29,15 +29,15 @@ public class RotationLock {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void lockRotation(Side side, boolean invert) {
-        lockRotation(side, invert, true);
+    public static void lockRotation(Side side, boolean allowVertical, boolean invert) {
+        lockRotation(side, allowVertical, invert, true);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void lockRotation(Side side, boolean invert, boolean sendToServer) {
+    public static void lockRotation(Side side, boolean allowVertical, boolean invert, boolean sendToServer) {
         switch (side) {
             case BACK:
-                side = invert ? Side.RIGHT : Side.LEFT;
+                side = invert ? Side.RIGHT : (allowVertical ? Side.BOTTOM : Side.LEFT);
                 break;
             case LEFT:
                 side = invert ? Side.BACK : Side.FRONT;
@@ -48,6 +48,12 @@ public class RotationLock {
             case RIGHT:
                 side = invert ? Side.FRONT : Side.BACK;
                 break;
+            case BOTTOM:
+                side = invert ? Side.BACK : Side.TOP;
+                break;
+            case TOP:
+                side = invert ? Side.BOTTOM : Side.LEFT;
+                break;
         }
         if(side != rotationLock) {
             rotationLock = side;
@@ -56,26 +62,26 @@ public class RotationLock {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void lockRotation(boolean invert) {
-        lockRotation(invert, true);
+    public static void lockRotation(boolean allowVertical, boolean invert) {
+        lockRotation(allowVertical, invert, true);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean invert) {
-        lockRotation(panelTile, playerEntity, invert, true);
+    public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean allowVertical, boolean invert) {
+        lockRotation(panelTile, playerEntity, allowVertical, invert, true);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void lockRotation(boolean invert, boolean sendToServer) {
+    public static void lockRotation(boolean allowVertical, boolean invert, boolean sendToServer) {
         lockRotation(rotationLock == null
                 ? Side.FRONT
-                : rotationLock, invert, sendToServer);
+                : rotationLock, allowVertical, invert, sendToServer);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean invert, boolean sendToServer) {
+    public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean allowVertical, boolean invert, boolean sendToServer) {
         lockRotation(rotationLock == null
-                ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(playerEntity))
+                ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(playerEntity, allowVertical))
                 : rotationLock, invert, sendToServer);
     }
 

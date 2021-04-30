@@ -1,5 +1,7 @@
 package com.dannyandson.tinyredstone;
 
+import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
@@ -18,6 +20,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
+
+import java.lang.reflect.InvocationTargetException;
 
 @Mod.EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
 public class ClientBinding {
@@ -46,9 +50,19 @@ public class ClientBinding {
                 BlockPos blockPos = new BlockPos(lookVector);
                 TileEntity te = world.getTileEntity(blockPos);
                 if (te instanceof PanelTile) {
-                    RotationLock.lockRotation((PanelTile) te, player, wheelDelta < 0);
+                    try {
+                        IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(mainHandItem).getConstructors()[0].newInstance();
+                        RotationLock.lockRotation((PanelTile) te, player, panelCell.canPlaceVertical(), wheelDelta < 0);
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                            TinyRedstone.LOGGER.error("Exception thrown when attempting to lock rotation: " + e.getMessage());
+                    }
                 } else {
-                    RotationLock.lockRotation(wheelDelta < 0);
+                    try {
+                        IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(mainHandItem).getConstructors()[0].newInstance();
+                        RotationLock.lockRotation(panelCell.canPlaceVertical(), wheelDelta < 0);
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                        TinyRedstone.LOGGER.error("Exception thrown when attempting to lock rotation: " + e.getMessage());
+                    }
                 }
                 mouseScrollEvent.setCanceled(true);
             } else {
