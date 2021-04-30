@@ -422,14 +422,25 @@ public class PanelBlock extends Block {
 
                                 if (panelCell instanceof IPanelCell) {
 
-                                    //place the cell on the panel
-                                    Direction playerFacing = panelTile.getPlayerDirectionFacing(player,((IPanelCell) panelCell).canPlaceVertical());
+                                    boolean placementOK = true;
 
-                                    pos1.getPanelTile().addCell(pos1, (IPanelCell) panelCell, panelTile.getSideFromDirection(playerFacing));
+                                    if (((IPanelCell) panelCell).needsSolidBase()) {
+                                        PanelCellPos basePos = pos1.offset(Side.BOTTOM);
+                                        if (basePos != null && (basePos.getIPanelCell() == null || !basePos.getIPanelCell().isPushable())) {
+                                            placementOK = false;
+                                        }
+                                    }
 
-                                    //remove an item from the player's stack
-                                    if (!player.isCreative())
-                                        player.getHeldItem(hand).setCount(player.getHeldItem(hand).getCount() - 1);
+                                    if (placementOK) {
+                                        //place the cell on the panel
+                                        Direction playerFacing = panelTile.getPlayerDirectionFacing(player, ((IPanelCell) panelCell).canPlaceVertical());
+
+                                        pos1.getPanelTile().addCell(pos1, (IPanelCell) panelCell, panelTile.getSideFromDirection(playerFacing));
+
+                                        //remove an item from the player's stack
+                                        if (!player.isCreative())
+                                            player.getHeldItem(hand).setCount(player.getHeldItem(hand).getCount() - 1);
+                                    }
                                 }
 
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -504,7 +515,7 @@ public class PanelBlock extends Block {
         }
     }
 
-   private void removeCell(PanelCellPos cellPos, PanelTile panelTile, PlayerEntity player)
+   protected void removeCell(PanelCellPos cellPos, PanelTile panelTile, @Nullable PlayerEntity player)
     {
         if (cellPos.getIPanelCell()!=null) {
 
@@ -512,12 +523,13 @@ public class PanelBlock extends Block {
             BlockPos pos = panelTile.getPos();
 
             // drop panel cell item
-            if (!player.isCreative()) {
+            if (player==null || !player.isCreative()) {
                 Item item = panelCellItemMap.get(cellPos.getIPanelCell().getClass());
                 ItemStack itemStack = new ItemStack(item);
                 ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY()+.5, pos.getZ(), itemStack);
                 world.addEntity(itemEntity);
-                itemEntity.setPosition(player.getPosX(),player.getPosY(),player.getPosZ());
+                if (player!=null)
+                    itemEntity.setPosition(player.getPosX(),player.getPosY(),player.getPosZ());
             }
 
             //remove from panel

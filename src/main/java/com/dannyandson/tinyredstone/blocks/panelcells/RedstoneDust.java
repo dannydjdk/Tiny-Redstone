@@ -264,6 +264,9 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
         return false;
     }
 
+    @Override
+    public boolean needsSolidBase(){return true;}
+
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
      *

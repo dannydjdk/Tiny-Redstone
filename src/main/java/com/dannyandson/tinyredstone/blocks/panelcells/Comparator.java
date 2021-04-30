@@ -195,6 +195,9 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
         return false;
     }
 
+    @Override
+    public boolean needsSolidBase(){return true;}
+
     /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
      *

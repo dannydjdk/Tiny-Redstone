@@ -52,6 +52,9 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.translate(0,-1,0);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
     }
 
     /**

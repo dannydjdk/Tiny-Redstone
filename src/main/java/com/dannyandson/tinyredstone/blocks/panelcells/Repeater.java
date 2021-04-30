@@ -220,6 +220,8 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
         return false;
     }
 
+    @Override
+    public boolean needsSolidBase(){return true;}
 
     /**
      * Called at the beginning of each tick if isTicking() returned true on last call.

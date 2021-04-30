@@ -93,6 +93,9 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
         return false;
     }
 
+    @Override
+    public boolean needsSolidBase(){return true;}
+
     /**
      * Called each each tick.
      *

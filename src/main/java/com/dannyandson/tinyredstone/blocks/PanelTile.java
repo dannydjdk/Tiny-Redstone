@@ -400,7 +400,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             Side movingToward = pistonPos.getCellFacing().getOpposite();
             PanelCellPos moverPos = pistonPos.offset(movingToward);
 
-            if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston) {
+            if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston && moverPos!=null) {
                 moverPos = moverPos.offset(movingToward);
                 movingToward = movingToward.getOpposite();
             }
@@ -419,6 +419,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     panelTile.updateNeighborCells(moverPos);
                 }
             }
+            PanelCellPos abovePiston = pistonPos.offset(Side.TOP);
+            if (abovePiston!=null && abovePiston.getIPanelCell()!=null)
+                panelTile.updateCell(abovePiston);
         }
     }
 
@@ -672,7 +675,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             if (direction1 == direction2) {
                 ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
             }
-        } else if (adjacentCell != null && !adjacentCell.isIndependentState())
+        } else if (adjacentCell != null && (!adjacentCell.isIndependentState()||(side==Side.TOP&&adjacentCell.needsSolidBase())))
             cellPosList.add(neighborPos);
 
         return false;
@@ -718,20 +721,27 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         IPanelCell thisCell = cellPos.getIPanelCell();
 
-        if (thisCell != null && !thisCell.isIndependentState()){
+        if (thisCell != null) {
 
-            //TODO consider making this more efficient by only updating affected sides
-                if (thisCell.neighborChanged(cellPos)) {
-                    updateNeighborCells(cellPos, iteration + 1);
-                    if (thisCell instanceof RedstoneDust) {
-                        PanelCellPos above = cellPos.offset(Side.TOP), below = cellPos.offset(Side.BOTTOM);
-                        if (above !=null)
-                            updateNeighborCells(above,iteration+1);
-                        if (below!=null)
-                            updateNeighborCells(below,iteration+1);
-                    }
+            if (thisCell.needsSolidBase()) {
+                PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
+                if (basePos != null && (basePos.getIPanelCell() == null || !basePos.getIPanelCell().isPushable())) {
+                    Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, this, null);
                     change = true;
                 }
+            }
+            //TODO consider making this more efficient by only updating affected sides
+            if (!change && !thisCell.isIndependentState() && thisCell.neighborChanged(cellPos)) {
+                updateNeighborCells(cellPos, iteration + 1);
+                if (thisCell instanceof RedstoneDust) {
+                    PanelCellPos above = cellPos.offset(Side.TOP), below = cellPos.offset(Side.BOTTOM);
+                    if (above != null)
+                        updateNeighborCells(above, iteration + 1);
+                    if (below != null)
+                        updateNeighborCells(below, iteration + 1);
+                }
+                change = true;
+            }
         }
 
 
