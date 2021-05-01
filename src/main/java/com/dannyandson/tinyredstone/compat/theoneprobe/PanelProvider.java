@@ -133,10 +133,13 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                     probeInfo.vertical(new LayoutStyle().borderColor(0xff44ff44).spacing(2))
                             .text(CompoundText.createLabelInfo("X: ", posInPanelCell.getX()))
                             .text(CompoundText.createLabelInfo("Z: ", posInPanelCell.getZ()))
+                            .text(CompoundText.createLabelInfo("Y: ", posInPanelCell.getY()))
                             .text(CompoundText.createLabelInfo("Row: ", posInPanelCell.getRow()))
                             .text(CompoundText.createLabelInfo("Column: ", posInPanelCell.getColumn()))
+                            .text(CompoundText.createLabelInfo("Level: ", posInPanelCell.getLevel()))
                             .text(CompoundText.createLabelInfo("Index: ", cellIndex))
-                            .text(CompoundText.createLabelInfo("Segment: ", segment.toString()));
+                            .text(CompoundText.createLabelInfo("Segment: ", segment.toString()))
+                            .text(CompoundText.createLabelInfo("Facing: ", posInPanelCell.getCellFacing()));
                 }
 
                 IPanelCell panelCell = posInPanelCell.getIPanelCell();

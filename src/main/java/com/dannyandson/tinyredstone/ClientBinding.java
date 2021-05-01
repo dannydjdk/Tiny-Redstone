@@ -54,7 +54,7 @@ public class ClientBinding {
                         IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(mainHandItem).getConstructors()[0].newInstance();
                         RotationLock.lockRotation((PanelTile) te, player, panelCell.canPlaceVertical(), wheelDelta < 0);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                            TinyRedstone.LOGGER.error("Exception thrown when attempting to lock rotation: " + e.getMessage());
+                        TinyRedstone.LOGGER.error("Exception thrown when attempting to lock rotation: " + e.getMessage());
                     }
                 } else {
                     try {
