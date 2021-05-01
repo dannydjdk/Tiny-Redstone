@@ -80,14 +80,14 @@ public class ToolbarOverlay {
                                 RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+shaft_height, y+shaft_offset, y+shaft_offset+shaft_width, color, 1.0f);
                                 break;
                             case TOP:
-                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+shaft_height, x+arrow_center, y+arrow_height+shaft_height, x+arrow_width, y+shaft_height, color, 1.0f);
-                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+shaft_offset, x+shaft_offset+shaft_width, y+plate_height, y+shaft_height, color, 1.0f);
-                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+arrow_width, y, y+plate_height, color, 1.0f);
-                                break;
-                            case BOTTOM:
                                 RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+arrow_center, y, x, y+arrow_height, x+arrow_width, y+arrow_height, color, 1.0f);
                                 RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+shaft_offset, x+shaft_offset+shaft_width, y+arrow_height, y+arrow_height+shaft_on_plate_height, color, 1.0f);
                                 RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+arrow_width, y+arrow_height+shaft_on_plate_height, y+arrow_height+shaft_height, color, 1.0f);
+                                break;
+                            case BOTTOM:
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+shaft_height, x+arrow_center, y+arrow_height+shaft_height, x+arrow_width, y+shaft_height, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+shaft_offset, x+shaft_offset+shaft_width, y+plate_height, y+shaft_height, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+arrow_width, y, y+plate_height, color, 1.0f);
                                 break;
                         }
 
