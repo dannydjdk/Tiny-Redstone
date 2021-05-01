@@ -130,20 +130,22 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     @Override
     public CompoundNBT write(CompoundNBT parentNBTTagCompound) {
         try {
-            if (this.strongPowerToNeighbors.size()==4) {
+            if (this.strongPowerToNeighbors.size()==5) {
                 CompoundNBT strongPowerToNeighbors = new CompoundNBT();
                 strongPowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.strongPowerToNeighbors.get(Side.FRONT));
                 strongPowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.strongPowerToNeighbors.get(Side.RIGHT));
                 strongPowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.strongPowerToNeighbors.get(Side.BACK));
                 strongPowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.strongPowerToNeighbors.get(Side.LEFT));
+                strongPowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.strongPowerToNeighbors.get(Side.TOP));
                 parentNBTTagCompound.put("strong_power_outgoing", strongPowerToNeighbors);
             }
-            if (this.weakPowerToNeighbors.size()==4) {
+            if (this.weakPowerToNeighbors.size()==5) {
                 CompoundNBT weakPowerToNeighbors = new CompoundNBT();
                 weakPowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.weakPowerToNeighbors.get(Side.FRONT));
                 weakPowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.weakPowerToNeighbors.get(Side.RIGHT));
                 weakPowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BACK));
                 weakPowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.weakPowerToNeighbors.get(Side.LEFT));
+                weakPowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.weakPowerToNeighbors.get(Side.TOP));
                 parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
             }
 
@@ -180,6 +182,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.strongPowerToNeighbors.put(Side.RIGHT, strongPowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
             this.strongPowerToNeighbors.put(Side.BACK,  strongPowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
             this.strongPowerToNeighbors.put(Side.LEFT,  strongPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
+            this.strongPowerToNeighbors.put(Side.TOP,  strongPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
         }
         CompoundNBT weakPowerToNeighbors = parentNBTTagCompound.getCompound("weak_power_outgoing");
         if (!weakPowerToNeighbors.isEmpty()) {
@@ -187,6 +190,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.weakPowerToNeighbors.put(Side.RIGHT, weakPowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.BACK,  weakPowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.LEFT,  weakPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
+            this.weakPowerToNeighbors.put(Side.TOP,  weakPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
         }
 
         CompoundNBT comparatorOverridesNBT = parentNBTTagCompound.getCompound("comparator_overrides");
@@ -200,6 +204,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 this.comparatorOverrides.put(Side.BACK,comparatorOverridesNBT.getInt(Side.BACK.ordinal()+""));
             if (comparatorOverridesNBT.contains(Side.LEFT.ordinal()+""))
                 this.comparatorOverrides.put(Side.LEFT,comparatorOverridesNBT.getInt(Side.LEFT.ordinal()+""));
+            if (comparatorOverridesNBT.contains(Side.TOP.ordinal()+""))
+                this.comparatorOverrides.put(Side.TOP,comparatorOverridesNBT.getInt(Side.TOP.ordinal()+""));
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
@@ -504,8 +510,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         Map<Integer, IPanelCell> cells = new HashMap<>();
         Map<Integer, Side> cellDirections = new HashMap<>();
 
-        for (Integer i = 0; i < 64; i++) {
-            if (this.cells.containsKey(i)) {
+        for (Integer i: this.cells.keySet()) {
+
                 PanelCellPos cellPos1 = PanelCellPos.fromIndex(this,i);
                 PanelCellPos cellPos2;
                 Side side1 = this.cellDirections.get(i);
@@ -526,7 +532,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 cells.put(cellPos2.getIndex(), this.cells.get(i));
                 cellDirections.put(cellPos2.getIndex(),side2);
 
-            }
         }
 
         this.cells = cells;
@@ -552,37 +557,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         boolean updated = false;
         Side side = getSideFromDirection(facing);
-
-        if (side==Side.LEFT) {
-            for (int i = 0; i < 8; i++) {
-                if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==side) {
-                    if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
-                        updated=true;
-                }
+        List<Integer> cellIndices = getEdgeCellIndices(side);
+        for (Integer i : cellIndices)
+            if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==side) {
+                if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
+                    updated=true;
             }
-        } else if (side==Side.FRONT) {
-            for (int i = 0; i < 64; i += 8) {
-                if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==side) {
-                    if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
-                        updated=true;
-                }
-            }
-        } else if (side==Side.RIGHT) {
-            for (int i = 56; i < 64; i++) {
-                if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==side) {
-                    if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
-                        updated=true;
-                }
-            }
-        } else if (side==Side.BACK) {
-            for (int i = 7; i < 64; i += 8) {
-                if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==side) {
-                    if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
-                        updated=true;
-                }
-            }
-        }
-
 
         return updated;
     }
@@ -593,36 +573,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public boolean updateSide(Side side){
         boolean updated = false;
 
-        if (side==Side.LEFT) {
-            for (int i = 0; i < 8; i++) {
-                if (cells.containsKey(i)) {
-                    if (updateCell(i))
-                        updated=true;
-                }
-            }
-        } else if (side==Side.FRONT) {
-            for (int i = 0; i < 64; i += 8) {
-                if (cells.containsKey(i)) {
-                    if (updateCell(i))
-                        updated=true;
-                }
-            }
-        } else if (side==Side.RIGHT) {
-            for (int i = 56; i < 64; i++) {
-                if (cells.containsKey(i)) {
-                    if (updateCell(i))
-                        updated=true;
-                }
-            }
-        } else if (side==Side.BACK) {
-            for (int i = 7; i < 64; i += 8) {
-                if (cells.containsKey(i)) {
-                    if (updateCell(i))
-                        updated=true;
-                }
+        List<Integer> cellIndices = getEdgeCellIndices(side);
+
+        for (Integer i : cellIndices) {
+            if (cells.containsKey(i)) {
+                if (updateCell(i))
+                    updated = true;
             }
         }
-
 
         return updated;
     }
@@ -795,7 +753,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         List<Direction> directionsUpdated = new ArrayList<>();
 
         //check edge cells
-        for (Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT}) {
+        for (Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT,Side.TOP}) {
             Direction direction = getDirectionFromSide(panelSide);
             weak=0;strong=0;
             List<Integer> indices = getEdgeCellIndices(direction);
@@ -858,51 +816,56 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return change;
     }
 
-    private List<Integer> getEdgeCellIndices(Direction edge)
-    {
+    private List<Integer> getEdgeCellIndices(Direction edge) {
+        return getEdgeCellIndices(getSideFromDirection(edge));
+    }
+    private List<Integer> getEdgeCellIndices(Side side){
+
         List<Integer> cellIndices = new ArrayList<>();
-        Side side = getSideFromDirection(edge);
 
-
-        if (side==Side.FRONT)
+        for (int i1 = 0 ; i1<447.0 ; i1+=64) {
+            if (side == Side.LEFT) {
+                for (int i = i1; i < i1+8; i++) {
+                    if (cells.containsKey(i)) {
+                        cellIndices.add(i);
+                    }
+                }
+            } else if (side == Side.FRONT) {
+                for (int i = i1; i < i1+64; i += 8) {
+                    if (cells.containsKey(i)) {
+                        cellIndices.add(i);
+                    }
+                }
+            } else if (side == Side.RIGHT) {
+                for (int i = i1+56; i < i1+64; i++) {
+                    if (cells.containsKey(i)) {
+                        cellIndices.add(i);
+                    }
+                }
+            } else if (side == Side.BACK) {
+                for (int i = i1+7; i < i1+64; i += 8) {
+                    if (cells.containsKey(i)) {
+                        cellIndices.add(i);
+                    }
+                }
+            }
+        }
+        if (side==Side.TOP)
         {
-            for (int i = 0; i < 64; i += 8) {
+            for (int i = 384; i < 448; i++) {
                 if (cells.containsKey(i)) {
                     cellIndices.add(i);
                 }
             }
+        }else if (side==Side.BOTTOM)
+        {
+            for (int i = 0; i < 64; i++) {
+                if (cells.containsKey(i)) {
+                    cellIndices.add(i);
+                }
+            }
+        }
 
-        }
-        else if (side==Side.RIGHT)
-        {
-            for (int i = 56; i < 64; i++)
-            {
-                if (cells.containsKey(i))
-                {
-                    cellIndices.add(i);
-                }
-            }
-        }
-        else if (side==Side.BACK)
-        {
-            for (int i = 7; i < 64; i += 8)
-            {
-                if (cells.containsKey(i))
-                {
-                    cellIndices.add(i);
-                }
-            }
-        }
-        else if (side==Side.LEFT)
-        {
-            for (int i = 0; i < 8; i ++)
-            {
-                if (cells.containsKey(i))
-                {
-                    cellIndices.add(i);
-                }
-            }
-        }
         return cellIndices;
     }
 
@@ -1190,33 +1153,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public boolean hasCellsOnFace(Direction direction)
     {
-        Side facing = getSideFromDirection(direction);
-        if (facing==Side.LEFT) {
-            for (int i = 0; i < 8; i++) {
-                if (cells.containsKey(i)) {
-                    return true;
-                }
-            }
-        } else if (facing == Side.FRONT) {
-            for (int i = 0; i < 64; i += 8) {
-                if (cells.containsKey(i)) {
-                    return true;
-                }
-            }
-        } else if (facing == Side.RIGHT) {
-            for (int i = 56; i < 64; i++) {
-                if (cells.containsKey(i)) {
-                    return true;
-                }
-            }
-        } else if (facing == Side.BACK) {
-            for (int i = 7; i < 64; i += 8) {
-                if (cells.containsKey(i)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return !getEdgeCellIndices(direction).isEmpty();
     }
     public void flagSync()
     {

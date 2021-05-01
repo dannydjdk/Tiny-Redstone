@@ -59,7 +59,7 @@ public class PanelCellPos {
         int row = Math.round((float) (x * 8f) - 0.5f);
         int cell = Math.round((float) (z * 8f) - 0.5f);
         int level = Math.round((float)(y * 8f) - 0.5f)-1;
-        if (row >= 0 && row < 8 && cell >= 0 && cell < 8 && level>=0 && level<4) {
+        if (row >= 0 && row < 8 && cell >= 0 && cell < 8 && level>=0 && level<7) {
             return new PanelCellPos(panelTile,row, cell, level);
         }
         return null;
@@ -157,7 +157,7 @@ public class PanelCellPos {
             }
         }
         else if (side==Side.TOP) {
-            if (level < 3) {
+            if (level < 6) {
                 cellPos =  new PanelCellPos(panelTile,row,column,level+1);
             }
         }
@@ -178,15 +178,22 @@ public class PanelCellPos {
                 PanelTile panelTile2 = (PanelTile) te;
                 if (panelTile2.getBlockState().get(BlockStateProperties.FACING)==panelTile.getBlockState().get(BlockStateProperties.FACING))
                 {
-                    int neighborRow, neighborColumn;
+                    int neighborRow, neighborColumn, neighborLevel;
                     if (side==Side.FRONT || side==Side.BACK) {
                         neighborRow = row;
                         neighborColumn = (column - 7) * -1;
-                    } else{
+                        neighborLevel = level;
+                    }/* else if (side==Side.TOP||side==Side.BOTTOM) {
+                        neighborRow = row;
+                        neighborColumn = column;
+                        neighborLevel = (level-6)*-1;
+                    }*/
+                    else{
                         neighborRow = (row - 7) * -1;
                         neighborColumn = column;
+                        neighborLevel = level;
                     }
-                    cellPos = new PanelCellPos(panelTile2,neighborRow,neighborColumn,level);
+                    cellPos = new PanelCellPos(panelTile2,neighborRow,neighborColumn,neighborLevel);
 
                 }
             }
@@ -258,9 +265,9 @@ public class PanelCellPos {
                 return new PanelCellNeighbor(neighborPos, null, null, side);
             }
 
-        } else {
-            BlockPos blockPos = this.panelTile.getPos().offset(this.panelTile.getDirectionFromSide(side));
-            return new PanelCellNeighbor(this.panelTile, blockPos, side);
+        } else if (towardPanelSide!=Side.BOTTOM){
+            BlockPos blockPos = this.panelTile.getPos().offset(this.panelTile.getDirectionFromSide(towardPanelSide));
+            return new PanelCellNeighbor(this.panelTile, blockPos, towardPanelSide);
         }
 
 

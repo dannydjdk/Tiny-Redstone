@@ -86,7 +86,7 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
             }
             else {
                 CompoundNBT cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
-                for (Integer i = 0; i < 256; i++) {
+                for (Integer i = 0; i < 448; i++) {
                     if (cellsNBT.contains(i.toString())) {
                         CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
 
