@@ -1,17 +1,14 @@
 package com.dannyandson.tinyredstone;
 
-import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.IPanelCover;
+import com.dannyandson.tinyredstone.blocks.PanelBlock;
+import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.compat.CompatHandler;
-import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
-import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
@@ -35,15 +32,12 @@ public class TinyRedstone {
         Registration.register();
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ModSetup::init);
-        if(FMLEnvironment.dist.isClient())
+        if(FMLEnvironment.dist.isClient()) {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientSetup::init);
-
+        }
 
         // Register the doClientStuff method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
-
-        // Register ourselves for server and other game events we are interested in
-        MinecraftForge.EVENT_BUS.register(this);
 
         //load configs
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
@@ -66,36 +60,5 @@ public class TinyRedstone {
         // do something that can only be done on the client
         LOGGER.info("Binding Renderer for Redstone Panel tile entity.", Registration.REDSTONE_PANEL_BLOCK.get());
         ClientRegistry.bindTileEntityRenderer(Registration.REDSTONE_PANEL_TILE.get(), PanelTileRenderer::new);
-    }
-
-    @SubscribeEvent
-    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event)
-    {
-        //allow creative players to remove cells by left clicking with wrench or cell item
-        if (event.getPlayer().isCreative() &&
-                event.getWorld().getBlockState(event.getPos()).getBlock() instanceof PanelBlock &&
-                (
-                    event.getPlayer().getHeldItemMainhand().getItem()==Registration.REDSTONE_WRENCH.get() ||
-                            event.getPlayer().getHeldItemMainhand().getItem() instanceof PanelCellItem
-                )) {
-                BlockState blockState = event.getWorld().getBlockState(event.getPos());
-                PanelBlock panelBlock = (PanelBlock)blockState.getBlock();
-                panelBlock.onBlockClicked(blockState,event.getWorld(),event.getPos(), event.getPlayer());
-                event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event)
-    {
-        if (event.getPlayer().isSneaking() && PanelBlock.isPanelCellItem(event.getItemStack().getItem()))
-        {
-            TileEntity te = event.getWorld().getTileEntity(event.getPos());
-            if (te instanceof PanelTile)
-            {
-                Registration.REDSTONE_PANEL_BLOCK.get().onBlockActivated(te.getBlockState(),event.getWorld(),event.getPos(),event.getPlayer(),event.getHand(),event.getHitVec());
-                event.setCanceled(true);
-            }
-        }
     }
 }

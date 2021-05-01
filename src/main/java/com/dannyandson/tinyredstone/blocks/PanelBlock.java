@@ -433,9 +433,15 @@ public class PanelBlock extends Block {
 
                                     if (placementOK) {
                                         //place the cell on the panel
-                                        Direction playerFacing = panelTile.getPlayerDirectionFacing(player, ((IPanelCell) panelCell).canPlaceVertical());
+                                        Side rotationLock = RotationLock.getServerRotationLock(player);
 
-                                        pos1.getPanelTile().addCell(pos1, (IPanelCell) panelCell, panelTile.getSideFromDirection(playerFacing));
+                                        pos1.getPanelTile().addCell(
+                                                pos1,
+                                                (IPanelCell) panelCell,
+                                                rotationLock == null
+                                                        ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, ((IPanelCell) panelCell).canPlaceVertical()))
+                                                        : rotationLock
+                                        );
 
                                         //remove an item from the player's stack
                                         if (!player.isCreative())

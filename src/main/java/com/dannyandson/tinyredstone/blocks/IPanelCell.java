@@ -4,8 +4,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.nbt.CompoundNBT;
 
-import javax.annotation.Nullable;
-
 public interface IPanelCell {
 
     /**

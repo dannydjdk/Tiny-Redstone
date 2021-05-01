@@ -1,4 +1,5 @@
 {
+  "key.tinyredstone.rotation_lock": "Lock rotation (use scroll)",
   "block.tinyredstone.redstone_panel" : "Redstone Panel",
   "message.item.redstone_panel" : "§7Panel to hold tiny redstone bits.\nRight click with dye to change color.§r",
   "message.item.redstone_wrench": "§7Right-click a Redstone Panel to rotate.\nLeft click to remove tiny redstone bits.§r",

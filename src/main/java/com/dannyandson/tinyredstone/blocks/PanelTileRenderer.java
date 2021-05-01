@@ -114,17 +114,19 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
         matrixStack.translate(cellSize*(double)pos.getRow(), 0.125+(pos.getLevel()*0.125), cellSize*(pos.getColumn()));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
 
-        if (pos.getCellFacing()== Side.LEFT)
+        Side facing = pos.getCellFacing();
+
+        if (facing == Side.LEFT)
         {
             matrixStack.translate(0,-cellSize,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
         }
-        else if (pos.getCellFacing()== Side.BACK)
+        else if (facing == Side.BACK)
         {
             matrixStack.translate(cellSize,-cellSize,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
         }
-        else if (pos.getCellFacing()== Side.RIGHT)
+        else if (facing == Side.RIGHT)
         {
             matrixStack.translate(cellSize,0,0);
             matrixStack.rotate(Vector3f.ZP.rotationDegrees(270));
@@ -180,7 +182,6 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                         if (cellPos!=null && cellPos.getIPanelCell()==null) {
                             try {
                                 IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getHeldItemMainhand().getItem()).getConstructors()[0].newInstance();
-                                Side lookingTowardSide = panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()));
                                 if (panelCell.needsSolidBase())
                                 {
                                     PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
@@ -189,7 +190,14 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                                         return null;
                                     }
                                 }
-                                return PanelCellGhostPos.fromPosInPanelCell(cellPos, panelCell, lookingTowardSide);
+                                Side rotationLock = RotationLock.getRotationLock();
+                                return PanelCellGhostPos.fromPosInPanelCell(
+                                        cellPos,
+                                        panelCell,
+                                        rotationLock == null ?
+                                                panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()))
+                                                : rotationLock
+                                );
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                                 TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());
                             }

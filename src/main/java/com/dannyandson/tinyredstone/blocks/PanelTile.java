@@ -102,6 +102,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         this.read(blockState, tag);
     }
 
+
+
     public CompoundNBT saveToNbt(CompoundNBT compoundNBT) {
 
         CompoundNBT cellsNBT = new CompoundNBT();
@@ -292,7 +294,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     @Override
     public void tick() {
-
         try {
             if (!flagCrashed) {
                 boolean dirty = false;

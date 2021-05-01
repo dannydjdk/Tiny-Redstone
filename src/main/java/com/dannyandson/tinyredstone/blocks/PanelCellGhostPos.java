@@ -2,7 +2,7 @@ package com.dannyandson.tinyredstone.blocks;
 
 import javax.annotation.CheckForNull;
 
-public class PanelCellGhostPos extends PanelCellPos{
+public class PanelCellGhostPos extends PanelCellPos {
     IPanelCell panelCell;
     Side facing;
 

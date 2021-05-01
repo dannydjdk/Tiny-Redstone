@@ -17,7 +17,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-import javax.annotation.Nullable;
 import java.util.LinkedList;
 
 public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
