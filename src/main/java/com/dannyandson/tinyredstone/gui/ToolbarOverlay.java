@@ -51,25 +51,44 @@ public class ToolbarOverlay {
 
                         final int color = 0xa1b29d;
 
+                        final float arrow_height = 2f;
+                        final float arrow_width = 3f;
+                        final float shaft_height = 2f;
+                        final float shaft_width = 1.5f;
+
+                        final float plate_height = 1f;
+
+                        final float shaft_on_plate_height = shaft_height - plate_height;
+                        final float shaft_offset = (arrow_width - shaft_width)/2;
+                        final float arrow_center = arrow_width/2;
+
                         switch (rotationLock) {
                             case BACK:
-                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+1, x+1.5f, y+3+1, x+3, y+1, color, 1.0f);
-                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+0.75f, x+3-0.75f, y, y+1, color, 1.0f);
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+shaft_height, x+arrow_center, y+arrow_height+shaft_height, x+arrow_width, y+shaft_height, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+shaft_offset, x+shaft_offset+shaft_width, y, y+shaft_height, color, 1.0f);
                                 break;
                             case LEFT:
-                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+1.5f, x+3, y+3, x+3, y, color, 1.0f);
-                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+3, x+3+1, y+0.75f, y+3-0.75f, color, 1.0f);
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+arrow_center, x+arrow_height, y+arrow_width, x+arrow_height, y, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+arrow_height, x+arrow_height+shaft_height, y+shaft_offset, y+shaft_width+shaft_offset, color, 1.0f);
                                 break;
                             case FRONT:
-                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+1.5f, y, x, y+3, x+3, y+3, color, 1.0f);
-                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+0.75f, x+3-0.75f, y+3, y+3+1, color, 1.0f);
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+arrow_center, y, x, y+arrow_height, x+arrow_width, y+arrow_height, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+shaft_offset, x+shaft_offset+shaft_width, y+arrow_height, y+arrow_height+shaft_height, color, 1.0f);
                                 break;
                             case RIGHT:
-                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+1, y, x+1, y+3, x+3+1, y+1.5f, color, 1.0f);
-                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+1, y+0.75f, y+3-0.75f, color, 1.0f);
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+shaft_height, y, x+shaft_height, y+arrow_width, x+arrow_height+shaft_height, y+arrow_center, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+shaft_height, y+shaft_offset, y+shaft_offset+shaft_width, color, 1.0f);
                                 break;
                             case TOP:
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x, y+shaft_height, x+arrow_center, y+arrow_height+shaft_height, x+arrow_width, y+shaft_height, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+shaft_offset, x+shaft_offset+shaft_width, y+plate_height, y+shaft_height, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+arrow_width, y, y+plate_height, color, 1.0f);
+                                break;
                             case BOTTOM:
+                                RenderHelper.drawTriangle(bufferBuilder, matrixStack, x+arrow_center, y, x, y+arrow_height, x+arrow_width, y+arrow_height, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x+shaft_offset, x+shaft_offset+shaft_width, y+arrow_height, y+arrow_height+shaft_on_plate_height, color, 1.0f);
+                                RenderHelper.drawTriangleRectangle(bufferBuilder, matrixStack, x, x+arrow_width, y+arrow_height+shaft_on_plate_height, y+arrow_height+shaft_height, color, 1.0f);
+                                break;
                         }
 
                         bufferBuilder.finishDrawing();

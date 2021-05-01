@@ -73,16 +73,12 @@ public class RotationLock {
 
     @OnlyIn(Dist.CLIENT)
     public static void lockRotation(boolean allowVertical, boolean invert, boolean sendToServer) {
-        lockRotation(rotationLock == null
-                ? Side.FRONT
-                : rotationLock, allowVertical, invert, sendToServer);
+        lockRotation(rotationLock == null ? Side.FRONT : rotationLock, allowVertical, invert, sendToServer);
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean allowVertical, boolean invert, boolean sendToServer) {
-        lockRotation(rotationLock == null
-                ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(playerEntity, allowVertical))
-                : rotationLock, invert, sendToServer);
+        lockRotation(rotationLock == null ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(playerEntity, allowVertical)) : rotationLock, allowVertical, invert, sendToServer);
     }
 
     @OnlyIn(Dist.CLIENT)
