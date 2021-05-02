@@ -6,6 +6,7 @@ import com.dannyandson.tinyredstone.blocks.PanelTileColor;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
+import com.dannyandson.tinyredstone.gui.ToolbarOverlay;
 import com.dannyandson.tinyredstone.items.PanelItemColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
@@ -61,6 +62,8 @@ public class ClientSetup {
         event.addSprite(TransparentBlock.TEXTURE_TRANSPARENT_BLOCK);
 
         event.addSprite(LightCover.TEXTURE_LIGHT_COVER);
+
+        event.addSprite(ToolbarOverlay.TEXTURE_ROTATION_LOCK);
     }
 
 
