@@ -138,7 +138,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                             .text(CompoundText.createLabelInfo("Column: ", posInPanelCell.getColumn()))
                             .text(CompoundText.createLabelInfo("Level: ", posInPanelCell.getLevel()))
                             .text(CompoundText.createLabelInfo("Index: ", cellIndex))
-                            .text(CompoundText.createLabelInfo("Segment: ", segment.toString()))
+                            .text(CompoundText.createLabelInfo("Segment: ", segment))
                             .text(CompoundText.createLabelInfo("Facing: ", posInPanelCell.getCellFacing()));
                 }
 
