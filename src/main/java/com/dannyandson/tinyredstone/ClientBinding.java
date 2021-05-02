@@ -34,9 +34,27 @@ public class ClientBinding {
     }
 
     @SubscribeEvent
+    public static void onKeyInput(InputEvent.KeyInputEvent keyInputEvent) {
+        if (keyInputEvent.isCanceled()) return;
+        int numberKey = keyInputEvent.getKey() - GLFW.GLFW_KEY_0;
+        if(numberKey > 0 && numberKey <= 9) {
+            final PlayerEntity player = Minecraft.getInstance().player;
+            if (player == null) return;
+            if(player.inventory.currentItem + 1 == numberKey) return;
+            final ItemStack mainHand = player.getHeldItemMainhand();
+            final Item mainHandItem = mainHand.getItem();
+
+            if (mainHandItem instanceof PanelCellItem) {
+                RotationLock.removeLock();
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void wheelEvent(final InputEvent.MouseScrollEvent mouseScrollEvent) {
         if (mouseScrollEvent.isCanceled()) return;
-        if (mouseScrollEvent.getScrollDelta() == 0) return;
+        final double scrollDelta = mouseScrollEvent.getScrollDelta();
+        if (scrollDelta == 0) return;
         final PlayerEntity player = Minecraft.getInstance().player;
         if (player == null) return;
         World world = Minecraft.getInstance().world;
@@ -45,21 +63,20 @@ public class ClientBinding {
 
         if (mainHandItem instanceof PanelCellItem) {
             if(rotationLock.isKeyDown()) {
-                final int wheelDelta = (int) mouseScrollEvent.getScrollDelta();
                 Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
                 BlockPos blockPos = new BlockPos(lookVector);
                 TileEntity te = world.getTileEntity(blockPos);
                 if (te instanceof PanelTile) {
                     try {
                         IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(mainHandItem).getConstructors()[0].newInstance();
-                        RotationLock.lockRotation((PanelTile) te, player, panelCell.canPlaceVertical(), wheelDelta < 0);
+                        RotationLock.lockRotation((PanelTile) te, player, panelCell.canPlaceVertical(), scrollDelta < 0);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                            TinyRedstone.LOGGER.error("Exception thrown when attempting to lock rotation: " + e.getMessage());
+                        TinyRedstone.LOGGER.error("Exception thrown when attempting to lock rotation: " + e.getMessage());
                     }
                 } else {
                     try {
                         IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(mainHandItem).getConstructors()[0].newInstance();
-                        RotationLock.lockRotation(panelCell.canPlaceVertical(), wheelDelta < 0);
+                        RotationLock.lockRotation(panelCell.canPlaceVertical(), scrollDelta < 0);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                         TinyRedstone.LOGGER.error("Exception thrown when attempting to lock rotation: " + e.getMessage());
                     }

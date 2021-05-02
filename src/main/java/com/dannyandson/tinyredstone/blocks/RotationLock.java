@@ -20,9 +20,10 @@ public class RotationLock {
     public static void removeLock() {
         removeLock(true);
     }
+
     @OnlyIn(Dist.CLIENT)
     public static void removeLock(boolean sendToServer) {
-        if(rotationLock != null) {
+        if (rotationLock != null) {
             rotationLock = null;
             if(sendToServer) ModNetworkHandler.sendToServer(new RotationLockRemoveSync());
         }
@@ -40,7 +41,7 @@ public class RotationLock {
                 side = invert ? Side.RIGHT : (allowVertical ? Side.BOTTOM : Side.LEFT);
                 break;
             case LEFT:
-                side = invert ? Side.BACK : Side.FRONT;
+                side = invert ? (allowVertical ? Side.TOP : Side.BACK) : Side.FRONT;
                 break;
             case FRONT:
                 side = invert ? Side.LEFT : Side.RIGHT;
