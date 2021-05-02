@@ -892,7 +892,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public void sync()
     {
         if (!isCovered() || panelCover.allowsLightOutput())
-            this.world.notifyBlockUpdate(pos,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+            this.world.notifyBlockUpdate(pos,this.getBlockState(), this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
     }
 
     protected void handleCrash(Exception e)

@@ -478,6 +478,11 @@ public class PanelBlock extends Block {
         return super.onBlockActivated(state, world, pos, player, hand, result);
     }
 
+    @Override
+    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+        return state.get(LIGHT_LEVEL);
+    }
+
     public void setLightValue(World world, BlockPos pos, BlockState state, int lightValue) {
         world.setBlockState(pos, state.with(LIGHT_LEVEL, Math.min(lightValue,world.getMaxLightLevel())));
     }
