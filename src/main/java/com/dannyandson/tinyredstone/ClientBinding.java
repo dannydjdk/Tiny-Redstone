@@ -36,8 +36,7 @@ public class ClientBinding {
     @SubscribeEvent
     public static void wheelEvent(final InputEvent.MouseScrollEvent mouseScrollEvent) {
         if (mouseScrollEvent.isCanceled()) return;
-        final int wheelDelta = (int) mouseScrollEvent.getScrollDelta();
-        if (wheelDelta == 0) return;
+        if (mouseScrollEvent.getScrollDelta() == 0) return;
         final PlayerEntity player = Minecraft.getInstance().player;
         if (player == null) return;
         World world = Minecraft.getInstance().world;
@@ -46,6 +45,7 @@ public class ClientBinding {
 
         if (mainHandItem instanceof PanelCellItem) {
             if(rotationLock.isKeyDown()) {
+                final int wheelDelta = (int) mouseScrollEvent.getScrollDelta();
                 Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
                 BlockPos blockPos = new BlockPos(lookVector);
                 TileEntity te = world.getTileEntity(blockPos);
