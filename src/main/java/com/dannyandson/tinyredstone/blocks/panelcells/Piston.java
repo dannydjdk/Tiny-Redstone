@@ -162,6 +162,8 @@ public class Piston implements IPanelCell {
                 bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
 
         boolean extend =
+                (cellPos.getLevel()>0||cellPos.getCellFacing()!=Side.TOP)
+                &&
                 (
                         ( rightNeighbor!=null && rightNeighbor.getWeakRsOutput()>0) ||
                                 ( frontNeighbor!=null && frontNeighbor.getWeakRsOutput()>0) ||
