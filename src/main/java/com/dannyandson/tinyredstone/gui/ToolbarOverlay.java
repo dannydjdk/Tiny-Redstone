@@ -13,7 +13,6 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -45,7 +44,6 @@ public class ToolbarOverlay {
                         final int y = (window.getScaledHeight() - 20) + 1 + 1;
 
                         MatrixStack matrixStack = event.getMatrixStack();
-                        RenderSystem.color4f(1, 1, 1, 1.0f);
 
                         Minecraft.getInstance().getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
                         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_ROTATION_LOCK);
