@@ -360,7 +360,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
                 if (this.flagLightUpdate) {
                     this.flagLightUpdate = false;
-                    this.world.getLightManager().checkBlock(pos);
+                    BlockState blockState = getBlockState();
+                    Block block = blockState.getBlock();
+                    if(block instanceof PanelBlock) {
+                        ((PanelBlock) block).setLightValue(world, pos, blockState, getLightOutput());
+                    }
                 }
 
 
