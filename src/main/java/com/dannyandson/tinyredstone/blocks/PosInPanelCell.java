@@ -86,9 +86,8 @@ public class PosInPanelCell extends PanelCellPos {
     public static PosInPanelCell fromHitVec(PanelTile panelTile, BlockPos pos, BlockRayTraceResult result) {
 
         Direction panelFacing = panelTile.getBlockState().get(BlockStateProperties.FACING);
-        Vector3f vector3f = result.getFace().getOpposite().toVector3f();
-        vector3f.mul(.001f);
-        Vector3d hitVec = result.getHitVec().add(new Vector3d(vector3f));
+        Direction rayTraceDirection = result.getFace().getOpposite();
+        Vector3d hitVec = result.getHitVec().add((double)rayTraceDirection.getXOffset()*.001d,(double)rayTraceDirection.getYOffset()*.001d,(double)rayTraceDirection.getZOffset()*.001d);
 
         double relX,relY,relZ;
 
