@@ -1163,6 +1163,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public VoxelShape getVoxelShape(){
 
+        if (isCovered())return VoxelShapes.fullCube();
+
         if (voxelShape==null) {
             switch (this.getBlockState().get(BlockStateProperties.FACING)) {
                 case UP:

@@ -11,7 +11,8 @@
       "shade": false,
       "faces": {
         "down": {
-          "texture": "#base"
+          "texture": "#base",
+          "tintindex": 0
         },
         "up": {
           "texture": "#base",

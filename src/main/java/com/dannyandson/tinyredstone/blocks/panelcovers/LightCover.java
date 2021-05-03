@@ -20,7 +20,7 @@ public class LightCover  implements IPanelCover {
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, int color) {
 
-        float x1 = .0625f, x2 = .9375f, y1 = .125f, y2 = .25f;
+        float x1 = 0, x2 = 1, y1 = 0.125f, y2 = 1;
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_LIGHT_COVER);
 
         matrixStack.translate(0, y2, 1);
