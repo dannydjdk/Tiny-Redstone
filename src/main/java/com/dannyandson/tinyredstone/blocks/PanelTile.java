@@ -549,7 +549,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         updateOutputs();
 
         clearVoxelShape();
-        sync();
+        flagSync();
 
     }
 
@@ -704,8 +704,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
 
 
-        if (change)
+        if (change) {
             this.markDirty();
+            flagSync();
+        }
         return change;
     }
 
@@ -887,7 +889,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public void sync()
     {
-        if (!isCovered() || panelCover.allowsLightOutput())
+        if (!world.isRemote && (!isCovered() || panelCover.allowsLightOutput()))
             this.world.notifyBlockUpdate(pos,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
     }
 
@@ -1136,7 +1138,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             }
 
             clearVoxelShape();
-            sync();
+            flagSync();
         }
     }
 

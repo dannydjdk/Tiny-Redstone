@@ -246,7 +246,6 @@ public class PanelBlock extends Block {
             try {
 
                 Side side = panelTile.getSideFromDirection(direction);
-                //side would be null if neighbor is above or below panel, and therefore irrelevant
                 if (side != null) {
 
                     if (panelTile.pingOutwardObservers(direction))
@@ -456,7 +455,7 @@ public class PanelBlock extends Block {
                         handled = true;
                     }
 
-                    panelTile.sync();
+                    panelTile.flagSync();
                     if (!world.isRemote) {
                         panelTile.markDirty();
                     }
@@ -564,7 +563,7 @@ public class PanelBlock extends Block {
             //remove from panel
             panelTile.panelCover = null;
 
-            panelTile.sync();
+            panelTile.flagSync();
 
         }
     }
