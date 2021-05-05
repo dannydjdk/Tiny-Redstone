@@ -211,9 +211,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
-        Block block = blockState.getBlock();
-        if(block instanceof PanelBlock) {
-            ((PanelBlock) block).setLightValue(world, pos, blockState, getLightOutput());
+        if(world != null) {
+            Block block = blockState.getBlock();
+            if(block instanceof PanelBlock) {
+                ((PanelBlock) block).setLightValue(world, pos, blockState, getLightOutput());
+            }
         }
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
         this.flagCrashed = parentNBTTagCompound.getBoolean("flagCrashed");
