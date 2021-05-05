@@ -60,7 +60,7 @@ public class PanelBlock extends Block {
         );
     }
 
-    private  static final IntegerProperty LIGHT_LEVEL = IntegerProperty.create("light_level", 0, 15);
+    protected static final IntegerProperty LIGHT_LEVEL = IntegerProperty.create("light_level", 0, 15);
 
     private static final Map<Item, Class<? extends IPanelCell>> itemPanelCellMap = new HashMap<>();
     private static final Map<Class<? extends IPanelCell>, Item> panelCellItemMap = new HashMap<>();
@@ -73,7 +73,7 @@ public class PanelBlock extends Block {
                 .hardnessAndResistance(2.0f)
                 .setLightLevel((state) -> state.get(LIGHT_LEVEL))
         );
-        setDefaultState(this.getDefaultState().with(LIGHT_LEVEL, 0));
+        this.setDefaultState(this.getDefaultState().with(LIGHT_LEVEL, 0));
     }
 
     public Class<? extends IPanelCell> getIPanelCellByItem(Item item) {
@@ -98,8 +98,7 @@ public class PanelBlock extends Block {
 
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(BlockStateProperties.FACING);
-        builder.add(LIGHT_LEVEL);
+        builder.add(BlockStateProperties.FACING, LIGHT_LEVEL);
     }
 
     @Nullable
@@ -484,7 +483,9 @@ public class PanelBlock extends Block {
     }
 
     public void setLightValue(World world, BlockPos pos, BlockState state, int lightValue) {
-        world.setBlockState(pos, state.with(LIGHT_LEVEL, Math.min(lightValue,world.getMaxLightLevel())));
+        lightValue = Math.min(lightValue,world.getMaxLightLevel());
+        if(state.get(LIGHT_LEVEL) == lightValue) return;
+        world.setBlockState(pos, state.with(LIGHT_LEVEL, lightValue));
     }
 
     @SuppressWarnings("deprecation")
