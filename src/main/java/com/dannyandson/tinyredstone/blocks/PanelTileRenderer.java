@@ -99,7 +99,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
 
             TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
-            RenderHelper.drawRectangle(buffer.getBuffer(RenderType.getTranslucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
+            RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.isFabulousGraphicsEnabled())?RenderType.getSolid():RenderType.getTranslucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
             matrixStack.pop();
         }
 
@@ -109,6 +109,8 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
     private void renderCell(MatrixStack matrixStack, PanelCellPos pos, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
     {
+        alpha = (Minecraft.isFabulousGraphicsEnabled())?1.0f:alpha;
+
         matrixStack.push();
 
         matrixStack.translate(cellSize*(double)pos.getRow(), 0.125+(pos.getLevel()*0.125), cellSize*(pos.getColumn()));
