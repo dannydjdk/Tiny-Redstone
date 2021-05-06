@@ -684,7 +684,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
             if (thisCell.needsSolidBase()) {
                 PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
-                if (basePos != null && (basePos.getIPanelCell() == null || !basePos.getIPanelCell().isPushable())) {
+                if (basePos != null && (basePos.getIPanelCell() == null || (!basePos.getIPanelCell().isPushable()) && !(basePos.getIPanelCell() instanceof Piston && basePos.getCellFacing()==Side.TOP ) )) {
                     Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, this, null);
                     change = true;
                 }
