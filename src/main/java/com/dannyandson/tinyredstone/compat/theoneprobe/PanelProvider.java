@@ -74,8 +74,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
 
-        if (tileEntity instanceof PanelTile) {
-            if(!show(probeMode, playerEntity)) return false;
+        if (tileEntity instanceof PanelTile && show(probeMode, playerEntity)) {
 
             PanelTile panelTile = (PanelTile) tileEntity;
             Block block = blockState.getBlock();
@@ -86,8 +85,9 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                 PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.get(BlockStateProperties.FACING),result);
 
 
-                IPanelCell panelCell = panelCellPos.getIPanelCell();
-                if(panelCell != null) {
+                if(panelCellPos!=null &&   panelCellPos.getIPanelCell() != null) {
+
+                    IPanelCell panelCell = panelCellPos.getIPanelCell();
                     String modName = Tools.getModName(block);
                     IProbeConfig config = Config.getRealConfig();
 
@@ -116,90 +116,64 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
     public void addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PlayerEntity playerEntity, World world, BlockState blockState, IProbeHitData probeHitData) {
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
-        if (tileEntity instanceof PanelTile && probeHitData.getSideHit() == blockState.get(BlockStateProperties.FACING).getOpposite()) {
-            if(!show(probeMode, playerEntity)) return;
 
+        if (tileEntity instanceof PanelTile && show(probeMode, playerEntity)) {
             PanelTile panelTile = (PanelTile) tileEntity;
 
-            if(!panelTile.isCovered()) {
+            if (!panelTile.isCovered()) {
 
                 BlockRayTraceResult rtr = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, rtr);
 
-                PanelCellSegment segment = posInPanelCell.getSegment();
+                if (posInPanelCell != null) {
 
-                if (probeMode == ProbeMode.DEBUG) {
-                    int cellIndex = posInPanelCell.getIndex();
-                    probeInfo.vertical(new LayoutStyle().borderColor(0xff44ff44).spacing(2))
-                            .text(CompoundText.createLabelInfo("X: ", posInPanelCell.getX()))
-                            .text(CompoundText.createLabelInfo("Z: ", posInPanelCell.getZ()))
-                            .text(CompoundText.createLabelInfo("Y: ", posInPanelCell.getY()))
-                            .text(CompoundText.createLabelInfo("Row: ", posInPanelCell.getRow()))
-                            .text(CompoundText.createLabelInfo("Column: ", posInPanelCell.getColumn()))
-                            .text(CompoundText.createLabelInfo("Level: ", posInPanelCell.getLevel()))
-                            .text(CompoundText.createLabelInfo("Index: ", cellIndex))
-                            .text(CompoundText.createLabelInfo("Segment: ", segment))
-                            .text(CompoundText.createLabelInfo("Facing: ", posInPanelCell.getCellFacing()));
-                }
+                    if (probeMode == ProbeMode.DEBUG) {
+                        int cellIndex = posInPanelCell.getIndex();
+                        PanelCellSegment segment = posInPanelCell.getSegment();
 
-                IPanelCell panelCell = posInPanelCell.getIPanelCell();
-                if (panelCell != null) {
-                    boolean handled = false;
-
-                    if (panelCell instanceof IPanelCellProbeInfoProvider) {
-                        handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, posInPanelCell);
+                        probeInfo.vertical(new LayoutStyle().borderColor(0xff44ff44).spacing(2))
+                                .text(CompoundText.createLabelInfo("X: ", posInPanelCell.getX()))
+                                .text(CompoundText.createLabelInfo("Z: ", posInPanelCell.getZ()))
+                                .text(CompoundText.createLabelInfo("Y: ", posInPanelCell.getY()))
+                                .text(CompoundText.createLabelInfo("Row: ", posInPanelCell.getRow()))
+                                .text(CompoundText.createLabelInfo("Column: ", posInPanelCell.getColumn()))
+                                .text(CompoundText.createLabelInfo("Level: ", posInPanelCell.getLevel()))
+                                .text(CompoundText.createLabelInfo("Index: ", cellIndex))
+                                .text(CompoundText.createLabelInfo("Segment: ", segment))
+                                .text(CompoundText.createLabelInfo("Facing: ", posInPanelCell.getCellFacing()));
                     }
-                    if (!handled) {
-                        int power = 0;
-                        switch (segment) {
-                            case BACK:
-                                power = panelCell.getWeakRsOutput(Side.BACK);
-                                break;
-                            case LEFT:
-                                power = panelCell.getWeakRsOutput(Side.LEFT);
-                                break;
-                            case FRONT:
-                                power = panelCell.getWeakRsOutput(Side.FRONT);
-                                break;
-                            case RIGHT:
-                                power = panelCell.getWeakRsOutput(Side.RIGHT);
-                                break;
-                            case CENTER: {
-                                int back = panelCell.getWeakRsOutput(Side.BACK);
-                                int left = panelCell.getWeakRsOutput(Side.LEFT);
-                                int front = panelCell.getWeakRsOutput(Side.FRONT);
-                                int right = panelCell.getWeakRsOutput(Side.RIGHT);
-                                if (back == left && left == front && front == right) {
-                                    power = back;
-                                }
-                                break;
-                            }
-                            case FRONT_RIGHT: {
-                                int front = panelCell.getWeakRsOutput(Side.FRONT);
-                                int right = panelCell.getWeakRsOutput(Side.RIGHT);
-                                if (front == right) power = front;
-                                break;
-                            }
-                            case FRONT_LEFT: {
-                                int front = panelCell.getWeakRsOutput(Side.FRONT);
-                                int left = panelCell.getWeakRsOutput(Side.LEFT);
-                                if (front == left) power = front;
-                                break;
-                            }
-                            case BACK_RIGHT: {
-                                int back = panelCell.getWeakRsOutput(Side.BACK);
-                                int right = panelCell.getWeakRsOutput(Side.RIGHT);
-                                if (back == right) power = back;
-                                break;
-                            }
-                            case BACK_LEFT: {
-                                int back = panelCell.getWeakRsOutput(Side.BACK);
-                                int left = panelCell.getWeakRsOutput(Side.LEFT);
-                                if (back == left) power = back;
-                                break;
-                            }
+
+                    IPanelCell panelCell = posInPanelCell.getIPanelCell();
+                    if (panelCell != null) {
+                        boolean handled = false;
+
+                        if (panelCell instanceof IPanelCellProbeInfoProvider) {
+                            handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, posInPanelCell);
                         }
-                        ProbeInfoHelper.addPower(probeInfo, power);
+                        if (!handled) {
+                            Side sideHit = panelTile.getPanelCellSide(posInPanelCell,panelTile.getSideFromDirection(probeHitData.getSideHit()));
+                            int power = 0;
+
+                            if(sideHit==Side.BACK) {
+                                power = panelCell.getWeakRsOutput(Side.BACK);
+                            }
+                            else if (sideHit==Side.LEFT) {
+                                power = panelCell.getWeakRsOutput(Side.LEFT);
+                            }
+                            else if (sideHit==Side.FRONT) {
+                                power = panelCell.getWeakRsOutput(Side.FRONT);
+                            }
+                            else if (sideHit==Side.RIGHT) {
+                                power = panelCell.getWeakRsOutput(Side.RIGHT);
+                            }
+                            else if (sideHit==Side.BOTTOM) {
+                                power = panelCell.getWeakRsOutput(Side.BOTTOM);
+                            }
+                            else if (sideHit==Side.TOP) {
+                                power = panelCell.getWeakRsOutput(Side.TOP);
+                            }
+                            ProbeInfoHelper.addPower(probeInfo, power);
+                        }
                     }
                 }
             }

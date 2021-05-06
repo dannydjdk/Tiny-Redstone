@@ -721,7 +721,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * @param panelSide the side of the redstone panel
      * @return the side of the cell that is facing the given side of the panel
      */
-    protected Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
+    public Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
     {
         Side cellDirection = cellPos.getPanelTile().getCellFacing(cellPos);
 
@@ -979,7 +979,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return null;
     }
 
-    protected Side getSideFromDirection(Direction direction) {
+    public Side getSideFromDirection(Direction direction) {
         Direction facing = getBlockState().get(BlockStateProperties.FACING);
         switch (direction){
             case NORTH:
