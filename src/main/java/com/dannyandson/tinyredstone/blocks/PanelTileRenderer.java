@@ -92,7 +92,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             }
         }
 
-        if (tileEntity.isCrashed())
+        if (tileEntity.isCrashed() || tileEntity.isOverflown())
         {
             matrixStack.push();
             matrixStack.translate(0, 0.126, 1);

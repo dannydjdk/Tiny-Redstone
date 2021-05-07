@@ -14,6 +14,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue DISPLAY_MODE;
     public static ForgeConfigSpec.BooleanValue JSON_BLUEPRINT;
     public static ForgeConfigSpec.IntValue SUPER_REPEATER_MAX;
+    public static ForgeConfigSpec.IntValue CIRCUIT_MAX_ITERATION;
 
     static {
 
@@ -34,6 +35,12 @@ public class Config {
         SUPER_REPEATER_MAX = SERVER_BUILDER.comment("Maximum redstone tick delay for super repeaters. 10 redstone ticks = 1 second." +
                 "\nLarge numbers require more memory. (default:100)")
                 .defineInRange("super_repeater_max",100,4,Integer.MAX_VALUE);
+
+        CIRCUIT_MAX_ITERATION = SERVER_BUILDER.comment("How many blocks long can a line of redstone run in a single tick?" +
+                "\nThis number determines approximately 2x how many zero tick super repeaters can extend a single redstone line?" +
+                "\n(Since each repeater can extend signal 2 full blocks.)" +
+                "\nVery large numbers may degrade performance and potentially risk crash. (default=32)")
+                .defineInRange("max_zero_tick_run",32,4,512);
 
         SERVER_BUILDER.pop();
 

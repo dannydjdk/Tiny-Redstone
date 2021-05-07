@@ -33,6 +33,7 @@ public class CrashFlagResetSync {
             if (te instanceof PanelTile)
             {
                 ((PanelTile)te).resetCrashFlag();
+                ((PanelTile)te).resetOverflownFlag();
             }
             ctx.get().setPacketHandled(true);
         });

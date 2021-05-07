@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -43,6 +44,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private Integer lightOutput = 0;
     protected boolean flagLightUpdate = false;
     private boolean flagCrashed = false;
+    private boolean flagOverflow = false;
     protected IPanelCover panelCover = null;
 
     //other state fields (not saved)
@@ -161,6 +163,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
             parentNBTTagCompound.putBoolean("flagCrashed",this.flagCrashed);
+            parentNBTTagCompound.putBoolean("flagOverflow",this.flagOverflow);
 
         } catch (NullPointerException exception) {
             TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.toString() + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
@@ -213,6 +216,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
         this.flagCrashed = parentNBTTagCompound.getBoolean("flagCrashed");
+        this.flagOverflow = parentNBTTagCompound.getBoolean("flagOverflow");
 
         if (parentNBTTagCompound.contains("color")) {
             int color = parentNBTTagCompound.getInt("color");
@@ -669,8 +673,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private boolean updateCell(PanelCellPos cellPos, int iteration) {
 
         boolean change = false;
-        if (iteration > 127) {
-            TinyRedstone.LOGGER.warn("Redstone panel iterated too many times.");
+        if (iteration > (16 * Config.CIRCUIT_MAX_ITERATION.get())) {
+            if (!this.flagOverflow)
+                TinyRedstone.LOGGER.warn("Redstone panel at " + pos.getX() + "," + pos.getY() + "," + pos.getZ() + " iterated too many times.");
+            this.flagOverflow=true;
             return false;
         }
 
@@ -909,6 +915,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         this.flagCrashed=false;
     }
 
+    public boolean isOverflown()
+    {
+        return this.flagOverflow;
+    }
+    public void resetOverflownFlag()
+    {
+        this.flagOverflow=false;
+    }
     public boolean isCovered()
     {
         return panelCover!=null;
