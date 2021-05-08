@@ -181,11 +181,17 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                         }
                     }
                 } else {
-                    if (Tools.show(probeMode, redstoneMode)) {
-                        ProbeInfoHelper.addPower(probeInfo, world.getRedstonePower(pos, probeHitData.getSideHit().getOpposite()));
-                    }
+                    showRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
                 }
+            } else {
+                showRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
             }
+        }
+    }
+
+    private void showRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, World world, BlockPos pos, IProbeHitData probeHitData) {
+        if (Tools.show(probeMode, redstoneMode)) {
+            ProbeInfoHelper.addPower(probeInfo, world.getRedstonePower(pos, probeHitData.getSideHit().getOpposite()));
         }
     }
 }
