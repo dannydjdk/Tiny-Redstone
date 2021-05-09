@@ -112,6 +112,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
             }
         } else if (redstoneMode != null) {
             config.showRedstone(redstoneMode);
+            redstoneMode = null;
         }
 
         return false;
