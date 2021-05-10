@@ -3,6 +3,8 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.IToolTipInfo;
+import com.dannyandson.tinyredstone.compat.StringFormatHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.CompoundText;
@@ -14,12 +16,13 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.properties.ComparatorMode;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
 import java.util.LinkedList;
 
-public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
+public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     protected boolean input = false;
     protected boolean output = false;
     protected boolean locked = false;
@@ -315,12 +318,11 @@ public class Repeater implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        probeInfo.text(CompoundText.createLabelInfo("Delay: ", this.ticks/2 + " ticks"));
+    public void addInfo(IToolTipInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
+        toolTipInfo.addText("Delay", this.ticks/2 + " ticks");
         if(this.locked) {
-            probeInfo.text(CompoundText.create().style(TextStyleClass.INFO).text("Locked"));
+            toolTipInfo.addText(StringFormatHelper.info("Locked"));
         }
-        return false;
     }
 
     @Override

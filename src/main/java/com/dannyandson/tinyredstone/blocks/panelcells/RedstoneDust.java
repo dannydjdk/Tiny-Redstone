@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.IToolTipInfo;
 import com.dannyandson.tinyredstone.compat.theoneprobe.ProbeInfoHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -11,6 +12,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.properties.ComparatorMode;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
@@ -20,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
+public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
     public static ResourceLocation TEXTURE_REDSTONE_DUST_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_on");
     public static ResourceLocation TEXTURE_REDSTONE_DUST_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_off");
@@ -353,9 +355,8 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        ProbeInfoHelper.addPower(probeInfo, this.signalStrength);
-        return true;
+    public void addInfo(IToolTipInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
+        toolTipInfo.setPowerOutput(this.signalStrength);
     }
 
     @Override

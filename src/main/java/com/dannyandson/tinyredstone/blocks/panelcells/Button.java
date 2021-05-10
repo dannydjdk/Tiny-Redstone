@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.IToolTipInfo;
 import com.dannyandson.tinyredstone.compat.theoneprobe.ProbeInfoHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -15,7 +16,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
+public class Button implements IPanelCell, IPanelCellInfoProvider {
 
     public static ResourceLocation TEXTURE_OAK_PLANKS = new ResourceLocation("minecraft","block/oak_planks");
 
@@ -162,9 +163,8 @@ public class Button implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        ProbeInfoHelper.addPower(probeInfo, this.active ? 15 : 0);
-        return true;
+    public void addInfo(IToolTipInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
+        toolTipInfo.setPowerOutput(this.active ? 15 : 0);
     }
 
     @Override

@@ -84,28 +84,28 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                 BlockRayTraceResult result = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.get(BlockStateProperties.FACING),result);
 
-
-                if(panelCellPos!=null &&   panelCellPos.getIPanelCell() != null) {
-
+                if(panelCellPos!=null) {
                     IPanelCell panelCell = panelCellPos.getIPanelCell();
-                    String modName = Tools.getModName(block);
-                    IProbeConfig config = Config.getRealConfig();
+                    if(panelCell != null) {
+                        String modName = Tools.getModName(block);
+                        IProbeConfig config = Config.getRealConfig();
 
-                    Item item = panelBlock.getItemByIPanelCell(panelCell.getClass());
-                    ItemStack itemStack = item.getDefaultInstance();
+                        Item item = panelBlock.getItemByIPanelCell(panelCell.getClass());
+                        ItemStack itemStack = item.getDefaultInstance();
 
-                    if (Tools.show(probeMode, config.getShowModName())) {
-                        probeInfo.horizontal()
-                                .item(itemStack)
-                                .vertical()
-                                .itemLabel(itemStack)
-                                .text(CompoundText.create().style(TextStyleClass.MODNAME).text(modName));
-                    } else {
-                        probeInfo.horizontal(probeInfo.defaultLayoutStyle().alignment(ElementAlignment.ALIGN_CENTER))
-                                .item(itemStack)
-                                .itemLabel(itemStack);
+                        if (Tools.show(probeMode, config.getShowModName())) {
+                            probeInfo.horizontal()
+                                    .item(itemStack)
+                                    .vertical()
+                                    .itemLabel(itemStack)
+                                    .text(CompoundText.create().style(TextStyleClass.MODNAME).text(modName));
+                        } else {
+                            probeInfo.horizontal(probeInfo.defaultLayoutStyle().alignment(ElementAlignment.ALIGN_CENTER))
+                                    .item(itemStack)
+                                    .itemLabel(itemStack);
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
         }
@@ -147,32 +147,19 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                     if (panelCell != null) {
                         boolean handled = false;
 
-                        if (panelCell instanceof IPanelCellProbeInfoProvider) {
-                            handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, posInPanelCell);
+
+
+                        if (panelCell instanceof IPanelCellInfoProvider) {
+                            ToolTipInfo tooltipInfo = new ToolTipInfo(probeInfo, probeMode);
+                            ((IPanelCellInfoProvider) panelCell).addInfo(tooltipInfo, panelTile, posInPanelCell);
+                            if(tooltipInfo.power > -1) {
+                                handled = true;
+                                ProbeInfoHelper.addPower(probeInfo, tooltipInfo.power);
+                            }
                         }
                         if (!handled) {
                             Side sideHit = panelTile.getPanelCellSide(posInPanelCell,panelTile.getSideFromDirection(probeHitData.getSideHit()));
-                            int power = 0;
-
-                            if(sideHit==Side.BACK) {
-                                power = panelCell.getWeakRsOutput(Side.BACK);
-                            }
-                            else if (sideHit==Side.LEFT) {
-                                power = panelCell.getWeakRsOutput(Side.LEFT);
-                            }
-                            else if (sideHit==Side.FRONT) {
-                                power = panelCell.getWeakRsOutput(Side.FRONT);
-                            }
-                            else if (sideHit==Side.RIGHT) {
-                                power = panelCell.getWeakRsOutput(Side.RIGHT);
-                            }
-                            else if (sideHit==Side.BOTTOM) {
-                                power = panelCell.getWeakRsOutput(Side.BOTTOM);
-                            }
-                            else if (sideHit==Side.TOP) {
-                                power = panelCell.getWeakRsOutput(Side.TOP);
-                            }
-                            ProbeInfoHelper.addPower(probeInfo, power);
+                            ProbeInfoHelper.addPower(probeInfo, panelCell.getWeakRsOutput(sideHit));
                         }
                     }
                 }

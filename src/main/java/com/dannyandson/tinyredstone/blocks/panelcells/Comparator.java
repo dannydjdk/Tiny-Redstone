@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.IToolTipInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.CompoundText;
@@ -15,7 +16,7 @@ import net.minecraft.state.properties.ComparatorMode;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
+public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     private Integer input1 = 0;
     private Integer input2 = 0;
     private Integer output = 0;
@@ -263,9 +264,8 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        probeInfo.text(CompoundText.createLabelInfo("Mode: ", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString()));
-        return false;
+    public void addInfo(IToolTipInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
+        toolTipInfo.addText("Mode", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString());
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.IToolTipInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcjty.theoneprobe.api.CompoundText;
@@ -13,12 +14,13 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.properties.ComparatorMode;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
+public class Lever implements IPanelCell, IPanelCellInfoProvider {
 
     public static ResourceLocation TEXTURE_LEVER = new ResourceLocation(TinyRedstone.MODID,"block/lever");
     public static ResourceLocation TEXTURE_LEVER_TOP = new ResourceLocation(TinyRedstone.MODID,"block/lever_top");
@@ -229,10 +231,9 @@ public class Lever implements IPanelCell, IPanelCellProbeInfoProvider {
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        probeInfo.horizontal().item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
-                .text(CompoundText.createLabelInfo("State: ", this.active ? "On" : "Off"));
-        return true;
+    public void addInfo(IToolTipInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
+        toolTipInfo.addText("State", this.active ? "On" : "Off");
+        toolTipInfo.setPowerOutput(0);
     }
 
     @Override
