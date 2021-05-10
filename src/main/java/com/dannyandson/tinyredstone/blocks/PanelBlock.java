@@ -218,7 +218,6 @@ public class PanelBlock extends Block {
 
     // Called when a neighbouring block changes.
     // Only called on the server side.
-    //TODO manage neighbor changes from above and below panel
     @Override
     @SuppressWarnings("deprecation")
     public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
@@ -452,6 +451,12 @@ public class PanelBlock extends Block {
                                 TinyRedstone.LOGGER.error(e.getMessage());
                             }
                         }
+                        handled = true;
+                    } else if (panelTile.isOverflown())
+                    {
+                        //open crash GUI if on client and panel is in crashed state
+                        if (world.isRemote)
+                            PanelCrashGUI.open(panelTile);
                         handled = true;
                     }
 
