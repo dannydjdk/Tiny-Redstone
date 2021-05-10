@@ -27,6 +27,7 @@ import java.util.function.Function;
 public class PanelProvider implements IBlockDisplayOverride, Function<ITheOneProbe, Void>, IProbeInfoProvider {
     private final ResourceLocation MEASURING_DEVICE = new ResourceLocation(TinyRedstone.MODID, "measuring_device");
     private final ResourceLocation TINY_COMPONENT = new ResourceLocation(TinyRedstone.MODID, "tiny_component");
+    private IProbeConfig.ConfigMode redstoneMode;
 
     @Override
     public String getID() {
@@ -74,7 +75,11 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         BlockPos pos = probeHitData.getPos();
         TileEntity tileEntity = world.getTileEntity(pos);
 
+        IProbeConfig config = Config.getRealConfig();
+
         if (tileEntity instanceof PanelTile && show(probeMode, playerEntity)) {
+            if (redstoneMode == null) redstoneMode = config.getShowRedstone();
+            config.showRedstone(IProbeConfig.ConfigMode.NOT);
 
             PanelTile panelTile = (PanelTile) tileEntity;
             Block block = blockState.getBlock();
@@ -84,12 +89,9 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                 BlockRayTraceResult result = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.get(BlockStateProperties.FACING),result);
 
-
-                if(panelCellPos!=null &&   panelCellPos.getIPanelCell() != null) {
-
+                if(panelCellPos!=null && panelCellPos.getIPanelCell() != null) {
                     IPanelCell panelCell = panelCellPos.getIPanelCell();
                     String modName = Tools.getModName(block);
-                    IProbeConfig config = Config.getRealConfig();
 
                     Item item = panelBlock.getItemByIPanelCell(panelCell.getClass());
                     ItemStack itemStack = item.getDefaultInstance();
@@ -108,7 +110,11 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                     return true;
                 }
             }
+        } else if (redstoneMode != null) {
+            config.showRedstone(redstoneMode);
+            redstoneMode = null;
         }
+
         return false;
     }
 
@@ -175,8 +181,18 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                             ProbeInfoHelper.addPower(probeInfo, power);
                         }
                     }
+                } else {
+                    showRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
                 }
+            } else {
+                showRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
             }
+        }
+    }
+
+    private void showRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, World world, BlockPos pos, IProbeHitData probeHitData) {
+        if (Tools.show(probeMode, redstoneMode)) {
+            ProbeInfoHelper.addPower(probeInfo, world.getRedstonePower(pos, probeHitData.getSideHit().getOpposite()));
         }
     }
 }
