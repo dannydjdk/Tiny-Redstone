@@ -19,9 +19,12 @@ import java.util.List;
 
 @WailaPlugin(TinyRedstone.MODID)
 public class PanelProvider implements IWailaPlugin, IComponentProvider {
+    static final ResourceLocation RENDER_STRING = new ResourceLocation("string");
+
     @Override
-    public void register(IRegistrar iRegistrar) {
-        iRegistrar.registerComponentProvider(this, TooltipPosition.BODY, PanelBlock.class);
+    public void register(IRegistrar registrar) {
+        registrar.registerTooltipRenderer(RENDER_STRING, new TooltipRendererString());
+        registrar.registerComponentProvider(this, TooltipPosition.BODY, PanelBlock.class);
     }
 
     @Override

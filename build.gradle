@@ -144,9 +144,9 @@ dependencies {
 
     compile fg.deobf(project.dependencies.create("mcjty.theoneprobe:TheOneProbe-${top_version}") {transitive = false})
 
-    compileOnly fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}:api")
-    runtimeOnly fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}")
-    //compile fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}")
+    //compileOnly fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}:api")
+    //runtimeOnly fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}")
+    compile fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}")
 
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
