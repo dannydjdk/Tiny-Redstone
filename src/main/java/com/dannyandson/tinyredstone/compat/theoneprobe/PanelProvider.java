@@ -10,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tags.ITag;
@@ -163,26 +164,34 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                             ((IPanelCellInfoProvider) panelCell).addInfo(tooltipInfo, panelTile, posInPanelCell);
                             if(tooltipInfo.power > -1) {
                                 handled = true;
-                                ProbeInfoHelper.addPower(probeInfo, tooltipInfo.power);
+                                showRedstonePower(probeInfo, tooltipInfo.power);
                             }
                         }
                         if (!handled) {
                             Side sideHit = panelTile.getPanelCellSide(posInPanelCell,panelTile.getSideFromDirection(probeHitData.getSideHit()));
-                            ProbeInfoHelper.addPower(probeInfo, panelCell.getWeakRsOutput(sideHit));
+                            showRedstonePower(probeInfo, panelCell.getWeakRsOutput(sideHit));
                         }
                     }
                 } else {
-                    showRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
+                    showBlockRedstonePower(probeInfo, probeMode, world, pos, probeHitData, power);
                 }
             } else {
-                showRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
+                showBlockRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
             }
         }
     }
 
-    private void showRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, World world, BlockPos pos, IProbeHitData probeHitData) {
+    private static void showBlockRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, World world, BlockPos pos, IProbeHitData probeHitData, int power) {
         if (Tools.show(probeMode, redstoneMode)) {
-            ProbeInfoHelper.addPower(probeInfo, world.getRedstonePower(pos, probeHitData.getSideHit().getOpposite()));
+            showRedstonePower(probeInfo, world.getRedstonePower(pos, probeHitData.getSideHit().getOpposite()));
+        }
+    }
+
+    private static void showRedstonePower(IProbeInfo probeInfo, int power) {
+        if (power > 0) {
+            probeInfo.horizontal()
+                    .item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
+                    .text(CompoundText.createLabelInfo("Power: ", power));
         }
     }
 }
