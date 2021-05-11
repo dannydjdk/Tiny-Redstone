@@ -10,8 +10,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tags.ITag;
 import net.minecraft.tags.ITagCollection;
@@ -173,15 +173,15 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                         }
                     }
                 } else {
-                    showBlockRedstonePower(probeInfo, probeMode, world, pos, probeHitData, power);
+                    showBlockRedstonePower(probeInfo, probeMode, redstoneMode, world, pos, probeHitData);
                 }
             } else {
-                showBlockRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
+                showBlockRedstonePower(probeInfo, probeMode, redstoneMode, world, pos, probeHitData);
             }
         }
     }
 
-    private static void showBlockRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, World world, BlockPos pos, IProbeHitData probeHitData, int power) {
+    private static void showBlockRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, IProbeConfig.ConfigMode redstoneMode, World world, BlockPos pos, IProbeHitData probeHitData) {
         if (Tools.show(probeMode, redstoneMode)) {
             showRedstonePower(probeInfo, world.getRedstonePower(pos, probeHitData.getSideHit().getOpposite()));
         }

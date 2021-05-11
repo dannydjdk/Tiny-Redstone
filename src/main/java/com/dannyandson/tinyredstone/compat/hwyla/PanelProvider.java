@@ -2,17 +2,18 @@ package com.dannyandson.tinyredstone.compat.hwyla;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.theoneprobe.ProbeInfoHelper;
 import mcp.mobius.waila.api.*;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -20,10 +21,14 @@ import java.util.List;
 @WailaPlugin(TinyRedstone.MODID)
 public class PanelProvider implements IWailaPlugin, IComponentProvider {
     static final ResourceLocation RENDER_STRING = new ResourceLocation("string");
+    static final ResourceLocation RENDER_ITEM_INLINE = new ResourceLocation("item_inline");
+    static final ResourceLocation RENDER_INFO_STRING = new ResourceLocation("info_string");
 
     @Override
     public void register(IRegistrar registrar) {
         registrar.registerTooltipRenderer(RENDER_STRING, new TooltipRendererString());
+        registrar.registerTooltipRenderer(RENDER_ITEM_INLINE, new TooltipRendererItemStackInline());
+        registrar.registerTooltipRenderer(RENDER_INFO_STRING, new TooltipRendererInfoString());
         registrar.registerComponentProvider(this, TooltipPosition.BODY, PanelBlock.class);
     }
 
@@ -80,18 +85,44 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
                                 ((IPanelCellInfoProvider) panelCell).addInfo(tooltipInfo, panelTile, posInPanelCell);
                                 if(tooltipInfo.power > -1) {
                                     handled = true;
-                                    if(tooltipInfo.power > 0) tooltip.add(new StringTextComponent("Power: " + tooltipInfo.power));
+                                    if(tooltipInfo.power > 0) {
+                                        tooltip.add(new RenderableTextComponent(
+                                                getItemStackRenderable(new ItemStack(Items.REDSTONE)),
+                                                getStringRenderable("Power: " + tooltipInfo.power)
+                                        ));
+                                    }
                                 }
                             }
                             if (!handled) {
                                 Side sideHit = panelTile.getPanelCellSide(posInPanelCell,panelTile.getSideFromDirection(accessor.getSide()));
                                 int power = panelCell.getWeakRsOutput(sideHit);
-                                if(power > 0) tooltip.add(new StringTextComponent("Power: " + power));
+                                if(power > 0) tooltip.add(new RenderableTextComponent(
+                                        getItemStackRenderable(new ItemStack(Items.REDSTONE)),
+                                        getStringRenderable("Power: " + power)
+                                ));
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    public static RenderableTextComponent getItemStackRenderable(ItemStack itemStack) {
+        CompoundNBT tag = new CompoundNBT();
+        tag.putString("id", itemStack.getItem().getRegistryName().toString());
+        return new RenderableTextComponent(PanelProvider.RENDER_ITEM_INLINE, tag);
+    }
+
+    public static RenderableTextComponent getStringRenderable(String string) {
+        CompoundNBT tag = new CompoundNBT();
+        tag.putString("string", string);
+        return new RenderableTextComponent(PanelProvider.RENDER_STRING, tag);
+    }
+
+    public static RenderableTextComponent getInfoStringRenderable(String string) {
+        CompoundNBT tag = new CompoundNBT();
+        tag.putString("string", string);
+        return new RenderableTextComponent(PanelProvider.RENDER_INFO_STRING, tag);
     }
 }

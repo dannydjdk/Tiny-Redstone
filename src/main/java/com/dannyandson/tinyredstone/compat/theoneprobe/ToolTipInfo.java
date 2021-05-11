@@ -5,8 +5,9 @@ import com.dannyandson.tinyredstone.compat.ToolTipInfoMode;
 import mcjty.theoneprobe.api.CompoundText;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
+import mcjty.theoneprobe.api.TextStyleClass;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 public class ToolTipInfo implements IToolTipInfo {
     private IProbeInfo probeInfo;
@@ -32,22 +33,27 @@ public class ToolTipInfo implements IToolTipInfo {
     }
 
     @Override
-    public void addText(ITextComponent text) {
-        this.probeInfo.text(text);
+    public void addText(String text) {
+        this.probeInfo.text(new StringTextComponent(text));
     }
 
     @Override
-    public void addText(ItemStack itemStack, ITextComponent text) {
-        this.probeInfo.horizontal().itemLabel(itemStack).text(text);
+    public void addText(ItemStack itemStack, String text) {
+        this.probeInfo.horizontal().itemLabel(itemStack).text(new StringTextComponent(text));
     }
 
     @Override
-    public void addText(ITextComponent label, ITextComponent text) {
+    public void addText(String label, String text) {
         this.probeInfo.text(CompoundText.createLabelInfo(label + ": ", text));
     }
 
     @Override
-    public void addText(ItemStack itemStack, ITextComponent label, ITextComponent text) {
-        this.probeInfo.horizontal().itemLabel(itemStack).text(CompoundText.createLabelInfo(label + ": ", text));
+    public void addText(ItemStack itemStack, String label, String text) {
+        this.probeInfo.horizontal().item(itemStack, this.probeInfo.defaultItemStyle().width(14).height(14)).text(CompoundText.createLabelInfo(label + ": ", text));
+    }
+
+    @Override
+    public void addInfo(String text) {
+        this.probeInfo.text(CompoundText.create().style(TextStyleClass.INFO).text(text));
     }
 }
