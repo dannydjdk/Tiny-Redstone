@@ -225,9 +225,9 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
-        toolTipInfo.addText("State", this.active ? "On" : "Off");
-        toolTipInfo.setPowerOutput(0);
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.addText("State", this.active ? "On" : "Off");
+        overlayBlockInfo.setPowerOutput(0);
     }
 
     @Override

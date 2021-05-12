@@ -194,7 +194,7 @@ public class RedstoneBridge extends RedstoneDust {
 
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
 
     }
 }

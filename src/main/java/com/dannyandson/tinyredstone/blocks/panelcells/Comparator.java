@@ -261,8 +261,8 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
-        toolTipInfo.addText("Mode", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString());
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.addText("Mode", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString());
     }
 
     @Override

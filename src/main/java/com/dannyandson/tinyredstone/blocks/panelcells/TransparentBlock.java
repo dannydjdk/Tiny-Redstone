@@ -153,7 +153,7 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     }
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
-        toolTipInfo.setPowerOutput(0);
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.setPowerOutput(0);
     }
 }

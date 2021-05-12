@@ -145,11 +145,11 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
 
                         if (panelCell instanceof IPanelCellInfoProvider) {
-                            OverlayBlockInfo tooltipInfo = new OverlayBlockInfo(probeInfo, probeMode);
-                            ((IPanelCellInfoProvider) panelCell).addInfo(tooltipInfo, panelTile, posInPanelCell);
-                            if(tooltipInfo.power > -1) {
+                            OverlayBlockInfo overlayBlockInfo = new OverlayBlockInfo(probeInfo, probeMode);
+                            ((IPanelCellInfoProvider) panelCell).addInfo(overlayBlockInfo, panelTile, posInPanelCell);
+                            if(overlayBlockInfo.power > -1) {
                                 handled = true;
-                                showRedstonePower(probeInfo, tooltipInfo.power);
+                                showRedstonePower(probeInfo, overlayBlockInfo.power);
                             }
                         }
                         if (!handled) {

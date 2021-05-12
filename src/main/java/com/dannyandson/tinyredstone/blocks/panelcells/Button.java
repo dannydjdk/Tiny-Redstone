@@ -160,8 +160,8 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
-        toolTipInfo.setPowerOutput(this.active ? 15 : 0);
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.setPowerOutput(this.active ? 15 : 0);
     }
 
     @Override

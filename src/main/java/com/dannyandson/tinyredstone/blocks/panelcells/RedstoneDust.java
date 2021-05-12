@@ -351,8 +351,8 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
-        toolTipInfo.setPowerOutput(this.signalStrength);
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.setPowerOutput(this.signalStrength);
     }
 
     @Override

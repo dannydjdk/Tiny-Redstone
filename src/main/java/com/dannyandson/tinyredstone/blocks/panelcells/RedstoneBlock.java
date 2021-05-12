@@ -113,7 +113,7 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
-        toolTipInfo.setPowerOutput(15);
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.setPowerOutput(15);
     }
 }

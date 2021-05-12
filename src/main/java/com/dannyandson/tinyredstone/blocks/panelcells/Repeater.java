@@ -312,10 +312,10 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
-        toolTipInfo.addText("Delay", this.ticks/2 + " ticks");
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.addText("Delay", this.ticks/2 + " ticks");
         if(this.locked) {
-            toolTipInfo.addInfo("Locked");
+            overlayBlockInfo.addInfo("Locked");
         }
     }
 

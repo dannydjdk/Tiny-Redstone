@@ -175,7 +175,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     }
 
     @Override
-    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
-        toolTipInfo.setPowerOutput(this.weakSignalStrength);
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.setPowerOutput(this.weakSignalStrength);
     }
 }

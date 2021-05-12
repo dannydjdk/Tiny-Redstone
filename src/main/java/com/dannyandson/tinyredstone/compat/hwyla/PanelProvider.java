@@ -100,14 +100,14 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
                             boolean handled = false;
 
                             if (panelCell instanceof IPanelCellInfoProvider) {
-                                OverlayBlockInfo tooltipInfo = new OverlayBlockInfo(tooltip, accessor.getPlayer().isSneaking());
-                                ((IPanelCellInfoProvider) panelCell).addInfo(tooltipInfo, panelTile, posInPanelCell);
-                                if(tooltipInfo.power > -1) {
+                                OverlayBlockInfo overlayBlockInfo = new OverlayBlockInfo(tooltip, accessor.getPlayer().isSneaking());
+                                ((IPanelCellInfoProvider) panelCell).addInfo(overlayBlockInfo, panelTile, posInPanelCell);
+                                if(overlayBlockInfo.power > -1) {
                                     handled = true;
-                                    if(tooltipInfo.power > 0) {
+                                    if(overlayBlockInfo.power > 0) {
                                         tooltip.add(new RenderableTextComponent(
                                                 getItemStackRenderable(new ItemStack(Items.REDSTONE)),
-                                                getStringRenderable("Power: " + tooltipInfo.power)
+                                                getStringRenderable("Power: " + overlayBlockInfo.power)
                                         ));
                                     }
                                 }
