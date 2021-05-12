@@ -12,6 +12,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -121,9 +122,26 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
                                 ));
                             }
                         }
+                    } else {
+                        showBlockRedstonePower(tooltip, accessor.getWorld(), pos, accessor.getSide());
                     }
+                } else {
+                    showBlockRedstonePower(tooltip, accessor.getWorld(), pos, accessor.getSide());
                 }
             }
+        }
+    }
+
+    private static void showBlockRedstonePower(List<ITextComponent> tooltip, World world, BlockPos pos, Direction sideHit) {
+        showRedstonePower(tooltip, world.getRedstonePower(pos, sideHit.getOpposite()));
+    }
+
+    private static void showRedstonePower(List<ITextComponent> tooltip, int power) {
+        if(power > 0) {
+            tooltip.add(new RenderableTextComponent(
+                    getItemStackRenderable(new ItemStack(Items.REDSTONE)),
+                    getStringRenderable("Power: " + power)
+            ));
         }
     }
 

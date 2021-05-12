@@ -15,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -158,17 +159,17 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                         }
                     }
                 } else {
-                    showBlockRedstonePower(probeInfo, probeMode, redstoneMode, world, pos, probeHitData);
+                    showBlockRedstonePower(probeInfo, probeMode, redstoneMode, world, pos, probeHitData.getSideHit());
                 }
             } else {
-                showBlockRedstonePower(probeInfo, probeMode, redstoneMode, world, pos, probeHitData);
+                showBlockRedstonePower(probeInfo, probeMode, redstoneMode, world, pos, probeHitData.getSideHit());
             }
         }
     }
 
-    private static void showBlockRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, IProbeConfig.ConfigMode redstoneMode, World world, BlockPos pos, IProbeHitData probeHitData) {
+    private static void showBlockRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, IProbeConfig.ConfigMode redstoneMode, World world, BlockPos pos, Direction sideHit) {
         if (Tools.show(probeMode, redstoneMode)) {
-            showRedstonePower(probeInfo, world.getRedstonePower(pos, probeHitData.getSideHit().getOpposite()));
+            showRedstonePower(probeInfo, world.getRedstonePower(pos, sideHit.getOpposite()));
         }
     }
 
