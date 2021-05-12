@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.compat.theoneprobe;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.CompatHandler;
 import mcjty.theoneprobe.Tools;
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.styles.LayoutStyle;
@@ -11,13 +12,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.ITagCollection;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
@@ -25,8 +24,6 @@ import net.minecraft.world.World;
 import java.util.function.Function;
 
 public class PanelProvider implements IBlockDisplayOverride, Function<ITheOneProbe, Void>, IProbeInfoProvider {
-    private final ResourceLocation MEASURING_DEVICE = new ResourceLocation(TinyRedstone.MODID, "measuring_device");
-    private final ResourceLocation TINY_COMPONENT = new ResourceLocation(TinyRedstone.MODID, "tiny_component");
     private IProbeConfig.ConfigMode redstoneMode;
 
     @Override
@@ -48,24 +45,14 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
             case 1:
                 break;
             case 2:
-                if(probeMode != ProbeMode.EXTENDED && probeMode != ProbeMode.DEBUG) return false;
+                if(probeMode == ProbeMode.NORMAL) return false;
                 break;
             case 3:
-                if(probeMode != ProbeMode.DEBUG) {
-                    ITag<Item> tag = ItemTags.getCollection().get(MEASURING_DEVICE);
-                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) return false;
-                }
+                if(probeMode != ProbeMode.DEBUG) return CompatHandler.isMeasuringDevice(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem());
+                break;
             case 4:
-                if(probeMode != ProbeMode.DEBUG) {
-                    ITagCollection<Item> collection = ItemTags.getCollection();
-                    ITag<Item> tag = collection.get(MEASURING_DEVICE);
-                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) {
-                        tag = collection.get(TINY_COMPONENT);
-                        if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) {
-                            return false;
-                        }
-                    }
-                }
+                if(probeMode != ProbeMode.DEBUG) return CompatHandler.isTinyComponent(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem());
+                break;
         }
         return true;
     }
@@ -78,6 +65,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         IProbeConfig config = Config.getRealConfig();
 
         if (tileEntity instanceof PanelTile && show(probeMode, playerEntity)) {
+
             if (redstoneMode == null) redstoneMode = config.getShowRedstone();
             config.showRedstone(IProbeConfig.ConfigMode.NOT);
 
@@ -89,25 +77,27 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                 BlockRayTraceResult result = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.get(BlockStateProperties.FACING),result);
 
-                if(panelCellPos!=null && panelCellPos.getIPanelCell() != null) {
+                if(panelCellPos!=null) {
                     IPanelCell panelCell = panelCellPos.getIPanelCell();
-                    String modName = Tools.getModName(block);
+                    if(panelCell != null) {
+                        String modName = Tools.getModName(block);
 
-                    Item item = panelBlock.getItemByIPanelCell(panelCell.getClass());
-                    ItemStack itemStack = item.getDefaultInstance();
+                        Item item = panelBlock.getItemByIPanelCell(panelCell.getClass());
+                        ItemStack itemStack = item.getDefaultInstance();
 
-                    if (Tools.show(probeMode, config.getShowModName())) {
-                        probeInfo.horizontal()
-                                .item(itemStack)
-                                .vertical()
-                                .itemLabel(itemStack)
-                                .text(CompoundText.create().style(TextStyleClass.MODNAME).text(modName));
-                    } else {
-                        probeInfo.horizontal(probeInfo.defaultLayoutStyle().alignment(ElementAlignment.ALIGN_CENTER))
-                                .item(itemStack)
-                                .itemLabel(itemStack);
+                        if (Tools.show(probeMode, config.getShowModName())) {
+                            probeInfo.horizontal()
+                                    .item(itemStack)
+                                    .vertical()
+                                    .itemLabel(itemStack)
+                                    .text(CompoundText.create().style(TextStyleClass.MODNAME).text(modName));
+                        } else {
+                            probeInfo.horizontal(probeInfo.defaultLayoutStyle().alignment(ElementAlignment.ALIGN_CENTER))
+                                    .item(itemStack)
+                                    .itemLabel(itemStack);
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
         } else if (redstoneMode != null) {
@@ -153,46 +143,41 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                     if (panelCell != null) {
                         boolean handled = false;
 
-                        if (panelCell instanceof IPanelCellProbeInfoProvider) {
-                            handled = ((IPanelCellProbeInfoProvider) panelCell).addProbeInfo(probeMode, probeInfo, panelTile, posInPanelCell);
+
+
+                        if (panelCell instanceof IPanelCellInfoProvider) {
+                            OverlayBlockInfo overlayBlockInfo = new OverlayBlockInfo(probeInfo, probeMode);
+                            ((IPanelCellInfoProvider) panelCell).addInfo(overlayBlockInfo, panelTile, posInPanelCell);
+                            if(overlayBlockInfo.power > -1) {
+                                handled = true;
+                                showRedstonePower(probeInfo, overlayBlockInfo.power);
+                            }
                         }
                         if (!handled) {
                             Side sideHit = panelTile.getPanelCellSide(posInPanelCell,panelTile.getSideFromDirection(probeHitData.getSideHit()));
-                            int power = 0;
-
-                            if(sideHit==Side.BACK) {
-                                power = panelCell.getWeakRsOutput(Side.BACK);
-                            }
-                            else if (sideHit==Side.LEFT) {
-                                power = panelCell.getWeakRsOutput(Side.LEFT);
-                            }
-                            else if (sideHit==Side.FRONT) {
-                                power = panelCell.getWeakRsOutput(Side.FRONT);
-                            }
-                            else if (sideHit==Side.RIGHT) {
-                                power = panelCell.getWeakRsOutput(Side.RIGHT);
-                            }
-                            else if (sideHit==Side.BOTTOM) {
-                                power = panelCell.getWeakRsOutput(Side.BOTTOM);
-                            }
-                            else if (sideHit==Side.TOP) {
-                                power = panelCell.getWeakRsOutput(Side.TOP);
-                            }
-                            ProbeInfoHelper.addPower(probeInfo, power);
+                            showRedstonePower(probeInfo, panelCell.getWeakRsOutput(sideHit));
                         }
                     }
                 } else {
-                    showRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
+                    showBlockRedstonePower(probeInfo, probeMode, redstoneMode, world, pos, probeHitData.getSideHit());
                 }
             } else {
-                showRedstonePower(probeInfo, probeMode, world, pos, probeHitData);
+                showBlockRedstonePower(probeInfo, probeMode, redstoneMode, world, pos, probeHitData.getSideHit());
             }
         }
     }
 
-    private void showRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, World world, BlockPos pos, IProbeHitData probeHitData) {
+    private static void showBlockRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, IProbeConfig.ConfigMode redstoneMode, World world, BlockPos pos, Direction sideHit) {
         if (Tools.show(probeMode, redstoneMode)) {
-            ProbeInfoHelper.addPower(probeInfo, world.getRedstonePower(pos, probeHitData.getSideHit().getOpposite()));
+            showRedstonePower(probeInfo, world.getRedstonePower(pos, sideHit.getOpposite()));
+        }
+    }
+
+    private static void showRedstonePower(IProbeInfo probeInfo, int power) {
+        if (power > 0) {
+            probeInfo.horizontal()
+                    .item(new ItemStack(Items.REDSTONE), probeInfo.defaultItemStyle().width(14).height(14))
+                    .text(CompoundText.createLabelInfo("Power: ", power));
         }
     }
 }

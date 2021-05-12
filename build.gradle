@@ -19,6 +19,7 @@ archivesBaseName = 'tinyredstone'
 
 def jei_version = '1.16.4:7.6.1.71'
 def top_version = '1.16:1.16-3.0.6-8'
+def hwyla_version = '1.10.11-B78_1.16.2'
 
 repositories {
     maven {
@@ -34,6 +35,10 @@ repositories {
     maven { // TOP
         name 'tterrag maven'
         url "http://maven.tterrag.com/"
+    }
+    maven { // Hwyla
+        name = "Tehnut"
+        url "https://maven.tehnut.info"
     }
 }
 
@@ -138,6 +143,10 @@ dependencies {
     runtimeOnly fg.deobf("mezz.jei:jei-${jei_version}")
 
     compile fg.deobf(project.dependencies.create("mcjty.theoneprobe:TheOneProbe-${top_version}") {transitive = false})
+
+    //compileOnly fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}:api")
+    //runtimeOnly fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}")
+    compile fg.deobf("mcp.mobius.waila:Hwyla:${hwyla_version}")
 
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
