@@ -1,7 +1,7 @@
 package com.dannyandson.tinyredstone.compat.theoneprobe;
 
-import com.dannyandson.tinyredstone.compat.IToolTipInfo;
-import com.dannyandson.tinyredstone.compat.ToolTipInfoMode;
+import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.compat.OverlayBlockInfoMode;
 import mcjty.theoneprobe.api.CompoundText;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
@@ -9,22 +9,23 @@ import mcjty.theoneprobe.api.TextStyleClass;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.StringTextComponent;
 
-public class ToolTipInfo implements IToolTipInfo {
-    private IProbeInfo probeInfo;
-    private ProbeMode probeMode;
+public class OverlayBlockInfo implements IOverlayBlockInfo {
+    private final IProbeInfo probeInfo;
+    private final ProbeMode probeMode;
     protected int power = -1;
-    protected ToolTipInfo(IProbeInfo probeInfo, ProbeMode probeMode) {
+    protected OverlayBlockInfo(IProbeInfo probeInfo, ProbeMode probeMode) {
         this.probeInfo = probeInfo;
+        this.probeMode = probeMode;
     }
 
     @Override
-    public ToolTipInfoMode getMode() {
+    public OverlayBlockInfoMode getMode() {
         switch (probeMode) {
-            case DEBUG: return ToolTipInfoMode.DEBUG;
-            case NORMAL: return ToolTipInfoMode.NORMAL;
-            case EXTENDED: return ToolTipInfoMode.EXTENDED;
+            case DEBUG: return OverlayBlockInfoMode.DEBUG;
+            case NORMAL: return OverlayBlockInfoMode.NORMAL;
+            case EXTENDED: return OverlayBlockInfoMode.EXTENDED;
         }
-        return ToolTipInfoMode.NORMAL;
+        return OverlayBlockInfoMode.NORMAL;
     }
 
     @Override

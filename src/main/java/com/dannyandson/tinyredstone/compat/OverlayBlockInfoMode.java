@@ -1,6 +1,6 @@
 package com.dannyandson.tinyredstone.compat;
 
-public enum ToolTipInfoMode {
+public enum OverlayBlockInfoMode {
     NORMAL,
     EXTENDED,
     DEBUG

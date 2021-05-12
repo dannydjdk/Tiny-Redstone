@@ -1,7 +1,7 @@
 package com.dannyandson.tinyredstone.compat.hwyla;
 
-import com.dannyandson.tinyredstone.compat.IToolTipInfo;
-import com.dannyandson.tinyredstone.compat.ToolTipInfoMode;
+import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.compat.OverlayBlockInfoMode;
 import mcp.mobius.waila.api.RenderableTextComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
@@ -9,18 +9,18 @@ import net.minecraft.util.text.StringTextComponent;
 
 import java.util.List;
 
-public class ToolTipInfo implements IToolTipInfo {
-    private List<ITextComponent> tooltip;
-    private boolean sneaking;
+public class OverlayBlockInfo implements IOverlayBlockInfo {
+    private final List<ITextComponent> tooltip;
+    private final boolean sneaking;
     protected int power = -1;
-    protected ToolTipInfo(List<ITextComponent> tooltip, boolean sneaking) {
+    protected OverlayBlockInfo(List<ITextComponent> tooltip, boolean sneaking) {
         this.tooltip = tooltip;
         this.sneaking = sneaking;
     }
     @Override
-    public ToolTipInfoMode getMode() {
-        if(sneaking) return ToolTipInfoMode.EXTENDED;
-        return ToolTipInfoMode.NORMAL;
+    public OverlayBlockInfoMode getMode() {
+        if(sneaking) return OverlayBlockInfoMode.EXTENDED;
+        return OverlayBlockInfoMode.NORMAL;
     }
 
     @Override

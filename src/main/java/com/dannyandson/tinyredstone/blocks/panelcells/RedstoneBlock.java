@@ -1,7 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.IToolTipInfo;
+import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -113,7 +113,7 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void addInfo(IToolTipInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
+    public void addInfo(IOverlayBlockInfo toolTipInfo, PanelTile panelTile, PosInPanelCell pos) {
         toolTipInfo.setPowerOutput(15);
     }
 }

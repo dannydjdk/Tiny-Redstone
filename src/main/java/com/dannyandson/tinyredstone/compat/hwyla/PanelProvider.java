@@ -3,7 +3,6 @@ package com.dannyandson.tinyredstone.compat.hwyla;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.compat.CompatHandler;
-import mcjty.theoneprobe.api.ProbeMode;
 import mcp.mobius.waila.api.*;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,9 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.ITagCollection;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
@@ -104,7 +100,7 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
                             boolean handled = false;
 
                             if (panelCell instanceof IPanelCellInfoProvider) {
-                                ToolTipInfo tooltipInfo = new ToolTipInfo(tooltip, accessor.getPlayer().isSneaking());
+                                OverlayBlockInfo tooltipInfo = new OverlayBlockInfo(tooltip, accessor.getPlayer().isSneaking());
                                 ((IPanelCellInfoProvider) panelCell).addInfo(tooltipInfo, panelTile, posInPanelCell);
                                 if(tooltipInfo.power > -1) {
                                     handled = true;

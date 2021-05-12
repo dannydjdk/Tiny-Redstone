@@ -2,8 +2,8 @@ package com.dannyandson.tinyredstone.compat;
 
 import net.minecraft.item.ItemStack;
 
-public interface IToolTipInfo {
-    ToolTipInfoMode getMode();
+public interface IOverlayBlockInfo {
+    OverlayBlockInfoMode getMode();
     void setPowerOutput(int power);
     void addText(String text);
     void addText(ItemStack itemStack, String text);

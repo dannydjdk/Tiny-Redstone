@@ -14,12 +14,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.ITagCollection;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
@@ -149,7 +145,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
 
                         if (panelCell instanceof IPanelCellInfoProvider) {
-                            ToolTipInfo tooltipInfo = new ToolTipInfo(probeInfo, probeMode);
+                            OverlayBlockInfo tooltipInfo = new OverlayBlockInfo(probeInfo, probeMode);
                             ((IPanelCellInfoProvider) panelCell).addInfo(tooltipInfo, panelTile, posInPanelCell);
                             if(tooltipInfo.power > -1) {
                                 handled = true;
