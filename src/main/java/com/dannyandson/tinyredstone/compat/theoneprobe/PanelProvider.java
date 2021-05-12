@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.compat.theoneprobe;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.CompatHandler;
 import mcjty.theoneprobe.Tools;
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.styles.LayoutStyle;
@@ -26,8 +27,6 @@ import net.minecraft.world.World;
 import java.util.function.Function;
 
 public class PanelProvider implements IBlockDisplayOverride, Function<ITheOneProbe, Void>, IProbeInfoProvider {
-    private final ResourceLocation MEASURING_DEVICE = new ResourceLocation(TinyRedstone.MODID, "measuring_device");
-    private final ResourceLocation TINY_COMPONENT = new ResourceLocation(TinyRedstone.MODID, "tiny_component");
     private IProbeConfig.ConfigMode redstoneMode;
 
     @Override
@@ -49,24 +48,14 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
             case 1:
                 break;
             case 2:
-                if(probeMode != ProbeMode.EXTENDED && probeMode != ProbeMode.DEBUG) return false;
+                if(probeMode == ProbeMode.NORMAL) return false;
                 break;
             case 3:
-                if(probeMode != ProbeMode.DEBUG) {
-                    ITag<Item> tag = ItemTags.getCollection().get(MEASURING_DEVICE);
-                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) return false;
-                }
+                if(probeMode != ProbeMode.DEBUG) return CompatHandler.isMeasuringDevice(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem());
+                break;
             case 4:
-                if(probeMode != ProbeMode.DEBUG) {
-                    ITagCollection<Item> collection = ItemTags.getCollection();
-                    ITag<Item> tag = collection.get(MEASURING_DEVICE);
-                    if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) {
-                        tag = collection.get(TINY_COMPONENT);
-                        if(tag == null || !tag.contains(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem())) {
-                            return false;
-                        }
-                    }
-                }
+                if(probeMode != ProbeMode.DEBUG) return CompatHandler.isTinyComponent(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem());
+                break;
         }
         return true;
     }

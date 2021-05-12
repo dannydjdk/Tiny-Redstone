@@ -2,14 +2,21 @@ package com.dannyandson.tinyredstone.compat.hwyla;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.CompatHandler;
+import mcjty.theoneprobe.api.ProbeMode;
 import mcp.mobius.waila.api.*;
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.tags.ITag;
+import net.minecraft.tags.ITagCollection;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -32,6 +39,22 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
         registrar.registerComponentProvider(this, TooltipPosition.BODY, PanelBlock.class);
     }
 
+    private boolean show(PlayerEntity playerEntity) {
+        switch (com.dannyandson.tinyredstone.Config.DISPLAY_MODE.get()) {
+            case 0:
+                return false;
+            case 1:
+                return true;
+            case 2:
+                return playerEntity.isSneaking();
+            case 3:
+                return CompatHandler.isMeasuringDevice(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem());
+            case 4:
+                return CompatHandler.isTinyComponent(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem());
+        }
+        return true;
+    }
+
     @Override
     public ItemStack getStack(IDataAccessor accessor, IPluginConfig config) {
         if(accessor.getBlock() != null) {
@@ -39,7 +62,7 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
             World world = accessor.getWorld();
             TileEntity tileEntity = world.getTileEntity(pos);
 
-            if (tileEntity instanceof PanelTile) {
+            if (tileEntity instanceof PanelTile && show(accessor.getPlayer())) {
 
                 PanelTile panelTile = (PanelTile) tileEntity;
                 Block block = accessor.getBlock();
@@ -67,7 +90,7 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
             BlockPos pos = accessor.getPosition();
             TileEntity tileEntity = accessor.getWorld().getTileEntity(pos);
 
-            if (tileEntity instanceof PanelTile) {
+            if (tileEntity instanceof PanelTile && show(accessor.getPlayer())) {
                 PanelTile panelTile = (PanelTile) tileEntity;
 
                 if (!panelTile.isCovered()) {
