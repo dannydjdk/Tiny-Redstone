@@ -225,7 +225,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean tick() {
+    public boolean tick(PanelCellPos cellPos) {
         while (this.queue.size()<this.ticks || this.queue.size()<1)
             this.queue.add(this.input);
 

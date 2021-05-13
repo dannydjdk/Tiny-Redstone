@@ -223,7 +223,7 @@ public class Piston implements IPanelCell {
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean tick() {
+    public boolean tick(PanelCellPos cellPos) {
         if (changePending < 0)
             return false;
         if (changePending > 0) {

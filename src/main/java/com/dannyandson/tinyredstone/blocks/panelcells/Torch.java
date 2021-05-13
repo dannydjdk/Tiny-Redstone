@@ -137,16 +137,6 @@ public class Torch implements IPanelCell
     }
 
     /**
-     * Can this cell be pushed by a piston?
-     *
-     * @return true if a piston can push this block
-     */
-    @Override
-    public boolean isPushable() {
-        return false;
-    }
-
-    /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
      *
      * @return Light level to output 0-15
@@ -162,7 +152,7 @@ public class Torch implements IPanelCell
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean tick() {
+    public boolean tick(PanelCellPos cellPos) {
         changeHx.add(changePending==2);
         if (changeHx.size()>60) changeHx.pop();
         int changes = 0;

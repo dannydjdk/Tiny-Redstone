@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
@@ -14,7 +15,7 @@ public class StickyPiston extends Piston {
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean tick() {
+    public boolean tick(PanelCellPos cellPos) {
         if (changePending < 0)
             return false;
         if (changePending > 0) {

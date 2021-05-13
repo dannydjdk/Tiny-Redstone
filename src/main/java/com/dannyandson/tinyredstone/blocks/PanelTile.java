@@ -38,7 +38,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private Map<Integer, Side> cellDirections = new HashMap<>();
     protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
-    protected Map<Side, Integer> comparatorOverrides = new HashMap<>();
 
     protected Integer Color = DyeColor.GRAY.getColorValue();
     private Integer lightOutput = 0;
@@ -153,13 +152,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
             }
 
-            CompoundNBT comparatorOverrideNBT = new CompoundNBT();
-            for(Side cDirection : comparatorOverrides.keySet())
-            {
-                comparatorOverrideNBT.putInt(cDirection.ordinal()+"",comparatorOverrides.get(cDirection));
-            }
-            parentNBTTagCompound.put("comparator_overrides",comparatorOverrideNBT);
-
             parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
             parentNBTTagCompound.putBoolean("flagCrashed",this.flagCrashed);
@@ -196,21 +188,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.weakPowerToNeighbors.put(Side.BACK,  weakPowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.LEFT,  weakPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.TOP,  weakPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
-        }
-
-        CompoundNBT comparatorOverridesNBT = parentNBTTagCompound.getCompound("comparator_overrides");
-        if (!comparatorOverridesNBT.isEmpty())
-        {
-            if (comparatorOverridesNBT.contains(Side.FRONT.ordinal()+""))
-                this.comparatorOverrides.put(Side.FRONT,comparatorOverridesNBT.getInt(Side.FRONT.ordinal()+""));
-            if (comparatorOverridesNBT.contains(Side.RIGHT.ordinal()+""))
-                this.comparatorOverrides.put(Side.RIGHT,comparatorOverridesNBT.getInt(Side.RIGHT.ordinal()+""));
-            if (comparatorOverridesNBT.contains(Side.BACK.ordinal()+""))
-                this.comparatorOverrides.put(Side.BACK,comparatorOverridesNBT.getInt(Side.BACK.ordinal()+""));
-            if (comparatorOverridesNBT.contains(Side.LEFT.ordinal()+""))
-                this.comparatorOverrides.put(Side.LEFT,comparatorOverridesNBT.getInt(Side.LEFT.ordinal()+""));
-            if (comparatorOverridesNBT.contains(Side.TOP.ordinal()+""))
-                this.comparatorOverrides.put(Side.TOP,comparatorOverridesNBT.getInt(Side.TOP.ordinal()+""));
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
@@ -308,32 +285,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     dirty=true;
                 }
 
-                //if we have a neighbor with a comparator override (outputs through comparator), check for change
-                if (!this.world.isRemote)
-                    for (Side side : comparatorOverrides.keySet()) {
-                        BlockPos neighborPos = pos.offset(getDirectionFromSide(side));
-                        BlockState neighborState = world.getBlockState(neighborPos);
-                        if (neighborState.hasComparatorInputOverride()) {
-                            int comparatorInputOverride = neighborState.getComparatorInputOverride(world, neighborPos);
-                            if (comparatorInputOverride != comparatorOverrides.get(side)) {
-                                this.comparatorOverrides.put(side, comparatorInputOverride);
-                                updateSide(side);
-                                dirty = true;
-                            }
-                        } else {
-                            comparatorOverrides.remove(side);
-                            if (updateSide(side)) {
-                                dirty = true;
-                            }
-                        }
-
-                    }
-
                 //call the tick() method in all our cells and grab any updated pistons
                 List<Integer> pistons = null;
                 for (Integer index : this.cells.keySet()) {
+                    PanelCellPos cellPos = PanelCellPos.fromIndex(this,index);
                     IPanelCell panelCell = this.cells.get(index);
-                    boolean update = panelCell.tick();
+                    boolean update = panelCell.tick(cellPos);
                     if (update) {
                         if (panelCell instanceof Piston) {
                             if (pistons == null)
@@ -348,7 +305,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                                         SoundCategory.BLOCKS, 0.25f, 2f, false
                                 );
                             }
-                            updateNeighborCells(PanelCellPos.fromIndex(this,index));
+                            updateNeighborCells(cellPos);
                         }
                         dirty = true;
                     }

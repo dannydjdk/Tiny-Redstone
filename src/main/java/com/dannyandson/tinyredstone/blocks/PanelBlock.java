@@ -123,7 +123,7 @@ public class PanelBlock extends Block {
     @SuppressWarnings("deprecation")
     @Override
     public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
-        return BASE.get(state.get(BlockStateProperties.FACING));
+        return getShape(state,worldIn,pos,ISelectionContext.dummy());
     }
 
     @SuppressWarnings("deprecation")
@@ -249,11 +249,6 @@ public class PanelBlock extends Block {
 
                     if (panelTile.pingOutwardObservers(direction))
                         change = true;
-
-                    BlockState neighborState = world.getBlockState(pos.offset(direction));
-                    if (neighborState.hasComparatorInputOverride() && !world.isRemote) {
-                        panelTile.comparatorOverrides.put(side, neighborState.getComparatorInputOverride(world, pos.offset(direction)));
-                    }
 
                     if (panelTile.updateSide(direction))
                         change = true;

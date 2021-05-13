@@ -61,9 +61,11 @@ public interface IPanelCell {
 
     /**
      * Called each each tick.
+     *
+     * @param cellPos The PanelCellPos of this IPanelCell
      * @return boolean indicating whether redstone output of this cell has changed
      */
-    default boolean tick(){return false;}
+    default boolean tick(PanelCellPos cellPos){return false;}
 
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.

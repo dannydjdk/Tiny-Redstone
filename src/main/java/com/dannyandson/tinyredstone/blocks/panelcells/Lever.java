@@ -37,26 +37,25 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.push();
         float x1 = 0.3125f, x2 = .6875f, y1 = 0.25f, y2 = 0.75f;
         float w = .375f, d = 0.5f,h=0.1875f;
-        //matrixStack.scale(.375f,.375f,1);
 
         matrixStack.translate(0,0,h);
-        drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_cobble,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_cobble,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-h,-y1);
-        drawRectangle(builder,matrixStack,x1,x2,0,h,sprite_cobble,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,0,h,sprite_cobble,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1f-x1);
-        drawRectangle(builder,matrixStack,0,d,0,h,sprite_cobble,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,d,0,h,sprite_cobble,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,d);
-        drawRectangle(builder,matrixStack,0,w,0,h,sprite_cobble,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,w,0,h,sprite_cobble,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,w);
-        drawRectangle(builder,matrixStack,0,d,0,h,sprite_cobble,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,d,0,h,sprite_cobble,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(60));
         matrixStack.translate(0,0.03125f,0);
@@ -71,42 +70,25 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.translate(0,0.40625,h/2f);
         matrixStack.rotate(Vector3f.XP.rotationDegrees((active)?45:135));
 
-        drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
-        drawRectangle(builder,matrixStack,x1,x2,x1,x2,sprite_lever_top,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,sprite_lever_top,combinedLight,alpha);
 
 
-    }
-
-    private void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2,TextureAtlasSprite sprite, int combinedLight ,float alpha)
-    {
-        add(builder, matrixStack, x1,y1,0, sprite.getMinU(), sprite.getMinV(), combinedLight,alpha);
-        add(builder, matrixStack, x2,y1,0, sprite.getMaxU(), sprite.getMinV(), combinedLight,alpha);
-        add(builder, matrixStack, x2,y2,0, sprite.getMaxU(), sprite.getMaxV(), combinedLight,alpha);
-        add(builder, matrixStack, x1,y2,0, sprite.getMinU(), sprite.getMaxV(), combinedLight,alpha);
-    }
-
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, float alpha) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, alpha)
-                .tex(u, v)
-                .lightmap(combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
     }
 
     /**
@@ -138,16 +120,6 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
     }
 
     /**
-     * Does the power level drop when transmitting between these cells (such as with redstone dust)?
-     *
-     * @return true if power level should drop, false if not
-     */
-    @Override
-    public boolean powerDrops() {
-        return false;
-    }
-
-    /**
      * Is this a component that does not change state based on neighbors (such as a redstone block, or potentiometer)?
      *
      * @return true if this cell's state is unaffected by neighbors
@@ -157,38 +129,8 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         return true;
     }
 
-    /**
-     * Can this cell be pushed by a piston?
-     *
-     * @return true if a piston can push this block
-     */
-    @Override
-    public boolean isPushable() {
-        return false;
-    }
-
     @Override
     public boolean needsSolidBase(){return true;}
-
-    /**
-     * If this cell outputs light, return the level here. Otherwise, return 0.
-     *
-     * @return Light level to output 0-15
-     */
-    @Override
-    public int lightOutput() {
-        return 0;
-    }
-
-    /**
-     * Called each each tick.
-     *
-     * @return boolean indicating whether redstone output of this cell has changed
-     */
-    @Override
-    public boolean tick() {
-        return false;
-    }
 
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.

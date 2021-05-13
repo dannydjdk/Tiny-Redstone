@@ -100,7 +100,7 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean tick() {
+    public boolean tick(PanelCellPos cellPos) {
         if (active && ticksRemaining >0)
         {
             ticksRemaining--;
