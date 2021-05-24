@@ -135,7 +135,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
         PanelCellNeighbor topNeighbor = cellPos.getNeighbor(Side.TOP);
         if (topNeighbor!=null) {
-            top = topNeighbor.getStrongRsOutput();
+            top = (topNeighbor.canConnectRedstone())? topNeighbor.getWeakRsOutput():topNeighbor.getStrongRsOutput();
             if (topNeighbor.getNeighborIPanelCell() instanceof TransparentBlock)
                 above = cellPos.offset(Side.TOP);
         }

@@ -124,7 +124,7 @@ public class Torch implements IPanelCell
     @Override
     public int getWeakRsOutput(Side outputDirection)
     {
-        if (outputDirection!= Side.BACK && outputDirection!= Side.BOTTOM && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
+        if (outputDirection!= Side.BACK && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
             return 15;
         else
             return 0;
