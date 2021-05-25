@@ -10,7 +10,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
@@ -151,11 +150,6 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
             return RenderHelper.getSprite(TEXTURE_REPEATER_ON);
         return RenderHelper.getSprite(TEXTURE_REPEATER_OFF);
 
-    }
-
-    @Override
-    public boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
-        return neighborChanged(cellPos);
     }
 
     /**

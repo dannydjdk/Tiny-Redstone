@@ -45,6 +45,7 @@ public class Registration {
         TinyRedstone.registerPanelCell(SuperRepeater.class,TINY_SUPER_REPEATER.get());
         TinyRedstone.registerPanelCell(Lever.class,TINY_LEVER.get());
         TinyRedstone.registerPanelCell(RedstoneBridge.class,TINY_REDSTONE_BRIDGE.get());
+        TinyRedstone.registerPanelCell(NoteBlock.class,TINY_NOTE_BLOCK.get());
 
         TinyRedstone.registerPanelCover(DarkCover.class,PANEL_COVER_DARK.get());
         TinyRedstone.registerPanelCover(LightCover.class,PANEL_COVER_LIGHT.get());
@@ -71,6 +72,7 @@ public class Registration {
     public static final RegistryObject<Item> TINY_SUPER_REPEATER = ITEMS.register("tiny_super_repeater",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_LEVER = ITEMS.register("tiny_lever",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_REDSTONE_BRIDGE = ITEMS.register("tiny_redstone_bridge",PanelCellItem::new);
+    public static final RegistryObject<Item> TINY_NOTE_BLOCK = ITEMS.register("tiny_note_block",PanelCellItem::new);
 
     public static final RegistryObject<Item> BLUEPRINT = ITEMS.register("blueprint", Blueprint::new);
 

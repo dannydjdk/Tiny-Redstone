@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
@@ -56,11 +55,6 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-    }
-
-    @Override
-    public boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
-        return neighborChanged(cellPos);
     }
 
     /**

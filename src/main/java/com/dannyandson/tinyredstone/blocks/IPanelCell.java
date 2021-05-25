@@ -21,7 +21,9 @@ public interface IPanelCell {
      * @param player Placing player
      * @return true if output change occurred
      */
-    default boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {return false;}
+    default boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
+        return neighborChanged(cellPos);
+    }
 
     /**
      * Called when neighboring redstone signal output changes.

@@ -28,6 +28,7 @@
   "item.tinyredstone.light_panel_cover": "Light Panel Cover",
   "item.tinyredstone.dark_panel_cover": "Dark Panel Cover",
   "item.tinyredstone.tiny_color_selector": "Tiny Color Selector",
+  "item.tinyredstone.tiny_note_block": "Tiny Note Block",
   "tinyredstone.close" : "Close",
   "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
   "tinyredstone.gui.tinyblock.msg" : "Select a color",

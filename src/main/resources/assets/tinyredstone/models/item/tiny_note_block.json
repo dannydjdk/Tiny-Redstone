@@ -1,10 +1,10 @@
 {
-  "parent": "minecraft:block/stone_button_inventory",
+  "parent": "minecraft:block/note_block",
   "display": {
     "gui": {
       "rotation": [30, 45, 0],
       "translation": [0, 0, 0],
-      "scale":[0.5, 0.5, 0.5]
+      "scale":[0.35, 0.35, 0.35]
     },
     "ground": {
       "rotation": [0, 180, 0],

@@ -1095,6 +1095,13 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             cellDirections.remove(cellIndex);
             cells.remove(cellIndex);
 
+            BlockPos pos = cellPos.getPanelTile().getPos();
+            cellPos.getPanelTile().getWorld().playSound(
+                    pos.getX(), pos.getY(), pos.getZ(),
+                    SoundEvents.BLOCK_STONE_BREAK,
+                    SoundCategory.BLOCKS, 0.15f, 2f, false
+            );
+
             //let neighbors know about vacancy
             updateNeighborCells(cellPos);
             //for tiny redstone dust, alert the whole neighborhood
@@ -1118,11 +1125,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         int cellIndex = cellPos.getIndex();
         cellDirections.put(cellIndex, facing);
         cells.put(cellIndex, panelCell);
-        /*
-        if (!panelCell.isIndependentState()) {
-            updateCell(cellIndex);
-        }
-        */
+
+        BlockPos pos = cellPos.getPanelTile().getPos();
+        cellPos.getPanelTile().getWorld().playSound(
+                pos.getX(), pos.getY(), pos.getZ(),
+                SoundEvents.BLOCK_STONE_PLACE,
+                SoundCategory.BLOCKS, 0.15f, 2f, false
+        );
+
         if (panelCell.onPlace(cellPos,player))
             updateNeighborCells(cellPos);
         clearVoxelShape();
