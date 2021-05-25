@@ -1113,15 +1113,18 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
     }
 
-    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing)
+    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing, PlayerEntity player)
     {
         int cellIndex = cellPos.getIndex();
         cellDirections.put(cellIndex, facing);
         cells.put(cellIndex, panelCell);
+        /*
         if (!panelCell.isIndependentState()) {
             updateCell(cellIndex);
         }
-        updateNeighborCells(cellPos);
+        */
+        if (panelCell.onPlace(cellPos,player))
+            updateNeighborCells(cellPos);
         clearVoxelShape();
     }
 

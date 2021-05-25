@@ -433,7 +433,8 @@ public class PanelBlock extends Block {
                                                 (IPanelCell) panelCell,
                                                 rotationLock == null
                                                         ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, ((IPanelCell) panelCell).canPlaceVertical()))
-                                                        : rotationLock
+                                                        : rotationLock,
+                                                player
                                         );
 
                                         //remove an item from the player's stack

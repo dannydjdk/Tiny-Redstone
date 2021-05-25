@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 
 public interface IPanelCell {
@@ -13,6 +14,14 @@ public interface IPanelCell {
      *                    starting point is (0,0,0)
      */
     void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha);
+
+    /**
+     * Called when cell is placed on a panel, also when ghost preview is rendered
+     * @param cellPos PanelCellPos object of this cell
+     * @param player Placing player
+     * @return true if output change occurred
+     */
+    default boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {return false;}
 
     /**
      * Called when neighboring redstone signal output changes.

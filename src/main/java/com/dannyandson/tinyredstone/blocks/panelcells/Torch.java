@@ -8,7 +8,10 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
@@ -21,6 +24,7 @@ public class Torch implements IPanelCell
     private int changePending = 0;
     private final LinkedList<Boolean> changeHx = new LinkedList<>();
     private boolean burnout = false;
+    private boolean upright = false;
 
     public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch");
     public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_off");
@@ -58,8 +62,15 @@ public class Torch implements IPanelCell
         float y1 = 0;
         float y2 = 1f;
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(60));
-        matrixStack.translate(0,0.03125f,0);
+        if (this.upright) {
+            matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+            matrixStack.translate(0, 0, -0.375f);
+        }
+        else {
+            matrixStack.rotate(Vector3f.XP.rotationDegrees(60));
+            matrixStack.translate(0,0.03125f,0);
+        }
+
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
@@ -81,6 +92,36 @@ public class Torch implements IPanelCell
 
     }
 
+    @Override
+    public boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
+        if(RotationLock.getServerRotationLock(player)==null) {
+            Direction panelFacing = cellPos.getPanelTile().getBlockState().get(BlockStateProperties.FACING);
+            double playerToPanel;
+            switch (panelFacing) {
+                case NORTH:
+                    playerToPanel = -player.getLookVec().getZ();
+                    break;
+                case SOUTH:
+                    playerToPanel = player.getLookVec().getZ();
+                    break;
+                case WEST:
+                    playerToPanel = -player.getLookVec().getX();
+                    break;
+                case EAST:
+                    playerToPanel = player.getLookVec().getX();
+                    break;
+                case UP:
+                    playerToPanel = player.getLookVec().getY();
+                    break;
+                default:
+                    playerToPanel = -player.getLookVec().getY();
+            }
+            if (playerToPanel > 0.95)
+                this.upright = true;
+        }
+        return neighborChanged(cellPos);
+    }
+
     /**
      * Called when neighboring redstone signal output changes.
      * This can be called multiple times in a tick.
@@ -91,10 +132,9 @@ public class Torch implements IPanelCell
     @Override
     public boolean neighborChanged(PanelCellPos cellPos){
 
-        PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK),
-            bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
+        PanelCellNeighbor inputNeighbor = cellPos.getNeighbor((upright)?Side.BOTTOM:Side.BACK);
 
-        boolean output = ( (backNeighbor==null || backNeighbor.getWeakRsOutput() ==0) && (bottomNeighbor==null || bottomNeighbor.getWeakRsOutput()==0));
+        boolean output = (inputNeighbor==null || inputNeighbor.getWeakRsOutput() ==0);
 
         if (burnout && output)
         {
@@ -124,7 +164,7 @@ public class Torch implements IPanelCell
     @Override
     public int getWeakRsOutput(Side outputDirection)
     {
-        if (outputDirection!= Side.BACK && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
+        if (((!upright && outputDirection!= Side.BACK )|| (upright && outputDirection!=Side.BOTTOM)) && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
             return 15;
         else
             return 0;
@@ -178,6 +218,7 @@ public class Torch implements IPanelCell
         nbt.putBoolean("output",output);
         nbt.putInt("changePending",changePending);
         nbt.putBoolean("burnout",burnout);
+        nbt.putBoolean("upright",upright);
 
         StringBuilder changeHxString = new StringBuilder();
         for (Object b : changeHx.toArray())
@@ -194,6 +235,7 @@ public class Torch implements IPanelCell
         this.output = compoundNBT.getBoolean("output");
         this.changePending = compoundNBT.getInt("changePending");
         this.burnout = compoundNBT.getBoolean("burnout");
+        this.upright = compoundNBT.getBoolean("upright");
 
         String changeHxString = compoundNBT.getString("changeHx");
         for (Byte b : changeHxString.getBytes())

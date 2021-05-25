@@ -193,6 +193,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                                     }
                                 }
                                 Side rotationLock = RotationLock.getRotationLock();
+                                panelCell.onPlace(cellPos,player);
                                 return PanelCellGhostPos.fromPosInPanelCell(
                                         cellPos,
                                         panelCell,

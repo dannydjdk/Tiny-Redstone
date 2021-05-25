@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.ComparatorMode;
 import net.minecraft.util.ResourceLocation;
@@ -99,6 +100,11 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
                 .lightmap(combinedLightIn)
                 .normal(1, 0, 0)
                 .endVertex();
+    }
+
+    @Override
+    public boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
+        return neighborChanged(cellPos);
     }
 
     /**
