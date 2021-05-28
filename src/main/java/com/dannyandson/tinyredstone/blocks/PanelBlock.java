@@ -1,7 +1,9 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.panelcells.NoteBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
+import com.dannyandson.tinyredstone.gui.NoteBlockGUI;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -340,9 +342,14 @@ public class PanelBlock extends Block {
                             PanelCrashGUI.open(panelTile);
                         handled = true;
                     } else if (heldItem == Registration.REDSTONE_WRENCH.get() && !player.isSneaking() && !panelTile.isCovered()) {
-                        //rotate panel if holding wrench
-                        panelTile.rotate(Rotation.CLOCKWISE_90);
-                        handled = true;
+                        if (posInPanelCell.getIPanelCell() instanceof NoteBlock) {
+                            if (world.isRemote)
+                                NoteBlockGUI.open(panelTile, posInPanelCell.getIndex(), (NoteBlock) posInPanelCell.getIPanelCell());
+                        }else if (posInPanelCell.getIPanelCell()==null){
+                            //rotate panel if holding wrench
+                            panelTile.rotate(Rotation.CLOCKWISE_90);
+                            handled = true;
+                        }
                     } else if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isSneaking()) {
                         //harvest block on sneak right click with wrench
                         this.onBlockHarvested(world, pos, state, player);

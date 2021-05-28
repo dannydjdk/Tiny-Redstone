@@ -43,5 +43,23 @@
   "itemGroup.tinyredstone": "Tiny Redstone",
   "tinyredstone.gui.crash.msg": "This panel has crashed.\nPlease check your log file,\n and report crash to mod author if possible.\nYou can only remove components.\nClick 'Restart' to attempt to re-enable panel.",
   "tinyredstone.gui.overflow.msg": "A circuit on this panel has overflown.\nA zero tick line of redstone may be too long.\nTry adding a delay or increase the max\nredstone length in the config.\nClick 'Restart' to clear the error.",
-  "tinyredstone.enable": "Restart"
+  "tinyredstone.enable": "Restart",
+
+  "tinyredstone.noteblock.bass": "Bass",
+  "tinyredstone.noteblock.snare": "Snare",
+  "tinyredstone.noteblock.hat": "Hihat",
+  "tinyredstone.noteblock.kick": "Kick",
+  "tinyredstone.noteblock.bell": "Bells",
+  "tinyredstone.noteblock.flute": "Flute",
+  "tinyredstone.noteblock.chime": "Chimes",
+  "tinyredstone.noteblock.guitar": "Guitar",
+
+  "tinyredstone.noteblock.xylophone": "Xylophone",
+  "tinyredstone.noteblock.iron_xylophone": "Vibraphone",
+  "tinyredstone.noteblock.cow_bell": "Cow Bell",
+  "tinyredstone.noteblock.didgeridoo": "Didgeridoo",
+  "tinyredstone.noteblock.bit": "Bit",
+  "tinyredstone.noteblock.banjo": "Banjo",
+  "tinyredstone.noteblock.pling": "Pling",
+  "tinyredstone.noteblock.harp": "Harp"
 }

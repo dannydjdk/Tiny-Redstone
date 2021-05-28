@@ -119,7 +119,8 @@ public class Torch implements IPanelCell
             if (playerToPanel > 0.95)
                 this.upright = true;
         }
-        return neighborChanged(cellPos);
+        neighborChanged(cellPos);
+        return true;
     }
 
     /**

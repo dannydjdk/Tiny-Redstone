@@ -1,9 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import com.dannyandson.tinyredstone.blocks.PanelCellPos;
-import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
-import com.dannyandson.tinyredstone.blocks.PanelTile;
-import com.dannyandson.tinyredstone.blocks.RenderHelper;
+import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -12,14 +10,17 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.TranslationTextComponent;
 
-public class NoteBlock extends TinyBlock{
+public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     public static ResourceLocation TEXTURE_TINY_NOTE_BLOCK = new ResourceLocation("minecraft","block/note_block");
 
+    private boolean powered = false;
     private int pitch = 0;
+    private String instrument = "harp";
 
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
@@ -56,11 +57,36 @@ public class NoteBlock extends TinyBlock{
 
     @Override
     public boolean neighborChanged(PanelCellPos cellPos){
-        int strength = this.weakSignalStrength;
+
+        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.RIGHT),
+                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
+                backNeighbor = cellPos.getNeighbor(Side.BACK),
+                frontNeighbor = cellPos.getNeighbor(Side.FRONT),
+                topNeighbor = cellPos.getNeighbor(Side.TOP),
+                bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
+
         boolean r = super.neighborChanged(cellPos);
-        if (strength==0 && this.weakSignalStrength>0) {
-            playNote(cellPos.getPanelTile());
+
+        if (
+                (weakSignalStrength + strongSignalStrength > 0) ||
+                        ((
+                                ((frontNeighbor != null) ? frontNeighbor.getWeakRsOutput() : 0) +
+                                        ((rightNeighbor != null) ? rightNeighbor.getWeakRsOutput() : 0) +
+                                        ((backNeighbor != null) ? backNeighbor.getWeakRsOutput() : 0) +
+                                        ((leftNeighbor != null) ? leftNeighbor.getWeakRsOutput() : 0)+
+                                        ((topNeighbor != null) ? topNeighbor.getWeakRsOutput() : 0)+
+                                        ((bottomNeighbor != null) ? bottomNeighbor.getWeakRsOutput() : 0)) > 0)
+        ) {
+            if (!this.powered) {
+                this.powered = true;
+                playNote(cellPos.getPanelTile());
+                return true;
+            }
+        } else if (this.powered) {
+            this.powered = false;
+            return true;
         }
+
         return r;
     }
 
@@ -79,6 +105,8 @@ public class NoteBlock extends TinyBlock{
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = super.writeNBT();
         nbt.putInt("pitch",this.pitch);
+        nbt.putString("instrument",this.instrument);
+        nbt.putBoolean("powered",this.powered);
         return nbt;
     }
 
@@ -86,16 +114,27 @@ public class NoteBlock extends TinyBlock{
     public void readNBT(CompoundNBT compoundNBT) {
         super.readNBT(compoundNBT);
         this.pitch= compoundNBT.getInt("pitch");
+        this.instrument= compoundNBT.getString("instrument");
+        this.powered =compoundNBT.getBoolean("powered");
+    }
+
+    @Override
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.addText("Instrument", new TranslationTextComponent("tinyredstone.noteblock." + this.instrument).getString() );
+        overlayBlockInfo.addText("Note", this.pitch+"");
     }
 
     private void playNote(PanelTile panelTile)
     {
         panelTile.getWorld().playSound(
                 panelTile.getPos().getX(), panelTile.getPos().getY(), panelTile.getPos().getZ(),
-                SoundEvents.BLOCK_NOTE_BLOCK_HARP,
-                SoundCategory.BLOCKS, 0.25f, (pitch==0)?0.5f:(float)Math.pow(2f,((pitch-12f)/12f)), false
+                new SoundEvent(new ResourceLocation("minecraft","block.note_block." + instrument)),
+                SoundCategory.BLOCKS, 0.5f, (pitch==0)?0.5f:(float)Math.pow(2f,((pitch-12f)/12f)), false
         );
     }
 
-
+    public void setInstrument(String instrument)
+    {
+        this.instrument=instrument;
+    }
 }
