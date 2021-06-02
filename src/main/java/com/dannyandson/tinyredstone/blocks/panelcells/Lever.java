@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -137,10 +138,11 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
      *
      * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
      * @param segmentClicked Which of nine segment within the cell were clicked.
+     * @param player
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
         PanelTile panelTile = cellPos.getPanelTile();
         panelTile.getWorld().playSound(
                 panelTile.getPos().getX(), panelTile.getPos().getY(), panelTile.getPos().getZ(),

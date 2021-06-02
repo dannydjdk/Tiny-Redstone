@@ -27,7 +27,7 @@ public class NoteBlockInstrumentSync {
     {
         this.pos= buffer.readBlockPos();
         this.cellIndex=buffer.readInt();
-        this.instrument =buffer.readString();
+        this.instrument =buffer.readString(32);
     }
 
     public void toBytes(PacketBuffer buf)

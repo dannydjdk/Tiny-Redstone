@@ -45,7 +45,7 @@ public class NoteBlockGUI extends Screen {
         addButton(new Button(relX + 5, relY+ 20,60,20,  new TranslationTextComponent("tinyredstone.noteblock.bass"), button-> setInstrument("bass")));
         addButton(new Button(relX + 65, relY+ 20,60,20, new TranslationTextComponent("tinyredstone.noteblock.snare"), button->setInstrument("snare")));
         addButton(new Button(relX + 125, relY+ 20,60,20, new TranslationTextComponent("tinyredstone.noteblock.hat"), button->setInstrument("hat")));
-        addButton(new Button(relX + 185, relY+ 20,60,20, new TranslationTextComponent("tinyredstone.noteblock.kick"), button->setInstrument("basedrum")));
+        addButton(new Button(relX + 185, relY+ 20,60,20, new TranslationTextComponent("tinyredstone.noteblock.basedrum"), button->setInstrument("basedrum")));
 
         addButton(new Button(relX + 5,  relY+ 40,60,20, new TranslationTextComponent("tinyredstone.noteblock.bell"), button->setInstrument("bell")));
         addButton(new Button(relX + 65, relY+ 40,60,20,new TranslationTextComponent("tinyredstone.noteblock.flute"), button->setInstrument("flute")));

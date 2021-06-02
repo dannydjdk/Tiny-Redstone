@@ -83,9 +83,10 @@ public interface IPanelCell {
      *
      * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
      * @param segmentClicked Which of nine segment within the cell were clicked.
+     * @param player player who activated (right-clicked) the cell
      * @return true if a change was made to the cell output
      */
-    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked){return false;}
+    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player){return false;}
 
     default boolean hasActivation(){return false;}
 

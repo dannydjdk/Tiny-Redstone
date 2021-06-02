@@ -65,6 +65,11 @@ public class ModNetworkHandler {
                 .consumer(CrashFlagResetSync::handle)
                 .add();
 
+        INSTANCE.messageBuilder(PlaySound.class,nextID())
+                .encoder(PlaySound::toBytes)
+                .decoder(PlaySound::new)
+                .consumer(PlaySound::handle)
+                .add();
     }
 
     public static void sendToClient(Object packet, ServerPlayerEntity player) {

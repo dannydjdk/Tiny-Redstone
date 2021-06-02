@@ -2,21 +2,27 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.gui.NoteBlockGUI;
+import com.dannyandson.tinyredstone.network.ModNetworkHandler;
+import com.dannyandson.tinyredstone.network.PlaySound;
+import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     public static ResourceLocation TEXTURE_TINY_NOTE_BLOCK = new ResourceLocation("minecraft","block/note_block");
+    private static final String[] noteNames = {"F#","G","G#","A","A#","B","C","C#","D","D#","E","F"};
 
     private boolean powered = false;
     private int pitch = 0;
@@ -91,10 +97,15 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
     }
 
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked){
-        pitch++;
-        if (pitch>24)pitch=0;
-        playNote(cellPos.getPanelTile());
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player){
+        if (player.getHeldItemMainhand().getItem() == Registration.REDSTONE_WRENCH.get()) {
+            if (cellPos.getPanelTile().getWorld().isRemote)
+                NoteBlockGUI.open(cellPos.getPanelTile(), cellPos.getIndex(), this);
+        }else {
+            pitch++;
+            if (pitch > 24) pitch = 0;
+            playNote(cellPos.getPanelTile());
+        }
         return false;
     }
 
@@ -121,16 +132,21 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
     @Override
     public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
         overlayBlockInfo.addText("Instrument", new TranslationTextComponent("tinyredstone.noteblock." + this.instrument).getString() );
-        overlayBlockInfo.addText("Note", this.pitch+"");
+        overlayBlockInfo.addText("Note", this.pitch + " (" + noteNames[this.pitch%12] + ")");
     }
 
     private void playNote(PanelTile panelTile)
     {
-        panelTile.getWorld().playSound(
-                panelTile.getPos().getX(), panelTile.getPos().getY(), panelTile.getPos().getZ(),
-                new SoundEvent(new ResourceLocation("minecraft","block.note_block." + instrument)),
-                SoundCategory.BLOCKS, 0.5f, (pitch==0)?0.5f:(float)Math.pow(2f,((pitch-12f)/12f)), false
-        );
+        if (!panelTile.getWorld().isRemote)
+        {
+            BlockPos pos = panelTile.getPos();
+            for(PlayerEntity player:panelTile.getWorld().getPlayers()){
+                if(panelTile.getWorld().isPlayerWithin(pos.getX(),pos.getY(),pos.getZ(),48))
+                    ModNetworkHandler.sendToClient(
+                            new PlaySound(pos,"minecraft", "block.note_block." + instrument, 0.5f, (pitch==0)?0.5f:(float)Math.pow(2f,((pitch-12f)/12f))),
+                            (ServerPlayerEntity) player);
+            }
+        }
     }
 
     public void setInstrument(String instrument)

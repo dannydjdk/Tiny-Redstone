@@ -341,15 +341,10 @@ public class PanelBlock extends Block {
                         if (world.isRemote)
                             PanelCrashGUI.open(panelTile);
                         handled = true;
-                    } else if (heldItem == Registration.REDSTONE_WRENCH.get() && !player.isSneaking() && !panelTile.isCovered()) {
-                        if (posInPanelCell.getIPanelCell() instanceof NoteBlock) {
-                            if (world.isRemote)
-                                NoteBlockGUI.open(panelTile, posInPanelCell.getIndex(), (NoteBlock) posInPanelCell.getIPanelCell());
-                        }else if (posInPanelCell.getIPanelCell()==null){
-                            //rotate panel if holding wrench
-                            panelTile.rotate(Rotation.CLOCKWISE_90);
-                            handled = true;
-                        }
+                    } else if (posInPanelCell.getIPanelCell()==null && heldItem == Registration.REDSTONE_WRENCH.get() && !player.isSneaking() && !panelTile.isCovered()) {
+                        //rotate panel if holding wrench
+                        panelTile.rotate(Rotation.CLOCKWISE_90);
+                        handled = true;
                     } else if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isSneaking()) {
                         //harvest block on sneak right click with wrench
                         this.onBlockHarvested(world, pos, state, player);
@@ -394,7 +389,7 @@ public class PanelBlock extends Block {
                     } else if (posInPanelCell.getIPanelCell() != null && !panelTile.isCovered() && posInPanelCell.getIPanelCell().hasActivation() && !player.isSneaking()) {
 
                         //if player clicked on a panel cell, activate it
-                        if (posInPanelCell.getIPanelCell().onBlockActivated(posInPanelCell, posInPanelCell.getSegment())) {
+                        if (posInPanelCell.getIPanelCell().onBlockActivated(posInPanelCell, posInPanelCell.getSegment(), player)) {
                             panelTile.updateCell(posInPanelCell);
                             panelTile.updateNeighborCells(posInPanelCell);
                             if (posInPanelCell.getIPanelCell() instanceof RedstoneDust) {
