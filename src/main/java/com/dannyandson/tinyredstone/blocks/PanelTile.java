@@ -431,6 +431,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         cellPos.getPanelTile().flagSync=true;
         cellPos.getPanelTile().clearVoxelShape();
 
+        if (cell instanceof IObservingPanelCell)
+            ((IObservingPanelCell) cell).frontNeighborUpdated();
+
         return true;
     }
 
