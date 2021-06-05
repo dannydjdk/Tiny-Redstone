@@ -1,9 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.panelcells.NoteBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
-import com.dannyandson.tinyredstone.gui.NoteBlockGUI;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -114,24 +112,6 @@ public class PanelBlock extends Block {
             return ((PanelTile) te).getVoxelShape();
         }
         return BASE.get(state.get(BlockStateProperties.FACING));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-        return getShape(state, worldIn, pos, context);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
-        return getShape(state,worldIn,pos,ISelectionContext.dummy());
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
     }
 
     /**

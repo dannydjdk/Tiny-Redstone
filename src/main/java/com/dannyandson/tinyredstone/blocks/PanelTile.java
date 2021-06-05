@@ -19,6 +19,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -58,6 +59,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public PanelTile() {
         super(Registration.REDSTONE_PANEL_TILE.get());
+    }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox()
+    {
+        return new AxisAlignedBB(getPos());
     }
 
     /* When the world loads from disk, the server needs to send the TileEntity information to the client
