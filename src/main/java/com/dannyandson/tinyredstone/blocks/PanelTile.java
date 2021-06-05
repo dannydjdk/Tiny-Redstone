@@ -61,6 +61,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         super(Registration.REDSTONE_PANEL_TILE.get());
     }
 
+    //Tell Minecraft to render this block whenever any of the block space is within view.
+    //By default, it only renders when the base model is within view.
     @Override
     public AxisAlignedBB getRenderBoundingBox()
     {
@@ -658,7 +660,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             if (thisCell.needsSolidBase()) {
                 PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
                 if (basePos != null && (basePos.getIPanelCell() == null || (!basePos.getIPanelCell().isPushable()) && !(basePos.getIPanelCell() instanceof Piston && basePos.getCellFacing()==Side.TOP ) )) {
-                    Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, this, null);
+                    Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
                     change = true;
                 }
             }
@@ -1127,6 +1129,13 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
             clearVoxelShape();
             flagSync();
+        }
+    }
+
+    public void removeAllCells(@Nullable PlayerEntity player){
+        Object[] indices = cells.keySet().toArray();
+        for (Object index : indices){
+            ((PanelBlock)this.getBlockState().getBlock()).removeCell(PanelCellPos.fromIndex(this,(Integer) index),player);
         }
     }
 

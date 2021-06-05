@@ -65,6 +65,12 @@ public class ModNetworkHandler {
                 .consumer(CrashFlagResetSync::handle)
                 .add();
 
+        INSTANCE.messageBuilder(ClearPanelSync.class,nextID())
+                .encoder(ClearPanelSync::toBytes)
+                .decoder(ClearPanelSync::new)
+                .consumer(ClearPanelSync::handle)
+                .add();
+
         INSTANCE.messageBuilder(PlaySound.class,nextID())
                 .encoder(PlaySound::toBytes)
                 .decoder(PlaySound::new)

@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
+import com.dannyandson.tinyredstone.gui.ClearPanelGUI;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -485,13 +486,19 @@ public class PanelBlock extends Block {
                         panelTile.flagLightUpdate=true;
                     }
                     else {
-                        BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
-                        PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,state.get(BlockStateProperties.FACING), result);
+                        if(heldItem==Registration.REDSTONE_WRENCH.get() && player.isSneaking()) {
+                            if(world.isRemote())
+                                ClearPanelGUI.open(panelTile);
+                        }
+                        else {
+                            BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
+                            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.get(BlockStateProperties.FACING), result);
 
-                        if (panelCellPos != null) {
-                            if (panelCellPos.getIPanelCell()!=null) {
-                                //if player left clicks with wrench, remove cell
-                                removeCell(panelCellPos, panelTile, player);
+                            if (panelCellPos != null) {
+                                if (panelCellPos.getIPanelCell() != null) {
+                                    //if player left clicks with wrench, remove cell
+                                    removeCell(panelCellPos, player);
+                                }
                             }
                         }
                     }
@@ -503,10 +510,11 @@ public class PanelBlock extends Block {
         }
     }
 
-   protected void removeCell(PanelCellPos cellPos, PanelTile panelTile, @Nullable PlayerEntity player)
+   protected void removeCell(PanelCellPos cellPos, @Nullable PlayerEntity player)
     {
         if (cellPos.getIPanelCell()!=null) {
 
+            PanelTile panelTile = cellPos.getPanelTile();
             World world = panelTile.getWorld();
             BlockPos pos = panelTile.getPos();
 
