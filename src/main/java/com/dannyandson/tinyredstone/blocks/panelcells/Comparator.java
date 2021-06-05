@@ -142,7 +142,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
         }
         else
         {
-            output1=(input>input2)?input:0;
+            output1=(input>=input2)?input:0;
         }
 
         if (output1==this.output)
