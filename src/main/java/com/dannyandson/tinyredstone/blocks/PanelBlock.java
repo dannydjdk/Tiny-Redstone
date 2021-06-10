@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
+import com.dannyandson.tinyredstone.gui.ClearPanelGUI;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -118,24 +119,6 @@ public class PanelBlock extends Block {
         return BASE.get(state.get(BlockStateProperties.FACING));
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-        return getShape(state, worldIn, pos, context);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
-        return BASE.get(state.get(BlockStateProperties.FACING));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
-
     /**
      * This block can provide redstone power
      * @return true if this block can provide redstone power
@@ -222,7 +205,6 @@ public class PanelBlock extends Block {
 
     // Called when a neighbouring block changes.
     // Only called on the server side.
-    //TODO manage neighbor changes from above and below panel
     @Override
     @SuppressWarnings("deprecation")
     public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
@@ -250,16 +232,10 @@ public class PanelBlock extends Block {
             try {
 
                 Side side = panelTile.getSideFromDirection(direction);
-                //side would be null if neighbor is above or below panel, and therefore irrelevant
                 if (side != null) {
 
                     if (panelTile.pingOutwardObservers(direction))
                         change = true;
-
-                    BlockState neighborState = world.getBlockState(pos.offset(direction));
-                    if (neighborState.hasComparatorInputOverride() && !world.isRemote) {
-                        panelTile.comparatorOverrides.put(side, neighborState.getComparatorInputOverride(world, pos.offset(direction)));
-                    }
 
                     if (panelTile.updateSide(direction))
                         change = true;
@@ -350,7 +326,7 @@ public class PanelBlock extends Block {
                         if (world.isRemote)
                             PanelCrashGUI.open(panelTile);
                         handled = true;
-                    } else if (heldItem == Registration.REDSTONE_WRENCH.get() && !player.isSneaking() && !panelTile.isCovered()) {
+                    } else if (posInPanelCell.getIPanelCell()==null && heldItem == Registration.REDSTONE_WRENCH.get() && !player.isSneaking() && !panelTile.isCovered()) {
                         //rotate panel if holding wrench
                         panelTile.rotate(Rotation.CLOCKWISE_90);
                         handled = true;
@@ -398,7 +374,7 @@ public class PanelBlock extends Block {
                     } else if (posInPanelCell.getIPanelCell() != null && !panelTile.isCovered() && posInPanelCell.getIPanelCell().hasActivation() && !player.isSneaking()) {
 
                         //if player clicked on a panel cell, activate it
-                        if (posInPanelCell.getIPanelCell().onBlockActivated(posInPanelCell, posInPanelCell.getSegment())) {
+                        if (posInPanelCell.getIPanelCell().onBlockActivated(posInPanelCell, posInPanelCell.getSegment(), player)) {
                             panelTile.updateCell(posInPanelCell);
                             panelTile.updateNeighborCells(posInPanelCell);
                             if (posInPanelCell.getIPanelCell() instanceof RedstoneDust) {
@@ -444,7 +420,8 @@ public class PanelBlock extends Block {
                                                 (IPanelCell) panelCell,
                                                 rotationLock == null
                                                         ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, ((IPanelCell) panelCell).canPlaceVertical()))
-                                                        : rotationLock
+                                                        : rotationLock,
+                                                player
                                         );
 
                                         //remove an item from the player's stack
@@ -458,9 +435,15 @@ public class PanelBlock extends Block {
                             }
                         }
                         handled = true;
+                    } else if (panelTile.isOverflown())
+                    {
+                        //open crash GUI if on client and panel is in crashed state
+                        if (world.isRemote)
+                            PanelCrashGUI.open(panelTile);
+                        handled = true;
                     }
 
-                    panelTile.sync();
+                    panelTile.flagSync();
                     if (!world.isRemote) {
                         panelTile.markDirty();
                     }
@@ -506,13 +489,19 @@ public class PanelBlock extends Block {
                         panelTile.flagLightUpdate=true;
                     }
                     else {
-                        BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
-                        PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,state.get(BlockStateProperties.FACING), result);
+                        if(heldItem==Registration.REDSTONE_WRENCH.get() && player.isSneaking()) {
+                            if(world.isRemote())
+                                ClearPanelGUI.open(panelTile);
+                        }
+                        else {
+                            BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
+                            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.get(BlockStateProperties.FACING), result);
 
-                        if (panelCellPos != null) {
-                            if (panelCellPos.getIPanelCell()!=null) {
-                                //if player left clicks with wrench, remove cell
-                                removeCell(panelCellPos, panelTile, player);
+                            if (panelCellPos != null) {
+                                if (panelCellPos.getIPanelCell() != null) {
+                                    //if player left clicks with wrench, remove cell
+                                    removeCell(panelCellPos, player);
+                                }
                             }
                         }
                     }
@@ -524,10 +513,11 @@ public class PanelBlock extends Block {
         }
     }
 
-   protected void removeCell(PanelCellPos cellPos, PanelTile panelTile, @Nullable PlayerEntity player)
+   protected void removeCell(PanelCellPos cellPos, @Nullable PlayerEntity player)
     {
         if (cellPos.getIPanelCell()!=null) {
 
+            PanelTile panelTile = cellPos.getPanelTile();
             World world = panelTile.getWorld();
             BlockPos pos = panelTile.getPos();
 
@@ -567,7 +557,7 @@ public class PanelBlock extends Block {
             //remove from panel
             panelTile.panelCover = null;
 
-            panelTile.sync();
+            panelTile.flagSync();
 
         }
     }

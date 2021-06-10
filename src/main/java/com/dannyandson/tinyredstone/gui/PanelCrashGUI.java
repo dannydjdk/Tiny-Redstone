@@ -36,7 +36,7 @@ public class PanelCrashGUI  extends Screen {
         addButton(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addButton(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EE0000));
 
-        TranslationTextComponent crashTextComponent = new TranslationTextComponent("tinyredstone.gui.crash.msg");
+        TranslationTextComponent crashTextComponent = new TranslationTextComponent((panelTile.isCrashed())?"tinyredstone.gui.crash.msg":"tinyredstone.gui.overflow.msg");
         int lineY = relY+2;
         for (String line : crashTextComponent.getString().split("\n",5))
         {
@@ -57,6 +57,7 @@ public class PanelCrashGUI  extends Screen {
 
     private void enable() {
         panelTile.resetCrashFlag();
+        panelTile.resetOverflownFlag();
         ModNetworkHandler.sendToServer(new CrashFlagResetSync(panelTile.getPos()));
         this.close();
     }

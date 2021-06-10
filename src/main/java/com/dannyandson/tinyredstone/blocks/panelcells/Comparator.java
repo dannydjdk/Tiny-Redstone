@@ -2,24 +2,25 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import mcjty.theoneprobe.api.CompoundText;
-import mcjty.theoneprobe.api.IProbeInfo;
-import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.ComparatorMode;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
+public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     private Integer input1 = 0;
     private Integer input2 = 0;
     private Integer output = 0;
     private Boolean subtract = false;
+    private Boolean comparatorOverride = false;
+    private Integer comparatorInput = 0;
     protected int changePending = -1;
 
     public static ResourceLocation TEXTURE_COMPARATOR_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_on");
@@ -114,11 +115,18 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
         PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK),
                 leftNeighbor = cellPos.getNeighbor(Side.LEFT),
                 rightNeighbor = cellPos.getNeighbor(Side.RIGHT);
+        int i1, i2;
 
-        this.input1 = (backNeighbor==null)?0: Math.max(Math.max(backNeighbor.getStrongRsOutput(), backNeighbor.getWeakRsOutput()), backNeighbor.getComparatorOverride());
-        this.input2 = Math.max((leftNeighbor==null)?0: leftNeighbor.getStrongRsOutput(), (rightNeighbor==null)?0:rightNeighbor.getStrongRsOutput());
+        boolean co = (backNeighbor!=null && backNeighbor.hasComparatorOverride());
+        i1 = (backNeighbor==null)?0: Math.max(backNeighbor.getStrongRsOutput(), backNeighbor.getWeakRsOutput());
+        i2 = Math.max((leftNeighbor==null)?0: leftNeighbor.getStrongRsOutput(), (rightNeighbor==null)?0:rightNeighbor.getStrongRsOutput());
 
-        this.changePending=1;
+        if (i1!=input1 || i2!=input2 || co!=comparatorOverride){
+            this.input1=i1;
+            this.input2=i2;
+            this.comparatorOverride=co;
+            this.changePending=1;
+        }
 
         return false;
     }
@@ -126,14 +134,15 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
     private boolean updateOutput()
     {
         Integer output1 = 0;
+        Integer input = (comparatorOverride)?Math.max(input1,comparatorInput):input1;
 
         if (this.subtract)
         {
-            output1=Math.max(0,input1-input2);
+            output1=Math.max(0,input-input2);
         }
         else
         {
-            output1=(input1>input2)?input1:0;
+            output1=(input>=input2)?input:0;
         }
 
         if (output1==this.output)
@@ -163,48 +172,8 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
         return 0;
     }
 
-    /**
-     * Does the power level drop when transmitting between these cells (such as with redstone dust)?
-     *
-     * @return true if power level should drop, false if not
-     */
-    @Override
-    public boolean powerDrops() {
-        return false;
-    }
-
-    /**
-     * Is this a component that does not change state based on neighbors (such as a redstone block, or potentiometer)?
-     *
-     * @return true if this cell's state is unaffected by neighbors
-     */
-    @Override
-    public boolean isIndependentState() {
-        return false;
-    }
-
-    /**
-     * Can this cell be pushed by a piston?
-     *
-     * @return true if a piston can push this block
-     */
-    @Override
-    public boolean isPushable() {
-        return false;
-    }
-
     @Override
     public boolean needsSolidBase(){return true;}
-
-    /**
-     * If this cell outputs light, return the level here. Otherwise, return 0.
-     *
-     * @return Light level to output 0-15
-     */
-    @Override
-    public int lightOutput() {
-        return 0;
-    }
 
     /**
      * Called at the beginning of each game tick if isTicking() returned true on last call.
@@ -212,16 +181,28 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean tick() {
-        if (changePending < 0)
-            return false;
-        if (changePending > 0) {
-            changePending--;
-            return false;
-        }
-        changePending--;
-        return updateOutput();
+    public boolean tick(PanelCellPos cellPos) {
 
+        if (!cellPos.getPanelTile().getWorld().isRemote) {
+            if (comparatorOverride) {
+                PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK);
+                int cInput = backNeighbor.getComparatorOverride();
+                if (cInput != comparatorInput) {
+                    comparatorInput = cInput;
+                    changePending = 1;
+                }
+            }
+
+            if (changePending < 0)
+                return false;
+            if (changePending > 0) {
+                changePending--;
+                return false;
+            }
+            changePending--;
+            return updateOutput();
+        }
+        return false;
     }
 
     /**
@@ -229,10 +210,11 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
      *
      * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
      * @param segmentClicked Which of nine segment within the cell were clicked.
+     * @param player player who activated (right-clicked) the cell
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
         this.subtract=!this.subtract;
         return updateOutput();
     }
@@ -248,7 +230,9 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
         nbt.putInt("input1",input1);
         nbt.putInt("input2",input2);
         nbt.putInt("changePending",changePending);
+        nbt.putInt("comparatorInput",comparatorInput);
         nbt.putBoolean("subtract",subtract);
+        nbt.putBoolean("comparatorOverride",comparatorOverride);
 
         return nbt;
     }
@@ -259,13 +243,14 @@ public class Comparator implements IPanelCell, IPanelCellProbeInfoProvider {
         this.input1 = compoundNBT.getInt("input1");
         this.input2 = compoundNBT.getInt("input2");
         this.changePending=compoundNBT.getInt("changePending");
+        this.comparatorInput=compoundNBT.getInt("comparatorInput");
         this.subtract = compoundNBT.getBoolean("subtract");
+        this.comparatorOverride = compoundNBT.getBoolean("comparatorOverride");
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        probeInfo.text(CompoundText.createLabelInfo("Mode: ", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString()));
-        return false;
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.addText("Mode", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString());
     }
 
     @Override

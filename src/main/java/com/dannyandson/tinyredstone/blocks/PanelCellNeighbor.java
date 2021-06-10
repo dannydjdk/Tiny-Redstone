@@ -12,6 +12,7 @@ public class PanelCellNeighbor {
     private Side neighborsSide =null;
     private final PanelTile panelTile;
     private PanelCellPos cellPos;
+    private BlockState blockState;
 
     /**
      * Construct a PanelCellNeighbor object for querying an IPanelCell
@@ -71,15 +72,16 @@ public class PanelCellNeighbor {
 
     public boolean hasComparatorOverride()
     {
-        if (blockPos!=null)
-            return panelTile.comparatorOverrides.containsKey(neighborDirection);
+        if (blockPos!=null) {
+            return getNeighborBlockState().hasComparatorInputOverride();
+        }
         return false;
     }
 
     public int getComparatorOverride()
     {
-        if (hasComparatorOverride())
-            return panelTile.comparatorOverrides.get(neighborDirection);
+        if (blockPos!=null && hasComparatorOverride())
+            return getNeighborBlockState().getComparatorInputOverride(panelTile.getWorld(), blockPos);;
         return 0;
     }
 
@@ -92,7 +94,7 @@ public class PanelCellNeighbor {
         if (iPanelCell!=null)
             return iPanelCell.powerDrops();
         if(blockPos!=null)
-            return panelTile.getWorld().getBlockState(blockPos).getBlock() == Blocks.REDSTONE_WIRE;
+            return getNeighborBlockState().getBlock() == Blocks.REDSTONE_WIRE;
         return false;
     }
 
@@ -135,7 +137,9 @@ public class PanelCellNeighbor {
     {
         if (blockPos!=null)
         {
-            return panelTile.getWorld().getBlockState(blockPos);
+            if (blockState==null)
+                blockState=panelTile.getWorld().getBlockState(blockPos);
+            return blockState;
         }
         return null;
     }

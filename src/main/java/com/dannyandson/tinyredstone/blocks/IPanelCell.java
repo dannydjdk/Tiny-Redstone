@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 
 public interface IPanelCell {
@@ -13,6 +14,16 @@ public interface IPanelCell {
      *                    starting point is (0,0,0)
      */
     void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha);
+
+    /**
+     * Called when cell is placed on a panel, also when ghost preview is rendered
+     * @param cellPos PanelCellPos object of this cell
+     * @param player Placing player
+     * @return true if output change occurred
+     */
+    default boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
+        return neighborChanged(cellPos);
+    }
 
     /**
      * Called when neighboring redstone signal output changes.
@@ -61,18 +72,21 @@ public interface IPanelCell {
 
     /**
      * Called each each tick.
+     *
+     * @param cellPos The PanelCellPos of this IPanelCell
      * @return boolean indicating whether redstone output of this cell has changed
      */
-    default boolean tick(){return false;}
+    default boolean tick(PanelCellPos cellPos){return false;}
 
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
      *
      * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
      * @param segmentClicked Which of nine segment within the cell were clicked.
+     * @param player player who activated (right-clicked) the cell
      * @return true if a change was made to the cell output
      */
-    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked){return false;}
+    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player){return false;}
 
     default boolean hasActivation(){return false;}
 

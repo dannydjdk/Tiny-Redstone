@@ -14,6 +14,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue DISPLAY_MODE;
     public static ForgeConfigSpec.BooleanValue JSON_BLUEPRINT;
     public static ForgeConfigSpec.IntValue SUPER_REPEATER_MAX;
+    public static ForgeConfigSpec.IntValue CIRCUIT_MAX_ITERATION;
 
     static {
 
@@ -35,6 +36,12 @@ public class Config {
                 "\nLarge numbers require more memory. (default:100)")
                 .defineInRange("super_repeater_max",100,4,Integer.MAX_VALUE);
 
+        CIRCUIT_MAX_ITERATION = SERVER_BUILDER.comment("How many blocks long can a line of redstone run in a single tick?" +
+                "\nThis number determines approximately 2x how many zero tick super repeaters can extend a single redstone line?" +
+                "\n(Since each repeater can extend signal 2 full blocks.)" +
+                "\nVery large numbers may degrade performance and potentially risk crash. (default=32)")
+                .defineInRange("max_zero_tick_run",32,4,512);
+
         SERVER_BUILDER.pop();
 
         SERVER_CONFIG = SERVER_BUILDER.build();
@@ -43,7 +50,7 @@ public class Config {
 
         CLIENT_BUILDER.comment("Performance Settings").push(CATEGORY_PERFORMANCE);
 
-        DISPLAY_MODE = CLIENT_BUILDER.comment("When should the information be displayed in theoneprobe? 0 = no, 1 = always, 2 = only in extended or debug, 3 = when you have a wrench in your hand, 4 = when you have any component in your hand")
+        DISPLAY_MODE = CLIENT_BUILDER.comment("When should the information be displayed in the overlay? 0 = no, 1 = always, 2 = only in extended or debug, 3 = when you have a wrench in your hand, 4 = when you have any component in your hand")
                 .defineInRange("display_mode", 1, 0, 4);
 
         CLIENT_BUILDER.pop();

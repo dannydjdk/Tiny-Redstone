@@ -6,7 +6,6 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
 
 import javax.annotation.CheckForNull;
 
@@ -68,9 +67,8 @@ public class PanelCellPos {
     public static PanelCellPos fromHitVec(PanelTile panelTile, Direction panelFacing, BlockRayTraceResult result) {
 
         BlockPos pos = panelTile.getPos();
-        Vector3f vector3f = result.getFace().getOpposite().toVector3f();
-        vector3f.mul(.001f);
-        Vector3d hitVec = result.getHitVec().add(new Vector3d(vector3f));
+        Direction rayTraceDirection = result.getFace().getOpposite();
+        Vector3d hitVec = result.getHitVec().add((double)rayTraceDirection.getXOffset()*.001d,(double)rayTraceDirection.getYOffset()*.001d,(double)rayTraceDirection.getZOffset()*.001d);
 
         double relX,relY,relZ;
 

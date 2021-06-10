@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -18,6 +19,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -37,12 +39,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private Map<Integer, Side> cellDirections = new HashMap<>();
     protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
-    protected Map<Side, Integer> comparatorOverrides = new HashMap<>();
 
     protected Integer Color = DyeColor.GRAY.getColorValue();
     private Integer lightOutput = 0;
     protected boolean flagLightUpdate = false;
     private boolean flagCrashed = false;
+    private boolean flagOverflow = false;
     protected IPanelCover panelCover = null;
 
     //other state fields (not saved)
@@ -57,6 +59,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public PanelTile() {
         super(Registration.REDSTONE_PANEL_TILE.get());
+    }
+
+    //Tell Minecraft to render this block whenever any of the block space is within view.
+    //By default, it only renders when the base model is within view.
+    @Override
+    public AxisAlignedBB getRenderBoundingBox()
+    {
+        return new AxisAlignedBB(getPos());
     }
 
     /* When the world loads from disk, the server needs to send the TileEntity information to the client
@@ -151,16 +161,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
             }
 
-            CompoundNBT comparatorOverrideNBT = new CompoundNBT();
-            for(Side cDirection : comparatorOverrides.keySet())
-            {
-                comparatorOverrideNBT.putInt(cDirection.ordinal()+"",comparatorOverrides.get(cDirection));
-            }
-            parentNBTTagCompound.put("comparator_overrides",comparatorOverrideNBT);
-
             parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
             parentNBTTagCompound.putBoolean("flagCrashed",this.flagCrashed);
+            parentNBTTagCompound.putBoolean("flagOverflow",this.flagOverflow);
 
         } catch (NullPointerException exception) {
             TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.toString() + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
@@ -195,21 +199,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.weakPowerToNeighbors.put(Side.TOP,  weakPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
         }
 
-        CompoundNBT comparatorOverridesNBT = parentNBTTagCompound.getCompound("comparator_overrides");
-        if (!comparatorOverridesNBT.isEmpty())
-        {
-            if (comparatorOverridesNBT.contains(Side.FRONT.ordinal()+""))
-                this.comparatorOverrides.put(Side.FRONT,comparatorOverridesNBT.getInt(Side.FRONT.ordinal()+""));
-            if (comparatorOverridesNBT.contains(Side.RIGHT.ordinal()+""))
-                this.comparatorOverrides.put(Side.RIGHT,comparatorOverridesNBT.getInt(Side.RIGHT.ordinal()+""));
-            if (comparatorOverridesNBT.contains(Side.BACK.ordinal()+""))
-                this.comparatorOverrides.put(Side.BACK,comparatorOverridesNBT.getInt(Side.BACK.ordinal()+""));
-            if (comparatorOverridesNBT.contains(Side.LEFT.ordinal()+""))
-                this.comparatorOverrides.put(Side.LEFT,comparatorOverridesNBT.getInt(Side.LEFT.ordinal()+""));
-            if (comparatorOverridesNBT.contains(Side.TOP.ordinal()+""))
-                this.comparatorOverrides.put(Side.TOP,comparatorOverridesNBT.getInt(Side.TOP.ordinal()+""));
-        }
-
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
         if(world != null) {
             Block block = blockState.getBlock();
@@ -219,6 +208,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
         this.flagCrashed = parentNBTTagCompound.getBoolean("flagCrashed");
+        this.flagOverflow = parentNBTTagCompound.getBoolean("flagOverflow");
 
         if (parentNBTTagCompound.contains("color")) {
             int color = parentNBTTagCompound.getInt("color");
@@ -313,32 +303,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     dirty=true;
                 }
 
-                //if we have a neighbor with a comparator override (outputs through comparator), check for change
-                if (!this.world.isRemote)
-                    for (Side side : comparatorOverrides.keySet()) {
-                        BlockPos neighborPos = pos.offset(getDirectionFromSide(side));
-                        BlockState neighborState = world.getBlockState(neighborPos);
-                        if (neighborState.hasComparatorInputOverride()) {
-                            int comparatorInputOverride = neighborState.getComparatorInputOverride(world, neighborPos);
-                            if (comparatorInputOverride != comparatorOverrides.get(side)) {
-                                this.comparatorOverrides.put(side, comparatorInputOverride);
-                                updateSide(side);
-                                dirty = true;
-                            }
-                        } else {
-                            comparatorOverrides.remove(side);
-                            if (updateSide(side)) {
-                                dirty = true;
-                            }
-                        }
-
-                    }
-
                 //call the tick() method in all our cells and grab any updated pistons
                 List<Integer> pistons = null;
                 for (Integer index : this.cells.keySet()) {
+                    PanelCellPos cellPos = PanelCellPos.fromIndex(this,index);
                     IPanelCell panelCell = this.cells.get(index);
-                    boolean update = panelCell.tick();
+                    boolean update = panelCell.tick(cellPos);
                     if (update) {
                         if (panelCell instanceof Piston) {
                             if (pistons == null)
@@ -353,7 +323,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                                         SoundCategory.BLOCKS, 0.25f, 2f, false
                                 );
                             }
-                            updateNeighborCells(PanelCellPos.fromIndex(this,index));
+                            updateNeighborCells(cellPos);
                         }
                         dirty = true;
                     }
@@ -483,6 +453,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         cellPos.getPanelTile().flagSync=true;
         cellPos.getPanelTile().clearVoxelShape();
 
+        if (cell instanceof IObservingPanelCell)
+            ((IObservingPanelCell) cell).frontNeighborUpdated();
+
         return true;
     }
 
@@ -562,7 +535,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         updateOutputs();
 
         clearVoxelShape();
-        sync();
+        flagSync();
 
     }
 
@@ -680,9 +653,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * @return true if this update caused the panel output to change
      */
     private boolean updateCell(PanelCellPos cellPos, int iteration) {
-
-        if (iteration > 127) {
-            TinyRedstone.LOGGER.warn("Redstone panel iterated too many times.");
+        boolean change = false;
+        if (iteration > (16 * Config.CIRCUIT_MAX_ITERATION.get())) {
+            if (!this.flagOverflow)
+                TinyRedstone.LOGGER.warn("Redstone panel at " + pos.getX() + "," + pos.getY() + "," + pos.getZ() + " iterated too many times.");
+            this.flagOverflow=true;
             return false;
         }
 
@@ -698,8 +673,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
             if (thisCell.needsSolidBase()) {
                 PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
-                if (basePos != null && (basePos.getIPanelCell() == null || !basePos.getIPanelCell().isPushable())) {
-                    Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, this, null);
+                if (basePos != null && (basePos.getIPanelCell() == null || (!basePos.getIPanelCell().isPushable()) && !(basePos.getIPanelCell() instanceof Piston && basePos.getCellFacing()==Side.TOP ) )) {
+                    Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
                     change = true;
                 }
             }
@@ -718,8 +693,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
 
 
-        if (change)
+        if (change) {
             this.markDirty();
+            flagSync();
+        }
         return change;
     }
 
@@ -733,7 +710,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * @param panelSide the side of the redstone panel
      * @return the side of the cell that is facing the given side of the panel
      */
-    protected Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
+    public Side getPanelCellSide(PanelCellPos cellPos,Side panelSide)
     {
         Side cellDirection = cellPos.getPanelTile().getCellFacing(cellPos);
 
@@ -901,8 +878,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public void sync()
     {
-        if (!isCovered() || panelCover.allowsLightOutput())
-            this.world.notifyBlockUpdate(pos,this.getBlockState(), this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+        if (!world.isRemote && (!isCovered() || panelCover.allowsLightOutput()))
+            this.world.notifyBlockUpdate(pos,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
     }
 
     protected void handleCrash(Exception e)
@@ -921,6 +898,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         this.flagCrashed=false;
     }
 
+    public boolean isOverflown()
+    {
+        return this.flagOverflow;
+    }
+    public void resetOverflownFlag()
+    {
+        this.flagOverflow=false;
+    }
     public boolean isCovered()
     {
         return panelCover!=null;
@@ -991,7 +976,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return null;
     }
 
-    protected Side getSideFromDirection(Direction direction) {
+    public Side getSideFromDirection(Direction direction) {
         Direction facing = getBlockState().get(BlockStateProperties.FACING);
         switch (direction){
             case NORTH:
@@ -1136,6 +1121,13 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             cellDirections.remove(cellIndex);
             cells.remove(cellIndex);
 
+            BlockPos pos = cellPos.getPanelTile().getPos();
+            cellPos.getPanelTile().getWorld().playSound(
+                    pos.getX(), pos.getY(), pos.getZ(),
+                    SoundEvents.BLOCK_STONE_BREAK,
+                    SoundCategory.BLOCKS, 0.15f, 2f, false
+            );
+
             //let neighbors know about vacancy
             updateNeighborCells(cellPos);
             //for tiny redstone dust, alert the whole neighborhood
@@ -1150,19 +1142,32 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             }
 
             clearVoxelShape();
-            sync();
+            flagSync();
         }
     }
 
-    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing)
+    public void removeAllCells(@Nullable PlayerEntity player){
+        Object[] indices = cells.keySet().toArray();
+        for (Object index : indices){
+            ((PanelBlock)this.getBlockState().getBlock()).removeCell(PanelCellPos.fromIndex(this,(Integer) index),player);
+        }
+    }
+
+    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing, PlayerEntity player)
     {
         int cellIndex = cellPos.getIndex();
         cellDirections.put(cellIndex, facing);
         cells.put(cellIndex, panelCell);
-        if (!panelCell.isIndependentState()) {
-            updateCell(cellIndex);
-        }
-        updateNeighborCells(cellPos);
+
+        BlockPos pos = cellPos.getPanelTile().getPos();
+        cellPos.getPanelTile().getWorld().playSound(
+                pos.getX(), pos.getY(), pos.getZ(),
+                SoundEvents.BLOCK_STONE_PLACE,
+                SoundCategory.BLOCKS, 0.15f, 2f, false
+        );
+
+        if (panelCell.onPlace(cellPos,player))
+            updateNeighborCells(cellPos);
         clearVoxelShape();
     }
 
@@ -1176,6 +1181,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     }
 
     public VoxelShape getVoxelShape(){
+
+        if (isCovered())return VoxelShapes.fullCube();
 
         if (voxelShape==null) {
             switch (this.getBlockState().get(BlockStateProperties.FACING)) {

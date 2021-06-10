@@ -10,7 +10,7 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
 public class ModNetworkHandler {
     private static SimpleChannel INSTANCE;
     private static int ID = 0;
-    private static final String PROTOCOL_VERSION = "1.0";
+    private static final String PROTOCOL_VERSION = "1.2";
 
     private static int nextID() {
         return ID++;
@@ -33,6 +33,12 @@ public class ModNetworkHandler {
                 .encoder(TinyBlockColorSync::toBytes)
                 .decoder(TinyBlockColorSync::new)
                 .consumer(TinyBlockColorSync::handle)
+                .add();
+
+        INSTANCE.messageBuilder(NoteBlockInstrumentSync.class,nextID())
+                .encoder(NoteBlockInstrumentSync::toBytes)
+                .decoder(NoteBlockInstrumentSync::new)
+                .consumer(NoteBlockInstrumentSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(BlueprintSync.class,nextID())
@@ -59,6 +65,17 @@ public class ModNetworkHandler {
                 .consumer(CrashFlagResetSync::handle)
                 .add();
 
+        INSTANCE.messageBuilder(ClearPanelSync.class,nextID())
+                .encoder(ClearPanelSync::toBytes)
+                .decoder(ClearPanelSync::new)
+                .consumer(ClearPanelSync::handle)
+                .add();
+
+        INSTANCE.messageBuilder(PlaySound.class,nextID())
+                .encoder(PlaySound::toBytes)
+                .decoder(PlaySound::new)
+                .consumer(PlaySound::handle)
+                .add();
     }
 
     public static void sendToClient(Object packet, ServerPlayerEntity player) {

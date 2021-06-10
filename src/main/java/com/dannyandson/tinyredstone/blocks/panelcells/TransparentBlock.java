@@ -2,10 +2,10 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import mcjty.theoneprobe.api.IProbeInfo;
-import mcjty.theoneprobe.api.ProbeMode;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPanelCellProbeInfoProvider
+public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider
 {
     public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation(TinyRedstone.MODID,"block/panel_transparent_block");
     private int color= 16777215;
@@ -28,7 +28,7 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((Minecraft.isFabulousGraphicsEnabled())?RenderType.getSolid():RenderType.getTranslucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
 
 
@@ -86,16 +86,6 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     }
 
     /**
-     * Does the power level drop when transmitting between these cells (such as with redstone dust)?
-     *
-     * @return true if power level should drop, false if not
-     */
-    @Override
-    public boolean powerDrops() {
-        return false;
-    }
-
-    /**
      * Is this a component that does not change state based on neighbors (such as a redstone block, or potentiometer)?
      *
      * @return true if this cell's state is unaffected by neighbors
@@ -113,26 +103,6 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     @Override
     public boolean isPushable() {
         return true;
-    }
-
-    /**
-     * If this cell outputs light, return the level here. Otherwise, return 0.
-     *
-     * @return Light level to output 0-15
-     */
-    @Override
-    public int lightOutput() {
-        return 0;
-    }
-
-    /**
-     * Called at the beginning of each tick if isTicking() returned true on last call.
-     *
-     * @return boolean indicating whether redstone output of this cell has changed
-     */
-    @Override
-    public boolean tick() {
-        return false;
     }
 
     @Override
@@ -153,7 +123,7 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     }
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        return true;
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.setPowerOutput(0);
     }
 }

@@ -2,14 +2,13 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.theoneprobe.ProbeInfoHelper;
+import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import mcjty.theoneprobe.api.IProbeInfo;
-import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
@@ -20,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
+public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
     public static ResourceLocation TEXTURE_REDSTONE_DUST_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_on");
     public static ResourceLocation TEXTURE_REDSTONE_DUST_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_off");
@@ -137,7 +136,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
         PanelCellNeighbor topNeighbor = cellPos.getNeighbor(Side.TOP);
         if (topNeighbor!=null) {
-            top = topNeighbor.getStrongRsOutput();
+            top = (topNeighbor.canConnectRedstone())? topNeighbor.getWeakRsOutput():topNeighbor.getStrongRsOutput();
             if (topNeighbor.getNeighborIPanelCell() instanceof TransparentBlock)
                 above = cellPos.offset(Side.TOP);
         }
@@ -272,10 +271,11 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
      *
      * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
      * @param segmentClicked Which of nine segment within the cell were clicked.
+     * @param player player who activated (right-clicked) the cell
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
         if(cellPos.getPanelTile().getWorld().isRemote)
            return false;
 
@@ -353,9 +353,8 @@ public class RedstoneDust implements IPanelCell, IPanelCellProbeInfoProvider {
 
 
     @Override
-    public boolean addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PanelTile panelTile, PosInPanelCell pos) {
-        ProbeInfoHelper.addPower(probeInfo, this.signalStrength);
-        return true;
+    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
+        overlayBlockInfo.setPowerOutput(this.signalStrength);
     }
 
     @Override
