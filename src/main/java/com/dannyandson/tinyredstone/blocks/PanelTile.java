@@ -377,7 +377,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             Side movingToward = pistonPos.getCellFacing().getOpposite();
             PanelCellPos moverPos = pistonPos.offset(movingToward);
 
-            if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston && moverPos!=null) {
+            if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston && moverPos!=null && moverPos.getIPanelCell()==null) {
                 moverPos = moverPos.offset(movingToward);
                 movingToward = movingToward.getOpposite();
             }
