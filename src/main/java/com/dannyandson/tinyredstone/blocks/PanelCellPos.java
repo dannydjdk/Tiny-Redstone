@@ -13,6 +13,7 @@ public class PanelCellPos {
     private final int row;
     private final int column;
     private final int level;
+    private Integer index=null;
     private final PanelTile panelTile;
 
     protected PanelCellPos(PanelTile panelTile, int row, int column, int level) {
@@ -47,7 +48,9 @@ public class PanelCellPos {
     }
 
     public int getIndex() {
-        return (level*64) + (row * 8) + column;
+        if (this.index==null)
+            this.index=(level*64) + (row * 8) + column;
+        return this.index;
     }
 
     public PanelTile getPanelTile(){
