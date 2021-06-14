@@ -12,6 +12,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
@@ -60,6 +61,8 @@ public class PanelBlock extends Block {
         );
     }
 
+    protected static final IntegerProperty LIGHT_LEVEL = IntegerProperty.create("light_level", 0, 15);
+
     private static final Map<Item, Class<? extends IPanelCell>> itemPanelCellMap = new HashMap<>();
     private static final Map<Class<? extends IPanelCell>, Item> panelCellItemMap = new HashMap<>();
     private static final Map<Item, Class<? extends IPanelCover>> itemPanelCoverMap = new HashMap<>();
@@ -69,8 +72,9 @@ public class PanelBlock extends Block {
         super(Properties.create(Material.ROCK)
                 .sound(SoundType.STONE)
                 .hardnessAndResistance(2.0f)
-
+                .setLightLevel((state) -> state.get(LIGHT_LEVEL))
         );
+        this.setDefaultState(this.getDefaultState().with(LIGHT_LEVEL, 0));
     }
 
     public Class<? extends IPanelCell> getIPanelCellByItem(Item item) {
@@ -95,7 +99,7 @@ public class PanelBlock extends Block {
 
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(BlockStateProperties.FACING);
+        builder.add(BlockStateProperties.FACING, LIGHT_LEVEL);
     }
 
     @Nullable
@@ -457,15 +461,14 @@ public class PanelBlock extends Block {
     }
 
     @Override
-    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos)
-    {
-        int ll = 0;
-        TileEntity te = world.getTileEntity(pos);
-        if (te instanceof PanelTile) {
-            PanelTile panelTile = (PanelTile) te;
-            ll=panelTile.getLightOutput();
-        }
-        return Math.min(ll,world.getMaxLightLevel());
+    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+        return state.get(LIGHT_LEVEL);
+    }
+
+    public void setLightValue(World world, BlockPos pos, BlockState state, int lightValue) {
+        lightValue = Math.min(lightValue,world.getMaxLightLevel());
+        if(state.get(LIGHT_LEVEL) == lightValue) return;
+        world.setBlockState(pos, state.with(LIGHT_LEVEL, lightValue));
     }
 
     @SuppressWarnings("deprecation")

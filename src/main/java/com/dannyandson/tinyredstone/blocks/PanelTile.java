@@ -200,6 +200,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
+        if(world != null) {
+            Block block = blockState.getBlock();
+            if(block instanceof PanelBlock) {
+                ((PanelBlock) block).setLightValue(world, pos, blockState, getLightOutput());
+            }
+        }
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
         this.flagCrashed = parentNBTTagCompound.getBoolean("flagCrashed");
         this.flagOverflow = parentNBTTagCompound.getBoolean("flagOverflow");
@@ -289,7 +295,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 boolean dirty = false;
                 //backward compatibility. Remove on major update (2.x.x).
                 if (fixLegacyFacing){
-                    world.setBlockState(pos, Registration.REDSTONE_PANEL_BLOCK.get().getDefaultState().with(BlockStateProperties.FACING,Direction.DOWN));
+                    world.setBlockState(pos, Registration.REDSTONE_PANEL_BLOCK.get().getDefaultState()
+                            .with(BlockStateProperties.FACING,Direction.DOWN)
+                            .with(PanelBlock.LIGHT_LEVEL, Math.min(getLightOutput(),world.getMaxLightLevel()))
+                    );
                     fixLegacyFacing=false;
                     dirty=true;
                 }
@@ -330,7 +339,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
                 if (this.flagLightUpdate) {
                     this.flagLightUpdate = false;
-                    this.world.getLightManager().checkBlock(pos);
+                    BlockState blockState = getBlockState();
+                    Block block = blockState.getBlock();
+                    if(block instanceof PanelBlock) {
+                        ((PanelBlock) block).setLightValue(world, pos, blockState, getLightOutput());
+                    }
                 }
 
 
@@ -640,7 +653,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * @return true if this update caused the panel output to change
      */
     private boolean updateCell(PanelCellPos cellPos, int iteration) {
-
         boolean change = false;
         if (iteration > (16 * Config.CIRCUIT_MAX_ITERATION.get())) {
             if (!this.flagOverflow)
@@ -652,6 +664,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         //if this cell position is on a different panel than this one, call this method on that panel
         if (cellPos.getPanelTile()!=this)
             return cellPos.getPanelTile().updateCell(cellPos,iteration);
+
+        boolean change = false;
 
         IPanelCell thisCell = cellPos.getIPanelCell();
 
