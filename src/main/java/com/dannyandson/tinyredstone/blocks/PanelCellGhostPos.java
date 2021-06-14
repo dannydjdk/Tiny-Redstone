@@ -1,5 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.api.IPanelCell;
+
 import javax.annotation.CheckForNull;
 
 public class PanelCellGhostPos extends PanelCellPos {

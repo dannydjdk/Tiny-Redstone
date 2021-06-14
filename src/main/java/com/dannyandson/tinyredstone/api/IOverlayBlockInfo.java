@@ -1,6 +1,8 @@
-package com.dannyandson.tinyredstone.compat;
+package com.dannyandson.tinyredstone.api;
 
+import com.dannyandson.tinyredstone.compat.OverlayBlockInfoMode;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
 
 public interface IOverlayBlockInfo {
     OverlayBlockInfoMode getMode();

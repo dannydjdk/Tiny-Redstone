@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
@@ -47,36 +48,36 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
     @Override
     public void render(PanelTile tileEntity, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
 
-        matrixStack.push();
+        matrixStack.pushPose();
 
         switch (tileEntity.getBlockState().get(BlockStateProperties.FACING))
         {
             case UP:
-                matrixStack.rotate(Vector3f.XP.rotationDegrees(180));
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
                 matrixStack.translate(0,-1,-1);
                 break;
             case NORTH:
-                matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
                 matrixStack.translate(0,0,-1);
                 break;
             case EAST:
-                matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
+                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
                 matrixStack.translate(0,-1,0);
                 break;
             case SOUTH:
-                matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
                 matrixStack.translate(0,-1,0);
                 break;
             case WEST:
-                matrixStack.rotate(Vector3f.ZP.rotationDegrees(-90));
+                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,0);
                 break;
         }
         if (tileEntity.isCovered())
         {
-            matrixStack.push();
+            matrixStack.pushPose();
             tileEntity.panelCover.render(matrixStack,buffer,combinedLight,combinedOverlay, tileEntity.getColor());
-            matrixStack.pop();
+            matrixStack.popPose();
         }
         else {
             List<PanelCellPos> positions = tileEntity.getCellPositions();
@@ -94,16 +95,16 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
         if (tileEntity.isCrashed() || tileEntity.isOverflown())
         {
-            matrixStack.push();
+            matrixStack.pushPose();
             matrixStack.translate(0, 0.126, 1);
-            matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
 
             TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
-            RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.isFabulousGraphicsEnabled())?RenderType.getSolid():RenderType.getTranslucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
-            matrixStack.pop();
+            RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.isFabulousGraphicsEnabled())?RenderType.solid():RenderType.translucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
+            matrixStack.popPose();
         }
 
-        matrixStack.pop();
+        matrixStack.popPose();
 
     }
 
@@ -111,37 +112,37 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
     {
         alpha = (Minecraft.isFabulousGraphicsEnabled())?1.0f:alpha;
 
-        matrixStack.push();
+        matrixStack.pushPose();
 
         matrixStack.translate(cellSize*(double)pos.getRow(), 0.125+(pos.getLevel()*0.125), cellSize*(pos.getColumn()));
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
 
         Side facing = pos.getCellFacing();
 
         if (facing == Side.LEFT)
         {
             matrixStack.translate(0,-cellSize,0);
-            matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
         }
         else if (facing == Side.BACK)
         {
             matrixStack.translate(cellSize,-cellSize,0);
-            matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         }
         else if (facing == Side.RIGHT)
         {
             matrixStack.translate(cellSize,0,0);
-            matrixStack.rotate(Vector3f.ZP.rotationDegrees(270));
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(270));
         }
         else if (pos.getCellFacing()==Side.BOTTOM)
         {
             matrixStack.translate(0,-cellSize,0);
-            matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         }
         else if (pos.getCellFacing()==Side.TOP)
         {
             matrixStack.translate(0,0,cellSize);
-            matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         }
 
         matrixStack.scale(scale, scale, scale);
@@ -149,7 +150,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
         pos.getIPanelCell().render(matrixStack, buffer, combinedLight, combinedOverlay,alpha);
 
-        matrixStack.pop();
+        matrixStack.popPose();
 
     }
 
@@ -160,10 +161,10 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
     @CheckForNull
     public static PanelCellGhostPos getPlayerLookingAtCell(PanelTile panelTile)
     {
-        World world = panelTile.getWorld();
+        World world = panelTile.getLevel();
         ClientPlayerEntity player = Minecraft.getInstance().player;
 
-        if (player!=null && PanelBlock.isPanelCellItem(player.getHeldItemMainhand().getItem())) {
+        if (player!=null && PanelBlock.isPanelCellItem(player.getMainHandItem().getItem())) {
 
             RayTraceResult lookingAt = Minecraft.getInstance().objectMouseOver;
 
@@ -171,7 +172,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
                 Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
                 BlockPos blockPos = new BlockPos(lookVector);
-                TileEntity te = world.getTileEntity(blockPos);
+                TileEntity te = world.getBlockEntity(blockPos);
                 if (te == panelTile) {
                     BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
 
@@ -183,7 +184,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                         }
                         if (cellPos!=null && cellPos.getIPanelCell()==null) {
                             try {
-                                IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getHeldItemMainhand().getItem()).getConstructors()[0].newInstance();
+                                IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getMainHandItem().getItem()).getConstructors()[0].newInstance();
                                 if (panelCell.needsSolidBase())
                                 {
                                     PanelCellPos basePos = cellPos.offset(Side.BOTTOM);

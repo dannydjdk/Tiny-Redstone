@@ -1,8 +1,8 @@
 package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
-import com.dannyandson.tinyredstone.blocks.IPanelCover;
+import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -23,14 +23,14 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
 
     public void render(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
     {
-        func_239207_a_(stack, p_239207_2_, matrixStack, buffer, combinedLight, combinedOverlay);
+        renderByItem(stack, p_239207_2_, matrixStack, buffer, combinedLight, combinedOverlay);
     }
 
     @Override
-    public void func_239207_a_(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
+    public void renderByItem(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
     {
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
+        IVertexBuilder builder = buffer.getBuffer(RenderType.solid());
         Integer color = DyeColor.GRAY.getColorValue();
         if (stack.getTag()!=null && stack.getTag().contains("BlockEntityTag") ) {
             CompoundNBT blockEntityTag = stack.getTag().getCompound("BlockEntityTag");
@@ -39,36 +39,36 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
             }
         }
 
-        matrixStack.push();
+        matrixStack.pushPose();
         matrixStack.translate(0,0.125,0);
 
 
-        matrixStack.push();
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(270));
+        matrixStack.pushPose();
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
         matrixStack.translate(0,-1,0.125);
         drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.125,0);
         drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
 
-        matrixStack.pop();
+        matrixStack.popPose();
 
         if (stack.getTag() !=null && stack.getTag().contains("BlockEntityTag")) {
 
@@ -76,9 +76,9 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
                 String coverClass = stack.getTag().getCompound("BlockEntityTag").getString("cover");
                 try {
                     IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
-                    matrixStack.push();
+                    matrixStack.pushPose();
                     cover.render(matrixStack, buffer, combinedLight, combinedOverlay, color);
-                    matrixStack.pop();
+                    matrixStack.popPose();
                 } catch (Exception exception) {
                     TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class for item render: " + coverClass +
                             ": " + exception.getMessage() + " " + exception.getStackTrace()[0].toString());
@@ -96,7 +96,7 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
 
                                 IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
                                 cell.readNBT(cellNBT.getCompound("data"));
-                                Direction cellDirection = Direction.byIndex(cellNBT.getInt("direction"));
+                                Direction cellDirection = Direction.from3DDataValue(cellNBT.getInt("direction"));
                                 renderCell(matrixStack, i, cell, cellDirection, buffer, combinedLight, combinedOverlay);
 
                             } catch (Exception exception) {
@@ -109,7 +109,7 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
             }
         }
 
-        matrixStack.pop();
+        matrixStack.popPose();
 
     }
 
@@ -126,25 +126,25 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
         int row = Math.round(((index.floatValue()%64)/8f)-0.5f);
         int cell = index%8;
 
-        matrixStack.push();
+        matrixStack.pushPose();
 
         matrixStack.translate(cellSize*(double)row, 0.125+(cellSize*(double)level), cellSize*(cell));
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(rotation1));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
 
         if (cellDirection== Direction.WEST)
         {
             matrixStack.translate(0,-cellSize,0);
-            matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
         }
         else if (cellDirection== Direction.SOUTH)
         {
             matrixStack.translate(cellSize,-cellSize,0);
-            matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         }
         else if (cellDirection== Direction.EAST)
         {
             matrixStack.translate(cellSize,0,0);
-            matrixStack.rotate(Vector3f.ZP.rotationDegrees(270));
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(270));
         }
 
         matrixStack.scale(scale, scale, scale);
@@ -152,22 +152,22 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
 
         panelCell.render(matrixStack, buffer, combinedLight, combinedOverlay,1);
 
-        matrixStack.pop();
+        matrixStack.popPose();
     }
 
     private void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , Integer color)
     {
-        add(builder, matrixStack, x1,y1,0, sprite.getMinU(), sprite.getMinV(), combinedLight,color);
-        add(builder, matrixStack, x2,y1,0, sprite.getMaxU(), sprite.getMinV(), combinedLight,color);
-        add(builder, matrixStack, x2,y2,0, sprite.getMaxU(), sprite.getMaxV(), combinedLight,color);
-        add(builder, matrixStack, x1,y2,0, sprite.getMinU(), sprite.getMaxV(), combinedLight,color);
+        add(builder, matrixStack, x1,y1,0, sprite.getU0(), sprite.getV0(), combinedLight,color);
+        add(builder, matrixStack, x2,y1,0, sprite.getU1(), sprite.getV0(), combinedLight,color);
+        add(builder, matrixStack, x2,y2,0, sprite.getU0(), sprite.getV1(), combinedLight,color);
+        add(builder, matrixStack, x1,y2,0, sprite.getU1(), sprite.getV1(), combinedLight,color);
     }
 
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, Integer color) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
-                .color(ColorHelper.PackedColor.getRed(color),ColorHelper.PackedColor.getGreen(color), ColorHelper.PackedColor.getBlue(color),  ColorHelper.PackedColor.getAlpha(color))
-                .tex(u, v)
-                .lightmap(combinedLightIn)
+        renderer.vertex(stack.last().pose(), x, y, z)
+                .color(ColorHelper.PackedColor.red(color),ColorHelper.PackedColor.green(color), ColorHelper.PackedColor.blue(color),  ColorHelper.PackedColor.alpha(color))
+                .uv(u, v)
+                .uv2(combinedLightIn)
                 .normal(1, 0, 0)
                 .endVertex();
     }

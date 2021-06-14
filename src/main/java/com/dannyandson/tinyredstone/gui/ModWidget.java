@@ -122,11 +122,11 @@ public class ModWidget extends Widget {
 
 
             if (scale != 1.0f) {
-                matrixStack.push();
+                matrixStack.pushPose();
                 matrixStack.scale(scale, scale, scale);
                 matrixStack.translate(drawX, y, 0);
                 fr.func_238422_b_(matrixStack, getMessage().func_241878_f(), drawX, y, this.color);
-                matrixStack.pop();
+                matrixStack.popPose();
             } else {
                 fr.func_238422_b_(matrixStack, getMessage().func_241878_f(), drawX, y, this.color);
             }

@@ -26,9 +26,9 @@ public class StoneButton extends Button {
         if (!active)
         {
             PanelTile panelTile = cellPos.getPanelTile();
-            panelTile.getWorld().playSound(
-                    panelTile.getPos().getX(), panelTile.getPos().getY(), panelTile.getPos().getZ(),
-                    SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON,
+            panelTile.getLevel().playLocalSound(
+                    panelTile.getBlockPos().getX(), panelTile.getBlockPos().getY(), panelTile.getBlockPos().getZ(),
+                    SoundEvents.STONE_BUTTON_CLICK_ON,
                     SoundCategory.BLOCKS, 0.25f, 2f, false
             );
             this.active=true;

@@ -1,6 +1,6 @@
 package com.dannyandson.tinyredstone;
 
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
@@ -41,7 +41,7 @@ public class ClientBinding {
             final PlayerEntity player = Minecraft.getInstance().player;
             if (player == null) return;
             if(player.inventory.currentItem + 1 == numberKey) return;
-            final ItemStack mainHand = player.getHeldItemMainhand();
+            final ItemStack mainHand = player.getMainHandItem();
             final Item mainHandItem = mainHand.getItem();
 
             if (mainHandItem instanceof PanelCellItem) {
@@ -58,14 +58,14 @@ public class ClientBinding {
         final PlayerEntity player = Minecraft.getInstance().player;
         if (player == null) return;
         World world = Minecraft.getInstance().world;
-        final ItemStack mainHand = player.getHeldItemMainhand();
+        final ItemStack mainHand = player.getMainHandItem();
         final Item mainHandItem = mainHand.getItem();
 
         if (mainHandItem instanceof PanelCellItem) {
             if(rotationLock.isKeyDown()) {
                 Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
                 BlockPos blockPos = new BlockPos(lookVector);
-                TileEntity te = world.getTileEntity(blockPos);
+                TileEntity te = world.getBlockEntity(blockPos);
                 if (te instanceof PanelTile) {
                     try {
                         IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(mainHandItem).getConstructors()[0].newInstance();

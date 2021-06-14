@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -43,7 +44,7 @@ public class Torch implements IPanelCell
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite_torch;
         TextureAtlasSprite sprite_torch_top;
 
@@ -63,29 +64,29 @@ public class Torch implements IPanelCell
         float y2 = 1f;
 
         if (this.upright) {
-            matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
             matrixStack.translate(0, 0, -0.375f);
         }
         else {
-            matrixStack.rotate(Vector3f.XP.rotationDegrees(60));
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(60));
             matrixStack.translate(0,0.03125f,0);
         }
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,sprite_torch_top,(output)?15728880:combinedLight,alpha);
 
@@ -95,26 +96,26 @@ public class Torch implements IPanelCell
     @Override
     public boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
         if(RotationLock.getServerRotationLock(player)==null) {
-            Direction panelFacing = cellPos.getPanelTile().getBlockState().get(BlockStateProperties.FACING);
+            Direction panelFacing = cellPos.getPanelTile().getBlockState().getValue(BlockStateProperties.FACING);
             double playerToPanel;
             switch (panelFacing) {
                 case NORTH:
-                    playerToPanel = -player.getLookVec().getZ();
+                    playerToPanel = -player.getLookAngle().z;
                     break;
                 case SOUTH:
-                    playerToPanel = player.getLookVec().getZ();
+                    playerToPanel = player.getLookAngle().z;
                     break;
                 case WEST:
-                    playerToPanel = -player.getLookVec().getX();
+                    playerToPanel = -player.getLookAngle().x;
                     break;
                 case EAST:
-                    playerToPanel = player.getLookVec().getX();
+                    playerToPanel = player.getLookAngle().x;
                     break;
                 case UP:
-                    playerToPanel = player.getLookVec().getY();
+                    playerToPanel = player.getLookAngle().y;
                     break;
                 default:
-                    playerToPanel = -player.getLookVec().getY();
+                    playerToPanel = -player.getLookAngle().y;
             }
             if (playerToPanel > 0.95)
                 this.upright = true;

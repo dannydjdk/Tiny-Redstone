@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.api.IPanelCell;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -172,7 +173,7 @@ public class PanelCellPos {
         if (cellPos==null && side!=Side.TOP && side!=Side.BOTTOM)
         {
             Direction direction = panelTile.getDirectionFromSide(side);
-            TileEntity te = panelTile.getWorld().getTileEntity(panelTile.getPos().offset(direction));
+            TileEntity te = panelTile.getLevel().getBlockEntity(panelTile.getPos().offset(direction));
 
             if (te instanceof PanelTile)
             {

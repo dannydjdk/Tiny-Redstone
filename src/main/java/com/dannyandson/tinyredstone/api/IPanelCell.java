@@ -1,5 +1,9 @@
-package com.dannyandson.tinyredstone.blocks;
+package com.dannyandson.tinyredstone.api;
 
+import com.dannyandson.tinyredstone.blocks.PanelCellPos;
+import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
+import com.dannyandson.tinyredstone.blocks.PanelCellVoxelShape;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.entity.player.PlayerEntity;

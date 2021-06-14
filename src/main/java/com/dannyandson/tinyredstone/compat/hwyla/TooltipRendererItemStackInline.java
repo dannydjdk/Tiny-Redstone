@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.compat.hwyla;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import mcp.mobius.waila.api.ICommonAccessor;
 import mcp.mobius.waila.api.ITooltipRenderer;
@@ -25,7 +26,7 @@ public class TooltipRendererItemStackInline implements ITooltipRenderer {
 
     @SuppressWarnings("SuspiciousNameCombination")
     public Dimension getSize(CompoundNBT tag, ICommonAccessor accessor) {
-        return new Dimension(client.fontRenderer.FONT_HEIGHT, client.fontRenderer.FONT_HEIGHT);
+        return new Dimension(client.font.lineHeight, client.font.lineHeight);
     }
 
     public void draw(CompoundNBT tag, ICommonAccessor accessor, int x, int y) {
@@ -34,28 +35,26 @@ public class TooltipRendererItemStackInline implements ITooltipRenderer {
             CompoundNBT stackTag = null;
 
             try {
-                stackTag = JsonToNBT.getTagFromJson(tag.getString("nbt"));
+                stackTag = JsonToNBT.parseTag(tag.getString("nbt"));
             } catch (CommandSyntaxException var9) {
             }
 
             ItemStack stack = new ItemStack(item, 1);
-            if (stackTag != null) {
-                stack.setTag(stackTag);
-            }
+            stack.setTag(stackTag);
 
             DisplayUtil.enable3DRender();
 
             try {
-                float scale = client.fontRenderer.FONT_HEIGHT/18f;
-                GlStateManager.pushMatrix();
-                GlStateManager.scalef(scale, scale, 1f);
+                float scale = client.font.lineHeight/18f;
+                RenderSystem.pushMatrix();
+                RenderSystem.scalef(scale, scale, 1f);
                 x /= scale;
                 y /= scale;
-                client.getItemRenderer().renderItemIntoGUI(stack, x, y);
-                client.getItemRenderer().renderItemOverlayIntoGUI(client.fontRenderer, stack, x, y, null);
-                GlStateManager.popMatrix();
+                client.getItemRenderer().renderGuiItem(stack, x, y);
+                client.getItemRenderer().renderGuiItemDecorations(client.font, stack, x, y, null);
+                RenderSystem.popMatrix();
             } catch (Exception var5) {
-                String stackStr = stack != null ? stack.toString() : "NullStack";
+                String stackStr = stack.toString();
                 WailaExceptionHandler.handleErr(var5, "renderStack | " + stackStr, null);
             }
 

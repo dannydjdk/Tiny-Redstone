@@ -1,6 +1,6 @@
 package com.dannyandson.tinyredstone.compat.theoneprobe;
 
-import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.compat.OverlayBlockInfoMode;
 import mcjty.theoneprobe.api.CompoundText;
 import mcjty.theoneprobe.api.IProbeInfo;

@@ -1,6 +1,6 @@
 package com.dannyandson.tinyredstone.network;
 
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.NoteBlock;
@@ -27,20 +27,20 @@ public class NoteBlockInstrumentSync {
     {
         this.pos= buffer.readBlockPos();
         this.cellIndex=buffer.readInt();
-        this.instrument =buffer.readString(32);
+        this.instrument =buffer.readUtf(32);
     }
 
     public void toBytes(PacketBuffer buf)
     {
         buf.writeBlockPos(pos);
         buf.writeInt(cellIndex);
-        buf.writeString(instrument);
+        buf.writeUtf(instrument);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            TileEntity te =  ctx.get().getSender().getServerWorld().getTileEntity(this.pos);
+            TileEntity te =  ctx.get().getSender().getLevel().getBlockEntity(this.pos);
             if (te instanceof PanelTile)
             {
                 PanelCellPos cellPos = PanelCellPos.fromIndex((PanelTile) te,this.cellIndex);

@@ -1,7 +1,8 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.gui.NoteBlockGUI;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PlaySound;
@@ -30,7 +31,7 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)? RenderType.getSolid():RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TINY_NOTE_BLOCK);
 
 
@@ -38,23 +39,23 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
         matrixStack.translate(0,0,1.0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
@@ -98,8 +99,8 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player){
-        if (player.getHeldItemMainhand().getItem() == Registration.REDSTONE_WRENCH.get()) {
-            if (cellPos.getPanelTile().getWorld().isRemote)
+        if (player.getMainHandItem().getItem() == Registration.REDSTONE_WRENCH.get()) {
+            if (cellPos.getPanelTile().getLevel().isClientSide)
                 NoteBlockGUI.open(cellPos.getPanelTile(), cellPos.getIndex(), this);
         }else {
             pitch++;
@@ -137,11 +138,11 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     private void playNote(PanelTile panelTile)
     {
-        if (!panelTile.getWorld().isRemote)
+        if (!panelTile.getLevel().isClientSide)
         {
-            BlockPos pos = panelTile.getPos();
-            for(PlayerEntity player:panelTile.getWorld().getPlayers()){
-                if(panelTile.getWorld().isPlayerWithin(pos.getX(),pos.getY(),pos.getZ(),48))
+            BlockPos pos = panelTile.getBlockPos();
+            for(PlayerEntity player:panelTile.getLevel().players()){
+                if(panelTile.getLevel().hasNearbyAlivePlayer(pos.getX(),pos.getY(),pos.getZ(),48))
                     ModNetworkHandler.sendToClient(
                             new PlaySound(pos,"minecraft", "block.note_block." + instrument, 0.5f, (pitch==0)?0.5f:(float)Math.pow(2f,((pitch-12f)/12f))),
                             (ServerPlayerEntity) player);
