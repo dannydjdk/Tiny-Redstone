@@ -159,8 +159,8 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
     {
         add(builder, matrixStack, x1,y1,0, sprite.getU0(), sprite.getV0(), combinedLight,color);
         add(builder, matrixStack, x2,y1,0, sprite.getU1(), sprite.getV0(), combinedLight,color);
-        add(builder, matrixStack, x2,y2,0, sprite.getU0(), sprite.getV1(), combinedLight,color);
-        add(builder, matrixStack, x1,y2,0, sprite.getU1(), sprite.getV1(), combinedLight,color);
+        add(builder, matrixStack, x2,y2,0, sprite.getU1(), sprite.getV1(), combinedLight,color);
+        add(builder, matrixStack, x1,y2,0, sprite.getU0(), sprite.getV1(), combinedLight,color);
     }
 
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, Integer color) {
