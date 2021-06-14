@@ -333,7 +333,7 @@ public class PanelBlock extends Block {
                     } else if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isCrouching()) {
                         //harvest block on sneak right click with wrench
                         this.playerWillDestroy(world, pos, state, player);
-                        if(!world.isClientSide) world.destroyBlock(pos, true, null, 512);
+                        if(!world.isClientSide) world.destroyBlock(pos, true);
                         handled = true;
                     } else if (heldItem == Registration.TINY_COLOR_SELECTOR.get() && posInPanelCell.getIPanelCell() instanceof IColorablePanelCell) {
                         if(world.isClientSide)
