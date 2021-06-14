@@ -1,6 +1,5 @@
 package com.dannyandson.tinyredstone.compat.hwyla;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import mcp.mobius.waila.api.ICommonAccessor;

@@ -1,8 +1,8 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.gui.NoteBlockGUI;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PlaySound;

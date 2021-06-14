@@ -10,7 +10,6 @@ import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
 import com.dannyandson.tinyredstone.gui.ToolbarOverlay;
 import com.dannyandson.tinyredstone.items.PanelItemColor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
