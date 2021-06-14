@@ -66,7 +66,7 @@ public class PanelCellNeighbor {
         }
         else if (blockPos!=null)
         {
-            return panelTile.getLevel().getSignal(blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            return panelTile.getLevel().getDirectSignal(blockPos,panelTile.getDirectionFromSide(neighborDirection));
         }
         return 0;
     }
