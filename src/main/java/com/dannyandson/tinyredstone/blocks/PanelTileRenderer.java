@@ -50,7 +50,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
         matrixStack.pushPose();
 
-        switch (tileEntity.getBlockState().get(BlockStateProperties.FACING))
+        switch (tileEntity.getBlockState().getValue(BlockStateProperties.FACING))
         {
             case UP:
                 matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
@@ -100,7 +100,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
 
             TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
-            RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.isFabulousGraphicsEnabled())?RenderType.solid():RenderType.translucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
+            RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
             matrixStack.popPose();
         }
 
@@ -110,7 +110,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
     private void renderCell(MatrixStack matrixStack, PanelCellPos pos, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay,float alpha)
     {
-        alpha = (Minecraft.isFabulousGraphicsEnabled())?1.0f:alpha;
+        alpha = (Minecraft.useShaderTransparency())?1.0f:alpha;
 
         matrixStack.pushPose();
 
@@ -166,21 +166,21 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
 
         if (player!=null && PanelBlock.isPanelCellItem(player.getMainHandItem().getItem())) {
 
-            RayTraceResult lookingAt = Minecraft.getInstance().objectMouseOver;
+            RayTraceResult lookingAt = Minecraft.getInstance().hitResult;
 
             if (lookingAt != null && lookingAt.getType() == RayTraceResult.Type.BLOCK) {
 
-                Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
+                Vector3d lookVector = Minecraft.getInstance().hitResult.getLocation();
                 BlockPos blockPos = new BlockPos(lookVector);
                 TileEntity te = world.getBlockEntity(blockPos);
                 if (te == panelTile) {
                     BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
 
-                    PanelCellPos cellPos =  PosInPanelCell.fromHitVec(panelTile,panelTile.getPos(),result);
+                    PanelCellPos cellPos =  PosInPanelCell.fromHitVec(panelTile,panelTile.getBlockPos(),result);
                     if (cellPos!=null) {
-                        if (cellPos.getIPanelCell()!=null && (!cellPos.getIPanelCell().hasActivation() || player.isSneaking()))
+                        if (cellPos.getIPanelCell()!=null && (!cellPos.getIPanelCell().hasActivation() || player.isCrouching()))
                         {
-                            cellPos = cellPos.offset(panelTile.getSideFromDirection(result.getFace()));
+                            cellPos = cellPos.offset(panelTile.getSideFromDirection(result.getDirection()));
                         }
                         if (cellPos!=null && cellPos.getIPanelCell()==null) {
                             try {

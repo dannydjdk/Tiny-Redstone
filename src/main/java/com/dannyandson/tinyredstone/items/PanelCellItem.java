@@ -17,11 +17,11 @@ import java.util.List;
 
 public class PanelCellItem extends Item {
     public PanelCellItem() {
-        super(new Item.Properties().group(ModSetup.ITEM_GROUP));
+        super(new Item.Properties().tab(ModSetup.ITEM_GROUP));
     }
 
     @Override
-    public  void  addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
+    public  void  appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
     {
         list.add(new TranslationTextComponent("message.item.redstone_panel_cell"));
     }

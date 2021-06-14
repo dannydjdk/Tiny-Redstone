@@ -65,13 +65,13 @@ public class NoteBlockGUI extends Screen {
     }
 
     private void close() {
-        minecraft.displayGuiScreen(null);
+        minecraft.setScreen(null);
     }
 
     private void setInstrument(String instrument)
     {
         this.tinyNoteBlock.setInstrument(instrument);
-        ModNetworkHandler.sendToServer(new NoteBlockInstrumentSync(panelTile.getPos(),cellIndex, instrument));
+        ModNetworkHandler.sendToServer(new NoteBlockInstrumentSync(panelTile.getBlockPos(),cellIndex, instrument));
         this.close();
     }
 
@@ -83,7 +83,7 @@ public class NoteBlockGUI extends Screen {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(GUI);
+        this.minecraft.getTextureManager().bind(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
         this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
@@ -93,6 +93,6 @@ public class NoteBlockGUI extends Screen {
 
 
     public static void open(PanelTile panelTile, Integer cellIndex, NoteBlock tinyNoteBlock) {
-        Minecraft.getInstance().displayGuiScreen(new NoteBlockGUI(panelTile, cellIndex, tinyNoteBlock));
+        Minecraft.getInstance().setScreen(new NoteBlockGUI(panelTile, cellIndex, tinyNoteBlock));
     }
 }

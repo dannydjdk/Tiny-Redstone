@@ -40,7 +40,7 @@ public class ClientBinding {
         if(numberKey > 0 && numberKey <= 9) {
             final PlayerEntity player = Minecraft.getInstance().player;
             if (player == null) return;
-            if(player.inventory.currentItem + 1 == numberKey) return;
+            if(player.inventory.selected + 1 == numberKey) return;
             final ItemStack mainHand = player.getMainHandItem();
             final Item mainHandItem = mainHand.getItem();
 
@@ -57,13 +57,13 @@ public class ClientBinding {
         if (scrollDelta == 0) return;
         final PlayerEntity player = Minecraft.getInstance().player;
         if (player == null) return;
-        World world = Minecraft.getInstance().world;
+        World world = Minecraft.getInstance().level;
         final ItemStack mainHand = player.getMainHandItem();
         final Item mainHandItem = mainHand.getItem();
 
         if (mainHandItem instanceof PanelCellItem) {
-            if(rotationLock.isKeyDown()) {
-                Vector3d lookVector = Minecraft.getInstance().objectMouseOver.getHitVec();
+            if(rotationLock.isDown()) {
+                Vector3d lookVector = Minecraft.getInstance().hitResult.getLocation();
                 BlockPos blockPos = new BlockPos(lookVector);
                 TileEntity te = world.getBlockEntity(blockPos);
                 if (te instanceof PanelTile) {

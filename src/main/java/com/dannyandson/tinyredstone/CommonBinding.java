@@ -37,7 +37,7 @@ public class CommonBinding {
                 )) {
             BlockState blockState = event.getPlayer().level.getBlockState(event.getPos());
             PanelBlock panelBlock = (PanelBlock)blockState.getBlock();
-            panelBlock.onBlockClicked(blockState,event.getPlayer().level,event.getPos(), event.getPlayer());
+            panelBlock.attack(blockState,event.getPlayer().level,event.getPos(), event.getPlayer());
             event.setCanceled(true);
         }
     }
@@ -50,7 +50,7 @@ public class CommonBinding {
             TileEntity te = event.getPlayer().level.getBlockEntity(event.getPos());
             if (te instanceof PanelTile)
             {
-                Registration.REDSTONE_PANEL_BLOCK.get().onBlockActivated(te.getBlockState(),event.getPlayer().level,event.getPos(),event.getPlayer(),event.getHand(),event.getHitVec());
+                Registration.REDSTONE_PANEL_BLOCK.get().use(te.getBlockState(),event.getPlayer().level,event.getPos(),event.getPlayer(),event.getHand(),event.getHitVec());
                 event.setCanceled(true);
             }
         }

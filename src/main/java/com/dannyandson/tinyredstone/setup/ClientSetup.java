@@ -11,6 +11,7 @@ import com.dannyandson.tinyredstone.gui.ToolbarOverlay;
 import com.dannyandson.tinyredstone.items.PanelItemColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -31,7 +32,7 @@ public class ClientSetup {
     @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
-        if (!event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE)) {
+        if (!event.getMap().location().equals(PlayerContainer.BLOCK_ATLAS)) {
             return;
         }
 

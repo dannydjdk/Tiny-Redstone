@@ -70,9 +70,9 @@ public class PanelCellPos {
 
     public static PanelCellPos fromHitVec(PanelTile panelTile, Direction panelFacing, BlockRayTraceResult result) {
 
-        BlockPos pos = panelTile.getPos();
-        Direction rayTraceDirection = result.getFace().getOpposite();
-        Vector3d hitVec = result.getHitVec().add((double)rayTraceDirection.getXOffset()*.001d,(double)rayTraceDirection.getYOffset()*.001d,(double)rayTraceDirection.getZOffset()*.001d);
+        BlockPos pos = panelTile.getBlockPos();
+        Direction rayTraceDirection = result.getDirection().getOpposite();
+        Vector3d hitVec = result.getLocation().add((double)rayTraceDirection.getStepX()*.001d,(double)rayTraceDirection.getStepY()*.001d,(double)rayTraceDirection.getStepZ()*.001d);
 
         double relX,relY,relZ;
 
@@ -173,12 +173,12 @@ public class PanelCellPos {
         if (cellPos==null && side!=Side.TOP && side!=Side.BOTTOM)
         {
             Direction direction = panelTile.getDirectionFromSide(side);
-            TileEntity te = panelTile.getLevel().getBlockEntity(panelTile.getPos().offset(direction));
+            TileEntity te = panelTile.getLevel().getBlockEntity(panelTile.getBlockPos().relative(direction));
 
             if (te instanceof PanelTile)
             {
                 PanelTile panelTile2 = (PanelTile) te;
-                if (panelTile2.getBlockState().get(BlockStateProperties.FACING)==panelTile.getBlockState().get(BlockStateProperties.FACING))
+                if (panelTile2.getBlockState().getValue(BlockStateProperties.FACING)==panelTile.getBlockState().getValue(BlockStateProperties.FACING))
                 {
                     int neighborRow, neighborColumn, neighborLevel;
                     if (side==Side.FRONT || side==Side.BACK) {
@@ -268,7 +268,7 @@ public class PanelCellPos {
             }
 
         } else if (towardPanelSide!=Side.BOTTOM){
-            BlockPos blockPos = this.panelTile.getPos().offset(this.panelTile.getDirectionFromSide(towardPanelSide));
+            BlockPos blockPos = this.panelTile.getBlockPos().relative(this.panelTile.getDirectionFromSide(towardPanelSide));
             return new PanelCellNeighbor(this.panelTile, blockPos, towardPanelSide);
         }
 

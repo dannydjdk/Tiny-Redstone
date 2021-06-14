@@ -31,7 +31,7 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        IVertexBuilder builder = buffer.getBuffer((Minecraft.isFabulousGraphicsEnabled())?RenderType.solid():RenderType.translucent());
+        IVertexBuilder builder = buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
 
 
