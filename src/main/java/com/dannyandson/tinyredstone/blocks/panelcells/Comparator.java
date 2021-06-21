@@ -1,8 +1,10 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -40,7 +42,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
      */
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_OFF);
 
@@ -58,46 +60,46 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
         matrixStack.translate(0,0,0.25);
 
-        add(builder, matrixStack, 0,0,0, sprite_repeater.getMinU(), sprite_repeater.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite_repeater.getMaxU(), sprite_repeater.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,1,0, sprite_repeater.getMaxU(), sprite_repeater.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,1,0, sprite_repeater.getMinU(), sprite_repeater.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0,0, sprite_repeater.getU0(), sprite_repeater.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite_repeater.getU1(), sprite_repeater.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,1,0, sprite_repeater.getU1(), sprite_repeater.getV0(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,1,0, sprite_repeater.getU0(), sprite_repeater.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.25,0);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
-        add(builder, matrixStack, 0,0,0, sprite.getMinU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0,0, sprite.getMaxU(), sprite.getMaxV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 1,0.25f,0, sprite.getMaxU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
-        add(builder, matrixStack, 0,0.25f,0, sprite.getMinU(), sprite.getMinV(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
+        add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
     }
 
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        renderer.pos(stack.getLast().getMatrix(), x, y, z)
+        renderer.vertex(stack.last().pose(), x, y, z)
                 .color(1.0f, 1.0f, 1.0f, alpha)
-                .tex(u, v)
-                .lightmap(combinedLightIn)
+                .uv(u, v)
+                .uv2(combinedLightIn)
                 .normal(1, 0, 0)
                 .endVertex();
     }
@@ -183,7 +185,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public boolean tick(PanelCellPos cellPos) {
 
-        if (!cellPos.getPanelTile().getWorld().isRemote) {
+        if (!cellPos.getPanelTile().getLevel().isClientSide) {
             if (comparatorOverride) {
                 PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK);
                 int cInput = backNeighbor.getComparatorOverride();
@@ -250,7 +252,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
-        overlayBlockInfo.addText("Mode", this.subtract ? ComparatorMode.SUBTRACT.getString() : ComparatorMode.COMPARE.getString());
+        overlayBlockInfo.addText("Mode", this.subtract ? ComparatorMode.SUBTRACT.toString() : ComparatorMode.COMPARE.toString());
     }
 
     @Override

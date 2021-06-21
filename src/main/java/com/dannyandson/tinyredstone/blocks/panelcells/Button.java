@@ -1,7 +1,9 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -32,26 +34,26 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         TextureAtlasSprite sprite = getSprite();
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
 
         matrixStack.translate(0,0,(active)?0.0625:0.125);
         float x1 = 0.3125f, x2 = .6875f, y1 = .375f, y2 = .625f;
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.125,-y1);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,0,0.125f,sprite,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,.6875);
         RenderHelper.drawRectangle(builder,matrixStack,0,0.25f,0,0.125f,sprite,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,.25);
         RenderHelper.drawRectangle(builder,matrixStack,0,.375f,0,.125f,sprite,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,0.375);
         RenderHelper.drawRectangle(builder,matrixStack,0,0.25f,0,0.125f,sprite,combinedLight,alpha);
 
@@ -127,9 +129,9 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
         if (!active)
         {
             PanelTile panelTile = cellPos.getPanelTile();
-            panelTile.getWorld().playSound(
-                    panelTile.getPos().getX(), panelTile.getPos().getY(), panelTile.getPos().getZ(),
-                    SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON,
+            panelTile.getLevel().playLocalSound(
+                    panelTile.getBlockPos().getX(), panelTile.getBlockPos().getY(), panelTile.getBlockPos().getZ(),
+                    SoundEvents.WOODEN_BUTTON_CLICK_ON,
                     SoundCategory.BLOCKS, 0.25f, 2f, false
             );
             this.active=true;

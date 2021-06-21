@@ -24,24 +24,24 @@ import java.util.List;
 
 public class RedstoneWrench extends Item {
     public RedstoneWrench() {
-        super(new Item.Properties().group(ModSetup.ITEM_GROUP).maxStackSize(1));
+        super(new Item.Properties().tab(ModSetup.ITEM_GROUP).stacksTo(1));
     }
 
     @Override
     @Nonnull
-    public ActionResultType onItemUse(ItemUseContext context) {
-        World world = context.getWorld();
-        if (!world.isRemote) {
+    public ActionResultType useOn(ItemUseContext context) {
+        World world = context.getLevel();
+        if (!world.isClientSide) {
             PlayerEntity player = context.getPlayer();
             Hand hand = context.getHand();
-            BlockPos pos = context.getPos();
+            BlockPos pos = context.getClickedPos();
 
-            if (player != null && player.isSneaking()) {
+            if (player != null && player.isCrouching()) {
                 // Make sure the block get activated if it is a BaseBlockNew
                 BlockState state = world.getBlockState(pos);
                 Block block = state.getBlock();
                 if (block instanceof PanelBlock) {
-                    return state.onBlockActivated(world, player, hand, new BlockRayTraceResult(context.getHitVec(), context.getFace(), pos, context.isInside()));
+                    return state.use(world, player, hand, new BlockRayTraceResult(context.getClickLocation(), context.getClickedFace(), pos, context.isInside()));
                 }
             }
         }
@@ -50,7 +50,7 @@ public class RedstoneWrench extends Item {
     }
 
     @Override
-    public  void  addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
+    public  void  appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
     {
         list.add(new TranslationTextComponent("message.item.redstone_wrench"));
     }
@@ -61,6 +61,6 @@ public class RedstoneWrench extends Item {
 
     public BlockRayTraceResult getBlockRayTraceResult(World world, PlayerEntity player)
     {
-        return Item.rayTrace(world,player,RayTraceContext.FluidMode.ANY);
+        return Item.getPlayerPOVHitResult(world,player,RayTraceContext.FluidMode.ANY);
     }
 }

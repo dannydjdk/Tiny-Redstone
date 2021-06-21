@@ -63,13 +63,13 @@ public class BlueprintGUI  extends Screen {
     }
 
     private void close() {
-        minecraft.displayGuiScreen(null);
+        minecraft.setScreen(null);
     }
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(GUI);
+        this.minecraft.getTextureManager().bind(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
         this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
@@ -79,7 +79,7 @@ public class BlueprintGUI  extends Screen {
 
 
     public static void open(ItemStack blueprint) {
-        Minecraft.getInstance().displayGuiScreen(new BlueprintGUI(blueprint));
+        Minecraft.getInstance().setScreen(new BlueprintGUI(blueprint));
     }
 
     public void exportToFile()
@@ -159,7 +159,7 @@ public class BlueprintGUI  extends Screen {
 
                     try {
                         //will throw CommandSyntaxException, abort and log error if file is not valid NBT json
-                        CompoundNBT nbt = JsonToNBT.getTagFromJson(data.toString());
+                        CompoundNBT nbt = JsonToNBT.parseTag(data.toString());
                         CompoundNBT cleanNBT = Blueprint.cleanUpBlueprintNBT(nbt);
                         if (cleanNBT!=null) {
                             this.blueprint.setTag(cleanNBT);

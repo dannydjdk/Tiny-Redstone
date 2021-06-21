@@ -29,7 +29,7 @@ public class ClearPanelSync {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            TileEntity te =  ctx.get().getSender().getServerWorld().getTileEntity(this.pos);
+            TileEntity te =  ctx.get().getSender().getLevel().getBlockEntity(this.pos);
             if (te instanceof PanelTile)
             {
                 ((PanelTile)te).removeAllCells(null);

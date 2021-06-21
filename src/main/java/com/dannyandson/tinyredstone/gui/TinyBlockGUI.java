@@ -1,7 +1,7 @@
 package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.IColorablePanelCell;
+import com.dannyandson.tinyredstone.api.IColorablePanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.TinyBlockColorSync;
@@ -70,13 +70,13 @@ public class TinyBlockGUI extends Screen {
     }
 
     private void close() {
-        minecraft.displayGuiScreen(null);
+        minecraft.setScreen(null);
     }
 
     private void setColor(int color)
     {
         this.iColorablePanelCell.setColor(color);
-        ModNetworkHandler.sendToServer(new TinyBlockColorSync(panelTile.getPos(),cellIndex, color));
+        ModNetworkHandler.sendToServer(new TinyBlockColorSync(panelTile.getBlockPos(),cellIndex, color));
         this.close();
     }
 
@@ -88,7 +88,7 @@ public class TinyBlockGUI extends Screen {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(GUI);
+        this.minecraft.getTextureManager().bind(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
         this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
@@ -98,6 +98,6 @@ public class TinyBlockGUI extends Screen {
 
 
     public static void open(PanelTile panelTile, Integer cellIndex, IColorablePanelCell iColorablePanelCell) {
-        Minecraft.getInstance().displayGuiScreen(new TinyBlockGUI(panelTile, cellIndex, iColorablePanelCell));
+        Minecraft.getInstance().setScreen(new TinyBlockGUI(panelTile, cellIndex, iColorablePanelCell));
     }
 }

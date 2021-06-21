@@ -20,14 +20,14 @@ public class PanelItem extends BlockItem {
     public PanelItem()
     {
         super(Registration.REDSTONE_PANEL_BLOCK.get(),new Item.Properties()
-                .group(ModSetup.ITEM_GROUP)
+                .tab(ModSetup.ITEM_GROUP)
                 .setISTER(()->PanelItemRenderer::new)
         );
 
     }
 
     @Override
-    public  void  addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
+    public  void  appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
     {
         list.add(new TranslationTextComponent("message.item.redstone_panel"));
     }

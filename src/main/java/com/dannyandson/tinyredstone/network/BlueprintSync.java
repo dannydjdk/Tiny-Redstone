@@ -20,19 +20,19 @@ public class BlueprintSync {
 
     public BlueprintSync(PacketBuffer buffer)
     {
-        this.nbt=buffer.readCompoundTag();
+        this.nbt=buffer.readNbt();
     }
 
     public void toBytes(PacketBuffer buf)
     {
-        buf.writeCompoundTag(nbt);
+        buf.writeNbt(nbt);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(()-> {
             ServerPlayerEntity player = ctx.get().getSender();
             if (player != null) {
-                ItemStack blueprint = ctx.get().getSender().getHeldItemMainhand();
+                ItemStack blueprint = ctx.get().getSender().getMainHandItem();
                 if (blueprint.getItem() instanceof Blueprint) {
                     blueprint.setTag(this.nbt);
                 }

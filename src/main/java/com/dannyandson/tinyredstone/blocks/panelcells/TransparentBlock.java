@@ -1,8 +1,11 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.api.IColorablePanelCell;
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
@@ -28,7 +31,7 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        IVertexBuilder builder = buffer.getBuffer((Minecraft.isFabulousGraphicsEnabled())?RenderType.getSolid():RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
 
 
@@ -36,23 +39,23 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
         matrixStack.translate(0,0,1.0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
     }

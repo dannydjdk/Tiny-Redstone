@@ -1,4 +1,4 @@
-package com.dannyandson.tinyredstone.blocks;
+package com.dannyandson.tinyredstone.api;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;

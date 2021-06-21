@@ -18,12 +18,12 @@ public class TooltipRendererString implements ITooltipRenderer {
 
     @Override
     public Dimension getSize(CompoundNBT data, ICommonAccessor accessor) {
-        return new Dimension(client.fontRenderer.getStringWidth(data.getString("string")), client.fontRenderer.FONT_HEIGHT + 1);
+        return new Dimension(client.font.width(data.getString("string")), client.font.lineHeight + 1);
     }
 
     @Override
     public void draw(CompoundNBT data, ICommonAccessor accessor, int x, int y) {
         WailaConfig.ConfigOverlay.ConfigOverlayColor color = Waila.CONFIG.get().getOverlay().getColor();
-        client.fontRenderer.drawStringWithShadow(new MatrixStack(), data.getString("string"), x, y, color.getFontColor());
+        client.font.draw(new MatrixStack(), data.getString("string"), x, y, color.getFontColor());
     }
 }

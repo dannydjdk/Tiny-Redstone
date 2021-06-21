@@ -53,7 +53,7 @@ public class Registration {
 
     public static final RegistryObject<PanelBlock> REDSTONE_PANEL_BLOCK = BLOCKS.register("redstone_panel", PanelBlock::new);
     public static final RegistryObject<TileEntityType<PanelTile>> REDSTONE_PANEL_TILE =
-            TILES.register("redstone_panel", () -> TileEntityType.Builder.create(PanelTile::new, REDSTONE_PANEL_BLOCK.get()).build(null));
+            TILES.register("redstone_panel", () -> TileEntityType.Builder.of(PanelTile::new, REDSTONE_PANEL_BLOCK.get()).build(null));
     public static final RegistryObject<Item> REDSTONE_PANEL_ITEM = ITEMS.register("redstone_panel",PanelItem::new);
 
     public static final RegistryObject<Item> TINY_REDSTONE_ITEM = ITEMS.register("tiny_redstone",PanelCellItem::new);
@@ -77,10 +77,10 @@ public class Registration {
     public static final RegistryObject<Item> BLUEPRINT = ITEMS.register("blueprint", Blueprint::new);
 
     public static final RegistryObject<Item> SILICON = ITEMS.register("silicon",()->new Item(new Item.Properties()
-            .group(ModSetup.ITEM_GROUP)
+            .tab(ModSetup.ITEM_GROUP)
     ));
     public static final RegistryObject<Item> SILICON_COMPOUND = ITEMS.register("silicon_compound",()->new Item(new Item.Properties()
-            .group(ModSetup.ITEM_GROUP)));
+            .tab(ModSetup.ITEM_GROUP)));
 
     public static final RegistryObject<RedstoneWrench> REDSTONE_WRENCH = ITEMS.register("redstone_wrench", RedstoneWrench::new);
     public static final RegistryObject<RedstoneWrench> TINY_COLOR_SELECTOR = ITEMS.register("tiny_color_selector", TinyColorSelector::new);
