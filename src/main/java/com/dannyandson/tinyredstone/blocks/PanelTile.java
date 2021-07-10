@@ -205,10 +205,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
-        if(world != null) {
+        if(level != null) {
             Block block = blockState.getBlock();
             if(block instanceof PanelBlock) {
-                ((PanelBlock) block).setLightValue(world, pos, blockState, getLightOutput());
+                ((PanelBlock) block).setLightValue(level, worldPosition, blockState, getLightOutput());
             }
         }
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
@@ -304,14 +304,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 boolean dirty = false;
                 //backward compatibility. Remove on major update (2.x.x).
                 if (fixLegacyFacing){
-<<<<<<< HEAD
-                    world.setBlockState(pos, Registration.REDSTONE_PANEL_BLOCK.get().getDefaultState()
-                            .with(BlockStateProperties.FACING,Direction.DOWN)
-                            .with(PanelBlock.LIGHT_LEVEL, Math.min(getLightOutput(),world.getMaxLightLevel()))
+                    level.setBlockAndUpdate(worldPosition, Registration.REDSTONE_PANEL_BLOCK.get().defaultBlockState()
+                            .setValue(BlockStateProperties.FACING,Direction.DOWN)
+                            .setValue(PanelBlock.LIGHT_LEVEL, Math.min(getLightOutput(),level.getMaxLightLevel()))
                     );
-=======
-                    level.setBlockAndUpdate(worldPosition, Registration.REDSTONE_PANEL_BLOCK.get().defaultBlockState().setValue(BlockStateProperties.FACING,Direction.DOWN));
->>>>>>> 001ae27d951f0deeab9702ac318cf4c61d4741a8
                     fixLegacyFacing=false;
                     dirty=true;
                 }
@@ -352,15 +348,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
                 if (this.flagLightUpdate) {
                     this.flagLightUpdate = false;
-<<<<<<< HEAD
                     BlockState blockState = getBlockState();
                     Block block = blockState.getBlock();
                     if(block instanceof PanelBlock) {
-                        ((PanelBlock) block).setLightValue(world, pos, blockState, getLightOutput());
+                        ((PanelBlock) block).setLightValue(level, worldPosition, blockState, getLightOutput());
                     }
-=======
-                    this.level.getLightEngine().checkBlock(worldPosition);
->>>>>>> 001ae27d951f0deeab9702ac318cf4c61d4741a8
                 }
 
 
@@ -670,7 +662,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      * @return true if this update caused the panel output to change
      */
     private boolean updateCell(PanelCellPos cellPos, int iteration) {
-        boolean change = false;
         if (iteration > (16 * Config.CIRCUIT_MAX_ITERATION.get())) {
             if (!this.flagOverflow)
                 TinyRedstone.LOGGER.warn("Redstone panel at " + worldPosition.getX() + "," + worldPosition.getY() + "," + worldPosition.getZ() + " iterated too many times.");

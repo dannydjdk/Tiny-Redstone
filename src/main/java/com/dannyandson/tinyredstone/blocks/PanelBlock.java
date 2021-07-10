@@ -76,15 +76,10 @@ public class PanelBlock extends Block {
     public PanelBlock() {
         super(Properties.of(Material.STONE)
                 .sound(SoundType.STONE)
-<<<<<<< HEAD
-                .hardnessAndResistance(2.0f)
-                .setLightLevel((state) -> state.get(LIGHT_LEVEL))
-=======
                 .strength(2.0f)
-
->>>>>>> 001ae27d951f0deeab9702ac318cf4c61d4741a8
+                .lightLevel((state) -> state.getValue(LIGHT_LEVEL))
         );
-        this.setDefaultState(this.getDefaultState().with(LIGHT_LEVEL, 0));
+        this.registerDefaultState(this.defaultBlockState().setValue(LIGHT_LEVEL, 0));
     }
 
     public Class<? extends IPanelCell> getIPanelCellByItem(Item item) {
@@ -108,13 +103,8 @@ public class PanelBlock extends Block {
 
 
     @Override
-<<<<<<< HEAD
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(BlockStateProperties.FACING, LIGHT_LEVEL);
-=======
     protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(BlockStateProperties.FACING);
->>>>>>> 001ae27d951f0deeab9702ac318cf4c61d4741a8
+        builder.add(BlockStateProperties.FACING, LIGHT_LEVEL);
     }
 
     @Nullable
@@ -477,26 +467,14 @@ public class PanelBlock extends Block {
     }
 
     @Override
-<<<<<<< HEAD
     public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
-        return state.get(LIGHT_LEVEL);
+        return state.getValue(LIGHT_LEVEL);
     }
 
     public void setLightValue(World world, BlockPos pos, BlockState state, int lightValue) {
         lightValue = Math.min(lightValue,world.getMaxLightLevel());
-        if(state.get(LIGHT_LEVEL) == lightValue) return;
-        world.setBlockState(pos, state.with(LIGHT_LEVEL, lightValue));
-=======
-    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos)
-    {
-        int ll = 0;
-        TileEntity te = world.getBlockEntity(pos);
-        if (te instanceof PanelTile) {
-            PanelTile panelTile = (PanelTile) te;
-            ll=panelTile.getLightOutput();
-        }
-        return Math.min(ll,world.getMaxLightLevel());
->>>>>>> 001ae27d951f0deeab9702ac318cf4c61d4741a8
+        if(state.getValue(LIGHT_LEVEL) == lightValue) return;
+        world.setBlockAndUpdate(pos, state.setValue(LIGHT_LEVEL, lightValue));
     }
 
     @SuppressWarnings("deprecation")
