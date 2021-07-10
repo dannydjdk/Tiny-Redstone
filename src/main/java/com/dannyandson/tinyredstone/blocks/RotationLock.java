@@ -88,14 +88,14 @@ public class RotationLock {
     }
 
     public static void removeServerLock(PlayerEntity player) {
-        playerRotationLock.remove(player.getUniqueID());
+        playerRotationLock.remove(player.getUUID());
     }
 
     public static void lockServerRotation(PlayerEntity playerEntity, Side side) {
-        playerRotationLock.put(playerEntity.getUniqueID(), side);
+        playerRotationLock.put(playerEntity.getUUID(), side);
     }
 
     public static Side getServerRotationLock(PlayerEntity playerEntity) {
-        return playerRotationLock.get(playerEntity.getUniqueID());
+        return playerRotationLock.get(playerEntity.getUUID());
     }
 }

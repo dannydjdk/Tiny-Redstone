@@ -42,18 +42,18 @@ public class ClearPanelGUI extends Screen {
     }
 
     private void removeCells(){
-        ModNetworkHandler.sendToServer(new ClearPanelSync(panelTile.getPos()));
+        ModNetworkHandler.sendToServer(new ClearPanelSync(panelTile.getBlockPos()));
         close();
     }
 
     private void close() {
-        minecraft.displayGuiScreen(null);
+        minecraft.setScreen(null);
     }
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(GUI);
+        this.minecraft.getTextureManager().bind(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
         this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
@@ -63,6 +63,6 @@ public class ClearPanelGUI extends Screen {
 
 
     public static void open(PanelTile panelTile) {
-        Minecraft.getInstance().displayGuiScreen(new ClearPanelGUI(panelTile));
+        Minecraft.getInstance().setScreen(new ClearPanelGUI(panelTile));
     }
 }

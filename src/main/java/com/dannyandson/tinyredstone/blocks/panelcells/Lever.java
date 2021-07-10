@@ -1,8 +1,10 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -33,35 +35,35 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         TextureAtlasSprite sprite_cobble = RenderHelper.getSprite(TEXTURE_COBBLESTONE);
         TextureAtlasSprite sprite_lever = RenderHelper.getSprite(TEXTURE_LEVER);
         TextureAtlasSprite sprite_lever_top = RenderHelper.getSprite(TEXTURE_LEVER_TOP);
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)? RenderType.getSolid():RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
 
-        matrixStack.push();
+        matrixStack.pushPose();
         float x1 = 0.3125f, x2 = .6875f, y1 = 0.25f, y2 = 0.75f;
         float w = .375f, d = 0.5f,h=0.1875f;
 
         matrixStack.translate(0,0,h);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,-h,-y1);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,0,h,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1f-x1);
         RenderHelper.drawRectangle(builder,matrixStack,0,d,0,h,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,d);
         RenderHelper.drawRectangle(builder,matrixStack,0,w,0,h,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(0,0,w);
         RenderHelper.drawRectangle(builder,matrixStack,0,d,0,h,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(60));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(60));
         matrixStack.translate(0,0.03125f,0);
 
-        matrixStack.pop();
+        matrixStack.popPose();
 
         x1 = 0.4375f;
         x2 = 0.5625f;
@@ -69,23 +71,23 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         y2 = .625f;
 
         matrixStack.translate(0,0.40625,h/2f);
-        matrixStack.rotate(Vector3f.XP.rotationDegrees((active)?45:135));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees((active)?45:135));
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
 
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,sprite_lever_top,combinedLight,alpha);
 
@@ -144,9 +146,9 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
         PanelTile panelTile = cellPos.getPanelTile();
-        panelTile.getWorld().playSound(
-                panelTile.getPos().getX(), panelTile.getPos().getY(), panelTile.getPos().getZ(),
-                SoundEvents.BLOCK_LEVER_CLICK,
+        panelTile.getLevel().playLocalSound(
+                panelTile.getBlockPos().getX(), panelTile.getBlockPos().getY(), panelTile.getBlockPos().getZ(),
+                SoundEvents.LEVER_CLICK,
                 SoundCategory.BLOCKS, 0.25f, 2f, false
         );
         this.active=!this.active;

@@ -1,7 +1,7 @@
 package com.dannyandson.tinyredstone.network;
 
-import com.dannyandson.tinyredstone.blocks.IColorablePanelCell;
-import com.dannyandson.tinyredstone.blocks.IPanelCell;
+import com.dannyandson.tinyredstone.api.IColorablePanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import net.minecraft.network.PacketBuffer;
@@ -40,7 +40,7 @@ public class TinyBlockColorSync {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            TileEntity te =  ctx.get().getSender().getServerWorld().getTileEntity(this.pos);
+            TileEntity te =  ctx.get().getSender().getLevel().getBlockEntity(this.pos);
             if (te instanceof PanelTile)
             {
                 PanelCellPos cellPos = PanelCellPos.fromIndex((PanelTile) te,this.cellIndex);

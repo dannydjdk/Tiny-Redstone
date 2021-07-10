@@ -40,7 +40,7 @@ public class PanelCrashGUI  extends Screen {
         int lineY = relY+2;
         for (String line : crashTextComponent.getString().split("\n",5))
         {
-            addButton(new ModWidget(relX+2,lineY,WIDTH-2,50, ITextComponent.getTextComponentOrEmpty(line)));
+            addButton(new ModWidget(relX+2,lineY,WIDTH-2,50, ITextComponent.nullToEmpty(line)));
             lineY+=10;
         }
 
@@ -52,20 +52,20 @@ public class PanelCrashGUI  extends Screen {
     }
 
     private void close() {
-        minecraft.displayGuiScreen(null);
+        minecraft.setScreen(null);
     }
 
     private void enable() {
         panelTile.resetCrashFlag();
         panelTile.resetOverflownFlag();
-        ModNetworkHandler.sendToServer(new CrashFlagResetSync(panelTile.getPos()));
+        ModNetworkHandler.sendToServer(new CrashFlagResetSync(panelTile.getBlockPos()));
         this.close();
     }
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(GUI);
+        this.minecraft.getTextureManager().bind(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
         this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
@@ -75,7 +75,7 @@ public class PanelCrashGUI  extends Screen {
 
 
     public static void open(PanelTile panelTile) {
-        Minecraft.getInstance().displayGuiScreen(new PanelCrashGUI(panelTile));
+        Minecraft.getInstance().setScreen(new PanelCrashGUI(panelTile));
     }
 
 }

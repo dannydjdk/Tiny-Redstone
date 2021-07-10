@@ -1,6 +1,8 @@
 package com.dannyandson.tinyredstone.compat.hwyla;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.compat.CompatHandler;
 import mcp.mobius.waila.api.*;
@@ -13,7 +15,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -43,11 +44,11 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
             case 1:
                 return true;
             case 2:
-                return playerEntity.isSneaking();
+                return playerEntity.isCrouching();
             case 3:
-                return CompatHandler.isMeasuringDevice(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem());
+                return CompatHandler.isMeasuringDevice(playerEntity.getMainHandItem().getItem());
             case 4:
-                return CompatHandler.isTinyComponent(playerEntity.getHeldItem(Hand.MAIN_HAND).getItem());
+                return CompatHandler.isTinyComponent(playerEntity.getMainHandItem().getItem());
         }
         return true;
     }
@@ -57,7 +58,7 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
         if(accessor.getBlock() != null) {
             BlockPos pos = accessor.getPosition();
             World world = accessor.getWorld();
-            TileEntity tileEntity = world.getTileEntity(pos);
+            TileEntity tileEntity = world.getBlockEntity(pos);
 
             if (tileEntity instanceof PanelTile && show(accessor.getPlayer())) {
 
@@ -66,8 +67,8 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
 
                 if(!panelTile.isCovered() && block instanceof PanelBlock) {
                     PanelBlock panelBlock = (PanelBlock) block;
-                    BlockRayTraceResult result = new BlockRayTraceResult(accessor.getHitResult().getHitVec(), accessor.getSide(), pos, true);
-                    PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, accessor.getBlockState().get(BlockStateProperties.FACING), result);
+                    BlockRayTraceResult result = new BlockRayTraceResult(accessor.getHitResult().getLocation(), accessor.getSide(), pos, true);
+                    PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, accessor.getBlockState().getValue(BlockStateProperties.FACING), result);
 
 
                     if (panelCellPos != null && panelCellPos.getIPanelCell() != null) {
@@ -85,14 +86,14 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
     public void appendBody(List<ITextComponent> tooltip, IDataAccessor accessor, IPluginConfig config) {
         if(accessor.getBlock() != null) {
             BlockPos pos = accessor.getPosition();
-            TileEntity tileEntity = accessor.getWorld().getTileEntity(pos);
+            TileEntity tileEntity = accessor.getWorld().getBlockEntity(pos);
 
             if (tileEntity instanceof PanelTile && show(accessor.getPlayer())) {
                 PanelTile panelTile = (PanelTile) tileEntity;
 
                 if (!panelTile.isCovered()) {
 
-                    BlockRayTraceResult rtr = new BlockRayTraceResult(accessor.getHitResult().getHitVec(),accessor.getSide(),pos,true);
+                    BlockRayTraceResult rtr = new BlockRayTraceResult(accessor.getHitResult().getLocation(),accessor.getSide(),pos,true);
                     PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, rtr);
 
                     if (posInPanelCell != null) {
@@ -101,7 +102,7 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
                             boolean handled = false;
 
                             if (panelCell instanceof IPanelCellInfoProvider) {
-                                OverlayBlockInfo overlayBlockInfo = new OverlayBlockInfo(tooltip, accessor.getPlayer().isSneaking());
+                                OverlayBlockInfo overlayBlockInfo = new OverlayBlockInfo(tooltip, accessor.getPlayer().isCrouching());
                                 ((IPanelCellInfoProvider) panelCell).addInfo(overlayBlockInfo, panelTile, posInPanelCell);
                                 if(overlayBlockInfo.power > -1) {
                                     handled = true;
@@ -133,7 +134,7 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
     }
 
     private static void showBlockRedstonePower(List<ITextComponent> tooltip, World world, BlockPos pos, Direction sideHit) {
-        showRedstonePower(tooltip, world.getRedstonePower(pos, sideHit.getOpposite()));
+        showRedstonePower(tooltip, world.getSignal(pos, sideHit.getOpposite()));
     }
 
     private static void showRedstonePower(List<ITextComponent> tooltip, int power) {

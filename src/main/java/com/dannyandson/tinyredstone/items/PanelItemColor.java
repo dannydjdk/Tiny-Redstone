@@ -9,7 +9,6 @@ public class PanelItemColor implements IItemColor {
     @Override
     public int getColor(ItemStack p_getColor_1_, int p_getColor_2_)
     {
-
         if (p_getColor_1_.getTag()!=null && p_getColor_1_.getTag().contains("BlockEntityTag") ) {
             CompoundNBT blockEntityTag = p_getColor_1_.getTag().getCompound("BlockEntityTag");
             if (blockEntityTag.contains("color")) {

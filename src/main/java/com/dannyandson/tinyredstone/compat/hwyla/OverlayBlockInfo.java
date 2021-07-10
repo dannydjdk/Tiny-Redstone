@@ -1,6 +1,6 @@
 package com.dannyandson.tinyredstone.compat.hwyla;
 
-import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.compat.OverlayBlockInfoMode;
 import mcp.mobius.waila.api.RenderableTextComponent;
 import net.minecraft.item.ItemStack;

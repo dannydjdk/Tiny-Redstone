@@ -40,7 +40,7 @@ public class RepeaterCellGUI extends Screen {
         Integer redstoneTicks = repeaterCell.getTicks()/2;
 
 
-        this.tickCount = new ModWidget(relX,relY+21,WIDTH,20, ITextComponent.getTextComponentOrEmpty(redstoneTicks.toString()))
+        this.tickCount = new ModWidget(relX,relY+21,WIDTH,20, ITextComponent.nullToEmpty(redstoneTicks.toString()))
             .setTextHAlignment(ModWidget.HAlignment.CENTER).setTextVAlignment(ModWidget.VAlignment.MIDDLE);
 
         addButton(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
@@ -50,32 +50,32 @@ public class RepeaterCellGUI extends Screen {
 
         addButton(new ModWidget(relX,relY+3,WIDTH-2,20,new TranslationTextComponent("tinyredstone.gui.repeater.msg")))
             .setTextHAlignment(ModWidget.HAlignment.CENTER);
-        addButton(new Button(relX + 10, relY + 15, 20, 20, ITextComponent.getTextComponentOrEmpty("--"), button -> changeTicks(-20)));
-        addButton(new Button(relX + 35, relY + 15, 20, 20, ITextComponent.getTextComponentOrEmpty("-"), button -> changeTicks(-2)));
+        addButton(new Button(relX + 10, relY + 15, 20, 20, ITextComponent.nullToEmpty("--"), button -> changeTicks(-20)));
+        addButton(new Button(relX + 35, relY + 15, 20, 20, ITextComponent.nullToEmpty("-"), button -> changeTicks(-2)));
 
-        addButton(new Button(relX + 95, relY + 15, 20, 20, ITextComponent.getTextComponentOrEmpty("+"), button -> changeTicks(2)));
-        addButton(new Button(relX + 125, relY + 15, 20, 20, ITextComponent.getTextComponentOrEmpty("++"), button -> changeTicks(20)));
+        addButton(new Button(relX + 95, relY + 15, 20, 20, ITextComponent.nullToEmpty("+"), button -> changeTicks(2)));
+        addButton(new Button(relX + 125, relY + 15, 20, 20, ITextComponent.nullToEmpty("++"), button -> changeTicks(20)));
 
 
 
     }
 
     private void close() {
-        minecraft.displayGuiScreen(null);
+        minecraft.setScreen(null);
     }
 
     private void changeTicks(int change)
     {
         repeaterCell.setTicks(repeaterCell.getTicks()+change);
 
-        ModNetworkHandler.sendToServer(new RepeaterTickSync(panelTile.getPos(),cellIndex, repeaterCell.getTicks()));
+        ModNetworkHandler.sendToServer(new RepeaterTickSync(panelTile.getBlockPos(),cellIndex, repeaterCell.getTicks()));
 
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
 
         Integer redstoneTicks = repeaterCell.getTicks()/2;
         this.buttons.remove(this.tickCount);
-        this.tickCount = new ModWidget(relX,relY+21,WIDTH,20, ITextComponent.getTextComponentOrEmpty(redstoneTicks.toString()))
+        this.tickCount = new ModWidget(relX,relY+21,WIDTH,20, ITextComponent.nullToEmpty(redstoneTicks.toString()))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER).setTextVAlignment(ModWidget.VAlignment.MIDDLE);
         addButton(this.tickCount);
     }
@@ -88,7 +88,7 @@ public class RepeaterCellGUI extends Screen {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bindTexture(GUI);
+        this.minecraft.getTextureManager().bind(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
         this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
@@ -98,7 +98,7 @@ public class RepeaterCellGUI extends Screen {
 
 
     public static void open(PanelTile panelTile, Integer cellIndex, Repeater repeaterCell) {
-        Minecraft.getInstance().displayGuiScreen(new RepeaterCellGUI(panelTile, cellIndex, repeaterCell));
+        Minecraft.getInstance().setScreen(new RepeaterCellGUI(panelTile, cellIndex, repeaterCell));
     }
 
 }

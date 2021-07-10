@@ -21,27 +21,27 @@ public class PlaySound {
 
     public PlaySound(BlockPos pos, String namespace, String path, float volume, float pitch)
     {
-        this.pos=pos;
-        this.namespace=namespace;
-        this.path=path;
-        this.volume=volume;
-        this.pitch=pitch;
+        this.pos = pos;
+        this.namespace = namespace;
+        this.path = path;
+        this.volume = volume;
+        this.pitch = pitch;
     }
 
     public PlaySound(PacketBuffer buffer)
     {
-        this.pos= buffer.readBlockPos();
-        this.namespace = buffer.readString();
-        this.path= buffer.readString();
-        this.volume=buffer.readFloat();
-        this.pitch=buffer.readFloat();
+        this.pos = buffer.readBlockPos();
+        this.namespace = buffer.readUtf();
+        this.path = buffer.readUtf();
+        this.volume = buffer.readFloat();
+        this.pitch = buffer.readFloat();
     }
 
     public void toBytes(PacketBuffer buf)
     {
         buf.writeBlockPos(pos);
-        buf.writeString(this.namespace);
-        buf.writeString(this.path);
+        buf.writeUtf(this.namespace);
+        buf.writeUtf(this.path);
         buf.writeFloat(volume);
         buf.writeFloat(pitch);
     }
@@ -49,10 +49,10 @@ public class PlaySound {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            TileEntity te = Minecraft.getInstance().world.getTileEntity(this.pos);
+            TileEntity te = Minecraft.getInstance().level.getBlockEntity(this.pos);
             if (te instanceof PanelTile)
             {
-                te.getWorld().playSound(
+                te.getLevel().playLocalSound(
                         pos.getX(), pos.getY(), pos.getZ(),
                         new SoundEvent(new ResourceLocation(namespace,path)),
                         SoundCategory.BLOCKS, volume, pitch, false

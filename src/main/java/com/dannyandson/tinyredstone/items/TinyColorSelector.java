@@ -12,7 +12,7 @@ import java.util.List;
 public class TinyColorSelector extends RedstoneWrench {
 
     @Override
-    public  void  addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
+    public  void  appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
     {
         list.add(new TranslationTextComponent("message.item.tiny_color_selector"));
     }

@@ -1,7 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.compat.IOverlayBlockInfo;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -39,13 +39,13 @@ public class RedstoneBridge extends RedstoneDust {
 
         float red1 = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         float red2 = (signalStrength2==0)?.25f:.30f + (.04f*signalStrength2);
-        int color1 = ColorHelper.PackedColor.packColor(255,Math.round(red1*255),0,0);
-        int color2 = ColorHelper.PackedColor.packColor(255,Math.round(red2*255),0,0);
+        int color1 = ColorHelper.PackedColor.color(255,Math.round(red1*255),0,0);
+        int color2 = ColorHelper.PackedColor.color(255,Math.round(red2*255),0,0);
 
         TextureAtlasSprite sprite_redstone_dust = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST);
         TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
 
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
 
         matrixStack.translate(0,0,0.05);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.05f,s10+.05f,s6-.05f,s10+.05f,sprite_redstone_dust,combinedLight,0xFF888888, alpha);
@@ -55,43 +55,43 @@ public class RedstoneBridge extends RedstoneDust {
             RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
             if (crawlUpSide.contains(Side.RIGHT))
             {
-                matrixStack.push();
-                matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+                matrixStack.pushPose();
+                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
                 matrixStack.translate(0,0,1.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
-                matrixStack.pop();
+                matrixStack.popPose();
             }        }
         if (leftEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
             if (crawlUpSide.contains(Side.LEFT))
             {
-                matrixStack.push();
-                matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+                matrixStack.pushPose();
+                matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,0.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
-                matrixStack.pop();
+                matrixStack.popPose();
             }       }
-        matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         if (frontEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
             if (crawlUpSide.contains(Side.FRONT))
             {
-                matrixStack.push();
-                matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+                matrixStack.pushPose();
+                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
                 matrixStack.translate(0,0,1.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
-                matrixStack.pop();
+                matrixStack.popPose();
             }       }
         if (backEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
             if (crawlUpSide.contains(Side.BACK))
             {
-                matrixStack.push();
-                matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+                matrixStack.pushPose();
+                matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
-                matrixStack.pop();
+                matrixStack.popPose();
             }        }
 
     }

@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -54,7 +55,7 @@ public class PanelCellNeighbor {
         }
         else if (blockPos!=null)
         {
-            return panelTile.getWorld().getRedstonePower(blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            return panelTile.getLevel().getSignal(blockPos,panelTile.getDirectionFromSide(neighborDirection));
         }
         return 0;
     }
@@ -65,7 +66,7 @@ public class PanelCellNeighbor {
         }
         else if (blockPos!=null)
         {
-            return panelTile.getWorld().getStrongPower(blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            return panelTile.getLevel().getDirectSignal(blockPos,panelTile.getDirectionFromSide(neighborDirection));
         }
         return 0;
     }
@@ -73,7 +74,7 @@ public class PanelCellNeighbor {
     public boolean hasComparatorOverride()
     {
         if (blockPos!=null) {
-            return getNeighborBlockState().hasComparatorInputOverride();
+            return getNeighborBlockState().hasAnalogOutputSignal();
         }
         return false;
     }
@@ -81,7 +82,7 @@ public class PanelCellNeighbor {
     public int getComparatorOverride()
     {
         if (blockPos!=null && hasComparatorOverride())
-            return getNeighborBlockState().getComparatorInputOverride(panelTile.getWorld(), blockPos);;
+            return getNeighborBlockState().getAnalogOutputSignal(panelTile.getLevel(), blockPos);;
         return 0;
     }
 
@@ -116,7 +117,7 @@ public class PanelCellNeighbor {
     {
         BlockState blockState = getNeighborBlockState();
         if (blockState!=null)
-            return blockState.canConnectRedstone(panelTile.getWorld(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            return blockState.canConnectRedstone(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
         if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;
         return false;
@@ -138,7 +139,7 @@ public class PanelCellNeighbor {
         if (blockPos!=null)
         {
             if (blockState==null)
-                blockState=panelTile.getWorld().getBlockState(blockPos);
+                blockState=panelTile.getLevel().getBlockState(blockPos);
             return blockState;
         }
         return null;

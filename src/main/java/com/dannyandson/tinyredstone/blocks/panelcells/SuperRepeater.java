@@ -67,7 +67,7 @@ public class SuperRepeater extends Repeater {
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
         PanelTile panelTile = cellPos.getPanelTile();
-        if (panelTile.getWorld().isRemote)
+        if (panelTile.getLevel().isClientSide)
             RepeaterCellGUI.open(panelTile, cellPos.getIndex(), this);
         return false;
     }

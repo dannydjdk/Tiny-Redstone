@@ -13,7 +13,7 @@ public class PanelTileColor  implements IBlockColor {
     @Override
     public int getColor(BlockState state, @Nullable IBlockDisplayReader world, @Nullable BlockPos pos, int tint) {
         if (world != null) {
-            TileEntity te = world.getTileEntity(pos);
+            TileEntity te = world.getBlockEntity(pos);
             if (te instanceof PanelTile) {
                 PanelTile panelTile = (PanelTile) te;
                 return panelTile.getColor();

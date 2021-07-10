@@ -1,7 +1,11 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
+import com.dannyandson.tinyredstone.blocks.PanelCellPos;
+import com.dannyandson.tinyredstone.blocks.RenderHelper;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -38,45 +42,45 @@ public class Piston implements IPanelCell {
         TextureAtlasSprite sprite_inner_top = RenderHelper.getSprite(TEXTURE_PISTON_TOP);
 
 
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.getSolid():RenderType.getTranslucent());
+        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite_top = getSprite_top();
 
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
 
 
-        matrixStack.rotate(Vector3f.ZP.rotationDegrees(180));
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         matrixStack.translate(-1,-1,0);
 
         //draw top
-        matrixStack.push();
+        matrixStack.pushPose();
         matrixStack.translate(0,0,1.0);
         drawSide(matrixStack,builder,combinedLight, alpha);
-        matrixStack.pop();
+        matrixStack.popPose();
 
         //draw right side
-        matrixStack.push();
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(90));
+        matrixStack.pushPose();
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-1,0,1);
         drawSide(matrixStack,builder,combinedLight, alpha);
-        matrixStack.pop();
+        matrixStack.popPose();
 
         //draw left side
-        matrixStack.push();
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(-90));
+        matrixStack.pushPose();
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
         matrixStack.translate(0,0,0);
         drawSide(matrixStack,builder,combinedLight, alpha);
-        matrixStack.pop();
+        matrixStack.popPose();
 
         //draw bottom side
-        matrixStack.push();
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(180));
+        matrixStack.pushPose();
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(180));
         matrixStack.translate(-1,0,0);
         drawSide(matrixStack,builder,combinedLight, alpha);
-        matrixStack.pop();
+        matrixStack.popPose();
 
         //draw front (bottom texture of piston)
-        matrixStack.push();
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(90));
+        matrixStack.pushPose();
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
         matrixStack.translate(0,0,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_bottom,combinedLight,alpha);
 
@@ -85,10 +89,10 @@ public class Piston implements IPanelCell {
             matrixStack.translate(0,0,-1.75);
             RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_inner_top,combinedLight,alpha);
         }
-        matrixStack.pop();
+        matrixStack.popPose();
 
         //draw back (top texture of piston)
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         matrixStack.translate(0,-1, 1);
         if (renderExtended)
         {
@@ -109,29 +113,29 @@ public class Piston implements IPanelCell {
                 :RenderHelper.getSprite(TEXTURE_PISTON_SIDE);
 
 
-        matrixStack.push();
+        matrixStack.pushPose();
 
         if (renderExtended)
             matrixStack.scale(1,.75f,1);
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(180));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
         matrixStack.translate(0,-1,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_bottom,combinedLight,alpha);
-        matrixStack.pop();
+        matrixStack.popPose();
 
         if (renderExtended)
         {
-            matrixStack.push();
+            matrixStack.pushPose();
 
             matrixStack.translate(0,1.75,0);
             matrixStack.scale(1,.25f,1);
             RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_top,combinedLight,alpha);
 
             matrixStack.scale(.25f,4,1);
-            matrixStack.rotate(Vector3f.ZP.rotationDegrees(90));
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
             matrixStack.translate(-1,-2.5,-0.375);
             RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_top,combinedLight,alpha);
 
-            matrixStack.pop();
+            matrixStack.popPose();
         }
 
     }

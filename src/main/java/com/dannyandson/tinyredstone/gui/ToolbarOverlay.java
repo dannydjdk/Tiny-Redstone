@@ -31,8 +31,8 @@ public class ToolbarOverlay {
             final ClientPlayerEntity player = mcInstance.player;
 
             if (!player.isSpectator()) {
-                final int currentSlot = player.inventory.currentItem;
-                final ItemStack stack = player.inventory.mainInventory.get(currentSlot);
+                final int currentSlot = player.inventory.selected;
+                final ItemStack stack = player.inventory.items.get(currentSlot);
                 if (stack.getItem() instanceof PanelCellItem) {
                     final MainWindow window = event.getWindow();
                     final Side rotationLock = RotationLock.getRotationLock();
@@ -40,16 +40,16 @@ public class ToolbarOverlay {
 
                     if(rotationLock != null) {
                         // top-left corner of selected slot + 1/2 border + 1 padding
-                        final int x = (window.getScaledWidth() / 2 - 180/2 + currentSlot * 20) + 2 + 1;
-                        final int y = (window.getScaledHeight() - 20) + 1 + 1;
+                        final int x = (window.getGuiScaledWidth() / 2 - 180/2 + currentSlot * 20) + 2 + 1;
+                        final int y = (window.getGuiScaledHeight() - 20) + 1 + 1;
 
                         MatrixStack matrixStack = event.getMatrixStack();
 
-                        Minecraft.getInstance().getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
+                        Minecraft.getInstance().getTextureManager().bind(PlayerContainer.BLOCK_ATLAS);
                         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_ROTATION_LOCK);
 
                         RenderSystem.enableBlend();
-                        mcInstance.ingameGUI.blit(matrixStack,x,y,0,5,5,sprite);
+                        mcInstance.gui.blit(matrixStack,x,y,0,5,5,sprite);
                         RenderSystem.disableBlend();
                     }
                 }

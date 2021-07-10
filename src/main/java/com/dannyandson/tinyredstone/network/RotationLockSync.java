@@ -15,11 +15,11 @@ public class RotationLockSync {
     }
 
     public RotationLockSync(PacketBuffer buffer) {
-        this.rotationLock = buffer.readEnumValue(Side.class);
+        this.rotationLock = buffer.readEnum(Side.class);
     }
 
     public void toBytes(PacketBuffer buf) {
-        buf.writeEnumValue(rotationLock);
+        buf.writeEnum(rotationLock);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
