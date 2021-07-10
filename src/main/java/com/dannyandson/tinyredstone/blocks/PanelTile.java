@@ -179,6 +179,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     // This is where you load the data that you saved in writeToNBT
     @Override
     public void load(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+        int previousLightOutput = this.lightOutput;
+
         super.load(blockState, parentNBTTagCompound);
 
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
@@ -228,6 +230,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         else
         {
             panelCover=null;
+        }
+
+        if(this.lightOutput != previousLightOutput) {
+            this.level.getLightEngine().checkBlock(worldPosition);
         }
 
     }
