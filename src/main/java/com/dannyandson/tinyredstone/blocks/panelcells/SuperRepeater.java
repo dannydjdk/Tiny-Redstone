@@ -3,7 +3,6 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.gui.RepeaterCellGUI;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
@@ -23,29 +22,7 @@ public class SuperRepeater extends Repeater {
     @Override
     public boolean neighborChanged(PanelCellPos cellPos){
 
-        PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.RIGHT),
-                leftNeighbor = cellPos.getNeighbor(Side.LEFT),
-                backNeighbor = cellPos.getNeighbor(Side.BACK);
-
-        boolean changed=false;
-        if (backNeighbor!=null && backNeighbor.getWeakRsOutput() >0 && !input)
-        {
-            input=true;
-        }
-        else if ((backNeighbor==null || backNeighbor.getWeakRsOutput() ==0 ) && input)
-        {
-            input=false;
-        }
-
-        this.locked= (leftNeighbor != null && leftNeighbor.getStrongRsOutput() > 0 &&
-                (leftNeighbor.getNeighborIPanelCell() instanceof Repeater || leftNeighbor.getNeighborIPanelCell() instanceof Comparator ||
-                        (leftNeighbor.getNeighborBlockState() != null && (leftNeighbor.getNeighborBlockState().getBlock() == Blocks.REPEATER || leftNeighbor.getNeighborBlockState().getBlock() == Blocks.COMPARATOR))
-                ))
-                ||
-                (rightNeighbor != null && rightNeighbor.getStrongRsOutput() > 0 &&
-                        (rightNeighbor.getNeighborIPanelCell() instanceof Repeater || rightNeighbor.getNeighborIPanelCell() instanceof Comparator ||
-                                (rightNeighbor.getNeighborBlockState() != null && (rightNeighbor.getNeighborBlockState().getBlock() == Blocks.REPEATER || rightNeighbor.getNeighborBlockState().getBlock() == Blocks.COMPARATOR))
-                        ));
+        boolean changed = super.neighborChanged(cellPos);
 
         if (this.ticks==0 && ! this.locked && this.input!=this.output)
         {

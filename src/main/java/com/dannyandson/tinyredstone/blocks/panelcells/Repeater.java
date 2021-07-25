@@ -17,13 +17,12 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-import java.util.LinkedList;
-
 public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     protected boolean input = false;
     protected boolean output = false;
     protected boolean locked = false;
-    private final LinkedList<Boolean> queue = new LinkedList<>();
+    private int onPending = -1;
+    private int offPending = -1;
     protected Integer ticks = 2;
 
     public static ResourceLocation TEXTURE_REPEATER_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_repeater_on");
@@ -171,6 +170,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
 
         if (backNeighbor!=null && backNeighbor.getWeakRsOutput() >0 && !input)
         {
+            //input has switched from off to on
             input=true;
         }
         else if ((backNeighbor==null || backNeighbor.getWeakRsOutput() ==0 ) && input)
@@ -178,6 +178,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
             input=false;
         }
 
+        boolean wasLocked = this.locked;
         this.locked= (leftNeighbor != null && leftNeighbor.getStrongRsOutput() > 0 &&
                 (leftNeighbor.getNeighborIPanelCell() instanceof Repeater || leftNeighbor.getNeighborIPanelCell() instanceof Comparator ||
                         (leftNeighbor.getNeighborBlockState() != null && (leftNeighbor.getNeighborBlockState().getBlock() == Blocks.REPEATER || leftNeighbor.getNeighborBlockState().getBlock() == Blocks.COMPARATOR))
@@ -187,6 +188,9 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
                         (rightNeighbor.getNeighborIPanelCell() instanceof Repeater || rightNeighbor.getNeighborIPanelCell() instanceof Comparator ||
                                 (rightNeighbor.getNeighborBlockState() != null && (rightNeighbor.getNeighborBlockState().getBlock() == Blocks.REPEATER || rightNeighbor.getNeighborBlockState().getBlock() == Blocks.COMPARATOR))
                         ));
+        if (wasLocked && !locked && output!=input)
+            if (input)onPending=ticks;
+            else offPending=ticks;
 
         return false;
     }
@@ -223,28 +227,40 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     public boolean needsSolidBase(){return true;}
 
     /**
-     * Called at the beginning of each tick if isTicking() returned true on last call.
+     * Called each tick.
      *
+     * @param cellPos The PanelCellPos of this IPanelCell
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
     public boolean tick(PanelCellPos cellPos) {
-        while (this.queue.size()<this.ticks || this.queue.size()<1)
-            this.queue.add(this.input);
 
-        while (this.queue.size()>this.ticks)
-            this.queue.remove();
-
-        if (this.ticks>0) {
-            Boolean newOutput = this.queue.remove();
-            this.queue.add(input);
-
-            if (!this.locked && this.output != newOutput) {
-                this.output = newOutput;
-                return true;
+        if (this.input!=this.output){
+            if (this.input && this.onPending==-1)
+            {
+                this.onPending=this.ticks;
+            }
+            if (!this.input && this.offPending==-1){
+                this.offPending=this.ticks;
             }
         }
 
+        if (this.onPending>=0)
+            onPending--;
+        if (this.offPending>=0)
+            offPending--;
+        if (this.onPending == 0 && !this.locked) {
+            this.output = true;
+            if (this.input)
+                this.offPending=-1;
+            else
+                this.offPending=this.ticks;
+            return true;
+        }
+        if (this.offPending==0 && !this.locked && !input){
+            this.output=false;
+            return true;
+        }
         return false;
     }
 
@@ -277,14 +293,8 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         nbt.putBoolean("output",output);
         nbt.putBoolean("input",input);
         nbt.putBoolean("locked",locked);
-
-        StringBuilder queueString = new StringBuilder();
-        for (Object b : queue.toArray())
-        {
-            queueString.append(((Boolean) b) ? "1" : "0");
-        }
-        nbt.putString("queue", queueString.toString());
-
+        nbt.putInt("offPending",this.offPending);
+        nbt.putInt("onPending",this.onPending);
 
         nbt.putInt("ticks",this.ticks);
 
@@ -297,12 +307,8 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         this.input = compoundNBT.getBoolean("input");
         this.locked = compoundNBT.getBoolean("locked");
         this.ticks = compoundNBT.getInt("ticks");
-
-        String queueString = compoundNBT.getString("queue");
-        for (Byte b : queueString.getBytes())
-        {
-            queue.add(b==49);
-        }
+        this.offPending=compoundNBT.getInt("offPending");
+        this.onPending=compoundNBT.getInt("onPending");
 
     }
 
