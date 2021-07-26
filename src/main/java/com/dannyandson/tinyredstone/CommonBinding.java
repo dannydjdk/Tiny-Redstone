@@ -5,9 +5,9 @@ import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.Registration;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.Mod;
 public class CommonBinding {
     @SubscribeEvent
     public static void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         if(player.level.isClientSide) {
             RotationLock.removeLock(false);
         } else {
@@ -47,7 +47,7 @@ public class CommonBinding {
     {
         if (event.getPlayer().isCrouching() && PanelBlock.isPanelCellItem(event.getItemStack().getItem()))
         {
-            TileEntity te = event.getPlayer().level.getBlockEntity(event.getPos());
+            BlockEntity te = event.getPlayer().level.getBlockEntity(event.getPos());
             if (te instanceof PanelTile)
             {
                 Registration.REDSTONE_PANEL_BLOCK.get().use(te.getBlockState(),event.getPlayer().level,event.getPos(),event.getPlayer(),event.getHand(),event.getHitVec());

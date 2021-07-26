@@ -5,16 +5,16 @@ import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.properties.ComparatorMode;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.properties.ComparatorMode;
 
 public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     private Integer input1 = 0;
@@ -32,8 +32,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
     /**
      * Drawing the cell on the panel
-     *
-     * @param matrixStack     positioned for this cell
+     *  @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
      * @param buffer
@@ -41,8 +40,8 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
      * @param combinedOverlay
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_OFF);
 
@@ -95,7 +94,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
     }
 
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
+    private void add(VertexConsumer renderer, PoseStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
         renderer.vertex(stack.last().pose(), x, y, z)
                 .color(1.0f, 1.0f, 1.0f, alpha)
                 .uv(u, v)
@@ -216,7 +215,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player) {
         this.subtract=!this.subtract;
         return updateOutput();
     }
@@ -225,9 +224,9 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     public boolean hasActivation(){return true;}
 
     @Override
-    public CompoundNBT writeNBT() {
+    public CompoundTag writeNBT() {
 
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
         nbt.putInt("output",output);
         nbt.putInt("input1",input1);
         nbt.putInt("input2",input2);
@@ -240,7 +239,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void readNBT(CompoundNBT compoundNBT) {
+    public void readNBT(CompoundTag compoundNBT) {
         this.output = compoundNBT.getInt("output");
         this.input1 = compoundNBT.getInt("input1");
         this.input2 = compoundNBT.getInt("input2");

@@ -7,15 +7,19 @@ import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,9 +59,10 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
      * Drawing the cell on the panel
      *
      * @param matrixStack     positioned for this cell and scaled such that length and width are 1.0 and height is 0.5 above panel base
+     * @param buffer
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
+    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         red = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         int color = ColorHelper.PackedColor.color(255,Math.round(red*255),0,0);
@@ -277,7 +282,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player) {
         if(cellPos.getPanelTile().getLevel().isClientSide)
            return false;
 
@@ -323,7 +328,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
     public boolean hasActivation(){return true;}
 
     @Override
-    public CompoundNBT writeNBT() {
+    public CompoundTag writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("strength",this.signalStrength);
         nbt.putBoolean("front",frontEnabled);
@@ -340,7 +345,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void readNBT(CompoundNBT compoundNBT) {
+    public void readNBT(CompoundTag compoundNBT) {
         this.signalStrength = compoundNBT.getInt("strength");
         this.frontEnabled = compoundNBT.getBoolean("front");
         this.rightEnabled = compoundNBT.getBoolean("right");

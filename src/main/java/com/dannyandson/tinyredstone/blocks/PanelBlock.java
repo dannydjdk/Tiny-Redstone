@@ -9,28 +9,35 @@ import com.dannyandson.tinyredstone.gui.ClearPanelGUI;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.util.Constants;
 
@@ -39,11 +46,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.minecraft.util.Direction.*;
+import static net.minecraft.core.Direction.*;
 
-public class PanelBlock extends Block {
+public class PanelBlock extends BaseEntityBlock {
 
-    private static final Map<Direction,VoxelShape> BASE = new HashMap<>();
+    private static final Map<Direction, VoxelShape> BASE = new HashMap<>();
     static{
         BASE.put(UP ,
                 Block.box(0, 16, 0,16, 14, 16)
@@ -86,33 +93,28 @@ public class PanelBlock extends Block {
         return panelCellItemMap.get(panelCell);
     }
 
-    @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new PanelTile();
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new PanelTile(blockPos,blockState);
     }
 
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(BlockStateProperties.FACING);
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
         return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite());
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public VoxelShape getShape(BlockState state, IBlockReader source, BlockPos pos, ISelectionContext context) {
-        TileEntity te =  source.getBlockEntity(pos);
+    public VoxelShape getShape(BlockState state, BlockGetter source, BlockPos pos, CollisionContext context) {
+        BlockEntity te =  source.getBlockEntity(pos);
         if(te instanceof PanelTile)
         {
             return ((PanelTile) te).getVoxelShape();
@@ -137,14 +139,14 @@ public class PanelBlock extends Block {
      * Don't use for inputs; for redstone which is just "passing by", it will make the redstone connect to the side of the block
      * but it won't actually inject weak power into the block.
      *
-     * @param blockReader                 The current world
+     * @param world                 The current world
      * @param pos                         Block position in world of the wire that is trying to connect
      * @param directionFromNeighborToThis if not null: the side of the wire that is trying to make a horizontal connection to this block. If null: test for a stepped connection (i.e. the wire is trying to run up or down the side of solid block in order to connect to this block)
      * @return true if this is a power output for redstone, so that redstone wire should connect to it
      */
     @Override
-    public boolean canConnectRedstone(BlockState state, IBlockReader blockReader, BlockPos pos, @Nullable Direction directionFromNeighborToThis) {
-        TileEntity tileentity = blockReader.getBlockEntity(pos);
+    public boolean shouldCheckWeakPower(BlockState state, LevelReader world, BlockPos pos, Direction directionFromNeighborToThis) {
+        BlockEntity tileentity = world.getBlockEntity(pos);
         if (tileentity instanceof PanelTile && directionFromNeighborToThis != null) {
             PanelTile panelTile = (PanelTile) tileentity;
             Direction facing = directionFromNeighborToThis.getOpposite();
@@ -152,7 +154,7 @@ public class PanelBlock extends Block {
             return panelTile.hasCellsOnFace(facing);
 
         }
-        return super.canConnectRedstone(state, blockReader, pos, directionFromNeighborToThis);
+        return super.shouldCheckWeakPower(state, world, pos, directionFromNeighborToThis);
     }
 
     /**
@@ -167,8 +169,8 @@ public class PanelBlock extends Block {
      */
     @Override
     @SuppressWarnings("deprecation")
-    public int getSignal(BlockState state, IBlockReader blockReader, BlockPos pos, Direction directionFromNeighborToThis) {
-        TileEntity tileentity = blockReader.getBlockEntity(pos);
+    public int getSignal(BlockState state, BlockGetter blockReader, BlockPos pos, Direction directionFromNeighborToThis) {
+        BlockEntity tileentity = blockReader.getBlockEntity(pos);
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
 
@@ -192,8 +194,8 @@ public class PanelBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    public int getDirectSignal(BlockState state, IBlockReader blockReader, BlockPos pos, Direction directionFromNeighborToThis) {
-        TileEntity tileentity = blockReader.getBlockEntity(pos);
+    public int getDirectSignal(BlockState state, BlockGetter blockReader, BlockPos pos, Direction directionFromNeighborToThis) {
+        BlockEntity tileentity = blockReader.getBlockEntity(pos);
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
 
@@ -208,7 +210,7 @@ public class PanelBlock extends Block {
     // Only called on the server side.
     @Override
     @SuppressWarnings("deprecation")
-    public void neighborChanged(BlockState currentState, World world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
+    public void neighborChanged(BlockState currentState, Level world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
 
         Direction direction;
         if (pos.east().equals(neighborPos))
@@ -226,7 +228,7 @@ public class PanelBlock extends Block {
         else
             return;
 
-        TileEntity tileentity = world.getBlockEntity(pos);
+        BlockEntity tileentity = world.getBlockEntity(pos);
         if (tileentity instanceof PanelTile) {
                 boolean change = false;
                 PanelTile panelTile = (PanelTile) tileentity;
@@ -261,12 +263,12 @@ public class PanelBlock extends Block {
         return ToolType.get("wrench");
     }
 
-    private ItemStack getItemWithNBT(IBlockReader worldIn, BlockPos pos, BlockState state) {
-        TileEntity tileentity = worldIn.getBlockEntity(pos);
+    private ItemStack getItemWithNBT(BlockGetter worldIn, BlockPos pos, BlockState state) {
+        BlockEntity tileentity = worldIn.getBlockEntity(pos);
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
             ItemStack itemstack = getCloneItemStack(worldIn, pos, state);
-            CompoundNBT compoundnbt = panelTile.saveToNbt(new CompoundNBT());
+            CompoundTag compoundnbt = panelTile.saveToNbt(new CompoundTag());
             if (!compoundnbt.isEmpty()) {
                 itemstack.addTagElement("BlockEntityTag", compoundnbt);
             }
@@ -280,7 +282,7 @@ public class PanelBlock extends Block {
      * this block
      */
     @Override
-    public void playerWillDestroy(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
+    public void playerWillDestroy(Level worldIn, BlockPos pos, BlockState state, Player player) {
         if(!player.isCreative()) {
             ItemStack itemstack = getItemWithNBT(worldIn, pos, state);
             if(itemstack != null) {
@@ -293,11 +295,11 @@ public class PanelBlock extends Block {
     }
 
     @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        TileEntity te = world.getBlockEntity(pos);
+    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+        BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) te;
-            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(player.level,player));
+            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), Registration.REDSTONE_WRENCH.get().getHitResult(player.level,player));
             IPanelCell cell = panelTile.getIPanelCell(panelCellPos);
             if (cell != null) {
                 return panelCellItemMap.get(cell.getClass()).getDefaultInstance();
@@ -310,11 +312,11 @@ public class PanelBlock extends Block {
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult result) {
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult result) {
 
         boolean handled = false;
-        TileEntity te = world.getBlockEntity(pos);
-        if (te instanceof PanelTile && hand==Hand.MAIN_HAND) {
+        BlockEntity te = world.getBlockEntity(pos);
+        if (te instanceof PanelTile && hand==InteractionHand.MAIN_HAND) {
             PanelTile panelTile = (PanelTile) te;
             try {
 
@@ -342,9 +344,9 @@ public class PanelBlock extends Block {
                             TinyBlockGUI.open(panelTile, posInPanelCell.getIndex(), (IColorablePanelCell)posInPanelCell.getIPanelCell());
                     } else if (heldItem instanceof DyeItem) {
                         //dye the panel if right clicking with a dye
-                        int color = ((DyeItem) heldItem).getDyeColor().getColorValue();
+                        int color = ((DyeItem) heldItem).getDyeColor().getId();
                         if (color != panelTile.Color) {
-                            panelTile.Color = ((DyeItem) heldItem).getDyeColor().getColorValue();
+                            panelTile.Color = ((DyeItem) heldItem).getDyeColor().getId();
                             //remove an item from the player's stack
                             if (!player.isCreative())
                                 player.getItemInHand(hand).setCount(player.getItemInHand(hand).getCount() - 1);
@@ -458,15 +460,15 @@ public class PanelBlock extends Block {
             }
         }
         if(handled)
-            return ActionResultType.CONSUME;
+            return InteractionResult.CONSUME;
         return super.use(state, world, pos, player, hand, result);
     }
 
     @Override
-    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos)
+    public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos)
     {
         int ll = 0;
-        TileEntity te = world.getBlockEntity(pos);
+        BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) te;
             ll=panelTile.getLightOutput();
@@ -476,12 +478,12 @@ public class PanelBlock extends Block {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void attack(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+    public void attack(BlockState state, Level world, BlockPos pos, Player player) {
         Item heldItem = player.getMainHandItem().getItem();
 
         if ((heldItem==Registration.REDSTONE_WRENCH.get() || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)))
         {
-            TileEntity te = world.getBlockEntity(pos);
+            BlockEntity te = world.getBlockEntity(pos);
             if (te instanceof PanelTile) {
                 PanelTile panelTile = (PanelTile) te;
 
@@ -497,7 +499,7 @@ public class PanelBlock extends Block {
                                 ClearPanelGUI.open(panelTile);
                         }
                         else {
-                            BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
+                            BlockHitResult result = Registration.REDSTONE_WRENCH.get().getHitResult(world, player);
                             PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), result);
 
                             if (panelCellPos != null) {
@@ -516,12 +518,12 @@ public class PanelBlock extends Block {
         }
     }
 
-   protected void removeCell(PanelCellPos cellPos, @Nullable PlayerEntity player)
+   protected void removeCell(PanelCellPos cellPos, @Nullable Player player)
     {
         if (cellPos.getIPanelCell()!=null) {
 
             PanelTile panelTile = cellPos.getPanelTile();
-            World world = panelTile.getLevel();
+            Level world = panelTile.getLevel();
             BlockPos pos = panelTile.getBlockPos();
 
             // drop panel cell item
@@ -541,11 +543,11 @@ public class PanelBlock extends Block {
 
     }
 
-    private void removeCover(PanelTile panelTile,PlayerEntity player)
+    private void removeCover(PanelTile panelTile,Player player)
     {
         if (panelTile.isCovered())
         {
-            World world = panelTile.getLevel();
+            Level world = panelTile.getLevel();
             BlockPos pos = panelTile.getBlockPos();
 
             // drop panel cell item
@@ -591,5 +593,4 @@ public class PanelBlock extends Block {
     {
         return itemPanelCellMap.containsKey(item);
     }
-
 }

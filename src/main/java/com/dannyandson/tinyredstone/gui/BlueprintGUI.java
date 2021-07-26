@@ -4,18 +4,18 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.items.Blueprint;
 import com.dannyandson.tinyredstone.network.BlueprintSync;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.util.JsonUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -35,10 +35,10 @@ public class BlueprintGUI  extends Screen {
 
     private final ItemStack blueprint;
     private boolean dialogOpen = false;
-    private Widget button;
+    private Button button;
 
     protected BlueprintGUI(ItemStack blueprint) {
-        super(new TranslationTextComponent("tinyredstone.gui.blueprint.msg"));
+        super(new TranslatableComponent("tinyredstone.gui.blueprint.msg"));
         this.blueprint=blueprint;
     }
 
@@ -47,16 +47,16 @@ public class BlueprintGUI  extends Screen {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
 
-        addButton(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
-        addButton(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addButton(new Button(relX + 20, relY + 50, 80, 20, new TranslationTextComponent("tinyredstone.close"), button -> close()));
+        addWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
+        addWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
+        addWidget(new Button(relX + 20, relY + 50, 80, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
 
         if (this.blueprint.hasTag())
-            button=new Button(relX + 20, relY + 20, 80, 20, new TranslationTextComponent("tinyredstone.export"), button -> exportToFile());
+            button=new Button(relX + 20, relY + 20, 80, 20, new TranslatableComponent("tinyredstone.export"), button -> exportToFile());
         else
-            button=new Button(relX + 20, relY + 20, 80, 20, new TranslationTextComponent("tinyredstone.import"), button -> importFromFile());
+            button=new Button(relX + 20, relY + 20, 80, 20, new TranslatableComponent("tinyredstone.import"), button -> importFromFile());
 
-        addButton(button);
+        addWidget(button);
 
 
 
@@ -67,9 +67,9 @@ public class BlueprintGUI  extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bind(GUI);
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+       // RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindForSetup(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
         this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
@@ -86,8 +86,8 @@ public class BlueprintGUI  extends Screen {
     {
         if (!dialogOpen) {
             this.dialogOpen=true;
-            this.buttons.remove(button);
-            this.buttons.add(new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444));
+            this.renderables.remove(button);
+            this.renderables.add(new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444));
 
             new Thread(() -> {
 
@@ -97,7 +97,7 @@ public class BlueprintGUI  extends Screen {
                 filters.flip();
 
                 String path = TinyFileDialogs.tinyfd_saveFileDialog(
-                        new TranslationTextComponent("tinyredstone.save_file").getString(),
+                        new TranslatableComponent("tinyredstone.save_file").getString(),
                         "blueprint.json", filters, null
                 );
                 this.dialogOpen=false;
@@ -124,8 +124,8 @@ public class BlueprintGUI  extends Screen {
         if (!dialogOpen) {
             this.dialogOpen = true;
 
-            this.buttons.remove(button);
-            this.buttons.add(new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444));
+            this.renderables.remove(button);
+            this.renderables.add(new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444));
 
             new Thread(() -> {
 
@@ -137,7 +137,7 @@ public class BlueprintGUI  extends Screen {
 
 
                 String path = TinyFileDialogs.tinyfd_openFileDialog(
-                        new TranslationTextComponent("tinyredstone.choose_file").getString(),
+                        new TranslatableComponent("tinyredstone.choose_file").getString(),
                         null, filters, "JSON File (*.json)", false
                 );
                 this.dialogOpen=false;
@@ -159,14 +159,16 @@ public class BlueprintGUI  extends Screen {
 
                     try {
                         //will throw CommandSyntaxException, abort and log error if file is not valid NBT json
-                        CompoundNBT nbt = JsonToNBT.parseTag(data.toString());
-                        CompoundNBT cleanNBT = Blueprint.cleanUpBlueprintNBT(nbt);
+                        JsonParser jsonParser = new JsonParser();
+                        JsonElement jsonElement =  jsonParser.parse(data.toString());
+                        CompoundTag nbt = JsonUtils.readNBT(jsonElement.getAsJsonObject(),"");
+                        CompoundTag cleanNBT = Blueprint.cleanUpBlueprintNBT(nbt);
                         if (cleanNBT!=null) {
                             this.blueprint.setTag(cleanNBT);
                             ModNetworkHandler.sendToServer(new BlueprintSync(cleanNBT));
                         }
-                    } catch (CommandSyntaxException e) {
-                        TinyRedstone.LOGGER.error("CommandSyntaxException reading JSON from user file: " + e.getLocalizedMessage());
+                    } catch (JsonParseException e) {
+                        TinyRedstone.LOGGER.error("JsonParseException reading JSON from user file: " + e.getLocalizedMessage());
                     }
                 }
 

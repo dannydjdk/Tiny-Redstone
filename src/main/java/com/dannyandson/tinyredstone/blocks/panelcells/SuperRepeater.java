@@ -6,6 +6,7 @@ import com.dannyandson.tinyredstone.gui.RepeaterCellGUI;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 public class SuperRepeater extends Repeater {
 
@@ -42,7 +43,7 @@ public class SuperRepeater extends Repeater {
          * @return true if a change was made to the cell output
          */
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player) {
         PanelTile panelTile = cellPos.getPanelTile();
         if (panelTile.getLevel().isClientSide)
             RepeaterCellGUI.open(panelTile, cellPos.getIndex(), this);

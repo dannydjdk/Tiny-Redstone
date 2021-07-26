@@ -1,15 +1,15 @@
 package com.dannyandson.tinyredstone.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class ModWidget extends Widget {
-
+public class ModWidget extends AbstractWidget {
 
     public enum HAlignment {
         LEFT, CENTER, RIGHT
@@ -25,10 +25,10 @@ public class ModWidget extends Widget {
     private int bgcolor=-1;
     private int textWidth;
     private int textHeight;
-    private ITextComponent toolTipTextComponent;
+    private Component toolTipTextComponent;
     private ModWidget.IPressable pressedAction=null;
 
-    public ModWidget(int x, int y, int width, int height, ITextComponent title, int textColor, int bgColor)
+    public ModWidget(int x, int y, int width, int height, Component title, int textColor, int bgColor)
     {
         super(x, y, width, height, title);
         this.color=textColor;
@@ -39,24 +39,24 @@ public class ModWidget extends Widget {
         }
     }
 
-    public ModWidget(int x, int y, int width, int height, ITextComponent title, int textColor)
+    public ModWidget(int x, int y, int width, int height, Component title, int textColor)
     {
         this(x,y,width,height,title,textColor,-1);
 
     }
-    public ModWidget(int x, int y, int width, int height, ITextComponent title)
+    public ModWidget(int x, int y, int width, int height, Component title)
     {
         this(x,y,width,height,title,0xFFFFFFFF,-1);
 
     }
     public ModWidget(int x, int y, int width, int height, int bgColor)
     {
-        this(x,y,width,height,ITextComponent.nullToEmpty(""),0xFFFFFFFF,bgColor);
+        this(x,y,width,height,Component.nullToEmpty(""),0xFFFFFFFF,bgColor);
 
     }
     public ModWidget(int x, int y, int width, int height, int bgColor, ModWidget.IPressable pressedAction)
     {
-        this(x,y,width,height,ITextComponent.nullToEmpty(""),0xFFFFFFFF,bgColor);
+        this(x,y,width,height,Component.nullToEmpty(""),0xFFFFFFFF,bgColor);
         this.pressedAction=pressedAction;
     }
 
@@ -70,7 +70,7 @@ public class ModWidget extends Widget {
         return this;
     }
 
-    public ModWidget setToolTip(ITextComponent textComponent)
+    public ModWidget setToolTip(Component textComponent)
     {
         this.toolTipTextComponent = textComponent;
         return this;
@@ -89,10 +89,10 @@ public class ModWidget extends Widget {
     }
 
     @Override
-    public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTick) {
         if (visible) {
             int drawX,drawY;
-            FontRenderer fr = Minecraft.getInstance().font;
+            Font fr = Minecraft.getInstance().font;
 
 
             switch (halignment) {
@@ -142,9 +142,9 @@ public class ModWidget extends Widget {
     }
 
 
-    public void renderHoverToolTip(MatrixStack matrixStack, int mouseX, int mouseY) {
+    public void renderHoverToolTip(PoseStack matrixStack, int mouseX, int mouseY) {
         if (this.toolTipTextComponent != null) {
-            FontRenderer fr = Minecraft.getInstance().font;
+            Font fr = Minecraft.getInstance().font;
             int width = fr.width(this.toolTipTextComponent);
             int height = fr.lineHeight;
 
@@ -154,6 +154,10 @@ public class ModWidget extends Widget {
         }
     }
 
+    @Override
+    public void updateNarration(NarrationElementOutput p_169152_) {
+
+    }
 
     @OnlyIn(Dist.CLIENT)
     public interface IPressable {

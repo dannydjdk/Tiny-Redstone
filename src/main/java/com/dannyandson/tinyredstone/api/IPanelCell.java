@@ -4,20 +4,21 @@ import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelCellVoxelShape;
 import com.dannyandson.tinyredstone.blocks.Side;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 
 public interface IPanelCell {
 
     /**
      * Drawing the cell on the panel
-     * @param matrixStack positioned for this cell
+     * @param poseStack positioned for this cell
      *                    scaled to 1/8 block size such that length and width of cell are 1.0
      *                    starting point is (0,0,0)
+     * @param buffer
      */
-    void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha);
+    void render(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha);
 
     /**
      * Called when cell is placed on a panel, also when ghost preview is rendered
@@ -25,7 +26,7 @@ public interface IPanelCell {
      * @param player Placing player
      * @return true if output change occurred
      */
-    default boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
+    default boolean onPlace(PanelCellPos cellPos, Player player) {
         return neighborChanged(cellPos);
     }
 
@@ -90,13 +91,13 @@ public interface IPanelCell {
      * @param player player who activated (right-clicked) the cell
      * @return true if a change was made to the cell output
      */
-    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player){return false;}
+    default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player){return false;}
 
     default boolean hasActivation(){return false;}
 
-    CompoundNBT writeNBT();
+    CompoundTag writeNBT();
 
-    void readNBT(CompoundNBT compoundNBT);
+    void readNBT(CompoundTag compoundNBT);
 
     /**
      * Get the shape of the cell for defining the hit box

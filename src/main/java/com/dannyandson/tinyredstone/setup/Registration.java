@@ -7,18 +7,18 @@ import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
 import com.dannyandson.tinyredstone.items.*;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class Registration {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, TinyRedstone.MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, TinyRedstone.MODID);
-    private static final DeferredRegister<TileEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, TinyRedstone.MODID);
+    private static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, TinyRedstone.MODID);
 
     //called from main mod constructor
     public static void register() {
@@ -52,8 +52,8 @@ public class Registration {
     }
 
     public static final RegistryObject<PanelBlock> REDSTONE_PANEL_BLOCK = BLOCKS.register("redstone_panel", PanelBlock::new);
-    public static final RegistryObject<TileEntityType<PanelTile>> REDSTONE_PANEL_TILE =
-            TILES.register("redstone_panel", () -> TileEntityType.Builder.of(PanelTile::new, REDSTONE_PANEL_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<PanelTile>> REDSTONE_PANEL_TILE =
+            TILES.register("redstone_panel", () -> BlockEntityType.Builder.of(PanelTile::new, REDSTONE_PANEL_BLOCK.get()).build(null));
     public static final RegistryObject<Item> REDSTONE_PANEL_ITEM = ITEMS.register("redstone_panel",PanelItem::new);
 
     public static final RegistryObject<Item> TINY_REDSTONE_ITEM = ITEMS.register("tiny_redstone",PanelCellItem::new);

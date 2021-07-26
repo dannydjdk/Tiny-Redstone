@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.RotationLockRemoveSync;
 import com.dannyandson.tinyredstone.network.RotationLockSync;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -87,7 +88,7 @@ public class RotationLock {
         return rotationLock;
     }
 
-    public static void removeServerLock(PlayerEntity player) {
+    public static void removeServerLock(Player player) {
         playerRotationLock.remove(player.getUUID());
     }
 
@@ -95,7 +96,7 @@ public class RotationLock {
         playerRotationLock.put(playerEntity.getUUID(), side);
     }
 
-    public static Side getServerRotationLock(PlayerEntity playerEntity) {
+    public static Side getServerRotationLock(Player playerEntity) {
         return playerRotationLock.get(playerEntity.getUUID());
     }
 }

@@ -8,14 +8,16 @@ import com.dannyandson.tinyredstone.compat.CompatHandler;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
-import net.minecraft.item.Item;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fmlclient.registry.ClientRegistry;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,5 +62,6 @@ public class TinyRedstone {
         // do something that can only be done on the client
         LOGGER.info("Binding Renderer for Redstone Panel tile entity.", Registration.REDSTONE_PANEL_BLOCK.get());
         ClientRegistry.bindTileEntityRenderer(Registration.REDSTONE_PANEL_TILE.get(), PanelTileRenderer::new);
+        BlockEntityRenderers.register(Registration.REDSTONE_PANEL_TILE.get(),PanelTileRenderer::new);
     }
 }

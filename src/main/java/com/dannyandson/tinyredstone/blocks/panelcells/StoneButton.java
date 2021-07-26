@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.world.entity.player.Player;
 
 public class StoneButton extends Button {
     public static ResourceLocation TEXTURE_OAK_PLANKS = new ResourceLocation("minecraft","block/stone");
@@ -22,7 +23,7 @@ public class StoneButton extends Button {
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player){
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player){
         if (!active)
         {
             PanelTile panelTile = cellPos.getPanelTile();

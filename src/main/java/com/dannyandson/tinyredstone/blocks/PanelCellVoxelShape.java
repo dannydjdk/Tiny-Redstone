@@ -1,6 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
-import net.minecraft.util.math.vector.Vector3d;
+import com.mojang.math.Vector3d;
 
 public class PanelCellVoxelShape {
 

@@ -4,10 +4,13 @@ import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -33,9 +36,10 @@ public class RedstoneBridge extends RedstoneDust {
      * Drawing the cell on the panel
      *
      * @param matrixStack     positioned for this cell and scaled such that length and width are 1.0 and height is 0.5 above panel base
+     * @param buffer
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
+    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         float red1 = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         float red2 = (signalStrength2==0)?.25f:.30f + (.04f*signalStrength2);
@@ -180,14 +184,14 @@ public class RedstoneBridge extends RedstoneDust {
     }
 
     @Override
-    public CompoundNBT writeNBT() {
+    public CompoundTag writeNBT() {
         CompoundNBT nbt = super.writeNBT();
         nbt.putInt("strength2",this.signalStrength2);
         return nbt;
     }
 
     @Override
-    public void readNBT(CompoundNBT compoundNBT) {
+    public void readNBT(CompoundTag compoundNBT) {
         super.readNBT(compoundNBT);
         this.signalStrength2 = compoundNBT.getInt("strength2");
     }

@@ -7,25 +7,27 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.setup.Registration;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.DyeColor;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.CheckForNull;
@@ -35,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PanelTile extends TileEntity implements ITickableTileEntity {
+public class PanelTile extends BlockEntity implements BlockEntityTicker {
 
     //panel data (saved)
     private Map<Integer, IPanelCell> cells = new HashMap<>();
@@ -43,7 +45,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
 
-    protected Integer Color = DyeColor.GRAY.getColorValue();
+    protected Integer Color = DyeColor.GRAY.getId();
     private Integer lightOutput = 0;
     protected boolean flagLightUpdate = false;
     private boolean flagCrashed = false;
@@ -59,17 +61,16 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     //for backward compat. Remove on next major update (2.x.x).
     private boolean fixLegacyFacing = false;
 
-
-    public PanelTile() {
-        super(Registration.REDSTONE_PANEL_TILE.get());
+    public PanelTile(BlockPos p_155229_, BlockState p_155230_) {
+        super(Registration.REDSTONE_PANEL_TILE.get(), p_155229_, p_155230_);
     }
 
     //Tell Minecraft to render this block whenever any of the block space is within view.
     //By default, it only renders when the base model is within view.
     @Override
-    public AxisAlignedBB getRenderBoundingBox()
+    public AABB getRenderBoundingBox()
     {
-        return new AxisAlignedBB(getBlockPos());
+        return new AABB(getBlockPos());
     }
 
     /* When the world loads from disk, the server needs to send the TileEntity information to the client
@@ -80,50 +81,47 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     @Override
     @Nullable
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        CompoundNBT nbtTagCompound = new CompoundNBT();
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        CompoundTag nbtTagCompound = new CompoundTag();
         this.save(nbtTagCompound);
         int tileEntityType = -1;  // arbitrary number; only used for vanilla TileEntities.
-        return new SUpdateTileEntityPacket(this.worldPosition, tileEntityType, nbtTagCompound);
+        return new ClientboundBlockEntityDataPacket(this.worldPosition, tileEntityType, nbtTagCompound);
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
         if (this.level.isClientSide) {
             this.cells.clear();
             this.cellDirections.clear();
         }
-        BlockState blockState = this.level.getBlockState(worldPosition);
-        this.load(blockState, pkt.getTag());   // read from the nbt in the packet
+        this.load(pkt.getTag());   // read from the nbt in the packet
     }
 
     /* Creates a tag containing the TileEntity information, used by vanilla to transmit from server to client*/
     @Override
-    public CompoundNBT getUpdateTag() {
-        CompoundNBT nbtTagCompound = new CompoundNBT();
+    public CompoundTag getUpdateTag() {
+        CompoundTag nbtTagCompound = new CompoundTag();
         this.save(nbtTagCompound);
         return nbtTagCompound;
     }
 
     /* Populates this TileEntity with information from the tag, used by vanilla to transmit from server to client*/
     @Override
-    public void handleUpdateTag(BlockState blockState, CompoundNBT tag) {
+    public void handleUpdateTag(CompoundTag tag) {
         if (this.level.isClientSide) {
             this.cells.clear();
             this.cellDirections.clear();
         }
-        this.load(blockState, tag);
+        this.load(tag);
     }
 
+    public CompoundTag saveToNbt(CompoundTag CompoundTag) {
 
-
-    public CompoundNBT saveToNbt(CompoundNBT compoundNBT) {
-
-        CompoundNBT cellsNBT = new CompoundNBT();
+        CompoundTag cellsNBT = new CompoundTag();
 
         for (Integer key : this.cells.keySet()) {
             IPanelCell cell = this.cells.get(key);
-            CompoundNBT cellNBT = new CompoundNBT();
+            CompoundTag cellNBT = new CompoundTag();
 
             cellNBT.putString("class", cell.getClass().getCanonicalName());
             cellNBT.putString("facing", this.cellDirections.get(key).name());
@@ -132,21 +130,21 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             cellsNBT.put(key.toString(), cellNBT);
         }
 
-        compoundNBT.put("cells", cellsNBT);
-        if(this.Color!=DyeColor.GRAY.getColorValue())
-            compoundNBT.putInt("color", this.Color);
+        CompoundTag.put("cells", cellsNBT);
+        if(this.Color!=DyeColor.GRAY.getId())
+            CompoundTag.putInt("color", this.Color);
         if (panelCover!=null)
-            compoundNBT.putString("cover",panelCover.getClass().getCanonicalName());
+            CompoundTag.putString("cover",panelCover.getClass().getCanonicalName());
 
-        return compoundNBT;
+        return CompoundTag;
     }
 
     /* This is where you save any data that you don't want to lose when the tile entity unloads*/
     @Override
-    public CompoundNBT save(CompoundNBT parentNBTTagCompound) {
+    public CompoundTag save(CompoundTag parentNBTTagCompound) {
         try {
             if (this.strongPowerToNeighbors.size()==5) {
-                CompoundNBT strongPowerToNeighbors = new CompoundNBT();
+                CompoundTag strongPowerToNeighbors = new CompoundTag();
                 strongPowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.strongPowerToNeighbors.get(Side.FRONT));
                 strongPowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.strongPowerToNeighbors.get(Side.RIGHT));
                 strongPowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.strongPowerToNeighbors.get(Side.BACK));
@@ -155,7 +153,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 parentNBTTagCompound.put("strong_power_outgoing", strongPowerToNeighbors);
             }
             if (this.weakPowerToNeighbors.size()==5) {
-                CompoundNBT weakPowerToNeighbors = new CompoundNBT();
+                CompoundTag weakPowerToNeighbors = new CompoundTag();
                 weakPowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.weakPowerToNeighbors.get(Side.FRONT));
                 weakPowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.weakPowerToNeighbors.get(Side.RIGHT));
                 weakPowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BACK));
@@ -178,16 +176,16 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     // This is where you load the data that you saved in writeToNBT
     @Override
-    public void load(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+    public void load(CompoundTag parentNBTTagCompound) {
         int previousLightOutput = this.lightOutput;
 
-        super.load(blockState, parentNBTTagCompound);
+        super.load(parentNBTTagCompound);
 
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
 
         this.loadCellsFromNBT(parentNBTTagCompound,true);
 
-        CompoundNBT strongPowerToNeighbors = parentNBTTagCompound.getCompound("strong_power_outgoing");
+        CompoundTag strongPowerToNeighbors = parentNBTTagCompound.getCompound("strong_power_outgoing");
         if (!strongPowerToNeighbors.isEmpty()) {
             this.strongPowerToNeighbors.put(Side.FRONT, strongPowerToNeighbors.getInt(Side.FRONT.ordinal() + ""));
             this.strongPowerToNeighbors.put(Side.RIGHT, strongPowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
@@ -195,7 +193,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.strongPowerToNeighbors.put(Side.LEFT,  strongPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
             this.strongPowerToNeighbors.put(Side.TOP,  strongPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
         }
-        CompoundNBT weakPowerToNeighbors = parentNBTTagCompound.getCompound("weak_power_outgoing");
+        CompoundTag weakPowerToNeighbors = parentNBTTagCompound.getCompound("weak_power_outgoing");
         if (!weakPowerToNeighbors.isEmpty()) {
             this.weakPowerToNeighbors.put(Side.FRONT, weakPowerToNeighbors.getInt(Side.FRONT.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.RIGHT, weakPowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
@@ -238,12 +236,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     }
 
-    public void loadCellsFromNBT(CompoundNBT parentNBTTagCompound,boolean fixFacing)
+    public void loadCellsFromNBT(CompoundTag parentNBTTagCompound,boolean fixFacing)
     {
-        CompoundNBT cellsNBT = parentNBTTagCompound.getCompound("cells");
+        CompoundTag cellsNBT = parentNBTTagCompound.getCompound("cells");
 
         for (String index : cellsNBT.getAllKeys()) {
-            CompoundNBT cellNBT = cellsNBT.getCompound(index);
+            CompoundTag cellNBT = cellsNBT.getCompound(index);
             if (cellNBT.contains("data")) {
                 if (this.cells.size()==0)
                     this.flagUpdate =true;
@@ -280,19 +278,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         clearVoxelShape();
     }
 
-    /**
-     * Don't render the object if the player is too far away
-     *
-     * @return the maximum distance squared at which the TER should render
-     */
     @Override
-    public double getViewDistance() {
-        final int MAXIMUM_DISTANCE_IN_BLOCKS = 16;
-        return MAXIMUM_DISTANCE_IN_BLOCKS * MAXIMUM_DISTANCE_IN_BLOCKS;
-    }
-
-    @Override
-    public void tick() {
+    public void tick(Level p_155253_, BlockPos p_155254_, BlockState p_155255_, BlockEntity p_155256_) {
         try {
             if (!flagCrashed) {
                 boolean dirty = false;
@@ -320,7 +307,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                                 level.playLocalSound(
                                         worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(),
                                         panelCell instanceof StoneButton ? SoundEvents.STONE_BUTTON_CLICK_OFF : SoundEvents.WOODEN_BUTTON_CLICK_OFF,
-                                        SoundCategory.BLOCKS, 0.25f, 2f, false
+                                        SoundSource.BLOCKS, 0.25f, 2f, false
                                 );
                             }
                             updateNeighborCells(cellPos);
@@ -394,7 +381,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             level.playLocalSound(
                     worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(),
                     (((Piston) panelCell).isExtended()) ? SoundEvents.PISTON_EXTEND : SoundEvents.PISTON_CONTRACT,
-                    SoundCategory.BLOCKS, 0.25f, 2f, false
+                    SoundSource.BLOCKS, 0.25f, 2f, false
             );
 
             if (moverPos != null) {
@@ -486,7 +473,6 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
     }
 
-    @Override
     public void rotate(Rotation rotationIn) {
 
 
@@ -859,7 +845,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public int getColor() {
         if (this.Color == null) {
-            return DyeColor.GRAY.getColorValue();
+            return DyeColor.GRAY.getId();
         }
         return this.Color;
     }
@@ -1065,7 +1051,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         return null;
     }
 
-    protected Direction getPlayerDirectionFacing(PlayerEntity player, boolean allowVertical){
+    protected Direction getPlayerDirectionFacing(Player player, boolean allowVertical){
 
         Direction panelFacing = getBlockState().getValue(BlockStateProperties.FACING);
 
@@ -1120,7 +1106,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             cellPos.getPanelTile().getLevel().playLocalSound(
                     pos.getX(), pos.getY(), pos.getZ(),
                     SoundEvents.STONE_BREAK,
-                    SoundCategory.BLOCKS, 0.15f, 2f, false
+                    SoundSource.BLOCKS, 0.15f, 2f, false
             );
 
             //let neighbors know about vacancy
@@ -1141,14 +1127,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         }
     }
 
-    public void removeAllCells(@Nullable PlayerEntity player){
+    public void removeAllCells(@Nullable Player player){
         Object[] indices = cells.keySet().toArray();
         for (Object index : indices){
             ((PanelBlock)this.getBlockState().getBlock()).removeCell(PanelCellPos.fromIndex(this,(Integer) index),player);
         }
     }
 
-    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing, PlayerEntity player)
+    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing, Player player)
     {
         int cellIndex = cellPos.getIndex();
         cellDirections.put(cellIndex, facing);
@@ -1158,7 +1144,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         cellPos.getPanelTile().getLevel().playLocalSound(
                 pos.getX(), pos.getY(), pos.getZ(),
                 SoundEvents.STONE_PLACE,
-                SoundCategory.BLOCKS, 0.15f, 2f, false
+                SoundSource.BLOCKS, 0.15f, 2f, false
         );
 
         if (panelCell.onPlace(cellPos,player))
@@ -1177,7 +1163,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public VoxelShape getVoxelShape(){
 
-        if (isCovered())return VoxelShapes.block();
+        if (isCovered())return Shapes.block();
 
         if (voxelShape==null) {
             switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
@@ -1215,22 +1201,22 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
                         switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
                             case UP:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, 16 - levelStart, 16 - columnStart, rowEnd, 16 - levelEnd, 16 - columnEnd));
+                                voxelShape = Shapes.or(voxelShape, Block.box(rowStart, 16 - levelStart, 16 - columnStart, rowEnd, 16 - levelEnd, 16 - columnEnd));
                                 break;
                             case NORTH:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, 16 - columnStart, levelStart, rowEnd, 16 - columnEnd, levelEnd));
+                                voxelShape = Shapes.or(voxelShape, Block.box(rowStart, 16 - columnStart, levelStart, rowEnd, 16 - columnEnd, levelEnd));
                                 break;
                             case EAST:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(16 - levelStart, rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd));
+                                voxelShape = Shapes.or(voxelShape, Block.box(16 - levelStart, rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd));
                                 break;
                             case SOUTH:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd, 16 - levelEnd));
+                                voxelShape = Shapes.or(voxelShape, Block.box(rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd, 16 - levelEnd));
                                 break;
                             case WEST:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(levelStart, 16 - rowStart, columnStart, levelEnd, 16 - rowEnd, columnEnd));
+                                voxelShape = Shapes.or(voxelShape, Block.box(levelStart, 16 - rowStart, columnStart, levelEnd, 16 - rowEnd, columnEnd));
                                 break;
                             default: //DOWN
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
+                                voxelShape = Shapes.or(voxelShape, Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
                         }
                     }
                 }

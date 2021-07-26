@@ -8,14 +8,18 @@ import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.world.entity.player.Player;
 
 public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     protected boolean input = false;
@@ -34,9 +38,10 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
+     * @param buffer
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
+    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = this.getRepeaterTexture();
@@ -273,7 +278,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
      * @return true if a change was made to the cell output
      */
     @Override
-    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player) {
+    public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player) {
         if (ticks<8)
         {
             ticks+=2;
@@ -288,7 +293,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     public boolean hasActivation(){return true;}
 
     @Override
-    public CompoundNBT writeNBT() {
+    public CompoundTag writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("output",output);
         nbt.putBoolean("input",input);
@@ -302,7 +307,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     }
 
     @Override
-    public void readNBT(CompoundNBT compoundNBT) {
+    public void readNBT(CompoundTag compoundNBT) {
         this.output = compoundNBT.getBoolean("output");
         this.input = compoundNBT.getBoolean("input");
         this.locked = compoundNBT.getBoolean("locked");

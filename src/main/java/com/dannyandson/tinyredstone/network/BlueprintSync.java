@@ -1,36 +1,36 @@
 package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.items.Blueprint;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 public class BlueprintSync {
 
-    private final CompoundNBT nbt;
+    private final CompoundTag nbt;
 
-    public BlueprintSync(CompoundNBT nbt)
+    public BlueprintSync(CompoundTag nbt)
     {
         this.nbt=nbt;
     }
 
-    public BlueprintSync(PacketBuffer buffer)
+    public BlueprintSync(FriendlyByteBuf buffer)
     {
         this.nbt=buffer.readNbt();
     }
 
-    public void toBytes(PacketBuffer buf)
+    public void toBytes(FriendlyByteBuf buf)
     {
         buf.writeNbt(nbt);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(()-> {
-            ServerPlayerEntity player = ctx.get().getSender();
+            ServerPlayer player = ctx.get().getSender();
             if (player != null) {
                 ItemStack blueprint = ctx.get().getSender().getMainHandItem();
                 if (blueprint.getItem() instanceof Blueprint) {

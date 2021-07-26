@@ -8,19 +8,19 @@ import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.gui.BlueprintGUI;
 import com.dannyandson.tinyredstone.setup.ModSetup;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,20 +35,20 @@ public class Blueprint extends Item {
     }
 
     @Override
-    public  void  appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags)
+    public  void  appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags)
     {
         if (stack.getTag() !=null && stack.getTag().contains("blueprint"))
         {
-            list.add(new TranslationTextComponent("message.item.blueprint.full"));
+            list.add(new TranslatableComponent("message.item.blueprint.full"));
             Map<Item,Integer> blueprintItems = getRequiredComponents(stack.getTagElement("blueprint"));
             for (Item item : blueprintItems.keySet())
             {
-                list.add(ITextComponent.nullToEmpty(item.getRegistryName().toString() + " : " + blueprintItems.get(item)));
+                list.add(Component.nullToEmpty(item.getRegistryName().toString() + " : " + blueprintItems.get(item)));
             }
         }
         else
         {
-            list.add(new TranslationTextComponent("message.item.blueprint.empty"));
+            list.add(new TranslatableComponent("message.item.blueprint.empty"));
         }
     }
 
@@ -56,17 +56,17 @@ public class Blueprint extends Item {
     //called when item is used on a block
     @Override
     @Nonnull
-    public ActionResultType useOn(ItemUseContext context) {
-        TileEntity te = context.getLevel().getBlockEntity(context.getClickedPos());
+    public InteractionResult useOn(UseOnContext context) {
+        BlockEntity te = context.getLevel().getBlockEntity(context.getClickedPos());
         if (te instanceof PanelTile)
         {
             PanelTile panelTile = (PanelTile)te;
             if (context.getItemInHand().getTag() !=null && context.getItemInHand().getTag().contains("blueprint"))
             {
-                PlayerEntity player = context.getPlayer();
+                Player player = context.getPlayer();
                 if (panelTile.getCellCount()==0 && player!=null)
                 {
-                    CompoundNBT blueprintNBT = context.getItemInHand().getTagElement("blueprint");
+                    CompoundTag blueprintNBT = context.getItemInHand().getTagElement("blueprint");
                     Map<Item,Integer> items = getRequiredComponents(blueprintNBT);
                     if (player.isCreative() || playerHasSufficientComponents(items, player)) {
 
@@ -82,7 +82,7 @@ public class Blueprint extends Item {
                             for (Item item : items.keySet())
                             {
                                 int itemsToRemove = items.get(item);
-                                for(ItemStack invStack : player.inventory.items)
+                                for(ItemStack invStack : player.getInventory().items)
                                 {
                                     if (invStack.getItem().equals(item))
                                     {
@@ -99,8 +99,8 @@ public class Blueprint extends Item {
                 }
             }
             else {
-                CompoundNBT nbt = new CompoundNBT();
-                CompoundNBT blueprintNBT = panelTile.saveToNbt(new CompoundNBT());
+                CompoundTag nbt = new CompoundTag();
+                CompoundTag blueprintNBT = panelTile.saveToNbt(new CompoundTag());
                 nbt.putInt("CustomModelData",1);
                 nbt.put("blueprint",blueprintNBT);
 
@@ -109,24 +109,24 @@ public class Blueprint extends Item {
             }
         }
 
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     //called when item is right clicked in the air
     @Override
-    public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
+    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
         if(worldIn.isClientSide && Config.JSON_BLUEPRINT.get())
             BlueprintGUI.open(playerIn.getItemInHand(handIn));
         return super.use(worldIn, playerIn, handIn);
     }
 
-    private static Map<Item,Integer> getRequiredComponents(CompoundNBT blueprintNBT)
+    private static Map<Item,Integer> getRequiredComponents(CompoundTag blueprintNBT)
     {
         Map<Item,Integer> items = new HashMap<>();
 
         if (blueprintNBT.contains("cells"))
         {
-            CompoundNBT cellsNBT = blueprintNBT.getCompound("cells");
+            CompoundTag cellsNBT = blueprintNBT.getCompound("cells");
             for (String key : cellsNBT.getAllKeys())
             {
                 try {
@@ -149,13 +149,13 @@ public class Blueprint extends Item {
         }
         return items;
     }
-    private static boolean playerHasSufficientComponents(Map<Item,Integer> items, PlayerEntity player)
+    private static boolean playerHasSufficientComponents(Map<Item,Integer> items, Player player)
     {
         for (Item item : items.keySet())
         {
             ItemStack itemStack = new ItemStack(item);
             int count = 0;
-            for(ItemStack invStack : player.inventory.items)
+            for(ItemStack invStack : player.getInventory().items)
             {
                 if (invStack.getItem().equals(itemStack.getItem()))
                 {
@@ -171,20 +171,20 @@ public class Blueprint extends Item {
     /**
      * Checks nbt for valid blueprint data. Removes any irrelevant data or cells with no definitions installed.
      * RETURNS NULL if no valid data found.
-     * @param nbt CompoundNBT to be cleaned up - usually acquired untrusted source such as a json file or network
+     * @param nbt CompoundTag to be cleaned up - usually acquired untrusted source such as a json file or network
      * @return cleaned up NBT with any irrelevant date removed. NULL if no valid data found.
      */
     @Nullable
-    public static CompoundNBT cleanUpBlueprintNBT(CompoundNBT nbt)
+    public static CompoundTag cleanUpBlueprintNBT(CompoundTag nbt)
     {
         if (nbt.contains("blueprint"))
         {
-            CompoundNBT blueprintNBT = nbt.getCompound("blueprint");
+            CompoundTag blueprintNBT = nbt.getCompound("blueprint");
             if (blueprintNBT.contains("cells"))
             {
-                CompoundNBT newCellsNBT = new CompoundNBT();
+                CompoundTag newCellsNBT = new CompoundTag();
 
-                CompoundNBT cellsNBT = blueprintNBT.getCompound("cells");
+                CompoundTag cellsNBT = blueprintNBT.getCompound("cells");
                 for (String key : cellsNBT.getAllKeys())
                 {
                     try {
@@ -199,8 +199,8 @@ public class Blueprint extends Item {
 
                 }
 
-                CompoundNBT newNBT = new CompoundNBT();
-                CompoundNBT newBlueprintNBT = new CompoundNBT();
+                CompoundTag newNBT = new CompoundTag();
+                CompoundTag newBlueprintNBT = new CompoundTag();
                 newNBT.putInt("CustomModelData",1);
                 newBlueprintNBT.put("cells",newCellsNBT);
                 newNBT.put("blueprint",newBlueprintNBT);

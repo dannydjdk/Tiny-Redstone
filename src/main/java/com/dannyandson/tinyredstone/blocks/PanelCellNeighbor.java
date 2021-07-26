@@ -2,9 +2,9 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class PanelCellNeighbor {
     private IPanelCell iPanelCell=null;
@@ -37,7 +37,7 @@ public class PanelCellNeighbor {
      * @param blockPos Position of the neighbor block
      * @param neighborDirection Direction of the neighbor block relative to the panel facing
      */
-    PanelCellNeighbor(PanelTile panelTile,BlockPos blockPos,Side neighborDirection)
+    PanelCellNeighbor(PanelTile panelTile, BlockPos blockPos, Side neighborDirection)
     {
         this.blockPos=blockPos;
         this.panelTile=panelTile;
@@ -117,7 +117,7 @@ public class PanelCellNeighbor {
     {
         BlockState blockState = getNeighborBlockState();
         if (blockState!=null)
-            return blockState.canConnectRedstone(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            return blockState.shouldCheckWeakPower(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
         if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;
         return false;

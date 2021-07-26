@@ -1,12 +1,12 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.api.IPanelCell;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.CheckForNull;
 
@@ -68,11 +68,11 @@ public class PanelCellPos {
         return null;
     }
 
-    public static PanelCellPos fromHitVec(PanelTile panelTile, Direction panelFacing, BlockRayTraceResult result) {
+    public static PanelCellPos fromHitVec(PanelTile panelTile, Direction panelFacing, BlockHitResult result) {
 
         BlockPos pos = panelTile.getBlockPos();
         Direction rayTraceDirection = result.getDirection().getOpposite();
-        Vector3d hitVec = result.getLocation().add((double)rayTraceDirection.getStepX()*.001d,(double)rayTraceDirection.getStepY()*.001d,(double)rayTraceDirection.getStepZ()*.001d);
+        Vec3 hitVec = result.getLocation().add((double)rayTraceDirection.getStepX()*.001d,(double)rayTraceDirection.getStepY()*.001d,(double)rayTraceDirection.getStepZ()*.001d);
 
         double relX,relY,relZ;
 
@@ -173,7 +173,7 @@ public class PanelCellPos {
         if (cellPos==null && side!=Side.TOP && side!=Side.BOTTOM)
         {
             Direction direction = panelTile.getDirectionFromSide(side);
-            TileEntity te = panelTile.getLevel().getBlockEntity(panelTile.getBlockPos().relative(direction));
+            BlockEntity te = panelTile.getLevel().getBlockEntity(panelTile.getBlockPos().relative(direction));
 
             if (te instanceof PanelTile)
             {

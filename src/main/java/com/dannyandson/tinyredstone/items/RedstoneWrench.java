@@ -17,6 +17,11 @@ import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,8 +64,8 @@ public class RedstoneWrench extends Item {
         return !(state.getBlock() instanceof PanelBlock);
     }
 
-    public BlockRayTraceResult getBlockRayTraceResult(World world, PlayerEntity player)
+    public BlockHitResult getHitResult(Level world, Player player)
     {
-        return Item.getPlayerPOVHitResult(world,player,RayTraceContext.FluidMode.ANY);
+        return Item.getPlayerPOVHitResult(world,player, ClipContext.Fluid.ANY);
     }
 }
