@@ -29,6 +29,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -52,7 +54,7 @@ public class PanelBlock extends BaseEntityBlock {
     private static final Map<Direction, VoxelShape> BASE = new HashMap<>();
     static{
         BASE.put(UP ,
-                Block.box(0, 16, 0,16, 14, 16)
+                Block.box(0, 14, 0,16, 16, 16)
         );
         BASE.put(DOWN ,
                 Block.box(0,0,0,16,2,16)
@@ -61,10 +63,10 @@ public class PanelBlock extends BaseEntityBlock {
                 Block.box(0, 0, 0,16, 16, 2)
         );
         BASE.put(EAST ,
-                Block.box(16,0,0,14,16,16)
+                Block.box(14,0,0,16,16,16)
         );
         BASE.put(SOUTH ,
-                Block.box(0,0,16,16,16,14)
+                Block.box(0,0,14,16,16,16)
         );
         BASE.put(WEST ,
                 Block.box(0,0,0,2,16,16)
@@ -98,6 +100,14 @@ public class PanelBlock extends BaseEntityBlock {
         return new PanelTile(blockPos,blockState);
     }
 
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return (level1, blockPos, blockState, t) -> {
+            if (t instanceof PanelTile panelTile)
+                panelTile.tick();
+        };
+    }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

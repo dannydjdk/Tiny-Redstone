@@ -10,6 +10,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
@@ -39,6 +40,8 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
     private double cellSize = 1d/8d;
 
+    public PanelTileRenderer(BlockEntityRendererProvider.Context context){
+    }
 
     @Override
     public void render(PanelTile tileEntity, float p_112308_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
@@ -150,8 +153,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
     }
 
     public static void register() {
-        //TODO 1.17 block entity renderer registration
-        //BlockEntityRenderers.register(Registration.REDSTONE_PANEL_TILE.get(),PanelTileRenderer::new);
+         BlockEntityRenderers.register(Registration.REDSTONE_PANEL_TILE.get(),PanelTileRenderer::new);
     }
 
     @CheckForNull

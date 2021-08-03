@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PanelTile extends BlockEntity implements BlockEntityTicker {
+public class PanelTile extends BlockEntity {
 
     //panel data (saved)
     private Map<Integer, IPanelCell> cells = new HashMap<>();
@@ -278,8 +278,7 @@ public class PanelTile extends BlockEntity implements BlockEntityTicker {
         clearVoxelShape();
     }
 
-    @Override
-    public void tick(Level p_155253_, BlockPos p_155254_, BlockState p_155255_, BlockEntity p_155256_) {
+    public void tick() {
         try {
             if (!flagCrashed) {
                 boolean dirty = false;
