@@ -1,10 +1,10 @@
 package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.blocks.PanelTile;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -16,12 +16,12 @@ public class CrashFlagResetSync {
         this.pos=pos;
     }
 
-    public CrashFlagResetSync(PacketBuffer buffer)
+    public CrashFlagResetSync(FriendlyByteBuf buffer)
     {
         this.pos= buffer.readBlockPos();
     }
 
-    public void toBytes(PacketBuffer buf)
+    public void toBytes(FriendlyByteBuf buf)
     {
         buf.writeBlockPos(pos);
     }
@@ -29,7 +29,7 @@ public class CrashFlagResetSync {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            TileEntity te =  ctx.get().getSender().getLevel().getBlockEntity(this.pos);
+            BlockEntity te =  ctx.get().getSender().getLevel().getBlockEntity(this.pos);
             if (te instanceof PanelTile)
             {
                 ((PanelTile)te).resetCrashFlag();

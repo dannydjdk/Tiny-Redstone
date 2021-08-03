@@ -2,13 +2,13 @@ package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -28,7 +28,7 @@ public class PlaySound {
         this.pitch = pitch;
     }
 
-    public PlaySound(PacketBuffer buffer)
+    public PlaySound(FriendlyByteBuf buffer)
     {
         this.pos = buffer.readBlockPos();
         this.namespace = buffer.readUtf();
@@ -37,7 +37,7 @@ public class PlaySound {
         this.pitch = buffer.readFloat();
     }
 
-    public void toBytes(PacketBuffer buf)
+    public void toBytes(FriendlyByteBuf buf)
     {
         buf.writeBlockPos(pos);
         buf.writeUtf(this.namespace);
@@ -49,13 +49,13 @@ public class PlaySound {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            TileEntity te = Minecraft.getInstance().level.getBlockEntity(this.pos);
+            BlockEntity te = Minecraft.getInstance().level.getBlockEntity(this.pos);
             if (te instanceof PanelTile)
             {
                 te.getLevel().playLocalSound(
                         pos.getX(), pos.getY(), pos.getZ(),
                         new SoundEvent(new ResourceLocation(namespace,path)),
-                        SoundCategory.BLOCKS, volume, pitch, false
+                        SoundSource.BLOCKS, volume, pitch, false
                 );
             }
             ctx.get().setPacketHandled(true);

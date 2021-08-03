@@ -5,18 +5,15 @@ import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.item.DyeColor;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 
 public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider {
 
@@ -24,7 +21,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
 
     protected int weakSignalStrength = 0;
     protected int strongSignalStrength = 0;
-    protected int color= DyeColor.WHITE.getColorValue();
+    protected int color= DyeColor.WHITE.getTextColor();
 
     /**
      * Drawing the cell on the panel
@@ -36,7 +33,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
      */
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TINY_BLOCK);
 
 
@@ -167,7 +164,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
 
     @Override
     public CompoundTag writeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
         nbt.putInt("strong",this.strongSignalStrength);
         nbt.putInt("weak",this.weakSignalStrength);
         nbt.putInt("color",this.color);

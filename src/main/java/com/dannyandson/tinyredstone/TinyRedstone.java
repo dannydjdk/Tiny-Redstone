@@ -4,7 +4,7 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
-import com.dannyandson.tinyredstone.compat.CompatHandler;
+//import com.dannyandson.tinyredstone.compat.CompatHandler;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -45,7 +45,7 @@ public class TinyRedstone {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
 
-        CompatHandler.register();
+        //CompatHandler.register();
     }
 
     public static void registerPanelCell(Class<? extends IPanelCell> iPanelCellClass, Item correspondingItem)
@@ -61,7 +61,7 @@ public class TinyRedstone {
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
         LOGGER.info("Binding Renderer for Redstone Panel tile entity.", Registration.REDSTONE_PANEL_BLOCK.get());
-        ClientRegistry.bindTileEntityRenderer(Registration.REDSTONE_PANEL_TILE.get(), PanelTileRenderer::new);
-        BlockEntityRenderers.register(Registration.REDSTONE_PANEL_TILE.get(),PanelTileRenderer::new);
+        //TODO bind redstone panel renderer
+        //ClientRegistry.bindTileEntityRenderer(Registration.REDSTONE_PANEL_TILE.get(), PanelTileRenderer::new);
     }
 }

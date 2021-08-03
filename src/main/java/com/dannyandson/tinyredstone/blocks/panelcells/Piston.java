@@ -6,17 +6,14 @@ import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
 
 public class Piston implements IPanelCell {
 
@@ -46,7 +43,7 @@ public class Piston implements IPanelCell {
         TextureAtlasSprite sprite_inner_top = RenderHelper.getSprite(TEXTURE_PISTON_TOP);
 
 
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite_top = getSprite_top();
 
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
@@ -108,7 +105,7 @@ public class Piston implements IPanelCell {
 
     }
 
-    private void drawSide(MatrixStack matrixStack,IVertexBuilder builder,int combinedLight, float alpha)
+    private void drawSide(PoseStack matrixStack, VertexConsumer builder, int combinedLight, float alpha)
     {
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
         TextureAtlasSprite sprite_side_top = RenderHelper.getSprite(TEXTURE_PISTON_SIDE_TOP);
@@ -244,7 +241,7 @@ public class Piston implements IPanelCell {
 
     @Override
     public CompoundTag writeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
         nbt.putBoolean("extended",this.extended);
         nbt.putInt("changePending",this.changePending);
         return nbt;

@@ -150,7 +150,8 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
     }
 
     public static void register() {
-        BlockEntityRenderers.register(Registration.REDSTONE_PANEL_TILE.get(),PanelTileRenderer::new);
+        //TODO 1.17 block entity renderer registration
+        //BlockEntityRenderers.register(Registration.REDSTONE_PANEL_TILE.get(),PanelTileRenderer::new);
     }
 
     @CheckForNull

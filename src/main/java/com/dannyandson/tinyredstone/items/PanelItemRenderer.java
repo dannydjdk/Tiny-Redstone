@@ -1,5 +1,7 @@
 package com.dannyandson.tinyredstone.items;
 
+//TODO 1.17 item rendering
+/*
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
@@ -7,6 +9,8 @@ import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
@@ -19,7 +23,7 @@ import net.minecraft.util.ColorHelper;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class PanelItemRenderer extends ItemStackTileEntityRenderer {
+public class PanelItemRenderer extends ItemStackBlockEntityRenderer {
 
     public void render(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
     {
@@ -163,7 +167,7 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
         add(builder, matrixStack, x1,y2,0, sprite.getU0(), sprite.getV1(), combinedLight,color);
     }
 
-    private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int combinedLightIn, Integer color) {
+    private void add(VertexConsumer renderer, PoseStack stack, float x, float y, float z, float u, float v, int combinedLightIn, Integer color) {
         renderer.vertex(stack.last().pose(), x, y, z)
                 .color(ColorHelper.PackedColor.red(color),ColorHelper.PackedColor.green(color), ColorHelper.PackedColor.blue(color),  ColorHelper.PackedColor.alpha(color))
                 .uv(u, v)
@@ -174,3 +178,5 @@ public class PanelItemRenderer extends ItemStackTileEntityRenderer {
 
 
 }
+
+ */

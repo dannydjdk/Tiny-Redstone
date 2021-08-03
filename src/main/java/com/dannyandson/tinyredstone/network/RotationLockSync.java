@@ -2,8 +2,8 @@ package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.blocks.Side;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -14,11 +14,11 @@ public class RotationLockSync {
         this.rotationLock = rotationLock;
     }
 
-    public RotationLockSync(PacketBuffer buffer) {
+    public RotationLockSync(FriendlyByteBuf buffer) {
         this.rotationLock = buffer.readEnum(Side.class);
     }
 
-    public void toBytes(PacketBuffer buf) {
+    public void toBytes(FriendlyByteBuf buf) {
         buf.writeEnum(rotationLock);
     }
 

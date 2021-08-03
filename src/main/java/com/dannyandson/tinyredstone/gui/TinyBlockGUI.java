@@ -5,14 +5,13 @@ import com.dannyandson.tinyredstone.api.IColorablePanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.TinyBlockColorSync;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 
 public class TinyBlockGUI extends Screen {
 
@@ -26,7 +25,7 @@ public class TinyBlockGUI extends Screen {
     private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     protected TinyBlockGUI(PanelTile panelTile, Integer cellIndex, IColorablePanelCell iColorablePanelCell) {
-        super(new TranslationTextComponent("tinyredstone:tinyBlockGUI"));
+        super(new TranslatableComponent("tinyredstone:tinyBlockGUI"));
         this.panelTile = panelTile;
         this.cellIndex = cellIndex;
         this.iColorablePanelCell = iColorablePanelCell;
@@ -39,30 +38,30 @@ public class TinyBlockGUI extends Screen {
 
 
 
-        addButton(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
-        addButton(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addButton(new Button(relX + 45, relY + 68, 80, 20, new TranslationTextComponent("tinyredstone.close"), button -> close()));
+        addWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
+        addWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
+        addWidget(new Button(relX + 45, relY + 68, 80, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
 
-        addButton(new ModWidget(relX + 5, relY+ 20,20,20, DyeColor.WHITE.getTextColor()+0xFF000000-1, button->setColor(DyeColor.WHITE.getColorValue())));
-        addButton(new ModWidget(relX + 25, relY+ 20,20,20, DyeColor.BLACK.getTextColor()+0xFF000000, button->setColor(DyeColor.BLACK.getColorValue())));
-        addButton(new ModWidget(relX + 45, relY+ 20,20,20, DyeColor.RED.getTextColor()+0xFF000000, button->setColor(DyeColor.RED.getColorValue())));
-        addButton(new ModWidget(relX + 65, relY+ 20,20,20, DyeColor.GREEN.getTextColor()+0xFF000000, button->setColor(DyeColor.GREEN.getColorValue())));
-        addButton(new ModWidget(relX + 85, relY+ 20,20,20, DyeColor.BROWN.getTextColor()+0xFF000000, button->setColor(DyeColor.BROWN.getColorValue())));
-        addButton(new ModWidget(relX + 105, relY+ 20,20,20, DyeColor.BLUE.getTextColor()+0xFF000000, button->setColor(DyeColor.BLUE.getColorValue())));
-        addButton(new ModWidget(relX + 125, relY+ 20,20,20, DyeColor.PURPLE.getTextColor()+0xFF000000, button->setColor(DyeColor.PURPLE.getColorValue())));
-        addButton(new ModWidget(relX + 145, relY+ 20,20,20, DyeColor.CYAN.getTextColor()+0xFF000000, button->setColor(DyeColor.CYAN.getColorValue())));
+        addWidget(new ModWidget(relX + 5, relY+ 20,20,20, DyeColor.WHITE.getTextColor()+0xFF000000-1, button->setColor(DyeColor.WHITE.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 25, relY+ 20,20,20, DyeColor.BLACK.getTextColor()+0xFF000000, button->setColor(DyeColor.BLACK.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 45, relY+ 20,20,20, DyeColor.RED.getTextColor()+0xFF000000, button->setColor(DyeColor.RED.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 65, relY+ 20,20,20, DyeColor.GREEN.getTextColor()+0xFF000000, button->setColor(DyeColor.GREEN.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 85, relY+ 20,20,20, DyeColor.BROWN.getTextColor()+0xFF000000, button->setColor(DyeColor.BROWN.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 105, relY+ 20,20,20, DyeColor.BLUE.getTextColor()+0xFF000000, button->setColor(DyeColor.BLUE.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 125, relY+ 20,20,20, DyeColor.PURPLE.getTextColor()+0xFF000000, button->setColor(DyeColor.PURPLE.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 145, relY+ 20,20,20, DyeColor.CYAN.getTextColor()+0xFF000000, button->setColor(DyeColor.CYAN.getMaterialColor().col)));
 
-        addButton(new ModWidget(relX + 5, relY+ 40,20,20, DyeColor.LIGHT_GRAY.getTextColor()+0xFF000000, button->setColor(DyeColor.LIGHT_GRAY.getColorValue())));
-        addButton(new ModWidget(relX + 25, relY+ 40,20,20, DyeColor.GRAY.getTextColor()+0xFF000000, button->setColor(DyeColor.GRAY.getColorValue())));
-        addButton(new ModWidget(relX + 45, relY+ 40,20,20, DyeColor.PINK.getTextColor()+0xFF000000, button->setColor(DyeColor.PINK.getColorValue())));
-        addButton(new ModWidget(relX + 65, relY+ 40,20,20, DyeColor.LIME.getTextColor()+0xFF000000, button->setColor(DyeColor.LIME.getColorValue())));
-        addButton(new ModWidget(relX + 85, relY+ 40,20,20, DyeColor.YELLOW.getTextColor()+0xFF000000, button->setColor(DyeColor.YELLOW.getColorValue())));
-        addButton(new ModWidget(relX + 105, relY+ 40,20,20, DyeColor.LIGHT_BLUE.getTextColor()+0xFF000000, button->setColor(DyeColor.LIGHT_BLUE.getColorValue())));
-        addButton(new ModWidget(relX + 125, relY+ 40,20,20, DyeColor.MAGENTA.getTextColor()+0xFF000000, button->setColor(DyeColor.MAGENTA.getColorValue())));
-        addButton(new ModWidget(relX + 145, relY+ 40,20,20, DyeColor.ORANGE.getTextColor()+0xFF000000, button->setColor(DyeColor.ORANGE.getColorValue())));
+        addWidget(new ModWidget(relX + 5, relY+ 40,20,20, DyeColor.LIGHT_GRAY.getTextColor()+0xFF000000, button->setColor(DyeColor.LIGHT_GRAY.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 25, relY+ 40,20,20, DyeColor.GRAY.getTextColor()+0xFF000000, button->setColor(DyeColor.GRAY.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 45, relY+ 40,20,20, DyeColor.PINK.getTextColor()+0xFF000000, button->setColor(DyeColor.PINK.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 65, relY+ 40,20,20, DyeColor.LIME.getTextColor()+0xFF000000, button->setColor(DyeColor.LIME.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 85, relY+ 40,20,20, DyeColor.YELLOW.getTextColor()+0xFF000000, button->setColor(DyeColor.YELLOW.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 105, relY+ 40,20,20, DyeColor.LIGHT_BLUE.getTextColor()+0xFF000000, button->setColor(DyeColor.LIGHT_BLUE.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 125, relY+ 40,20,20, DyeColor.MAGENTA.getTextColor()+0xFF000000, button->setColor(DyeColor.MAGENTA.getMaterialColor().col)));
+        addWidget(new ModWidget(relX + 145, relY+ 40,20,20, DyeColor.ORANGE.getTextColor()+0xFF000000, button->setColor(DyeColor.ORANGE.getMaterialColor().col)));
 
 
-        addButton(new ModWidget(relX,relY+3,WIDTH-2,20,new TranslationTextComponent("tinyredstone.gui.tinyblock.msg")))
+        addWidget(new ModWidget(relX,relY+3,WIDTH-2,20,new TranslatableComponent("tinyredstone.gui.tinyblock.msg")))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER);
 
 
@@ -86,9 +85,9 @@ public class TinyBlockGUI extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bind(GUI);
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        //RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
+        this.minecraft.getTextureManager().bindForSetup(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
         this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);

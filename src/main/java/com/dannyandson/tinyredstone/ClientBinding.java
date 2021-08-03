@@ -5,20 +5,20 @@ import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.InvocationTargetException;
@@ -26,10 +26,10 @@ import java.lang.reflect.InvocationTargetException;
 @Mod.EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
 public class ClientBinding {
 
-    public static KeyBinding rotationLock;
+    public static KeyMapping rotationLock;
 
     public static void registerKeyBindings() {
-        rotationLock =  new KeyBinding("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, "TinyRedstone");
+        rotationLock =  new KeyMapping("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, "TinyRedstone");
         ClientRegistry.registerKeyBinding(rotationLock);
     }
 
@@ -38,9 +38,9 @@ public class ClientBinding {
         if (keyInputEvent.isCanceled()) return;
         int numberKey = keyInputEvent.getKey() - GLFW.GLFW_KEY_0;
         if(numberKey > 0 && numberKey <= 9) {
-            final PlayerEntity player = Minecraft.getInstance().player;
+            final Player player = Minecraft.getInstance().player;
             if (player == null) return;
-            if(player.inventory.selected + 1 == numberKey) return;
+            if(player.getInventory().selected + 1 == numberKey) return;
             final ItemStack mainHand = player.getMainHandItem();
             final Item mainHandItem = mainHand.getItem();
 
@@ -55,17 +55,17 @@ public class ClientBinding {
         if (mouseScrollEvent.isCanceled()) return;
         final double scrollDelta = mouseScrollEvent.getScrollDelta();
         if (scrollDelta == 0) return;
-        final PlayerEntity player = Minecraft.getInstance().player;
+        final Player player = Minecraft.getInstance().player;
         if (player == null) return;
-        World world = Minecraft.getInstance().level;
+        Level world = Minecraft.getInstance().level;
         final ItemStack mainHand = player.getMainHandItem();
         final Item mainHandItem = mainHand.getItem();
 
         if (mainHandItem instanceof PanelCellItem) {
             if(rotationLock.isDown()) {
-                Vector3d lookVector = Minecraft.getInstance().hitResult.getLocation();
+                Vec3 lookVector = Minecraft.getInstance().hitResult.getLocation();
                 BlockPos blockPos = new BlockPos(lookVector);
-                TileEntity te = world.getBlockEntity(blockPos);
+                BlockEntity te = world.getBlockEntity(blockPos);
                 if (te instanceof PanelTile) {
                     try {
                         IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(mainHandItem).getConstructors()[0].newInstance();

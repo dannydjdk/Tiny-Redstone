@@ -5,15 +5,15 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.items.PanelCellItem;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MainWindow;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,15 +26,15 @@ public class ToolbarOverlay {
 
     @SubscribeEvent
     public static void onRenderGUI(final RenderGameOverlayEvent.Post event) {
-        if(event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR) {
+        if(event.getType() == RenderGameOverlayEvent.ElementType.valueOf("HOTBAR")) {
             final Minecraft mcInstance = Minecraft.getInstance();
-            final ClientPlayerEntity player = mcInstance.player;
+            final LocalPlayer player = mcInstance.player;
 
             if (!player.isSpectator()) {
-                final int currentSlot = player.inventory.selected;
-                final ItemStack stack = player.inventory.items.get(currentSlot);
+                final int currentSlot = player.getInventory().selected;
+                final ItemStack stack = player.getInventory().items.get(currentSlot);
                 if (stack.getItem() instanceof PanelCellItem) {
-                    final MainWindow window = event.getWindow();
+                    final Window window = event.getWindow();
                     final Side rotationLock = RotationLock.getRotationLock();
 
 
@@ -43,9 +43,9 @@ public class ToolbarOverlay {
                         final int x = (window.getGuiScaledWidth() / 2 - 180/2 + currentSlot * 20) + 2 + 1;
                         final int y = (window.getGuiScaledHeight() - 20) + 1 + 1;
 
-                        MatrixStack matrixStack = event.getMatrixStack();
+                        PoseStack matrixStack = event.getMatrixStack();
 
-                        Minecraft.getInstance().getTextureManager().bind(PlayerContainer.BLOCK_ATLAS);
+                        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
                         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_ROTATION_LOCK);
 
                         RenderSystem.enableBlend();

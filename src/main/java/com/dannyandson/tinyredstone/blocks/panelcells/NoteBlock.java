@@ -7,21 +7,17 @@ import com.dannyandson.tinyredstone.gui.NoteBlockGUI;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PlaySound;
 import com.dannyandson.tinyredstone.setup.Registration;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
@@ -35,7 +31,7 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TINY_NOTE_BLOCK);
 
 
@@ -119,7 +115,7 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     @Override
     public CompoundTag writeNBT() {
-        CompoundNBT nbt = super.writeNBT();
+        CompoundTag nbt = super.writeNBT();
         nbt.putInt("pitch",this.pitch);
         nbt.putString("instrument",this.instrument);
         nbt.putBoolean("powered",this.powered);
@@ -136,7 +132,7 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     @Override
     public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
-        overlayBlockInfo.addText("Instrument", new TranslationTextComponent("tinyredstone.noteblock." + this.instrument).getString() );
+        overlayBlockInfo.addText("Instrument", new TranslatableComponent("tinyredstone.noteblock." + this.instrument).getString() );
         overlayBlockInfo.addText("Note", this.pitch + " (" + noteNames[this.pitch%12] + ")");
     }
 
@@ -145,11 +141,11 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
         if (!panelTile.getLevel().isClientSide)
         {
             BlockPos pos = panelTile.getBlockPos();
-            for(PlayerEntity player:panelTile.getLevel().players()){
+            for(Player player:panelTile.getLevel().players()){
                 if(panelTile.getLevel().hasNearbyAlivePlayer(pos.getX(),pos.getY(),pos.getZ(),48))
                     ModNetworkHandler.sendToClient(
                             new PlaySound(pos,"minecraft", "block.note_block." + instrument, 0.5f, (pitch==0)?0.5f:(float)Math.pow(2f,((pitch-12f)/12f))),
-                            (ServerPlayerEntity) player);
+                            (ServerPlayer) player);
             }
         }
     }

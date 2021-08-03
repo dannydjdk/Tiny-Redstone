@@ -5,20 +5,16 @@ import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 public class Lever implements IPanelCell, IPanelCellInfoProvider {
@@ -40,7 +36,7 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         TextureAtlasSprite sprite_cobble = RenderHelper.getSprite(TEXTURE_COBBLESTONE);
         TextureAtlasSprite sprite_lever = RenderHelper.getSprite(TEXTURE_LEVER);
         TextureAtlasSprite sprite_lever_top = RenderHelper.getSprite(TEXTURE_LEVER_TOP);
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
 
         matrixStack.pushPose();
         float x1 = 0.3125f, x2 = .6875f, y1 = 0.25f, y2 = 0.75f;
@@ -154,7 +150,7 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         panelTile.getLevel().playLocalSound(
                 panelTile.getBlockPos().getX(), panelTile.getBlockPos().getY(), panelTile.getBlockPos().getZ(),
                 SoundEvents.LEVER_CLICK,
-                SoundCategory.BLOCKS, 0.25f, 2f, false
+                SoundSource.BLOCKS, 0.25f, 2f, false
         );
         this.active=!this.active;
         return true;
@@ -165,7 +161,7 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public CompoundTag writeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
         nbt.putBoolean("active",this.active);
         return nbt;
     }

@@ -3,12 +3,12 @@ package com.dannyandson.tinyredstone.blocks.panelcovers;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
 
 public class LightCover  implements IPanelCover {
 
@@ -18,7 +18,7 @@ public class LightCover  implements IPanelCover {
      * Drawing the cover on the panel
      */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, int color) {
+    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, int color) {
 
         float x1 = 0, x2 = 1, y1 = 0.125f, y2 = 1;
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_LIGHT_COVER);

@@ -2,15 +2,12 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ColorHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.world.inventory.InventoryMenu;
 
 public class RenderHelper {
 
@@ -49,22 +46,26 @@ public class RenderHelper {
 
     public static void add(VertexConsumer renderer, Matrix4f matrix4f, float x, float y, float z, int color, float alpha) {
         renderer.vertex(matrix4f, x, y, z)
-                .color(ColorHelper.PackedColor.red(color),ColorHelper.PackedColor.green(color), ColorHelper.PackedColor.blue(color), (int)(alpha*255f))
+                .color(color >> 16 & 255,color >> 8 & 255, color & 255, (int)(alpha*255f))
                 .endVertex();
     }
 
     public static void add(VertexConsumer renderer, Matrix4f matrix4f, float x, float y, float z, float u, float v, int combinedLightIn, int color, float alpha) {
         renderer.vertex(matrix4f, x, y, z)
-                .color(ColorHelper.PackedColor.red(color),ColorHelper.PackedColor.green(color), ColorHelper.PackedColor.blue(color), (int)(alpha*255f))
+                .color(color >> 16 & 255,color >> 8 & 255, color & 255, (int)(alpha*255f))
                 .uv(u, v)
                 .uv2(combinedLightIn)
                 .normal(1, 0, 0)
                 .endVertex();
     }
 
+    public static int getColor (int alpha, int red, int green, int blue){
+        return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
     public static TextureAtlasSprite getSprite(ResourceLocation resourceLocation)
     {
-        return Minecraft.getInstance().getTextureAtlas(PlayerContainer.BLOCK_ATLAS).apply(resourceLocation);
+        return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(resourceLocation);
     }
 
 

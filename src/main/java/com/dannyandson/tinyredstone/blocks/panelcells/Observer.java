@@ -5,17 +5,14 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.LinkedList;
 
@@ -40,7 +37,7 @@ public class Observer implements IPanelCell, IObservingPanelCell {
      */
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
 
         TextureAtlasSprite sprite_top = RenderHelper.getSprite(TEXTURE_OBSERVER_TOP);
         TextureAtlasSprite sprite_back;
@@ -77,7 +74,7 @@ public class Observer implements IPanelCell, IObservingPanelCell {
 
     }
 
-    private void addRectangle(IVertexBuilder builder, MatrixStack matrixStack, TextureAtlasSprite sprite,int combinedLight, float alpha)
+    private void addRectangle(VertexConsumer builder, PoseStack matrixStack, TextureAtlasSprite sprite,int combinedLight, float alpha)
     {
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
     }
@@ -167,7 +164,7 @@ public class Observer implements IPanelCell, IObservingPanelCell {
 
     @Override
     public CompoundTag writeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+        CompoundTag nbt = new CompoundTag();
         nbt.putBoolean("output",output);
 
         String queueString = "";

@@ -5,10 +5,9 @@ import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 public class StoneButton extends Button {
@@ -30,7 +29,7 @@ public class StoneButton extends Button {
             panelTile.getLevel().playLocalSound(
                     panelTile.getBlockPos().getX(), panelTile.getBlockPos().getY(), panelTile.getBlockPos().getZ(),
                     SoundEvents.STONE_BUTTON_CLICK_ON,
-                    SoundCategory.BLOCKS, 0.25f, 2f, false
+                    SoundSource.BLOCKS, 0.25f, 2f, false
             );
             this.active=true;
             this.ticksRemaining =20;

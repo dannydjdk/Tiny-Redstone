@@ -4,10 +4,10 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.Repeater;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -23,14 +23,14 @@ public class RepeaterTickSync {
         this.ticks = ticks;
     }
 
-    public RepeaterTickSync(PacketBuffer buffer)
+    public RepeaterTickSync(FriendlyByteBuf buffer)
     {
         this.pos= buffer.readBlockPos();
         this.cellIndex=buffer.readInt();
         this.ticks=buffer.readInt();
     }
 
-    public void toBytes(PacketBuffer buf)
+    public void toBytes(FriendlyByteBuf buf)
     {
         buf.writeBlockPos(pos);
         buf.writeInt(cellIndex);
@@ -40,7 +40,7 @@ public class RepeaterTickSync {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            TileEntity te =  ctx.get().getSender().getLevel().getBlockEntity(this.pos);
+            BlockEntity te =  ctx.get().getSender().getLevel().getBlockEntity(this.pos);
             if (te instanceof PanelTile)
             {
                 PanelCellPos cellPos = PanelCellPos.fromIndex((PanelTile) te,this.cellIndex);

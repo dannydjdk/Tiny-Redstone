@@ -2,17 +2,13 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.ColorHelper;
-import net.minecraft.util.math.vector.Vector3f;
 
 public class RedstoneBridge extends RedstoneDust {
 
@@ -43,13 +39,13 @@ public class RedstoneBridge extends RedstoneDust {
 
         float red1 = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         float red2 = (signalStrength2==0)?.25f:.30f + (.04f*signalStrength2);
-        int color1 = ColorHelper.PackedColor.color(255,Math.round(red1*255),0,0);
-        int color2 = ColorHelper.PackedColor.color(255,Math.round(red2*255),0,0);
+        int color1 = RenderHelper.getColor(255,Math.round(red1*255),0,0);
+        int color2 = RenderHelper.getColor(255,Math.round(red2*255),0,0);
 
         TextureAtlasSprite sprite_redstone_dust = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST);
         TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
 
-        IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
 
         matrixStack.translate(0,0,0.05);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.05f,s10+.05f,s6-.05f,s10+.05f,sprite_redstone_dust,combinedLight,0xFF888888, alpha);
@@ -185,7 +181,7 @@ public class RedstoneBridge extends RedstoneDust {
 
     @Override
     public CompoundTag writeNBT() {
-        CompoundNBT nbt = super.writeNBT();
+        CompoundTag nbt = super.writeNBT();
         nbt.putInt("strength2",this.signalStrength2);
         return nbt;
     }

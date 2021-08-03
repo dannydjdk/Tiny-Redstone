@@ -3,7 +3,6 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.RotationLockRemoveSync;
 import com.dannyandson.tinyredstone.network.RotationLockSync;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -69,7 +68,7 @@ public class RotationLock {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean allowVertical, boolean invert) {
+    public static void lockRotation(PanelTile panelTile, Player playerEntity, boolean allowVertical, boolean invert) {
         lockRotation(panelTile, playerEntity, allowVertical, invert, true);
     }
 
@@ -79,7 +78,7 @@ public class RotationLock {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void lockRotation(PanelTile panelTile, PlayerEntity playerEntity, boolean allowVertical, boolean invert, boolean sendToServer) {
+    public static void lockRotation(PanelTile panelTile, Player playerEntity, boolean allowVertical, boolean invert, boolean sendToServer) {
         lockRotation(rotationLock == null ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(playerEntity, allowVertical)) : rotationLock, allowVertical, invert, sendToServer);
     }
 
@@ -92,7 +91,7 @@ public class RotationLock {
         playerRotationLock.remove(player.getUUID());
     }
 
-    public static void lockServerRotation(PlayerEntity playerEntity, Side side) {
+    public static void lockServerRotation(Player playerEntity, Side side) {
         playerRotationLock.put(playerEntity.getUUID(), side);
     }
 
