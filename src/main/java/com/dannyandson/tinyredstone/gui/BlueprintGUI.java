@@ -7,6 +7,7 @@ import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -47,16 +48,16 @@ public class BlueprintGUI  extends Screen {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
 
-        addWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
-        addWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addWidget(new Button(relX + 20, relY + 50, 80, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
+        addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
+        addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
+        addRenderableWidget(new Button(relX + 20, relY + 50, 80, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
 
         if (this.blueprint.hasTag())
             button=new Button(relX + 20, relY + 20, 80, 20, new TranslatableComponent("tinyredstone.export"), button -> exportToFile());
         else
             button=new Button(relX + 20, relY + 20, 80, 20, new TranslatableComponent("tinyredstone.import"), button -> importFromFile());
 
-        addWidget(button);
+        addRenderableWidget(button);
 
 
 
@@ -68,7 +69,8 @@ public class BlueprintGUI  extends Screen {
 
     @Override
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-       // RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, GUI);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bindForSetup(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;

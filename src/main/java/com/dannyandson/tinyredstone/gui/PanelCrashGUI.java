@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.network.CrashFlagResetSync;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -32,20 +33,20 @@ public class PanelCrashGUI  extends Screen {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
 
-        addWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
-        addWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EE0000));
+        addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
+        addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EE0000));
 
         TranslatableComponent crashTextComponent = new TranslatableComponent((panelTile.isCrashed())?"tinyredstone.gui.crash.msg":"tinyredstone.gui.overflow.msg");
         int lineY = relY+2;
         for (String line : crashTextComponent.getString().split("\n",5))
         {
-            addWidget(new ModWidget(relX+2,lineY,WIDTH-2,50, Component.nullToEmpty(line)));
+            addRenderableWidget(new ModWidget(relX+2,lineY,WIDTH-2,50, Component.nullToEmpty(line)));
             lineY+=10;
         }
 
 
-        addWidget(new Button(relX + 60, relY + 68, 60, 20, new TranslatableComponent("tinyredstone.enable"), button -> enable()));
-        addWidget(new Button(relX + 140, relY + 68, 60, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
+        addRenderableWidget(new Button(relX + 60, relY + 68, 60, 20, new TranslatableComponent("tinyredstone.enable"), button -> enable()));
+        addRenderableWidget(new Button(relX + 140, relY + 68, 60, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
 
 
     }
@@ -63,7 +64,8 @@ public class PanelCrashGUI  extends Screen {
 
     @Override
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        //RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, GUI);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bindForSetup(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;

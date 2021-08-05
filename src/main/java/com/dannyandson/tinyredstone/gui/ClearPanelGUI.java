@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.network.ClearPanelSync;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -30,13 +31,13 @@ public class ClearPanelGUI extends Screen {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
 
-        addWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
-        addWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
+        addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
+        addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
 
-        addWidget(new ModWidget(relX,relY+10,WIDTH,20,new TranslatableComponent("tinyredstone.gui.clearpanel.msg")))
+        addRenderableWidget(new ModWidget(relX,relY+10,WIDTH,20,new TranslatableComponent("tinyredstone.gui.clearpanel.msg")))
             .setTextHAlignment(ModWidget.HAlignment.CENTER);
-        addWidget(new Button(relX + 20, relY + 30, 80, 20, new TranslatableComponent("tinyredstone.yes"), button -> removeCells()));
-        addWidget(new Button(relX + 120, relY + 30, 80, 20, new TranslatableComponent("tinyredstone.cancel"), button -> close()));
+        addRenderableWidget(new Button(relX + 20, relY + 30, 80, 20, new TranslatableComponent("tinyredstone.yes"), button -> removeCells()));
+        addRenderableWidget(new Button(relX + 120, relY + 30, 80, 20, new TranslatableComponent("tinyredstone.cancel"), button -> close()));
 
     }
 
@@ -51,7 +52,8 @@ public class ClearPanelGUI extends Screen {
 
     @Override
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        //RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, GUI);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bindForSetup(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
