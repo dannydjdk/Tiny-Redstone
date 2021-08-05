@@ -23,7 +23,6 @@ public class ClientSetup {
 
     public static void init(final FMLClientSetupEvent event)
     {
-        PanelTileRenderer.register();
         Minecraft.getInstance().getBlockColors().register(new PanelTileColor(), Registration.REDSTONE_PANEL_BLOCK.get());
         Minecraft.getInstance().getItemColors().register(new PanelItemColor(),Registration.REDSTONE_PANEL_ITEM.get());
         ClientBinding.registerKeyBindings();
@@ -31,7 +30,7 @@ public class ClientSetup {
 
     @SubscribeEvent
     public static void onRegisterRenderer(EntityRenderersEvent.RegisterRenderers event){
-        TinyRedstone.LOGGER.info("Binding Renderer for Redstone Panel tile entity.", Registration.REDSTONE_PANEL_BLOCK.get());
+        TinyRedstone.LOGGER.info("Registering Renderer for Redstone Panel block entity.", Registration.REDSTONE_PANEL_BLOCK.get());
         event.registerBlockEntityRenderer(Registration.REDSTONE_PANEL_TILE.get(), PanelTileRenderer::new);
     }
 

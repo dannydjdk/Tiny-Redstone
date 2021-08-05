@@ -2,6 +2,8 @@ package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
@@ -9,9 +11,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.client.IItemRenderProperties;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class PanelItem extends BlockItem {
 
@@ -21,10 +25,23 @@ public class PanelItem extends BlockItem {
     {
         super(Registration.REDSTONE_PANEL_BLOCK.get(),new Item.Properties()
                 .tab(ModSetup.ITEM_GROUP)
-                //TODO item rendering in 1.17
-                //.setISTER(()->PanelItemRenderer::new)
         );
 
+    }
+
+    @Override
+    public void initializeClient(Consumer<IItemRenderProperties> consumer) {
+        consumer.accept(new IItemRenderProperties() {
+                            /**
+                             * @return This Item's renderer, or the default instance if it does not have
+                             * one.
+                             */
+                            @Override
+                            public BlockEntityWithoutLevelRenderer getItemStackRenderer() {
+                                return new PanelItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+                            }
+                        }
+        );
     }
 
     @Override
@@ -32,4 +49,6 @@ public class PanelItem extends BlockItem {
     {
         list.add(new TranslatableComponent("message.item.redstone_panel"));
     }
+
+
 }

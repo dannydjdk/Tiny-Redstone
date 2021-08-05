@@ -4,12 +4,31 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.DyeColor;
 
 public class RenderHelper {
+
+    private static int[] textureDiffusedColors = {
+            16383998,
+            16351261,
+            13061821,
+            3847130,
+            16701501,
+            8439583,
+            15961002,
+            4673362,
+            10329495,
+            1481884,
+            8991416,
+            3949738,
+            8606770,
+            6192150,
+            11546150,
+            1908001
+    };
 
     public static void drawRectangle(VertexConsumer  builder, PoseStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , float alpha)
     {
@@ -61,6 +80,23 @@ public class RenderHelper {
 
     public static int getColor (int alpha, int red, int green, int blue){
         return alpha << 24 | red << 16 | green << 8 | blue;
+    }
+
+    public static int getTextureDiffusedColor(DyeColor dyeColor) {
+        return textureDiffusedColors[dyeColor.getId()];
+    }
+
+    public static int getRed(int packedColor){
+        return packedColor >> 16 & 255;
+    }
+    public static int getGreen(int packedColor){
+        return packedColor >> 8 & 255;
+    }
+    public static int getBlue(int packedColor){
+        return packedColor & 255;
+    }
+    public static int getAlpha(int packedColor){
+        return packedColor >>> 24;
     }
 
     public static TextureAtlasSprite getSprite(ResourceLocation resourceLocation)

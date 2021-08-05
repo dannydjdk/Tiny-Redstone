@@ -45,7 +45,7 @@ public class PanelTile extends BlockEntity {
     protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
 
-    protected Integer Color = DyeColor.GRAY.getId();
+    protected Integer Color = RenderHelper.getTextureDiffusedColor(DyeColor.GRAY);
     private Integer lightOutput = 0;
     protected boolean flagLightUpdate = false;
     private boolean flagCrashed = false;
@@ -844,7 +844,7 @@ public class PanelTile extends BlockEntity {
 
     public int getColor() {
         if (this.Color == null) {
-            return DyeColor.GRAY.getId();
+            return RenderHelper.getTextureDiffusedColor(DyeColor.GRAY);
         }
         return this.Color;
     }

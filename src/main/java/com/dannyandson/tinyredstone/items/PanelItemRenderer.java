@@ -1,43 +1,39 @@
 package com.dannyandson.tinyredstone.items;
 
-//TODO 1.17 item rendering
-/*
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ColorHelper;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 
-public class PanelItemRenderer extends ItemStackBlockEntityRenderer {
+public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
 
-    public void render(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
-    {
-        renderByItem(stack, p_239207_2_, matrixStack, buffer, combinedLight, combinedOverlay);
+    public PanelItemRenderer(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
+        super(p_172550_, p_172551_);
     }
 
     @Override
-    public void renderByItem(ItemStack stack, ItemCameraTransforms.TransformType p_239207_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
+    public void renderByItem(ItemStack stack, ItemTransforms.TransformType p_239207_2_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
     {
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
-        IVertexBuilder builder = buffer.getBuffer(RenderType.solid());
-        Integer color = DyeColor.GRAY.getColorValue();
+        VertexConsumer builder = buffer.getBuffer(RenderType.solid());
+        Integer color = DyeColor.GRAY.getMaterialColor().col;
         if (stack.getTag()!=null && stack.getTag().contains("BlockEntityTag") ) {
-            CompoundNBT blockEntityTag = stack.getTag().getCompound("BlockEntityTag");
+            CompoundTag blockEntityTag = stack.getTag().getCompound("BlockEntityTag");
             if (blockEntityTag.contains("color")) {
                 color = blockEntityTag.getInt("color");
             }
@@ -89,10 +85,10 @@ public class PanelItemRenderer extends ItemStackBlockEntityRenderer {
                 }
             }
             else {
-                CompoundNBT cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
+                CompoundTag cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
                 for (Integer i = 0; i < 448; i++) {
                     if (cellsNBT.contains(i.toString())) {
-                        CompoundNBT cellNBT = cellsNBT.getCompound(i.toString());
+                        CompoundTag cellNBT = cellsNBT.getCompound(i.toString());
 
                         if (cellNBT.contains("data")) {
                             String className = cellNBT.getString("class");
@@ -117,7 +113,7 @@ public class PanelItemRenderer extends ItemStackBlockEntityRenderer {
 
     }
 
-    private void renderCell(MatrixStack matrixStack, Integer index, IPanelCell panelCell, Direction cellDirection, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay)
+    private void renderCell(PoseStack matrixStack, Integer index, IPanelCell panelCell, Direction cellDirection, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
     {
         float scale = 0.125f;
         float t2X = 0.0f;
@@ -159,7 +155,7 @@ public class PanelItemRenderer extends ItemStackBlockEntityRenderer {
         matrixStack.popPose();
     }
 
-    private void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , Integer color)
+    private void drawRectangle(VertexConsumer builder, PoseStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , Integer color)
     {
         add(builder, matrixStack, x1,y1,0, sprite.getU0(), sprite.getV0(), combinedLight,color);
         add(builder, matrixStack, x2,y1,0, sprite.getU1(), sprite.getV0(), combinedLight,color);
@@ -169,7 +165,7 @@ public class PanelItemRenderer extends ItemStackBlockEntityRenderer {
 
     private void add(VertexConsumer renderer, PoseStack stack, float x, float y, float z, float u, float v, int combinedLightIn, Integer color) {
         renderer.vertex(stack.last().pose(), x, y, z)
-                .color(ColorHelper.PackedColor.red(color),ColorHelper.PackedColor.green(color), ColorHelper.PackedColor.blue(color),  ColorHelper.PackedColor.alpha(color))
+                .color(RenderHelper.getRed(color),RenderHelper.getGreen(color),RenderHelper.getBlue(color),RenderHelper.getAlpha(color))
                 .uv(u, v)
                 .uv2(combinedLightIn)
                 .normal(1, 0, 0)
@@ -178,5 +174,3 @@ public class PanelItemRenderer extends ItemStackBlockEntityRenderer {
 
 
 }
-
- */

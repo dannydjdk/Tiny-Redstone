@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -11,7 +12,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -71,6 +71,37 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
                 matrixStack.translate(-1,0,0);
                 break;
         }
+
+        TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
+        VertexConsumer builder = buffer.getBuffer(RenderType.solid());
+        int color = tileEntity.getColor();
+        matrixStack.pushPose();
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
+        matrixStack.translate(0,-1,0.125);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,1.0f);
+
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.translate(0,-0.125,0);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color,1.0f);
+
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color,1.0f);
+
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color,1.0f);
+
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color,1.0f);
+
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.translate(0,-1,0);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,1.0f);
+
+        matrixStack.popPose();
+
         if (tileEntity.isCovered())
         {
             matrixStack.pushPose();
@@ -97,7 +128,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
             matrixStack.translate(0, 0.126, 1);
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
 
-            TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
+            sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
             RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
             matrixStack.popPose();
         }
@@ -150,10 +181,6 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
         matrixStack.popPose();
 
-    }
-
-    public static void register() {
-         BlockEntityRenderers.register(Registration.REDSTONE_PANEL_TILE.get(),PanelTileRenderer::new);
     }
 
     @CheckForNull

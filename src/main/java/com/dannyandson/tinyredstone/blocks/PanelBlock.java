@@ -353,9 +353,9 @@ public class PanelBlock extends BaseEntityBlock {
                             TinyBlockGUI.open(panelTile, posInPanelCell.getIndex(), (IColorablePanelCell)posInPanelCell.getIPanelCell());
                     } else if (heldItem instanceof DyeItem) {
                         //dye the panel if right clicking with a dye
-                        int color = ((DyeItem) heldItem).getDyeColor().getId();
+                        int color = RenderHelper.getTextureDiffusedColor(((DyeItem) heldItem).getDyeColor());
                         if (color != panelTile.Color) {
-                            panelTile.Color = ((DyeItem) heldItem).getDyeColor().getId();
+                            panelTile.Color = color;
                             //remove an item from the player's stack
                             if (!player.isCreative())
                                 player.getItemInHand(hand).setCount(player.getItemInHand(hand).getCount() - 1);
