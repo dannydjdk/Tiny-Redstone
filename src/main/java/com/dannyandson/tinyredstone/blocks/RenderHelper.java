@@ -36,11 +36,14 @@ public class RenderHelper {
     }
 
     public static void drawRectangle(VertexConsumer builder, PoseStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , int color, float alpha) {
+        drawRectangle(builder, matrixStack, x1, x2, y1, y2, sprite.getU0(), sprite.getU1(), sprite.getV0(), sprite.getV1(), combinedLight, color, alpha);
+    }
+    public static void drawRectangle(VertexConsumer builder, PoseStack matrixStack, float x1, float x2, float y1, float y2, float u0, float u1, float v0, float v1, int combinedLight , int color, float alpha){
         Matrix4f matrix4f = matrixStack.last().pose();
-        add(builder, matrix4f, x1, y1, 0, sprite.getU0(), sprite.getV0(), combinedLight, color, alpha);
-        add(builder, matrix4f, x2, y1, 0, sprite.getU1(), sprite.getV0(), combinedLight, color, alpha);
-        add(builder, matrix4f, x2, y2, 0, sprite.getU1(), sprite.getV1(), combinedLight, color, alpha);
-        add(builder, matrix4f, x1, y2, 0, sprite.getU0(), sprite.getV1(), combinedLight, color, alpha);
+        add(builder, matrix4f, x1, y1, 0, u0, v0, combinedLight, color, alpha);
+        add(builder, matrix4f, x2, y1, 0, u1, v0, combinedLight, color, alpha);
+        add(builder, matrix4f, x2, y2, 0, u1, v1, combinedLight, color, alpha);
+        add(builder, matrix4f, x1, y2, 0, u0, v1, combinedLight, color, alpha);
     }
 
     public static void drawTriangle(VertexConsumer builder, PoseStack matrixStack, float x1, float y1, float x2, float y2, float x3, float y3, int color, float alpha) {

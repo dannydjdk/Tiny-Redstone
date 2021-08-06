@@ -55,12 +55,8 @@ public class ClientSetup {
         event.addSprite(Torch.TEXTURE_TORCH_OFF);
         event.addSprite(Torch.TEXTURE_TORCH_TOP_ON);
         event.addSprite(Torch.TEXTURE_TORCH_TOP_OFF);
-        event.addSprite(Piston.TEXTURE_PISTON_SIDE_TOP);
-        event.addSprite(Piston.TEXTURE_PISTON_SIDE_BOTTOM);
         event.addSprite(SuperRepeater.TEXTURE_SUPER_REPEATER_ON);
         event.addSprite(SuperRepeater.TEXTURE_SUPER_REPEATER_OFF);
-        event.addSprite(Lever.TEXTURE_LEVER);
-        event.addSprite(Lever.TEXTURE_LEVER_TOP);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_OFF);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_ON);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_OFF);

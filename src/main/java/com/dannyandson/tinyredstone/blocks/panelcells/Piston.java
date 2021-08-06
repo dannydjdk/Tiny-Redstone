@@ -1,6 +1,5 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
@@ -18,8 +17,6 @@ import net.minecraft.resources.ResourceLocation;
 public class Piston implements IPanelCell {
 
     public static ResourceLocation TEXTURE_PISTON_SIDE = new ResourceLocation("minecraft","block/piston_side");
-    public static ResourceLocation TEXTURE_PISTON_SIDE_TOP = new ResourceLocation(TinyRedstone.MODID,"block/piston_side_top");
-    public static ResourceLocation TEXTURE_PISTON_SIDE_BOTTOM = new ResourceLocation(TinyRedstone.MODID,"block/piston_side_bottom");
     public static ResourceLocation TEXTURE_PISTON_TOP = new ResourceLocation("minecraft","block/piston_top");
     public static ResourceLocation TEXTURE_PISTON_BOTTOM = new ResourceLocation("minecraft","block/piston_bottom");
     public static ResourceLocation TEXTURE_PISTON_INNER = new ResourceLocation("minecraft","block/piston_inner");
@@ -108,33 +105,42 @@ public class Piston implements IPanelCell {
     private void drawSide(PoseStack matrixStack, VertexConsumer builder, int combinedLight, float alpha)
     {
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
-        TextureAtlasSprite sprite_side_top = RenderHelper.getSprite(TEXTURE_PISTON_SIDE_TOP);
-        TextureAtlasSprite sprite_side_bottom = (renderExtended)
-                ?RenderHelper.getSprite(TEXTURE_PISTON_SIDE_BOTTOM)
-                :RenderHelper.getSprite(TEXTURE_PISTON_SIDE);
+        TextureAtlasSprite sprite_side_bottom = RenderHelper.getSprite(TEXTURE_PISTON_SIDE);
 
+        float bu0=sprite_side_bottom.getU0();
+        float bu1=sprite_side_bottom.getU1();
+        float bv0=sprite_side_bottom.getV0();
+        float bv1=sprite_side_bottom.getV1();
 
         matrixStack.pushPose();
 
-        if (renderExtended)
-            matrixStack.scale(1,.75f,1);
+        if (renderExtended) {
+            matrixStack.scale(1, .75f, 1);
+            bv0 = bv0 + ((bv1-bv0)*.25f);
+        }
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
         matrixStack.translate(0,-1,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_bottom,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,bu0,bu1,bv0,bv1,combinedLight,0xFFFFFFFF,alpha);
         matrixStack.popPose();
 
         if (renderExtended)
         {
+
+            float tu0=bu0;
+            float tu1=bu1;
+            float tv0=sprite_side_bottom.getV0();
+            float tv1=tv0 + ((bv1-tv0)*.25f);
+
             matrixStack.pushPose();
 
             matrixStack.translate(0,1.75,0);
             matrixStack.scale(1,.25f,1);
-            RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_top,combinedLight,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,tu0,tu1,tv0,tv1,combinedLight,0xFFFFFFFF,alpha);
 
             matrixStack.scale(.25f,4,1);
             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
             matrixStack.translate(-1,-2.5,-0.375);
-            RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_side_top,combinedLight,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,tu0,tu1,tv0,tv1,combinedLight,0xFFFFFFFF,alpha);
 
             matrixStack.popPose();
         }

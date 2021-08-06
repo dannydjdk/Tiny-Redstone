@@ -1,6 +1,5 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
@@ -19,8 +18,7 @@ import net.minecraft.world.entity.player.Player;
 
 public class Lever implements IPanelCell, IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_LEVER = new ResourceLocation(TinyRedstone.MODID,"block/lever");
-    public static ResourceLocation TEXTURE_LEVER_TOP = new ResourceLocation(TinyRedstone.MODID,"block/lever_top");
+    public static ResourceLocation TEXTURE_LEVER = new ResourceLocation("minecraft","block/lever");
     public static ResourceLocation TEXTURE_COBBLESTONE = new ResourceLocation("minecraft","block/cobblestone");
     private boolean active = false;
     /**
@@ -35,7 +33,15 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
         TextureAtlasSprite sprite_cobble = RenderHelper.getSprite(TEXTURE_COBBLESTONE);
         TextureAtlasSprite sprite_lever = RenderHelper.getSprite(TEXTURE_LEVER);
-        TextureAtlasSprite sprite_lever_top = RenderHelper.getSprite(TEXTURE_LEVER_TOP);
+        float lu0 = sprite_lever.getU0();
+        float lu1 = sprite_lever.getU1();
+        float lv0 = sprite_lever.getV0();
+        float lv1 = sprite_lever.getV1();
+        float lhu0 = lu0 + ((lu1-lu0)*7f/16f);
+        float lhu1 = lhu0 + ((lu1-lu0)*2f/16f);
+        float lhv0 = lv0 + ((lv1-lv0)*6f/16f);
+        float lhv1 = lv1;
+
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
 
         matrixStack.pushPose();
@@ -74,23 +80,23 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.translate(0,0.40625,h/2f);
         matrixStack.mulPose(Vector3f.XP.rotationDegrees((active)?45:135));
 
-        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,lhu1,lhu0,lhv1,lhv0,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,lhu1,lhu0,lhv1,lhv0,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,lhu1,lhu0,lhv1,lhv0,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
-        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,lhu1,lhu0,lhv1,lhv0,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
-        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,sprite_lever_top,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,lhu1,lhu0,lhv0 + ((lv1-lv0)*2f/16f),lhv0,combinedLight,0xFFFFFFFF,alpha);
 
 
     }
