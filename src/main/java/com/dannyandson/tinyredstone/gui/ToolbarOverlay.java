@@ -26,12 +26,11 @@ public class ToolbarOverlay {
 
     @SubscribeEvent
     public static void onRenderGUI(final RenderGameOverlayEvent.Post event) {
-        //TODO hotbar rendering
-        if(false) { //event.getType() == RenderGameOverlayEvent.ElementType.valueOf("HOTBAR")) {
+        if(event.getType() == RenderGameOverlayEvent.ElementType.LAYER) {
             final Minecraft mcInstance = Minecraft.getInstance();
             final LocalPlayer player = mcInstance.player;
 
-            if (!player.isSpectator()) {
+            if (player!=null && !player.isSpectator()) {
                 final int currentSlot = player.getInventory().selected;
                 final ItemStack stack = player.getInventory().items.get(currentSlot);
                 if (stack.getItem() instanceof PanelCellItem) {
