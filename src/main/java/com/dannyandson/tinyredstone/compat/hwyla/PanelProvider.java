@@ -31,9 +31,14 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
 
     @Override
     public void register(IRegistrar registrar) {
-        registrar.registerTooltipRenderer(RENDER_STRING, new TooltipRendererString());
-        registrar.registerTooltipRenderer(RENDER_ITEM_INLINE, new TooltipRendererItemStackInline());
-        registrar.registerTooltipRenderer(RENDER_INFO_STRING, new TooltipRendererInfoString());
+        try {
+            registrar.registerTooltipRenderer(RENDER_STRING, new TooltipRendererString());
+            registrar.registerTooltipRenderer(RENDER_ITEM_INLINE, new TooltipRendererItemStackInline());
+            registrar.registerTooltipRenderer(RENDER_INFO_STRING, new TooltipRendererInfoString());
+        }catch (RuntimeException e)
+        {
+            TinyRedstone.LOGGER.catching(e);
+        }
         registrar.registerComponentProvider(this, TooltipPosition.BODY, PanelBlock.class);
     }
 
