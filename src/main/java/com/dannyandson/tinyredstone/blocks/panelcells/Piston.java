@@ -188,7 +188,7 @@ public class Piston implements IPanelCell {
                 ( extended ||
                         (
                                 backNeighbor == null || ( backNeighbor.getNeighborIPanelCell() != null &&
-                                backNeighbor.isPushable() )
+                                (backNeighbor.isPushable() ||backNeighbor.getNeighborIPanelCell().needsSolidBase()) )
                         )
                 );
         if (extend!=this.extended)

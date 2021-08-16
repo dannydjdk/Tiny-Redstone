@@ -375,6 +375,8 @@ public class PanelTile extends BlockEntity {
             if (!((Piston) panelCell).isExtended() && panelCell instanceof StickyPiston && moverPos!=null && moverPos.getIPanelCell()==null) {
                 moverPos = moverPos.offset(movingToward);
                 movingToward = movingToward.getOpposite();
+                if (moverPos.getIPanelCell()!=null && moverPos.getIPanelCell().needsSolidBase())
+                    moverPos=null;
             }
 
             level.playLocalSound(
@@ -410,6 +412,10 @@ public class PanelTile extends BlockEntity {
         IPanelCell cell = cellPos.getIPanelCell();
 
         if (cell == null) return true;
+        if (cell.needsSolidBase()) {
+            Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
+            return true;
+        }
         if (!cell.isPushable()) return false;
 
         PanelCellPos newPos = cellPos.offset(towardSide);
@@ -453,6 +459,10 @@ public class PanelTile extends BlockEntity {
 
         //if this is an empty cell, we know it can be pushed into
         if (iPanelCell==null)
+            return true;
+
+        //if this cell needs a solid base, it will be removed, so return true
+        if(!iPanelCell.needsSolidBase())
             return true;
 
         //if this is not a pushable cell, we know we can't extend into it
