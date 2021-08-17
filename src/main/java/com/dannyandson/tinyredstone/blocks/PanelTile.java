@@ -1177,16 +1177,16 @@ public class PanelTile extends BlockEntity {
         if (voxelShape==null) {
             switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
                 case UP:
-                    voxelShape = Block.box(0, 16, 0, 16, 14, 16);
+                    voxelShape = Block.box(0, 14, 0, 16, 16, 16);
                     break;
                 case NORTH:
                     voxelShape = Block.box(0, 0, 0, 16, 16, 2);
                     break;
                 case EAST:
-                    voxelShape = Block.box(16, 0, 0, 14, 16, 16);
+                    voxelShape = Block.box(14, 0, 0, 16, 16, 16);
                     break;
                 case SOUTH:
-                    voxelShape = Block.box(0, 0, 16, 16, 16, 14);
+                    voxelShape = Block.box(0, 0, 14, 16, 16, 16);
                     break;
                 case WEST:
                     voxelShape = Block.box(0, 0, 0, 2, 16, 16);
