@@ -20,6 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.List;
 
@@ -31,13 +32,10 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
 
     @Override
     public void register(IRegistrar registrar) {
-        try {
+        if(FMLEnvironment.dist.isClient()) {
             registrar.registerTooltipRenderer(RENDER_STRING, new TooltipRendererString());
             registrar.registerTooltipRenderer(RENDER_ITEM_INLINE, new TooltipRendererItemStackInline());
             registrar.registerTooltipRenderer(RENDER_INFO_STRING, new TooltipRendererInfoString());
-        }catch (RuntimeException e)
-        {
-            TinyRedstone.LOGGER.catching(e);
         }
         registrar.registerComponentProvider(this, TooltipPosition.BODY, PanelBlock.class);
     }
