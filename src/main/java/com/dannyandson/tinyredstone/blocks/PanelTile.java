@@ -16,13 +16,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
@@ -221,8 +218,7 @@ public class PanelTile extends BlockEntity {
             try {
                 panelCover= (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
             } catch (Exception exception) {
-                TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class " + coverClass +
-                        ": " + exception.getMessage() + " " + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
+                TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class " + coverClass, exception);
             }
         }
         else
@@ -270,8 +266,7 @@ public class PanelTile extends BlockEntity {
                     else
                         this.cellDirections.put(i, Side.valueOf(cellNBT.getString("facing")));
                 } catch (Exception exception) {
-                    TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class " + className +
-                            ": " + exception.getMessage() + " " + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
+                    TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class " + className, exception);
                 }
             }
         }
@@ -611,7 +606,7 @@ public class PanelTile extends BlockEntity {
             if (direction1 == direction2) {
                 ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
             }
-        } else if (adjacentCell != null && (!adjacentCell.isIndependentState()||(side==Side.TOP&&adjacentCell.needsSolidBase())))
+        } else if (adjacentCell != null && (!adjacentCell.isIndependentState()||(adjacentCell.needsSolidBase()&&side.getOpposite()==neighborPos.getBaseDirection())))
             cellPosList.add(neighborPos);
 
         return false;
@@ -662,8 +657,9 @@ public class PanelTile extends BlockEntity {
         if (thisCell != null) {
 
             if (thisCell.needsSolidBase()) {
-                PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
-                if (basePos != null && (basePos.getIPanelCell() == null || (!basePos.getIPanelCell().isPushable()) && !(basePos.getIPanelCell() instanceof Piston && basePos.getCellFacing()==Side.TOP ) )) {
+                Side baseDirection = cellPos.getBaseDirection();
+                PanelCellPos basePos = cellPos.offset(baseDirection);
+                if (basePos != null && (basePos.getIPanelCell() == null || (!basePos.getIPanelCell().isPushable()) && !(basePos.getIPanelCell() instanceof Piston && basePos.getCellFacing()==cellPos.getBaseDirection().getOpposite() ) )) {
                     Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
                     change = true;
                 }

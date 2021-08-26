@@ -268,6 +268,14 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public boolean needsSolidBase(){return true;}
 
+    @Override
+    public boolean canAttachToBaseOnSide(Side side) {
+        return side==Side.BOTTOM;
+    }
+
+    @Override
+    public Side getBaseSide(){return Side.BOTTOM;}
+
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
      *

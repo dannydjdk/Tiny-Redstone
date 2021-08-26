@@ -225,6 +225,13 @@ public class PanelCellPos {
         return this.panelTile.getCellFacing(this);
     }
 
+    @CheckForNull
+    public Side getBaseDirection(){
+        IPanelCell thisCell = getIPanelCell();
+        if (thisCell==null || thisCell.getBaseSide()==null)return null;
+        return (thisCell.getBaseSide()==Side.FRONT)?this.getCellFacing():thisCell.getBaseSide();
+    }
+
     /**
      * Gets a PanelCellNeighbor object providing data about the neighboring cell or block.
      *

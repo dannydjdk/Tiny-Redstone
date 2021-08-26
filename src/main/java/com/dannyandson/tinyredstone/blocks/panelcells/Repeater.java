@@ -227,6 +227,14 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public boolean needsSolidBase(){return true;}
 
+    @Override
+    public boolean canAttachToBaseOnSide(Side side) {
+        return side==Side.BOTTOM;
+    }
+
+    @Override
+    public Side getBaseSide(){return Side.BOTTOM;}
+
     /**
      * Called each tick.
      *

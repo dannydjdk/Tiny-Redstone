@@ -176,6 +176,15 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public boolean needsSolidBase(){return true;}
 
+    @Override
+    public boolean canAttachToBaseOnSide(Side side) {
+        return side==Side.BOTTOM;
+    }
+
+    @Override
+    public Side getBaseSide(){return Side.BOTTOM;}
+
+
     /**
      * Called at the beginning of each game tick if isTicking() returned true on last call.
      * Note: 1 redstone tick is 2 game ticks, so this is called 2x per redstone tick, 20x per second.

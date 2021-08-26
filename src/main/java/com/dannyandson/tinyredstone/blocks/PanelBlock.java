@@ -321,15 +321,14 @@ public class PanelBlock extends BaseEntityBlock {
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult result) {
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult blockHitResult) {
 
         boolean handled = false;
         BlockEntity te = world.getBlockEntity(pos);
-        if (te instanceof PanelTile && hand==InteractionHand.MAIN_HAND) {
-            PanelTile panelTile = (PanelTile) te;
+        if (te instanceof PanelTile panelTile && hand==InteractionHand.MAIN_HAND) {
             try {
 
-                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, result);
+                PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, blockHitResult);
 
                 if (posInPanelCell != null) {
                     Item heldItem = player.getItemInHand(hand).getItem();
@@ -401,39 +400,56 @@ public class PanelBlock extends BaseEntityBlock {
                         handled = true;
                     } else if (itemPanelCellMap.containsKey(heldItem) && !panelTile.isCovered()) {
                         //if player is holding an item registered as a panel cell, try to place that cell on the panel
-                        PanelCellPos pos1 = posInPanelCell;
-                        if(pos1.getIPanelCell()!=null)
+                        PanelCellPos placementPos = posInPanelCell;
+                        if(placementPos.getIPanelCell()!=null)
                         {
-                            pos1 = posInPanelCell.offset(panelTile.getSideFromDirection(result.getDirection()));
+                            placementPos = posInPanelCell.offset(panelTile.getSideFromDirection(blockHitResult.getDirection()));
                         }
 
                         //but first, check to see if cell exists and is empty
-                        if (pos1!=null && pos1.getIPanelCell()==null && !panelTile.checkCellForPistonExtension(pos1)) {
+                        if (placementPos!=null && placementPos.getIPanelCell()==null && !panelTile.checkCellForPistonExtension(placementPos)) {
                             try {
                                 //catch any exception thrown while attempting to construct from the registered IPanelCell class
                                 Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 
-                                if (panelCell instanceof IPanelCell) {
+                                if (panelCell instanceof IPanelCell cell) {
 
                                     boolean placementOK = true;
 
-                                    if (((IPanelCell) panelCell).needsSolidBase()) {
-                                        PanelCellPos basePos = pos1.offset(Side.BOTTOM);
-                                        if (basePos != null && (basePos.getIPanelCell() == null || !basePos.getIPanelCell().isPushable())) {
+                                    Side rotationLock = RotationLock.getServerRotationLock(player);
+                                    Side cellFacing = rotationLock == null
+                                            ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, cell.canPlaceVertical()))
+                                            : rotationLock;
+
+                                    if (cell.needsSolidBase()) {
+                                        Side attachingSideDir = panelTile.getSideFromDirection(blockHitResult.getDirection()).getOpposite();
+                                        Side attachingSideRel = (attachingSideDir==Side.TOP || attachingSideDir==Side.BOTTOM)?attachingSideDir:Side.FRONT;
+                                        if (
+                                                !posInPanelCell.equals(placementPos)
+                                                        && (
+                                                        posInPanelCell.getIPanelCell() == null
+                                                                || !posInPanelCell.getIPanelCell().isPushable()
+                                                                //check if the cell can attach to the side of the block facing
+                                                                || !posInPanelCell.getIPanelCell().canAttachToBaseOnSide(attachingSideRel)
+                                                )
+                                        ) {
                                             placementOK = false;
+                                        }
+                                        else {
+                                            //set the direction of the base block
+                                            cell.setBaseSide(attachingSideRel);
+                                            //set the cell direction to face the base block
+                                            if (attachingSideRel==Side.FRONT)
+                                                cellFacing=attachingSideDir;
                                         }
                                     }
 
                                     if (placementOK) {
                                         //place the cell on the panel
-                                        Side rotationLock = RotationLock.getServerRotationLock(player);
-
-                                        pos1.getPanelTile().addCell(
-                                                pos1,
-                                                (IPanelCell) panelCell,
-                                                rotationLock == null
-                                                        ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, ((IPanelCell) panelCell).canPlaceVertical()))
-                                                        : rotationLock,
+                                        placementPos.getPanelTile().addCell(
+                                                placementPos,
+                                                cell,
+                                                cellFacing,
                                                 player
                                         );
 
@@ -444,7 +460,10 @@ public class PanelBlock extends BaseEntityBlock {
                                 }
 
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                                TinyRedstone.LOGGER.error(e.getMessage());
+                                //catch any exception thrown while attempting to construct from the registered IPanelCell class
+                                //this may happen if an invalid IPanelCell class is registered by Tiny Redstone or an add-on mod
+                                //or from an invalid or outdated blueprint
+                                TinyRedstone.LOGGER.error(e);
                             }
                         }
                         handled = true;
@@ -470,7 +489,7 @@ public class PanelBlock extends BaseEntityBlock {
         }
         if(handled)
             return InteractionResult.CONSUME;
-        return super.use(state, world, pos, player, hand, result);
+        return super.use(state, world, pos, player, hand, blockHitResult);
     }
 
     @Override

@@ -195,37 +195,56 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
             if (lookingAt != null && lookingAt.getType() == HitResult.Type.BLOCK) {
 
+                BlockHitResult blockHitResult = (BlockHitResult)lookingAt;
                 Vec3 lookVector = Minecraft.getInstance().hitResult.getLocation();
                 BlockPos blockPos = new BlockPos(lookVector);
                 BlockEntity te = world.getBlockEntity(blockPos);
-                if (te == panelTile) {
-                    BlockHitResult result = Registration.REDSTONE_WRENCH.get().getHitResult(world, player);
 
-                    PanelCellPos cellPos =  PosInPanelCell.fromHitVec(panelTile,panelTile.getBlockPos(),result);
-                    if (cellPos!=null) {
+                if (te == panelTile) {
+
+                    PanelCellPos cellPos1 =  PosInPanelCell.fromHitVec(panelTile,panelTile.getBlockPos(),blockHitResult);
+                    if (cellPos1!=null) {
+                        PanelCellPos cellPos = cellPos1;
                         if (cellPos.getIPanelCell()!=null && (!cellPos.getIPanelCell().hasActivation() || player.isCrouching()))
                         {
-                            cellPos = cellPos.offset(panelTile.getSideFromDirection(result.getDirection()));
+                            cellPos = cellPos.offset(panelTile.getSideFromDirection(blockHitResult.getDirection()));
                         }
                         if (cellPos!=null && cellPos.getIPanelCell()==null) {
                             try {
                                 IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getMainHandItem().getItem()).getConstructors()[0].newInstance();
+                                Side rotationLock = RotationLock.getRotationLock();
+                                Side cellFacing = rotationLock == null ?
+                                        panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()))
+                                        : rotationLock;
+
                                 if (panelCell.needsSolidBase())
                                 {
-                                    PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
-                                    if (basePos!=null && (basePos.getIPanelCell()==null || !basePos.getIPanelCell().isPushable()))
+                                    Side attachingSideDir = panelTile.getSideFromDirection(blockHitResult.getDirection()).getOpposite();
+                                    Side attachingSideRel = (attachingSideDir==Side.TOP || attachingSideDir==Side.BOTTOM)?attachingSideDir:Side.FRONT;
+
+                                    if (
+                                            !cellPos1.equals(cellPos)
+                                                    && (
+                                                    cellPos1.getIPanelCell() == null
+                                                            || !cellPos1.getIPanelCell().isPushable()
+                                                            //check if the cell can attach to the side of the block facing
+                                                            || !cellPos1.getIPanelCell().canAttachToBaseOnSide(attachingSideRel)
+                                            )
+                                    )
                                     {
                                         return null;
+                                    }else{
+                                        panelCell.setBaseSide(attachingSideRel);
+                                        if (attachingSideRel==Side.FRONT)
+                                            cellFacing=attachingSideDir;
                                     }
                                 }
-                                Side rotationLock = RotationLock.getRotationLock();
+
                                 panelCell.onPlace(cellPos,player);
                                 return PanelCellGhostPos.fromPosInPanelCell(
                                         cellPos,
                                         panelCell,
-                                        rotationLock == null ?
-                                                panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()))
-                                                : rotationLock
+                                        cellFacing
                                 );
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                                 TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());

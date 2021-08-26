@@ -4,19 +4,17 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.items.Blueprint;
 import com.dannyandson.tinyredstone.network.BlueprintSync;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.JsonUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -161,16 +159,14 @@ public class BlueprintGUI  extends Screen {
 
                     try {
                         //will throw CommandSyntaxException, abort and log error if file is not valid NBT json
-                        JsonParser jsonParser = new JsonParser();
-                        JsonElement jsonElement =  jsonParser.parse(data.toString());
-                        CompoundTag nbt = JsonUtils.readNBT(jsonElement.getAsJsonObject(),"");
+                        CompoundTag nbt = TagParser.parseTag(data.toString());
                         CompoundTag cleanNBT = Blueprint.cleanUpBlueprintNBT(nbt);
                         if (cleanNBT!=null) {
                             this.blueprint.setTag(cleanNBT);
                             ModNetworkHandler.sendToServer(new BlueprintSync(cleanNBT));
                         }
-                    } catch (JsonParseException e) {
-                        TinyRedstone.LOGGER.error("JsonParseException reading JSON from user file: " + e.getLocalizedMessage());
+                    } catch (CommandSyntaxException e) {
+                        TinyRedstone.LOGGER.error("Exception reading JSON from user file: ",e);
                     }
                 }
 

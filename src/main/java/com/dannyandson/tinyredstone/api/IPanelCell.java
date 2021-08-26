@@ -16,7 +16,6 @@ public interface IPanelCell {
      * @param poseStack positioned for this cell
      *                    scaled to 1/8 block size such that length and width of cell are 1.0
      *                    starting point is (0,0,0)
-     * @param buffer
      */
     void render(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha);
 
@@ -65,9 +64,39 @@ public interface IPanelCell {
      */
     default boolean isPushable(){return false;}
 
+    /**
+     * Can the tiny component be placed to face up or down?
+     * @return true if it can place facing up or down
+     */
     default boolean canPlaceVertical(){return false;}
 
+    /**
+     * Does this component need to be placed against a full tiny block (piston pushable) or panel base?
+     * @return true if a full tiny block or panel base is required
+     */
     default boolean needsSolidBase(){return false;}
+
+    /**
+     * If a solid base is needed, which sides can be used as support.
+     * @param side The side of the cell to face a base: Side.BOTTOM, Side.TOP or Side.FRONT
+     * @return true if this cell can attach to the side in question.
+     */
+    default boolean canAttachToBaseOnSide(Side side){return true;}
+
+    /**
+     * Getter for base side.
+     * If a solid base is needed, which side of this cell is currently attached
+     * @return either Side.BOTTOM, Side.TOP or Side.FRONT
+     */
+    default Side getBaseSide(){return null;}
+
+    /**
+     * Setter for base side.
+     * If a solid base is needed, upon placement, this will be called to set which
+     * side of this cell is to attach to a base tiny block.
+     * @param side Side of this cell to attach to base tiny block. Either Side.BOTTOM, Side.TOP or Side.FRONT
+     */
+    default void setBaseSide(Side side){}
 
     /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
@@ -76,7 +105,7 @@ public interface IPanelCell {
     default int lightOutput(){return 0;}
 
     /**
-     * Called each each tick.
+     * Called each tick.
      *
      * @param cellPos The PanelCellPos of this IPanelCell
      * @return boolean indicating whether redstone output of this cell has changed
@@ -84,7 +113,7 @@ public interface IPanelCell {
     default boolean tick(PanelCellPos cellPos){return false;}
 
     /**
-     * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
+     * Called when the cell is activated. i.e. player right-clicked on the cell of the panel tile.
      *
      * @param cellPos The position of the clicked IPanelCell within the panel (this IPanelCell)
      * @param segmentClicked Which of nine segment within the cell were clicked.
@@ -93,6 +122,10 @@ public interface IPanelCell {
      */
     default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player){return false;}
 
+    /**
+     * Does this component have an action that is performed on activation (right-click)?
+     * @return true if something happens when the user right-clicks this cell.
+     */
     default boolean hasActivation(){return false;}
 
     CompoundTag writeNBT();
