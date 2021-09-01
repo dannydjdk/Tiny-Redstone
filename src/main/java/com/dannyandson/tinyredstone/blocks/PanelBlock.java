@@ -39,7 +39,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ToolType;
+import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -266,11 +266,11 @@ public class PanelBlock extends BaseEntityBlock {
         }
     }
 
-    @Nullable
-    @Override
-    public ToolType getHarvestTool(BlockState state) {
-        return ToolType.get("wrench");
-    }
+//    @Nullable
+//    @Override
+//    public ToolAction getHarvestTool(BlockState state) {
+//        return ToolAction.get("wrench");
+//    }
 
     private ItemStack getItemWithNBT(BlockGetter worldIn, BlockPos pos, BlockState state) {
         BlockEntity tileentity = worldIn.getBlockEntity(pos);
@@ -333,7 +333,7 @@ public class PanelBlock extends BaseEntityBlock {
                 if (posInPanelCell != null) {
                     Item heldItem = player.getItemInHand(hand).getItem();
 
-                    if (panelTile.isCrashed()) {
+                    if (panelTile.isCrashed() || panelTile.isOverflown()) {
                         //open crash GUI if on client and panel is in crashed state
                         if (world.isClientSide)
                             PanelCrashGUI.open(panelTile);

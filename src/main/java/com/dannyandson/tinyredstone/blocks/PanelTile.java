@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.Config;
+import com.dannyandson.tinyredstone.PanelOverflowException;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IObservingPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCell;
@@ -275,7 +276,7 @@ public class PanelTile extends BlockEntity {
 
     public void tick() {
         try {
-            if (!flagCrashed) {
+            if (!flagCrashed && !flagOverflow) {
                 boolean dirty = false;
                 //backward compatibility. Remove on major update (2.x.x).
                 if (fixLegacyFacing){
@@ -357,7 +358,7 @@ public class PanelTile extends BlockEntity {
 
     }
 
-    private void updatePiston(int index) {
+    private void updatePiston(int index) throws PanelOverflowException{
         IPanelCell panelCell = cells.get(index);
         if (panelCell instanceof Piston) {
             PanelTile panelTile = this;
@@ -401,7 +402,7 @@ public class PanelTile extends BlockEntity {
      * @param iteration how many times have we iterated
      * @return whether the move was successful and/or if adjacent cell can move into this pos
      */
-    private boolean moveCell(PanelCellPos cellPos, Side towardSide, Integer iteration) {
+    private boolean moveCell(PanelCellPos cellPos, Side towardSide, Integer iteration) throws PanelOverflowException {
         if (iteration > 12) return false;
 
         IPanelCell cell = cellPos.getIPanelCell();
@@ -510,18 +511,22 @@ public class PanelTile extends BlockEntity {
         this.cells = cells;
         this.cellDirections = cellDirections;
 
-        updateSide(Side.FRONT);
-        updateSide(Side.RIGHT);
-        updateSide(Side.BACK);
-        updateSide(Side.LEFT);
+        try {
+            updateSide(Side.FRONT);
+            updateSide(Side.RIGHT);
+            updateSide(Side.BACK);
+            updateSide(Side.LEFT);
 
-        if (!level.isClientSide)
-            setChanged();
+            if (!level.isClientSide)
+                setChanged();
 
-        updateOutputs();
+            updateOutputs();
 
-        clearVoxelShape();
-        flagSync();
+            clearVoxelShape();
+            flagSync();
+        }catch (PanelOverflowException e) {
+            this.handleCrash(e);
+        }
 
     }
 
@@ -540,10 +545,10 @@ public class PanelTile extends BlockEntity {
         return updated;
     }
 
-    public boolean updateSide(Direction facing) {
+    public boolean updateSide(Direction facing) throws PanelOverflowException {
         return updateSide(getSideFromDirection(facing));
     }
-    public boolean updateSide(Side side){
+    public boolean updateSide(Side side) throws PanelOverflowException{
         boolean updated = false;
 
         List<Integer> cellIndices = getEdgeCellIndices(side);
@@ -558,11 +563,11 @@ public class PanelTile extends BlockEntity {
         return updated;
     }
 
-    public boolean updateNeighborCells(PanelCellPos cellPos) {
+    public boolean updateNeighborCells(PanelCellPos cellPos) throws PanelOverflowException{
         return updateNeighborCells(cellPos, 1);
     }
 
-    private boolean updateNeighborCells(PanelCellPos cellPos, Integer iteration) {
+    private boolean updateNeighborCells(PanelCellPos cellPos, Integer iteration) throws PanelOverflowException{
         List<PanelCellPos> cellPosList = new ArrayList<>();
         boolean updateOutputs = false;
 
@@ -625,11 +630,11 @@ public class PanelTile extends BlockEntity {
         return false;
     }
 
-    protected boolean updateCell(Integer cellIndex) {
+    protected boolean updateCell(Integer cellIndex) throws PanelOverflowException{
         PanelCellPos cellPos = PanelCellPos.fromIndex(this,cellIndex);
         return updateCell(cellPos, 1);
     }
-    protected boolean updateCell(PanelCellPos cellPos) {
+    protected boolean updateCell(PanelCellPos cellPos) throws PanelOverflowException{
         return updateCell(cellPos, 1);
     }
     /**
@@ -638,14 +643,15 @@ public class PanelTile extends BlockEntity {
      * @param cellPos position of cell to update
      * @return true if this update caused the panel output to change
      */
-    private boolean updateCell(PanelCellPos cellPos, int iteration) {
+    private boolean updateCell(PanelCellPos cellPos, int iteration) throws PanelOverflowException{
 
         boolean change = false;
-        if (iteration > (16 * Config.CIRCUIT_MAX_ITERATION.get())) {
+        if (iteration > (16 * Config.CIRCUIT_MAX_ITERATION.get()) || this.flagOverflow) {
             if (!this.flagOverflow)
                 TinyRedstone.LOGGER.warn("Redstone panel at " + worldPosition.getX() + "," + worldPosition.getY() + "," + worldPosition.getZ() + " iterated too many times.");
             this.flagOverflow=true;
-            return false;
+            throw new PanelOverflowException("Redstone Panel iterated too many times.");
+            //return false;
         }
 
         //if this cell position is on a different panel than this one, call this method on that panel
@@ -868,11 +874,15 @@ public class PanelTile extends BlockEntity {
             this.level.sendBlockUpdated(worldPosition,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
     }
 
-    protected void handleCrash(Exception e)
+    public void handleCrash(Exception e)
     {
-        this.flagCrashed=true;
+        if (e instanceof PanelOverflowException pe)
+            this.flagOverflow=true;
+        else
+            this.flagCrashed=true;
 
         TinyRedstone.LOGGER.error("Redstone Panel Crashed at " + worldPosition.getX() + "," + worldPosition.getY() + "," + worldPosition.getZ(),e);
+        this.sync();
     }
 
     public boolean isCrashed()
@@ -1114,21 +1124,24 @@ public class PanelTile extends BlockEntity {
                     SoundSource.BLOCKS, 0.15f, 2f, false
             );
 
-            //let neighbors know about vacancy
-            updateNeighborCells(cellPos);
-            //for tiny redstone dust, alert the whole neighborhood
-            if (isRedstoneDust)
-            {
-                PanelCellPos above = cellPos.offset(Side.TOP),
-                        below = cellPos.offset(Side.BOTTOM);
-                if (above!=null)
-                    updateNeighborCells(above);
-                if (below!=null)
-                    updateNeighborCells(below);
-            }
+            try {
+                //let neighbors know about vacancy
+                updateNeighborCells(cellPos);
+                //for tiny redstone dust, alert the whole neighborhood
+                if (isRedstoneDust) {
+                    PanelCellPos above = cellPos.offset(Side.TOP),
+                            below = cellPos.offset(Side.BOTTOM);
+                    if (above != null)
+                        updateNeighborCells(above);
+                    if (below != null)
+                        updateNeighborCells(below);
+                }
 
-            clearVoxelShape();
-            flagSync();
+                clearVoxelShape();
+                flagSync();
+            }catch (PanelOverflowException e){
+                this.handleCrash(e);
+            }
         }
     }
 
@@ -1139,7 +1152,7 @@ public class PanelTile extends BlockEntity {
         }
     }
 
-    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing, Player player)
+    public void addCell(PanelCellPos cellPos,IPanelCell panelCell, Side facing, Player player) throws PanelOverflowException
     {
         int cellIndex = cellPos.getIndex();
         cellDirections.put(cellIndex, facing);

@@ -70,12 +70,18 @@ public class Blueprint extends Item {
                     Map<Item,Integer> items = getRequiredComponents(blueprintNBT);
                     if (player.isCreative() || playerHasSufficientComponents(items, player)) {
 
-                        panelTile.loadCellsFromNBT(blueprintNBT,false);
-                        panelTile.updateSide(Side.FRONT);
-                        panelTile.updateSide(Side.RIGHT);
-                        panelTile.updateSide(Side.BACK);
-                        panelTile.updateSide(Side.LEFT);
-                        panelTile.setChanged();
+                        try {
+
+                            panelTile.loadCellsFromNBT(blueprintNBT, false);
+                            panelTile.updateSide(Side.FRONT);
+                            panelTile.updateSide(Side.RIGHT);
+                            panelTile.updateSide(Side.BACK);
+                            panelTile.updateSide(Side.LEFT);
+                            panelTile.setChanged();
+
+                        }catch (Exception e){
+                            panelTile.handleCrash(e);
+                        }
 
                         if (!player.isCreative())
                         {
