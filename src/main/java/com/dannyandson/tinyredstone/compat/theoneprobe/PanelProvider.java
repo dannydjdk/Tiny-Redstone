@@ -9,18 +9,19 @@ import mcjty.theoneprobe.Tools;
 import mcjty.theoneprobe.api.*;
 import mcjty.theoneprobe.apiimpl.styles.LayoutStyle;
 import mcjty.theoneprobe.config.Config;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.function.Function;
 
@@ -28,8 +29,8 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
     private IProbeConfig.ConfigMode redstoneMode;
 
     @Override
-    public String getID() {
-        return TinyRedstone.MODID + ":panel";
+    public ResourceLocation getID() {
+        return new ResourceLocation( TinyRedstone.MODID,"panel");
     }
 
     @Override
@@ -39,7 +40,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         return null;
     }
 
-    private boolean show(ProbeMode probeMode, PlayerEntity playerEntity) {
+    private boolean show(ProbeMode probeMode, Player playerEntity) {
         switch (com.dannyandson.tinyredstone.Config.DISPLAY_MODE.get()) {
             case 0:
                 return probeMode == ProbeMode.DEBUG;
@@ -59,23 +60,21 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
     }
 
     @Override
-    public boolean overrideStandardInfo(ProbeMode probeMode, IProbeInfo probeInfo, PlayerEntity playerEntity, World world, BlockState blockState, IProbeHitData probeHitData) {
+    public boolean overrideStandardInfo(ProbeMode probeMode, IProbeInfo probeInfo, Player playerEntity, Level world, BlockState blockState, IProbeHitData probeHitData) {
         BlockPos pos = probeHitData.getPos();
-        TileEntity tileEntity = world.getBlockEntity(pos);
+        BlockEntity tileEntity = world.getBlockEntity(pos);
 
         IProbeConfig config = Config.getRealConfig();
 
-        if (tileEntity instanceof PanelTile && show(probeMode, playerEntity)) {
+        if (tileEntity instanceof PanelTile panelTile && show(probeMode, playerEntity)) {
 
             if (redstoneMode == null) redstoneMode = config.getShowRedstone();
             config.showRedstone(IProbeConfig.ConfigMode.NOT);
 
-            PanelTile panelTile = (PanelTile) tileEntity;
             Block block = blockState.getBlock();
 
-            if(!panelTile.isCovered() && block instanceof PanelBlock) {
-                PanelBlock panelBlock = (PanelBlock) block;
-                BlockRayTraceResult result = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
+            if(!panelTile.isCovered() && block instanceof PanelBlock panelBlock) {
+                BlockHitResult result = new BlockHitResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.getValue(BlockStateProperties.FACING),result);
 
                 if(panelCellPos!=null) {
@@ -110,16 +109,15 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
     }
 
     @Override
-    public void addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, PlayerEntity playerEntity, World world, BlockState blockState, IProbeHitData probeHitData) {
+    public void addProbeInfo(ProbeMode probeMode, IProbeInfo probeInfo, Player playerEntity, Level world, BlockState blockState, IProbeHitData probeHitData) {
         BlockPos pos = probeHitData.getPos();
-        TileEntity tileEntity = world.getBlockEntity(pos);
+        BlockEntity tileEntity = world.getBlockEntity(pos);
 
-        if (tileEntity instanceof PanelTile && show(probeMode, playerEntity)) {
-            PanelTile panelTile = (PanelTile) tileEntity;
+        if (tileEntity instanceof PanelTile panelTile && show(probeMode, playerEntity)) {
 
             if (!panelTile.isCovered()) {
 
-                BlockRayTraceResult rtr = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
+                BlockHitResult rtr = new BlockHitResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, rtr);
 
                 if (posInPanelCell != null) {
@@ -168,7 +166,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
         }
     }
 
-    private static void showBlockRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, IProbeConfig.ConfigMode redstoneMode, World world, BlockPos pos, Direction sideHit) {
+    private static void showBlockRedstonePower(IProbeInfo probeInfo, ProbeMode probeMode, IProbeConfig.ConfigMode redstoneMode, Level world, BlockPos pos, Direction sideHit) {
         if (Tools.show(probeMode, redstoneMode)) {
             showRedstonePower(probeInfo, world.getSignal(pos, sideHit.getOpposite()));
         }

@@ -3,11 +3,11 @@ package com.dannyandson.tinyredstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
+import com.dannyandson.tinyredstone.compat.CompatHandler;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -41,7 +41,7 @@ public class TinyRedstone {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
 
-        //CompatHandler.register();
+        CompatHandler.register();
     }
 
     public static void registerPanelCell(Class<? extends IPanelCell> iPanelCellClass, Item correspondingItem)

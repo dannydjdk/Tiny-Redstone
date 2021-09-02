@@ -6,8 +6,7 @@ import mcjty.theoneprobe.api.CompoundText;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
 import mcjty.theoneprobe.api.TextStyleClass;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.item.ItemStack;
 
 public class OverlayBlockInfo implements IOverlayBlockInfo {
     private final IProbeInfo probeInfo;
@@ -35,12 +34,12 @@ public class OverlayBlockInfo implements IOverlayBlockInfo {
 
     @Override
     public void addText(String text) {
-        this.probeInfo.text(new StringTextComponent(text));
+        this.probeInfo.text(text);
     }
 
     @Override
     public void addText(ItemStack itemStack, String text) {
-        this.probeInfo.horizontal().itemLabel(itemStack).text(new StringTextComponent(text));
+        this.probeInfo.horizontal().itemLabel(itemStack).text(text);
     }
 
     @Override

@@ -1,10 +1,10 @@
 package com.dannyandson.tinyredstone.api;
 
-//import com.dannyandson.tinyredstone.compat.OverlayBlockInfoMode;
+import com.dannyandson.tinyredstone.compat.OverlayBlockInfoMode;
 import net.minecraft.world.item.ItemStack;
 
 public interface IOverlayBlockInfo {
-    //OverlayBlockInfoMode getMode();
+    OverlayBlockInfoMode getMode();
     void setPowerOutput(int power);
     void addText(String text);
     void addText(ItemStack itemStack, String text);
