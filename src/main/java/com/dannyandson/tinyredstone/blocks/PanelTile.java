@@ -1165,8 +1165,8 @@ public class PanelTile extends BlockEntity {
                 SoundSource.BLOCKS, 0.15f, 2f, false
         );
 
-        if (panelCell.onPlace(cellPos,player))
-            updateNeighborCells(cellPos);
+        panelCell.onPlace(cellPos,player);
+        updateNeighborCells(cellPos);
         clearVoxelShape();
     }
 

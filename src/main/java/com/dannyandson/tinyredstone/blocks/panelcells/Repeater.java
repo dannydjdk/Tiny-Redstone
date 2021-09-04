@@ -173,6 +173,10 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         {
             //input has switched from off to on
             input=true;
+            if(offPending==1)
+            {
+                onPending=ticks;
+            }
         }
         else if ((backNeighbor==null || backNeighbor.getWeakRsOutput() ==0 ) && input)
         {
@@ -266,7 +270,8 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
                 this.offPending=this.ticks;
             return true;
         }
-        if (this.offPending==0 && !this.locked && !input){
+        if (this.offPending==0 && !this.locked && (!input||(this.output && this.onPending>-1)) ){
+            if ((this.output && this.onPending>-1))this.onPending=this.ticks;
             this.output=false;
             return true;
         }

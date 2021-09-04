@@ -272,6 +272,11 @@ public class PanelBlock extends BaseEntityBlock {
 //        return ToolAction.get("wrench");
 //    }
 
+    @Override
+    public boolean canHarvestBlock(BlockState state, BlockGetter world, BlockPos pos, Player player) {
+        return true;
+    }
+
     private ItemStack getItemWithNBT(BlockGetter worldIn, BlockPos pos, BlockState state) {
         BlockEntity tileentity = worldIn.getBlockEntity(pos);
         if (tileentity instanceof PanelTile) {

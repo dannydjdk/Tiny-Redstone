@@ -82,7 +82,7 @@ public class PanelCellNeighbor {
     public int getComparatorOverride()
     {
         if (blockPos!=null && hasComparatorOverride())
-            return getNeighborBlockState().getAnalogOutputSignal(panelTile.getLevel(), blockPos);;
+            return getNeighborBlockState().getAnalogOutputSignal(panelTile.getLevel(), blockPos);
         return 0;
     }
 
@@ -117,7 +117,7 @@ public class PanelCellNeighbor {
     {
         BlockState blockState = getNeighborBlockState();
         if (blockState!=null)
-            return blockState.shouldCheckWeakPower(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            return blockState.isSignalSource();
         if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;
         return false;
