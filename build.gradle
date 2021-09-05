@@ -138,7 +138,8 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.17.1-37.0.50'
 
     implementation fg.deobf('curse.maven:theoneprobe-245211:3430022')
-    //https://media.forgecdn.net/files/3430/22/theoneprobe-1.17-4.0.2.jar
+
+    implementation fg.deobf('curse.maven:jei-238222:3448057')
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency

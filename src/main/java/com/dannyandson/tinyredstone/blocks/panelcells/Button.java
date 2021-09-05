@@ -96,16 +96,6 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
         return true;
     }
 
-    /**
-     * Can this cell be pushed by a piston?
-     *
-     * @return true if a piston can push this block
-     */
-    @Override
-    public boolean isPushable() {
-        return false;
-    }
-
     @Override
     public boolean needsSolidBase(){return true;}
 

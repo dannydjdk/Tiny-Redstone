@@ -153,7 +153,7 @@ public class Piston implements IPanelCell {
     }
 
     public boolean isExtended(){
-        return this.extended;
+        return (extended && changePending==-1) || (!extended && changePending!=-1);
     }
 
     /**
@@ -188,7 +188,7 @@ public class Piston implements IPanelCell {
                 ( extended ||
                         (
                                 backNeighbor == null || ( backNeighbor.getNeighborIPanelCell() != null &&
-                                (backNeighbor.isPushable() ||backNeighbor.getNeighborIPanelCell().needsSolidBase()) )
+                                backNeighbor.isPushable() )
                         )
                 );
         if (extend!=this.extended)

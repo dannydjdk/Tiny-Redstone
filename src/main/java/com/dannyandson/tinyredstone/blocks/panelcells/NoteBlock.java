@@ -113,6 +113,16 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
     @Override
     public boolean hasActivation(){return true;}
 
+    /**
+     * Can this cell be pushed by a piston?
+     *
+     * @return true if a piston can push this block
+     */
+    @Override
+    public boolean isPushable() {
+        return true;
+    }
+
     @Override
     public CompoundTag writeNBT() {
         CompoundTag nbt = super.writeNBT();
