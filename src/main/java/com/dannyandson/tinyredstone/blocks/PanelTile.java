@@ -240,8 +240,6 @@ public class PanelTile extends BlockEntity {
         for (String index : cellsNBT.getAllKeys()) {
             CompoundTag cellNBT = cellsNBT.getCompound(index);
             if (cellNBT.contains("data")) {
-                if (this.cells.size()==0)
-                    this.flagUpdate =true;
                 String className = cellNBT.getString("class");
                 try {
                     IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
