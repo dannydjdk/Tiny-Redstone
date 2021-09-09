@@ -64,8 +64,16 @@ public interface IPanelCell {
      */
     default boolean isPushable(){return false;}
 
+    /**
+     * Can the tiny component be placed to face up or down?
+     * @return true if it can place facing up or down
+     */
     default boolean canPlaceVertical(){return false;}
 
+    /**
+     * Does this component need to be placed against a full tiny block (piston pushable) or panel base?
+     * @return true if a full tiny block or panel base is required
+     */
     default boolean needsSolidBase(){return false;}
 
     /**
@@ -75,7 +83,7 @@ public interface IPanelCell {
     default int lightOutput(){return 0;}
 
     /**
-     * Called each each tick.
+     * Called each tick.
      *
      * @param cellPos The PanelCellPos of this IPanelCell
      * @return boolean indicating whether redstone output of this cell has changed
@@ -92,6 +100,10 @@ public interface IPanelCell {
      */
     default boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, PlayerEntity player){return false;}
 
+    /**
+     * Does this component have an action that is performed on activation (right-click)?
+     * @return true if something happens when the user right-clicks this cell.
+     */
     default boolean hasActivation(){return false;}
 
     CompoundNBT writeNBT();

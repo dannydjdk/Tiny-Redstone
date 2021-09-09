@@ -1,9 +1,9 @@
 package com.dannyandson.tinyredstone;
 
+import com.dannyandson.tinyredstone.api.AbstractPanelCellItem;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
-import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,7 +33,7 @@ public class CommonBinding {
                 event.getPlayer().level.getBlockState(event.getPos()).getBlock() instanceof PanelBlock &&
                 (
                         event.getPlayer().getMainHandItem().getItem()==Registration.REDSTONE_WRENCH.get() ||
-                                event.getPlayer().getMainHandItem().getItem() instanceof PanelCellItem
+                                event.getPlayer().getMainHandItem().getItem() instanceof AbstractPanelCellItem
                 )) {
             BlockState blockState = event.getPlayer().level.getBlockState(event.getPos());
             PanelBlock panelBlock = (PanelBlock)blockState.getBlock();
