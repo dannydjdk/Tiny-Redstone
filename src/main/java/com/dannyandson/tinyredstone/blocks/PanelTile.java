@@ -213,7 +213,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             int color = parentNBTTagCompound.getInt("color");
             if (this.Color != color) {
                 this.Color = color;
-                this.flagUpdate = true;
+                this.level.sendBlockUpdated(worldPosition,blockState,blockState,0);
             }
         }
 

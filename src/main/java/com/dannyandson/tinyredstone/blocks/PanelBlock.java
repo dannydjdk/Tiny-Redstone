@@ -348,6 +348,7 @@ public class PanelBlock extends Block {
                             //remove an item from the player's stack
                             if (!player.isCreative())
                                 player.getItemInHand(hand).setCount(player.getItemInHand(hand).getCount() - 1);
+                            world.sendBlockUpdated(pos,state,state,0);
                         }
                         handled = true;
                     } else if (heldItem.equals(Items.BARRIER) && player.getScoreboardName().equals("Dev")) {
