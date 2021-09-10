@@ -6,11 +6,14 @@ import com.dannyandson.tinyredstone.api.IObservingPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
+import com.dannyandson.tinyredstone.network.ModNetworkHandler;
+import com.dannyandson.tinyredstone.network.PlaySound;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
@@ -294,85 +297,83 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public void tick() {
         try {
             if (!flagCrashed) {
-                boolean dirty = false;
-                //backward compatibility. Remove on major update (2.x.x).
-                if (fixLegacyFacing){
-                    level.setBlockAndUpdate(worldPosition, Registration.REDSTONE_PANEL_BLOCK.get().defaultBlockState().setValue(BlockStateProperties.FACING,Direction.DOWN));
-                    fixLegacyFacing=false;
-                    dirty=true;
-                }
-
-                //call the tick() method in all our cells and grab any updated pistons
-                List<Integer> pistons = null;
-                for (Integer index : this.cells.keySet()) {
-                    PanelCellPos cellPos = PanelCellPos.fromIndex(this,index);
-                    IPanelCell panelCell = this.cells.get(index);
-                    boolean update = panelCell.tick(cellPos);
-                    if (update) {
-                        if (panelCell instanceof Piston) {
-                            if (pistons == null)
-                                pistons = new ArrayList<>();
-                            pistons.add(index);
-                        } else {
-                            if(panelCell instanceof Button)
-                            {
-                                level.playLocalSound(
-                                        worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(),
-                                        panelCell instanceof StoneButton ? SoundEvents.STONE_BUTTON_CLICK_OFF : SoundEvents.WOODEN_BUTTON_CLICK_OFF,
-                                        SoundCategory.BLOCKS, 0.25f, 2f, false
-                                );
-                            }
-                            updateNeighborCells(cellPos);
-                        }
+                if (level.isClientSide) {
+                    PanelCellGhostPos gPos = PanelTileRenderer.getPlayerLookingAtCell(this);
+                    if (gPos != null)
+                        gPos.getPanelTile().panelCellGhostPos = gPos;
+                    else
+                        this.panelCellGhostPos = null;
+                }else{
+                    boolean dirty = false;
+                    //backward compatibility. Remove on major update (2.x.x).
+                    if (fixLegacyFacing) {
+                        level.setBlockAndUpdate(worldPosition, Registration.REDSTONE_PANEL_BLOCK.get().defaultBlockState().setValue(BlockStateProperties.FACING, Direction.DOWN));
+                        fixLegacyFacing = false;
                         dirty = true;
                     }
 
-                }
+                    //call the tick() method in all our cells and grab any updated pistons
+                    List<Integer> pistons = null;
+                    for (Integer index : this.cells.keySet()) {
+                        PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
+                        IPanelCell panelCell = this.cells.get(index);
+                        boolean update = panelCell.tick(cellPos);
+                        if (update) {
+                            if (panelCell instanceof Piston) {
+                                if (pistons == null)
+                                    pistons = new ArrayList<>();
+                                pistons.add(index);
+                            } else {
+                                if (panelCell instanceof Button) {
+                                    for (PlayerEntity player : this.getLevel().players()) {
+                                        if (this.getLevel().hasNearbyAlivePlayer(getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), 48))
+                                            ModNetworkHandler.sendToClient(
+                                                    new PlaySound(getBlockPos(), "minecraft", panelCell instanceof StoneButton ? "block.stone_button.click_off" : "block.wooden_button.click_off", 0.25f, 2f),
+                                                    (ServerPlayerEntity) player);
+                                    }
+                                }
+                                updateNeighborCells(cellPos);
+                            }
+                            dirty = true;
+                        }
 
-                //if any pistons updated state, try to update them
-                if (pistons != null) {
-                    for (Integer index : pistons) {
-                        updatePiston(index);
                     }
-                }
 
-                if (this.flagLightUpdate) {
-                    this.flagLightUpdate = false;
-                    this.level.getLightEngine().checkBlock(worldPosition);
-                }
+                    //if any pistons updated state, try to update them
+                    if (pistons != null) {
+                        for (Integer index : pistons) {
+                            updatePiston(index);
+                        }
+                    }
+
+                    if (this.flagLightUpdate) {
+                        this.flagLightUpdate = false;
+                        this.level.getLightEngine().checkBlock(worldPosition);
+                    }
 
 
-                if (flagUpdate)
-                {
-                    updateSide(Side.FRONT);
-                    updateSide(Side.RIGHT);
-                    updateSide(Side.BACK);
-                    updateSide(Side.LEFT);
-                }
-                if (dirty || flagUpdate) {
-                    setChanged();
-                    updateOutputs();
-                }
+                    if (flagUpdate) {
+                        updateSide(Side.FRONT);
+                        updateSide(Side.RIGHT);
+                        updateSide(Side.BACK);
+                        updateSide(Side.LEFT);
+                    }
+                    if (dirty || flagUpdate) {
+                        setChanged();
+                        updateOutputs();
+                    }
 
-                if (flagSync || dirty || flagUpdate) {
-                    sync();
-                    flagSync=false;
-                    flagUpdate=false;
-                }
+                    if (flagSync || dirty || flagUpdate) {
+                        sync();
+                        flagSync = false;
+                        flagUpdate = false;
+                    }
 
-                if (level.isClientSide) {
-                    PanelCellGhostPos gPos = PanelTileRenderer.getPlayerLookingAtCell(this);
-                    if (gPos!=null)
-                        gPos.getPanelTile().panelCellGhostPos=gPos;
-                    else
-                        this.panelCellGhostPos=null;
                 }
             }
-        }catch(Exception e)
-        {
+        } catch (Exception e) {
             this.handleCrash(e);
         }
-
     }
 
     private void updatePiston(int index) {
@@ -390,11 +391,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 movingToward = movingToward.getOpposite();
             }
 
-            level.playLocalSound(
-                    worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(),
-                    (((Piston) panelCell).isExtended()) ? SoundEvents.PISTON_EXTEND : SoundEvents.PISTON_CONTRACT,
-                    SoundCategory.BLOCKS, 0.25f, 2f, false
-            );
+            for(PlayerEntity player:this.getLevel().players()){
+                if(this.getLevel().hasNearbyAlivePlayer(getBlockPos().getX(),getBlockPos().getY(),getBlockPos().getZ(),48))
+                    ModNetworkHandler.sendToClient(
+                            new PlaySound(getBlockPos(),"minecraft",(((Piston) panelCell).isExtended()) ? "block.piston.extend" : "block.piston.contract", 0.25f, 2f),
+                            (ServerPlayerEntity) player);
+            }
 
             if (moverPos != null) {
                 PanelTile moverPanelTile = moverPos.getPanelTile();
