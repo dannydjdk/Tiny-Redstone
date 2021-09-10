@@ -213,7 +213,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             int color = parentNBTTagCompound.getInt("color");
             if (this.Color != color) {
                 this.Color = color;
-                this.level.sendBlockUpdated(worldPosition,blockState,blockState,0);
+                if (this.level!=null)
+                    this.level.sendBlockUpdated(worldPosition,blockState,blockState,0);
             }
         }
 
@@ -232,7 +233,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             panelCover=null;
         }
 
-        if(this.lightOutput != previousLightOutput) {
+        if(this.lightOutput != previousLightOutput && this.level != null) {
             this.level.getLightEngine().checkBlock(worldPosition);
         }
 
