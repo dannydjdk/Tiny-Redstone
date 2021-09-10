@@ -10,7 +10,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -21,8 +20,8 @@ public class PanelCellItem extends AbstractPanelCellItem {
     }
 
     @Override
-    public  void  appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags) {
-        if (!FMLEnvironment.dist.isDedicatedServer()) {
+    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags) {
+        if (Screen.hasShiftDown()) {
             list.add(new TranslatableComponent("message.item.redstone_panel_cell").withStyle(ChatFormatting.GRAY));
             list.add(new TranslatableComponent("message." + this.getDescriptionId()).withStyle(ChatFormatting.RED));
         } else

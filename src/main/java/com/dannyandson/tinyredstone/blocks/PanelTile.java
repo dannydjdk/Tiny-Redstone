@@ -209,7 +209,6 @@ public class PanelTile extends BlockEntity {
             int color = parentNBTTagCompound.getInt("color");
             if (this.Color != color) {
                 this.Color = color;
-                this.flagUpdate = true;
             }
         }
 
@@ -227,7 +226,7 @@ public class PanelTile extends BlockEntity {
             panelCover=null;
         }
 
-        if(this.lightOutput != previousLightOutput) {
+        if(this.lightOutput != previousLightOutput && this.level!=null) {
             this.level.getLightEngine().checkBlock(worldPosition);
         }
 
