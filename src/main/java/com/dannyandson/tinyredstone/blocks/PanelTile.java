@@ -7,12 +7,15 @@ import com.dannyandson.tinyredstone.api.IObservingPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
+import com.dannyandson.tinyredstone.network.ModNetworkHandler;
+import com.dannyandson.tinyredstone.network.PlaySound;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -51,13 +54,9 @@ public class PanelTile extends BlockEntity {
     protected IPanelCover panelCover = null;
 
     //other state fields (not saved)
-    private boolean flagUpdate = false;
     private boolean flagSync = true;
     protected PanelCellGhostPos panelCellGhostPos;
     private VoxelShape voxelShape = null;
-
-    //for backward compat. Remove on next major update (2.x.x).
-    private boolean fixLegacyFacing = false;
 
     public PanelTile(BlockPos p_155229_, BlockState p_155230_) {
         super(Registration.REDSTONE_PANEL_TILE.get(), p_155229_, p_155230_);
@@ -181,7 +180,7 @@ public class PanelTile extends BlockEntity {
 
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
 
-        this.loadCellsFromNBT(parentNBTTagCompound,true);
+        this.loadCellsFromNBT(parentNBTTagCompound);
 
         CompoundTag strongPowerToNeighbors = parentNBTTagCompound.getCompound("strong_power_outgoing");
         if (!strongPowerToNeighbors.isEmpty()) {
@@ -232,7 +231,7 @@ public class PanelTile extends BlockEntity {
 
     }
 
-    public void loadCellsFromNBT(CompoundTag parentNBTTagCompound,boolean fixFacing)
+    public void loadCellsFromNBT(CompoundTag parentNBTTagCompound)
     {
         CompoundTag cellsNBT = parentNBTTagCompound.getCompound("cells");
 
@@ -256,9 +255,6 @@ public class PanelTile extends BlockEntity {
                         else if (direction==Direction.SOUTH) this.cellDirections.put(i,Side.BACK);
                         else if (direction==Direction.WEST) this.cellDirections.put(i,Side.LEFT);
 
-                        //for panels placed before the direction update, set facing to DOWN
-                        if (fixFacing)
-                            this.fixLegacyFacing = true;
 
                     }
                     else
@@ -274,78 +270,65 @@ public class PanelTile extends BlockEntity {
     public void tick() {
         try {
             if (!flagCrashed && !flagOverflow) {
-                boolean dirty = false;
-                //backward compatibility. Remove on major update (2.x.x).
-                if (fixLegacyFacing){
-                    level.setBlockAndUpdate(worldPosition, Registration.REDSTONE_PANEL_BLOCK.get().defaultBlockState().setValue(BlockStateProperties.FACING,Direction.DOWN));
-                    fixLegacyFacing=false;
-                    dirty=true;
-                }
-
-                //call the tick() method in all our cells and grab any updated pistons
-                List<Integer> pistons = null;
-                for (Integer index : this.cells.keySet()) {
-                    PanelCellPos cellPos = PanelCellPos.fromIndex(this,index);
-                    IPanelCell panelCell = this.cells.get(index);
-                    boolean update = panelCell.tick(cellPos);
-                    if (update) {
-                        if (panelCell instanceof Piston) {
-                            if (pistons == null)
-                                pistons = new ArrayList<>();
-                            pistons.add(index);
-                        } else {
-                            if(panelCell instanceof Button)
-                            {
-                                level.playLocalSound(
-                                        worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(),
-                                        panelCell instanceof StoneButton ? SoundEvents.STONE_BUTTON_CLICK_OFF : SoundEvents.WOODEN_BUTTON_CLICK_OFF,
-                                        SoundSource.BLOCKS, 0.25f, 2f, false
-                                );
-                            }
-                            updateNeighborCells(cellPos);
-                        }
-                        dirty = true;
-                    }
-
-                }
-
-                //if any pistons updated state, try to update them
-                if (pistons != null) {
-                    for (Integer index : pistons) {
-                        updatePiston(index);
-                    }
-                }
-
-                if (this.flagLightUpdate) {
-                    this.flagLightUpdate = false;
-                    this.level.getLightEngine().checkBlock(worldPosition);
-                }
-
-
-                if (flagUpdate)
-                {
-                    updateSide(Side.FRONT);
-                    updateSide(Side.RIGHT);
-                    updateSide(Side.BACK);
-                    updateSide(Side.LEFT);
-                }
-                if (dirty || flagUpdate) {
-                    setChanged();
-                    updateOutputs();
-                }
-
-                if (flagSync || dirty || flagUpdate) {
-                    sync();
-                    flagSync=false;
-                    flagUpdate=false;
-                }
-
                 if (level.isClientSide) {
                     PanelCellGhostPos gPos = PanelTileRenderer.getPlayerLookingAtCell(this);
-                    if (gPos!=null)
-                        gPos.getPanelTile().panelCellGhostPos=gPos;
+                    if (gPos != null)
+                        gPos.getPanelTile().panelCellGhostPos = gPos;
                     else
-                        this.panelCellGhostPos=null;
+                        this.panelCellGhostPos = null;
+                } else {
+                    //only on server side
+                    boolean dirty = false;
+
+                    //call the tick() method in all our cells and grab any updated pistons
+                    List<Integer> pistons = null;
+                    for (Integer index : this.cells.keySet()) {
+                        PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
+                        IPanelCell panelCell = this.cells.get(index);
+                        boolean update = panelCell.tick(cellPos);
+                        if (update) {
+                            if (panelCell instanceof Piston) {
+                                if (pistons == null)
+                                    pistons = new ArrayList<>();
+                                pistons.add(index);
+                            } else {
+                                if (panelCell instanceof Button) {
+                                    for (Player player : this.getLevel().players()) {
+                                        if (player.distanceToSqr(getBlockPos().getX(),getBlockPos().getY(),getBlockPos().getZ()) < 64d)
+                                            ModNetworkHandler.sendToClient(
+                                                    new PlaySound(getBlockPos(), "minecraft", panelCell instanceof StoneButton ? "block.stone_button.click_off" : "block.wooden_button.click_off", 0.25f, 2f),
+                                                    (ServerPlayer) player);
+                                    }
+                                }
+                                updateNeighborCells(cellPos);
+                            }
+                            dirty = true;
+                        }
+
+                    }
+
+                    //if any pistons updated state, try to update them
+                    if (pistons != null) {
+                        for (Integer index : pistons) {
+                            updatePiston(index);
+                        }
+                    }
+
+                    if (this.flagLightUpdate) {
+                        this.flagLightUpdate = false;
+                        this.level.getLightEngine().checkBlock(worldPosition);
+                    }
+
+
+                    if (dirty) {
+                        setChanged();
+                        updateOutputs();
+                    }
+
+                    if (flagSync || dirty) {
+                        sync();
+                        flagSync = false;
+                    }
                 }
             }
         }catch(Exception e)
@@ -372,11 +355,13 @@ public class PanelTile extends BlockEntity {
                     moverPos=null;
             }
 
-            level.playLocalSound(
-                    worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(),
-                    (((Piston) panelCell).isExtended()) ? SoundEvents.PISTON_EXTEND : SoundEvents.PISTON_CONTRACT,
-                    SoundSource.BLOCKS, 0.25f, 2f, false
-            );
+            for(Player player:this.getLevel().players()){
+                if (player.distanceToSqr(getBlockPos().getX(),getBlockPos().getY(),getBlockPos().getZ()) < 64d)
+                    ModNetworkHandler.sendToClient(
+                            new PlaySound(getBlockPos(),"minecraft",(((Piston) panelCell).isExtended()) ? "block.piston.extend" : "block.piston.contract", 0.25f, 2f),
+                            (ServerPlayer) player);
+            }
+
 
             if (moverPos != null) {
                 PanelTile moverPanelTile = moverPos.getPanelTile();

@@ -72,7 +72,7 @@ public class Blueprint extends Item {
 
                         try {
 
-                            panelTile.loadCellsFromNBT(blueprintNBT, false);
+                            panelTile.loadCellsFromNBT(blueprintNBT);
                             panelTile.updateSide(Side.FRONT);
                             panelTile.updateSide(Side.RIGHT);
                             panelTile.updateSide(Side.BACK);

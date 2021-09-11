@@ -152,7 +152,7 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
         {
             BlockPos pos = panelTile.getBlockPos();
             for(Player player:panelTile.getLevel().players()){
-                if(panelTile.getLevel().hasNearbyAlivePlayer(pos.getX(),pos.getY(),pos.getZ(),48))
+                if(player.distanceToSqr(pos.getX(),pos.getY(),pos.getZ()) < 256d)
                     ModNetworkHandler.sendToClient(
                             new PlaySound(pos,"minecraft", "block.note_block." + instrument, 0.5f, (pitch==0)?0.5f:(float)Math.pow(2f,((pitch-12f)/12f))),
                             (ServerPlayer) player);

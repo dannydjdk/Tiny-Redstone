@@ -10,7 +10,7 @@ import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
 public class ModNetworkHandler {
     private static SimpleChannel INSTANCE;
     private static int ID = 0;
-    private static final String PROTOCOL_VERSION = "1.2";
+    private static final String PROTOCOL_VERSION = "2.0 ";
 
     private static int nextID() {
         return ID++;
@@ -75,6 +75,12 @@ public class ModNetworkHandler {
                 .encoder(PlaySound::toBytes)
                 .decoder(PlaySound::new)
                 .consumer(PlaySound::handle)
+                .add();
+
+        INSTANCE.messageBuilder(PanelCellSync.class,nextID())
+                .encoder(PanelCellSync::toBytes)
+                .decoder(PanelCellSync::new)
+                .consumer(PanelCellSync::handle)
                 .add();
     }
 
