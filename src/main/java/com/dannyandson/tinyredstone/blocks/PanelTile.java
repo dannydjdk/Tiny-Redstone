@@ -326,7 +326,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                             } else {
                                 if (panelCell instanceof Button) {
                                     for (PlayerEntity player : this.getLevel().players()) {
-                                        if (this.getLevel().hasNearbyAlivePlayer(getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), 48))
+                                        if (player.distanceToSqr((double) getBlockPos().getX(), (double) getBlockPos().getY(), (double) getBlockPos().getZ()) < 64d)
                                             ModNetworkHandler.sendToClient(
                                                     new PlaySound(getBlockPos(), "minecraft", panelCell instanceof StoneButton ? "block.stone_button.click_off" : "block.wooden_button.click_off", 0.25f, 2f),
                                                     (ServerPlayerEntity) player);
@@ -392,7 +392,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             }
 
             for(PlayerEntity player:this.getLevel().players()){
-                if(this.getLevel().hasNearbyAlivePlayer(getBlockPos().getX(),getBlockPos().getY(),getBlockPos().getZ(),48))
+                if (player.distanceToSqr((double) getBlockPos().getX(), (double) getBlockPos().getY(), (double) getBlockPos().getZ()) < 64d)
                     ModNetworkHandler.sendToClient(
                             new PlaySound(getBlockPos(),"minecraft",(((Piston) panelCell).isExtended()) ? "block.piston.extend" : "block.piston.contract", 0.25f, 2f),
                             (ServerPlayerEntity) player);

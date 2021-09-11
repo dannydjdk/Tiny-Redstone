@@ -41,6 +41,12 @@ public class ModNetworkHandler {
                 .consumer(NoteBlockInstrumentSync::handle)
                 .add();
 
+        INSTANCE.messageBuilder(PanelCellSync.class,nextID())
+                .encoder(PanelCellSync::toBytes)
+                .decoder(PanelCellSync::new)
+                .consumer(PanelCellSync::handle)
+                .add();
+
         INSTANCE.messageBuilder(BlueprintSync.class,nextID())
                 .encoder(BlueprintSync::toBytes)
                 .decoder(BlueprintSync::new)
