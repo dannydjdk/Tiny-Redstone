@@ -43,7 +43,9 @@ public class Blueprint extends Item {
             Map<Item,Integer> blueprintItems = getRequiredComponents(stack.getTagElement("blueprint"));
             for (Item item : blueprintItems.keySet())
             {
-                list.add(Component.nullToEmpty(item.getRegistryName().toString() + " : " + blueprintItems.get(item)));
+                TranslatableComponent itemNameComponent = new TranslatableComponent(item.getDescriptionId());
+                String itemName = itemNameComponent.getString();
+                list.add(Component.nullToEmpty(itemName + " : " + blueprintItems.get(item)));
             }
         }
         else

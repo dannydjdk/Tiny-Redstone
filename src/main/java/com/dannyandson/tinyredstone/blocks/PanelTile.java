@@ -440,7 +440,7 @@ public class PanelTile extends BlockEntity {
             return true;
 
         //if this cell needs a solid base, it will be removed, so return true
-        if(!iPanelCell.needsSolidBase())
+        if(iPanelCell.needsSolidBase())
             return true;
 
         //if this is not a pushable cell, we know we can't extend into it
