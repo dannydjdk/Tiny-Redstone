@@ -52,6 +52,7 @@ public class PanelTile extends BlockEntity {
     private boolean flagCrashed = false;
     private boolean flagOverflow = false;
     protected IPanelCover panelCover = null;
+    private boolean flagOutputUpdate = false;
 
     //other state fields (not saved)
     private boolean flagSync = true;
@@ -163,6 +164,7 @@ public class PanelTile extends BlockEntity {
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
             parentNBTTagCompound.putBoolean("flagCrashed",this.flagCrashed);
             parentNBTTagCompound.putBoolean("flagOverflow",this.flagOverflow);
+            parentNBTTagCompound.putBoolean("flagOutputUpdate",this.flagOutputUpdate);
 
         } catch (NullPointerException exception) {
             TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.toString() + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
@@ -203,6 +205,7 @@ public class PanelTile extends BlockEntity {
         this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
         this.flagCrashed = parentNBTTagCompound.getBoolean("flagCrashed");
         this.flagOverflow = parentNBTTagCompound.getBoolean("flagOverflow");
+        this.flagOutputUpdate = parentNBTTagCompound.getBoolean("flagOutputUpdate");
 
         if (parentNBTTagCompound.contains("color")) {
             int color = parentNBTTagCompound.getInt("color");
@@ -319,11 +322,8 @@ public class PanelTile extends BlockEntity {
                         this.level.getLightEngine().checkBlock(worldPosition);
                     }
 
-
-                    if (dirty) {
-                        setChanged();
+                    if (flagOutputUpdate)
                         updateOutputs();
-                    }
 
                     if (flagSync || dirty) {
                         sync();
@@ -412,10 +412,8 @@ public class PanelTile extends BlockEntity {
         newPos.getPanelTile().updateNeighborCells(newPos);
         cellPos.getPanelTile().updateNeighborCells(cellPos);
 
-        newPos.getPanelTile().setChanged();
         newPos.getPanelTile().flagSync=true;
         newPos.getPanelTile().clearVoxelShape();
-        cellPos.getPanelTile().setChanged();
         cellPos.getPanelTile().flagSync=true;
         cellPos.getPanelTile().clearVoxelShape();
 
@@ -527,28 +525,47 @@ public class PanelTile extends BlockEntity {
         return updated;
     }
 
-    public boolean updateSide(Direction facing) throws PanelOverflowException {
-        return updateSide(getSideFromDirection(facing));
+    /**
+     * Updates each cell on the specified side of the panel
+     * @param facing which side of the panel to update
+     * @throws PanelOverflowException
+     */
+    public void updateSide(Direction facing) throws PanelOverflowException {
+        updateSide(getSideFromDirection(facing));
     }
-    public boolean updateSide(Side side) throws PanelOverflowException{
-        boolean updated = false;
 
+    /**
+     * Updates each cell on the specified side of the panel
+     * @param side which side of the panel to update
+     * @throws PanelOverflowException
+     */
+    public void updateSide(Side side) throws PanelOverflowException{
         List<Integer> cellIndices = getEdgeCellIndices(side);
 
         for (Integer i : cellIndices) {
             if (cells.containsKey(i)) {
-                if (updateCell(i))
-                    updated = true;
+                updateCell(i);
             }
         }
-
-        return updated;
     }
 
+    /**
+     * Notify neighboring cells of a change to this cell
+     * @param cellPos position of the cell that changed
+     * @return true if the resulting update changes the panel output
+     * @throws PanelOverflowException
+     */
     public boolean updateNeighborCells(PanelCellPos cellPos) throws PanelOverflowException{
         return updateNeighborCells(cellPos, 1);
     }
 
+    /**
+     * Notify neighboring cells of a change to this cell
+     * @param cellPos position of the cell that changed
+     * @param iteration incrementer of iterative calls
+     * @return true if the resulting update changes the panel output
+     * @throws PanelOverflowException
+     */
     private boolean updateNeighborCells(PanelCellPos cellPos, Integer iteration) throws PanelOverflowException{
         List<PanelCellPos> cellPosList = new ArrayList<>();
         boolean updateOutputs = false;
@@ -566,27 +583,32 @@ public class PanelTile extends BlockEntity {
         if (updateNeighbor(cellPos,Side.BOTTOM,cellPosList))
             updateOutputs=true;
 
-
-        if (updateOutputs) {
-            updateOutputs();
-        }
-
-        boolean updated = false;
         for (PanelCellPos updatePos : cellPosList)
         {
-            if(updateCell(updatePos,iteration+1))
-                updated=true;
+            updateCell(updatePos,iteration+1);
         }
-        return updated || updateOutputs;
+
+        if (updateOutputs)flagOutputUpdate();
+        return updateOutputs;
     }
 
+    /**
+     * Alerts a single neighbor cell that an update has occurred.
+     * @param cellPos position of the cell that changed
+     * @param side direction of the cell being updated
+     * @param cellPosList list of cells that have changed as a result
+     * @return true if the change resulted in a panel output change
+     */
     private boolean updateNeighbor(PanelCellPos cellPos, Side side, List<PanelCellPos> cellPosList) {
         PanelCellPos neighborPos = cellPos.offset(side);
 
+        //A null neighbor position means we've reached the edge of the panel, so return true that the outputs have changed
         if (neighborPos == null)
             return true;
 
+        //get the cell that's being notified
         IPanelCell adjacentCell = neighborPos.getIPanelCell();
+        //if it's an observer, check if it's facing the updated panel and if so let it know
         if (adjacentCell instanceof IObservingPanelCell) {
             Side direction1 = neighborPos.getCellFacing();
             Side direction2 = side.getOpposite();
@@ -594,6 +616,7 @@ public class PanelTile extends BlockEntity {
                 ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
             }
         } else if (adjacentCell != null && (!adjacentCell.isIndependentState()||(adjacentCell.needsSolidBase()&&side.getOpposite()==neighborPos.getBaseDirection())))
+            //if a component exists within the cell and is either affected by inputs or needs a solid base and it's base changed, add it to the list to be notified
             cellPosList.add(neighborPos);
 
         return false;
@@ -612,20 +635,29 @@ public class PanelTile extends BlockEntity {
         return false;
     }
 
-    protected boolean updateCell(Integer cellIndex) throws PanelOverflowException{
+    /**
+     * Update a cell with a potential input change
+     *
+     * @param cellIndex index of cell to update
+     */
+    protected void updateCell(Integer cellIndex) throws PanelOverflowException{
         PanelCellPos cellPos = PanelCellPos.fromIndex(this,cellIndex);
-        return updateCell(cellPos, 1);
-    }
-    protected boolean updateCell(PanelCellPos cellPos) throws PanelOverflowException{
-        return updateCell(cellPos, 1);
+        updateCell(cellPos, 1);
     }
     /**
      * Update a cell with a potential input change
      *
      * @param cellPos position of cell to update
-     * @return true if this update caused the panel output to change
      */
-    private boolean updateCell(PanelCellPos cellPos, int iteration) throws PanelOverflowException{
+    protected void updateCell(PanelCellPos cellPos) throws PanelOverflowException{
+        updateCell(cellPos, 1);
+    }
+    /**
+     * Update a cell with a potential input change
+     *
+     * @param cellPos position of cell to update
+     */
+    private void updateCell(PanelCellPos cellPos, int iteration) throws PanelOverflowException{
 
         boolean change = false;
         if (iteration > (16 * Config.CIRCUIT_MAX_ITERATION.get()) || this.flagOverflow) {
@@ -633,17 +665,19 @@ public class PanelTile extends BlockEntity {
                 TinyRedstone.LOGGER.warn("Redstone panel at " + worldPosition.getX() + "," + worldPosition.getY() + "," + worldPosition.getZ() + " iterated too many times.");
             this.flagOverflow=true;
             throw new PanelOverflowException("Redstone Panel iterated too many times.");
-            //return false;
         }
 
         //if this cell position is on a different panel than this one, call this method on that panel
-        if (cellPos.getPanelTile()!=this)
-            return cellPos.getPanelTile().updateCell(cellPos,iteration);
+        if (cellPos.getPanelTile()!=this) {
+            cellPos.getPanelTile().updateCell(cellPos, iteration);
+            return;
+        }
 
         IPanelCell thisCell = cellPos.getIPanelCell();
 
+        //if there is a cell at this position, notify it of the update and process any of its updates
         if (thisCell != null) {
-
+            //if the cell needs a solid base, check if its base has been removed
             if (thisCell.needsSolidBase()) {
                 Side baseDirection = cellPos.getBaseDirection();
                 PanelCellPos basePos = cellPos.offset(baseDirection);
@@ -652,8 +686,11 @@ public class PanelTile extends BlockEntity {
                     change = true;
                 }
             }
-            //TODO consider making this more efficient by only updating affected sides
+
+            //if change is still false (cell hasn't been removed, and this cell is affected by input changes
+            //notify the cell of the input change and check for output changes
             if (!change && !thisCell.isIndependentState() && thisCell.neighborChanged(cellPos)) {
+            	//update neighbors if this cell output changed
                 updateNeighborCells(cellPos, iteration + 1);
                 if (thisCell instanceof RedstoneDust) {
                     PanelCellPos above = cellPos.offset(Side.TOP), below = cellPos.offset(Side.BOTTOM);
@@ -666,12 +703,9 @@ public class PanelTile extends BlockEntity {
             }
         }
 
-
         if (change) {
-            this.setChanged();
             flagSync();
         }
-        return change;
     }
 
     private Side getPanelCellSide(PanelCellPos cellPos, Direction facing) {
@@ -709,10 +743,26 @@ public class PanelTile extends BlockEntity {
     }
 
     /**
+     * Flag a recalculation of outputs at the end of this tick
+     */
+    public void flagOutputUpdate()
+    {
+        flagOutputUpdate=true;
+    }
+
+    /**
+     * Has an output update been flagged?
+     * @return true if an output update is pending
+     */
+    public boolean isFlagOutputUpdate() {
+        return flagOutputUpdate;
+    }
+
+    /**
      * Recalculate the outputs of the tile. Will sync to client and return true if any output changes
      * @return boolean true if any outputs have changed
      */
-    public boolean updateOutputs() {
+    protected boolean updateOutputs() {
         boolean change = false;
         int weak, strong;
 
@@ -770,6 +820,7 @@ public class PanelTile extends BlockEntity {
         if (change)
         {
             flagSync();
+            this.setChanged();
             level.updateNeighborsAt(worldPosition,this.getBlockState().getBlock());
             for (Direction direction : directionsUpdated) {
                 BlockPos neighborPos = worldPosition.relative(direction);
@@ -779,6 +830,7 @@ public class PanelTile extends BlockEntity {
             }
         }
 
+        flagOutputUpdate=false;
         return change;
     }
 
@@ -854,6 +906,7 @@ public class PanelTile extends BlockEntity {
     {
         if (!level.isClientSide && (!isCovered() || panelCover.allowsLightOutput()))
             this.level.sendBlockUpdated(worldPosition,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+        this.setChanged();
     }
 
     public void handleCrash(Exception e)

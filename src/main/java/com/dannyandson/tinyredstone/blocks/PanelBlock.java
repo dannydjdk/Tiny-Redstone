@@ -39,7 +39,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -142,28 +141,13 @@ public class PanelBlock extends BaseEntityBlock {
     }
 
     /**
-     * Determine if this block will provide power to redstone and can make a redstone connection on the side provided.
-     * Useful to control which sides are outputs for redstone wires.
-     * <p>
-     * Don't use for inputs; for redstone which is just "passing by", it will make the redstone connect to the side of the block
-     * but it won't actually inject weak power into the block.
-     *
-     * @param world                 The current world
-     * @param pos                         Block position in world of the wire that is trying to connect
-     * @param directionFromNeighborToThis if not null: the side of the wire that is trying to make a horizontal connection to this block. If null: test for a stepped connection (i.e. the wire is trying to run up or down the side of solid block in order to connect to this block)
-     * @return true if this is a power output for redstone, so that redstone wire should connect to it
+     * Called to determine whether to allow the block to handle its own indirect power rather than using the default rules.
+     * @return Whether Block#isProvidingWeakPower should be called when determining indirect power
      */
     @Override
     public boolean shouldCheckWeakPower(BlockState state, LevelReader world, BlockPos pos, Direction directionFromNeighborToThis) {
-        BlockEntity tileentity = world.getBlockEntity(pos);
-        if (tileentity instanceof PanelTile && directionFromNeighborToThis != null) {
-            PanelTile panelTile = (PanelTile) tileentity;
-            Direction facing = directionFromNeighborToThis.getOpposite();
-
-            return panelTile.hasCellsOnFace(facing);
-
-        }
-        return super.shouldCheckWeakPower(state, world, pos, directionFromNeighborToThis);
+        //returning false to override default behavior and allow the block entity to specify its redstone output
+        return false;
     }
 
     /**
@@ -249,12 +233,10 @@ public class PanelBlock extends BaseEntityBlock {
                     if (panelTile.pingOutwardObservers(direction))
                         change = true;
 
-                    if (panelTile.updateSide(direction))
-                        change = true;
+                    panelTile.updateSide(direction);
 
-                    if (panelTile.updateOutputs()) {
-                        if (!world.isClientSide)
-                            panelTile.setChanged();
+                    if (panelTile.isFlagOutputUpdate()) {
+                        panelTile.updateOutputs();
                     }
                     if (change) {
                         panelTile.flagSync();
@@ -484,7 +466,8 @@ public class PanelBlock extends BaseEntityBlock {
                     if (!world.isClientSide) {
                         panelTile.setChanged();
                     }
-                    panelTile.updateOutputs();
+                    if (panelTile.isFlagOutputUpdate())
+                        panelTile.updateOutputs();
                 }
 
             }catch (Exception e)
