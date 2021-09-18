@@ -73,7 +73,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
             Block block = blockState.getBlock();
 
-            if(!panelTile.isCovered() && block instanceof PanelBlock panelBlock) {
+            if(!panelTile.isCovered() && block instanceof PanelBlock) {
                 BlockHitResult result = new BlockHitResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.getValue(BlockStateProperties.FACING),result);
 
@@ -82,7 +82,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                     if(panelCell != null) {
                         String modName = Tools.getModName(block);
 
-                        Item item = panelBlock.getItemByIPanelCell(panelCell.getClass());
+                        Item item = PanelBlock.getItemByIPanelCell(panelCell.getClass());
                         ItemStack itemStack = item.getDefaultInstance();
 
                         if (Tools.show(probeMode, config.getShowModName())) {

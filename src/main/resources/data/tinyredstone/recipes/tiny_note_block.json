@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{
+    "item": "minecraft:note_block"   },
+    {
+      "tag": "forge:silicon"
+
+    }
+  ],
+  "result": {
+    "item": "tinyredstone:tiny_note_block",
+    "count": 8
+  }
+}

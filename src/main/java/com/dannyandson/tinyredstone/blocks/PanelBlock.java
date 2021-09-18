@@ -89,7 +89,7 @@ public class PanelBlock extends BaseEntityBlock {
         return itemPanelCellMap.get(item);
     }
 
-    public Item getItemByIPanelCell(Class<? extends IPanelCell> panelCell) {
+    public static Item getItemByIPanelCell(Class<? extends IPanelCell> panelCell) {
         return panelCellItemMap.get(panelCell);
     }
 
