@@ -279,6 +279,10 @@ public class PanelBlock extends BaseEntityBlock {
      */
     @Override
     public void playerWillDestroy(Level worldIn, BlockPos pos, BlockState state, Player player) {
+        if (worldIn.getBlockEntity(pos) instanceof PanelTile panelTile){
+            panelTile.onBlockDestroy();
+        }
+
         if(!player.isCreative()) {
             ItemStack itemstack = getItemWithNBT(worldIn, pos, state);
             if(itemstack != null) {
