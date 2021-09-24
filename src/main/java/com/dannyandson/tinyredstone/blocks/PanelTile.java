@@ -1113,6 +1113,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             int cellIndex = cellPos.getIndex();
             boolean isRedstoneDust = cellPos.getIPanelCell() instanceof RedstoneDust;
 
+            cellPos.getIPanelCell().onRemove(cellPos);
+
             //remove from panel
             cellDirections.remove(cellIndex);
             cells.remove(cellIndex);
@@ -1243,6 +1245,13 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     public void clearVoxelShape()
     {
         voxelShape=null;
+    }
+
+    public void onBlockDestroy() {
+        for (Integer index : cells.keySet()) {
+            PanelCellPos pos = PanelCellPos.fromIndex(this, index);
+            pos.getIPanelCell().onRemove(pos);
+        }
     }
 }
 

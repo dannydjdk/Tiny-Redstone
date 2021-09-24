@@ -116,4 +116,10 @@ public interface IPanelCell {
      */
     default PanelCellVoxelShape getShape() {return PanelCellVoxelShape.FULLCELL;}
 
+    /**
+     * Called just before the cell is removed from the panel
+     * @param cellPos PanelCellPos object of this cell
+     */
+    default void onRemove(PanelCellPos cellPos){}
+
 }
