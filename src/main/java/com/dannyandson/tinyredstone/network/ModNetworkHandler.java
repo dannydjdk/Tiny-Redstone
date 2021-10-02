@@ -1,8 +1,11 @@
 package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.fmllegacy.network.NetworkDirection;
 import net.minecraftforge.fmllegacy.network.NetworkRegistry;
 import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
@@ -82,10 +85,22 @@ public class ModNetworkHandler {
                 .decoder(PanelCellSync::new)
                 .consumer(PanelCellSync::handle)
                 .add();
+
+        INSTANCE.messageBuilder(ValidTinyBlockCacheSync.class,nextID())
+                .encoder(ValidTinyBlockCacheSync::toBytes)
+                .decoder(ValidTinyBlockCacheSync::new)
+                .consumer(ValidTinyBlockCacheSync::handle)
+                .add();
     }
 
     public static void sendToClient(Object packet, ServerPlayer player) {
         INSTANCE.sendTo(packet, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+    }
+
+    public static void sendToNearestClient(Object packet, Level level, BlockPos pos) {
+        Player player = level.getNearestPlayer(pos.getX(),pos.getY(),pos.getZ(),-1d,false);
+        if (player instanceof ServerPlayer serverPlayer)
+            INSTANCE.sendTo(packet, serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     public static void sendToServer(Object packet) {

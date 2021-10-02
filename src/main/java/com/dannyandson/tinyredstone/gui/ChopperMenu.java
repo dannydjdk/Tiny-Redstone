@@ -1,8 +1,11 @@
 package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
+import com.dannyandson.tinyredstone.network.ModNetworkHandler;
+import com.dannyandson.tinyredstone.network.ValidTinyBlockCacheSync;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,6 +34,8 @@ public class ChopperMenu extends AbstractContainerMenu {
     public static ChopperMenu createChopperMenu(int containerId, Inventory playerInventory, Container inventory) {
         return new ChopperMenu(containerId, playerInventory, inventory);
     }
+
+    public static List<String> validBlockCache = new ArrayList<>();
 
     public static List<Material> solidMaterials = Arrays.asList(
             Material.WOOD,
@@ -115,17 +121,24 @@ public class ChopperMenu extends AbstractContainerMenu {
             if (container instanceof ChopperBlockEntity chopperBlockEntity) {
                 Boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
                 if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasBlockEntity()) {
-                    CompoundTag madeFromTag = new CompoundTag();
-                    madeFromTag.putString("namespace", inputBlock.getRegistryName().getNamespace());
-                    madeFromTag.putString("path", inputBlock.getRegistryName().getPath());
-                    if (solidMaterials.contains(material)) {
-                        outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
-                        outputStack.setCount(8);
-                        outputStack.addTagElement("made_from", madeFromTag);
-                    } else if (transparentMaterials.contains(material)) {
-                        outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
-                        outputStack.setCount(8);
-                        outputStack.addTagElement("made_from", madeFromTag);
+                    ResourceLocation inputRegistryName = inputBlock.getRegistryName();
+                    if (!validBlockCache.contains(inputRegistryName.toString())){
+                        if (!chopperBlockEntity.getLevel().isClientSide)
+                            ModNetworkHandler.sendToNearestClient(new ValidTinyBlockCacheSync(chopperBlockEntity.getBlockPos(),inputRegistryName),chopperBlockEntity.getLevel(),chopperBlockEntity.getBlockPos());
+                    }
+                    else {
+                        CompoundTag madeFromTag = new CompoundTag();
+                        madeFromTag.putString("namespace", inputBlock.getRegistryName().getNamespace());
+                        madeFromTag.putString("path", inputBlock.getRegistryName().getPath());
+                        if (solidMaterials.contains(material)) {
+                            outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
+                            outputStack.setCount(8);
+                            outputStack.addTagElement("made_from", madeFromTag);
+                        } else if (transparentMaterials.contains(material)) {
+                            outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
+                            outputStack.setCount(8);
+                            outputStack.addTagElement("made_from", madeFromTag);
+                        }
                     }
                 }
             }

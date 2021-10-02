@@ -22,6 +22,7 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
 {
     public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation(TinyRedstone.MODID,"block/panel_transparent_block");
     private ResourceLocation madeFrom;
+    private TextureAtlasSprite sprite;
     private int color= 16777215;
 
     /**
@@ -36,7 +37,8 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         VertexConsumer builder = buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent());
-        TextureAtlasSprite sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TRANSPARENT_BLOCK);
+        if (sprite==null)
+            sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TRANSPARENT_BLOCK);
 
         matrixStack.translate(0,0,1.0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);

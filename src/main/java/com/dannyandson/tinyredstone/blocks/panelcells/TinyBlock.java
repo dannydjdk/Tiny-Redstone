@@ -25,6 +25,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     protected int strongSignalStrength = 0;
     protected int color= DyeColor.WHITE.getTextColor();
     protected ResourceLocation madeFrom;
+    protected TextureAtlasSprite sprite;
 
     /**
      * Drawing the cell on the panel
@@ -37,9 +38,8 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
-        TextureAtlasSprite sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TINY_BLOCK);
-
-
+        if (sprite==null)
+            sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TINY_BLOCK);
 
         matrixStack.translate(0,0,1.0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
