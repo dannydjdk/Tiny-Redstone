@@ -1,0 +1,49 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "base": "tinyredstone:block/block_chopper",
+    "top": "tinyredstone:block/block_chopper_top",
+    "particle": "tinyredstone:block/block_chopper"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "shade": false,
+      "faces": {
+        "down": {
+          "texture": "#top",
+          "tintindex": 0
+        },
+        "up": {
+          "texture": "#top",
+          "tintindex": 0
+        },
+        "east": {
+          "texture": "#base",
+          "tintindex": 0
+        },
+        "west": {
+          "texture": "#base",
+          "tintindex": 0
+        },
+        "north": {
+          "texture": "#base",
+          "tintindex": 0
+        },
+        "south": {
+          "texture": "#base",
+          "tintindex": 0
+        }
+      }
+    }
+  ]
+}

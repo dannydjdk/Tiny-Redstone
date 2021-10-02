@@ -13,7 +13,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 
 public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider {
 
@@ -22,6 +24,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     protected int weakSignalStrength = 0;
     protected int strongSignalStrength = 0;
     protected int color= DyeColor.WHITE.getTextColor();
+    protected ResourceLocation madeFrom;
 
     /**
      * Drawing the cell on the panel
@@ -34,7 +37,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
-        TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TINY_BLOCK);
+        TextureAtlasSprite sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TINY_BLOCK);
 
 
 
@@ -61,6 +64,24 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
+    }
+
+    @Override
+    public boolean onPlace(PanelCellPos cellPos, Player player) {
+        ItemStack stack = ItemStack.EMPTY;
+        if (player.getUsedItemHand() != null)
+            stack = player.getItemInHand(player.getUsedItemHand());
+        if (stack == ItemStack.EMPTY)
+            stack = player.getMainHandItem();
+        if (stack.hasTag()) {
+            CompoundTag itemNBT = stack.getTag();
+            CompoundTag madeFromTag = itemNBT.getCompound("made_from");
+            if (madeFromTag.contains("namespace")) {
+                this.madeFrom = new ResourceLocation(madeFromTag.getString("namespace"), "block/" + madeFromTag.getString("path"));
+            }
+        }
+
+        return IPanelCell.super.onPlace(cellPos, player);
     }
 
     /**
@@ -168,6 +189,10 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
         nbt.putInt("strong",this.strongSignalStrength);
         nbt.putInt("weak",this.weakSignalStrength);
         nbt.putInt("color",this.color);
+        if (this.madeFrom!=null) {
+            nbt.putString("made_from_namespace",this.madeFrom.getNamespace());
+            nbt.putString("made_from_path",this.madeFrom.getPath());
+        }
         return nbt;
     }
 
@@ -176,10 +201,25 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
         this.strongSignalStrength=compoundNBT.getInt("strong");
         this.weakSignalStrength=compoundNBT.getInt("weak");
         this.color=compoundNBT.getInt("color");
+        if (compoundNBT.contains("made_from_namespace"))
+            this.madeFrom=new ResourceLocation(compoundNBT.getString("made_from_namespace"),compoundNBT.getString("made_from_path"));
     }
 
     @Override
     public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
         overlayBlockInfo.setPowerOutput(this.weakSignalStrength);
+    }
+
+    @Override
+    public CompoundTag getItemTag() {
+        if (this.madeFrom != null) {
+            CompoundTag madeFromTag = new CompoundTag();
+            madeFromTag.putString("namespace", this.madeFrom.getNamespace());
+            madeFromTag.putString("path", this.madeFrom.getPath().substring(6));
+            CompoundTag itemTag = new CompoundTag();
+            itemTag.put("made_from", madeFromTag);
+            return itemTag;
+        }
+        return null;
     }
 }

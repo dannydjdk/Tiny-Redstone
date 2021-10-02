@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:block/white_wool",
+  "parent": "builtin/entity",
   "display": {
     "gui": {
       "rotation": [30, 45, 0],

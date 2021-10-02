@@ -144,4 +144,12 @@ public interface IPanelCell {
      */
     default void onRemove(PanelCellPos cellPos){}
 
+    /**
+     * Gets Compound tag with any NBT data the itemStack for this cell should contain
+     * This is used when the item is removed and the itemStack provided to player, also
+     * for pick block and info overlays like The One Probe
+     * @return CompoundTag with item NBT data
+     */
+    default CompoundTag getItemTag(){return null;}
+
 }

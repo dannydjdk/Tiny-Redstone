@@ -1,12 +1,16 @@
 package com.dannyandson.tinyredstone.setup;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.ChopperBlock;
+import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
+import com.dannyandson.tinyredstone.gui.ChopperMenu;
 import com.dannyandson.tinyredstone.items.*;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -19,12 +23,14 @@ public class Registration {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, TinyRedstone.MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, TinyRedstone.MODID);
     private static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, TinyRedstone.MODID);
+    private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.CONTAINERS,TinyRedstone.MODID);
 
     //called from main mod constructor
     public static void register() {
         BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         TILES.register(FMLJavaModLoadingContext.get().getModEventBus());
+        MENU_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
     //called at FMLCommonSetupEvent in ModSetup
@@ -56,16 +62,23 @@ public class Registration {
             TILES.register("redstone_panel", () -> BlockEntityType.Builder.of(PanelTile::new, REDSTONE_PANEL_BLOCK.get()).build(null));
     public static final RegistryObject<Item> REDSTONE_PANEL_ITEM = ITEMS.register("redstone_panel",PanelItem::new);
 
+    public static final RegistryObject<ChopperBlock> CUTTER_BLOCK = BLOCKS.register("block_chopper", ChopperBlock::new);
+    public static final RegistryObject<BlockEntityType<ChopperBlockEntity>> CUTTER_BLOCK_ENTITY =
+            TILES.register("block_chopper", ()->BlockEntityType.Builder.of(ChopperBlockEntity::new,CUTTER_BLOCK.get()).build(null));
+    public static final RegistryObject<Item> CUTTER_BLOCK_ITEM = ITEMS.register("block_chopper", ChopperBlockItem::new);
+    public static final RegistryObject<MenuType<ChopperMenu>> CUTTER_MENU_TYPE = MENU_TYPES.register("block_chopper", () -> new MenuType<>(ChopperMenu::createChopperMenu));
+
+    public static final RegistryObject<Item> TINY_SOLID_BLOCK = ITEMS.register("tiny_solid_block",TinyBlockItem::new);
+    public static final RegistryObject<Item> TINY_TRANSPARENT_BLOCK = ITEMS.register("tiny_transparent_block",TinyBlockItem::new);
+
     public static final RegistryObject<Item> TINY_REDSTONE_ITEM = ITEMS.register("tiny_redstone",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_REDSTONE_TORCH = ITEMS.register("tiny_redstone_torch",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_REPEATER = ITEMS.register("tiny_repeater",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_REDSTONE_BLOCK = ITEMS.register("tiny_redstone_block",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_COMPARATOR = ITEMS.register("tiny_comparator",PanelCellItem::new);
-    public static final RegistryObject<Item> TINY_SOLID_BLOCK = ITEMS.register("tiny_solid_block",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_PISTON = ITEMS.register("tiny_piston",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_STICKY_PISTON = ITEMS.register("tiny_sticky_piston",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_REDSTONE_LAMP = ITEMS.register("tiny_redstone_lamp",PanelCellItem::new);
-    public static final RegistryObject<Item> TINY_TRANSPARENT_BLOCK = ITEMS.register("tiny_transparent_block",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_BUTTON = ITEMS.register("tiny_button",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_STONE_BUTTON = ITEMS.register("tiny_stone_button",PanelCellItem::new);
     public static final RegistryObject<Item> TINY_OBSERVER = ITEMS.register("tiny_observer",PanelCellItem::new);

@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "tinyredstone:redstone_panel",
+    "tinyredstone:block_chopper"
+  ]
+}

@@ -302,7 +302,14 @@ public class PanelBlock extends BaseEntityBlock {
             PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), Registration.REDSTONE_WRENCH.get().getHitResult(player.level,player));
             IPanelCell cell = panelTile.getIPanelCell(panelCellPos);
             if (cell != null) {
-                return panelCellItemMap.get(cell.getClass()).getDefaultInstance();
+                ItemStack itemStack = panelCellItemMap.get(cell.getClass()).getDefaultInstance();
+                CompoundTag itemTag = cell.getItemTag();
+                if (itemTag!=null){
+                    for (String key : itemTag.getAllKeys()){
+                        itemStack.addTagElement(key,itemTag.get(key));
+                    }
+                }
+                return itemStack;
             }
         }
         ItemStack itemStack = getItemWithNBT(world, pos, state);
@@ -550,6 +557,12 @@ public class PanelBlock extends BaseEntityBlock {
             if (player==null || !player.isCreative()) {
                 Item item = panelCellItemMap.get(cellPos.getIPanelCell().getClass());
                 ItemStack itemStack = new ItemStack(item);
+                CompoundTag itemTag = cellPos.getIPanelCell().getItemTag();
+                if (itemTag!=null){
+                    for (String key : itemTag.getAllKeys()){
+                        itemStack.addTagElement(key,itemTag.get(key));
+                    }
+                }
                 ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY()+.5, pos.getZ(), itemStack);
                 world.addFreshEntity(itemEntity);
                 if (player!=null)

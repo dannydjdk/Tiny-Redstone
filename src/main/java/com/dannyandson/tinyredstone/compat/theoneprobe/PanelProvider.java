@@ -11,6 +11,7 @@ import mcjty.theoneprobe.apiimpl.styles.LayoutStyle;
 import mcjty.theoneprobe.config.Config;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -84,6 +85,12 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
                         Item item = PanelBlock.getItemByIPanelCell(panelCell.getClass());
                         ItemStack itemStack = item.getDefaultInstance();
+                        CompoundTag itemTag = panelCell.getItemTag();
+                        if (itemTag!=null){
+                            for (String key : itemTag.getAllKeys()){
+                                itemStack.addTagElement(key,itemTag.get(key));
+                            }
+                        }
 
                         if (Tools.show(probeMode, config.getShowModName())) {
                             probeInfo.horizontal()
