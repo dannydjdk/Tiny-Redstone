@@ -6,6 +6,9 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.Side;
+import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
+import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
+import com.dannyandson.tinyredstone.codec.TinyBlockData;
 import com.dannyandson.tinyredstone.gui.BlueprintGUI;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import net.minecraft.nbt.CompoundTag;
@@ -24,6 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,12 +44,12 @@ public class Blueprint extends Item {
         if (stack.getTag() !=null && stack.getTag().contains("blueprint"))
         {
             list.add(new TranslatableComponent("message.item.blueprint.full"));
-            Map<Item,Integer> blueprintItems = getRequiredComponents(stack.getTagElement("blueprint"));
-            for (Item item : blueprintItems.keySet())
+            List<ItemStack> blueprintItems = getRequiredItemStacks(stack.getTagElement("blueprint"));
+            for (ItemStack item : blueprintItems)
             {
-                TranslatableComponent itemNameComponent = new TranslatableComponent(item.getDescriptionId());
+                Component itemNameComponent = item.getHoverName();// new TranslatableComponent(item.getDescriptionId());
                 String itemName = itemNameComponent.getString();
-                list.add(Component.nullToEmpty(itemName + " : " + blueprintItems.get(item)));
+                list.add(Component.nullToEmpty(itemName + " : " + item.getCount()));
             }
         }
         else
@@ -69,7 +73,7 @@ public class Blueprint extends Item {
                 if (panelTile.getCellCount()==0 && player!=null)
                 {
                     CompoundTag blueprintNBT = context.getItemInHand().getTagElement("blueprint");
-                    Map<Item,Integer> items = getRequiredComponents(blueprintNBT);
+                    List<ItemStack> items = getRequiredItemStacks(blueprintNBT);
                     if (player.isCreative() || playerHasSufficientComponents(items, player)) {
 
                         try {
@@ -87,12 +91,12 @@ public class Blueprint extends Item {
 
                         if (!player.isCreative())
                         {
-                            for (Item item : items.keySet())
+                            for (ItemStack item : items)
                             {
-                                int itemsToRemove = items.get(item);
+                                int itemsToRemove = item.getCount();
                                 for(ItemStack invStack : player.getInventory().items)
                                 {
-                                    if (invStack.getItem().equals(item))
+                                    if (stacksAreMatchingItem(invStack,item))
                                     {
                                         int removeCt = Math.min(invStack.getCount(),itemsToRemove);
                                         invStack.setCount(invStack.getCount()-removeCt);
@@ -128,52 +132,77 @@ public class Blueprint extends Item {
         return super.use(worldIn, playerIn, handIn);
     }
 
-    private static Map<Item,Integer> getRequiredComponents(CompoundTag blueprintNBT)
-    {
-        Map<Item,Integer> items = new HashMap<>();
+    private static List<ItemStack> getRequiredItemStacks(CompoundTag blueprintNBT) {
+        List<ItemStack> itemStacks = new ArrayList<>();
 
-        if (blueprintNBT.contains("cells"))
-        {
+        if (blueprintNBT.contains("cells")) {
             CompoundTag cellsNBT = blueprintNBT.getCompound("cells");
-            for (String key : cellsNBT.getAllKeys())
-            {
+            for (String key : cellsNBT.getAllKeys()) {
                 try {
                     Class iPanelCellClass = Class.forName(cellsNBT.getCompound(key).getString("class"));
-                    if (IPanelCell.class.isAssignableFrom(iPanelCellClass))
-                    {
+                    if (IPanelCell.class.isAssignableFrom(iPanelCellClass)) {
                         Item item = PanelBlock.getPanelCellItemFromClass((Class<? extends IPanelCell>) iPanelCellClass);
-                        if (items.containsKey(item))
-                            items.put(item,items.get(item)+1);
-                        else
-                            items.put(item,1);
+                        ItemStack itemStack = item.getDefaultInstance();
+                        if (iPanelCellClass == TinyBlock.class || iPanelCellClass == TransparentBlock.class) {
+                            CompoundTag cellDataNBT = cellsNBT.getCompound(key).getCompound("data");
+                            if (cellDataNBT.contains("made_from_namespace")) {
+                                CompoundTag madeFromTag = new CompoundTag();
+                                madeFromTag.putString("namespace", cellDataNBT.getString("made_from_namespace"));
+                                madeFromTag.putString("path", cellDataNBT.getString("made_from_path"));
+                                CompoundTag itemTag = new CompoundTag();
+                                itemTag.put("made_from", madeFromTag);
+                                itemStack.setTag(itemTag);
+                            }
+                        }
+
+                        boolean addNeeded = true;
+
+                        for (ItemStack stack : itemStacks) {
+                            if (stacksAreMatchingItem(stack, itemStack)) {
+                                stack.setCount(stack.getCount() + 1);
+                                addNeeded = false;
+                                break;
+                            }
+                        }
+
+                        if (addNeeded)
+                            itemStacks.add(itemStack);
+
                     }
 
-                }catch (ClassNotFoundException e)
-                {
+                } catch (ClassNotFoundException e) {
                     TinyRedstone.LOGGER.error("Class not found exception while attempting to read components from blueprint NBT: " + e.getLocalizedMessage());
                 }
 
             }
         }
-        return items;
+        return itemStacks;
     }
-    private static boolean playerHasSufficientComponents(Map<Item,Integer> items, Player player)
+
+    private static boolean playerHasSufficientComponents(List<ItemStack> itemStacks, Player player)
     {
-        for (Item item : items.keySet())
+        for (ItemStack itemStack : itemStacks)
         {
-            ItemStack itemStack = new ItemStack(item);
             int count = 0;
             for(ItemStack invStack : player.getInventory().items)
             {
-                if (invStack.getItem().equals(itemStack.getItem()))
+                if (stacksAreMatchingItem(invStack,itemStack))
                 {
                     count+= invStack.getCount();
                 }
             }
-            if (count<items.get(item))
+            if (count<itemStack.getCount())
                 return false;
         }
         return true;
+    }
+
+    private static boolean stacksAreMatchingItem(ItemStack stack1, ItemStack stack2){
+        return stack1.getItem() == stack2.getItem() &&
+                (
+                        (!stack1.hasTag() && !stack2.hasTag()) ||
+                                (stack1.hasTag() && stack1.getTag().equals(stack2.getTag()))
+                );
     }
 
     /**

@@ -37,12 +37,13 @@ public class TinyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
             CompoundTag itemNBT = stack.getTag();
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
-                ResourceLocation texture = new ResourceLocation(madeFromTag.getString("namespace"), "block/" + madeFromTag.getString("path"));
+                ResourceLocation itemId = new ResourceLocation(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
+                ResourceLocation texture = Registration.TINY_BLOCK_OVERRIDES.getTexture(itemId);
                 sprite = RenderHelper.getSprite(texture);
             }
         }
 
-        if (sprite == null || sprite.equals(brokenSprite))
+        if (sprite == null)
             sprite = RenderHelper.getSprite(isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
 
         VertexConsumer builder = buffer.getBuffer(isTransparent ? RenderType.translucent() : RenderType.solid());
@@ -50,29 +51,9 @@ public class TinyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
 
         poseStack.pushPose();
 
-        poseStack.translate(0, 0, 1.0);
-        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite, combinedLight, alpha);
-
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        poseStack.translate(0, 0, 1);
-        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite, combinedLight, alpha);
-
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        poseStack.translate(0, 0, 1);
-        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite, combinedLight, alpha);
-
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        poseStack.translate(0, 0, 1);
-        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite, combinedLight, alpha);
-
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        poseStack.translate(0, -1, 0);
-        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite, combinedLight, alpha);
-
-
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(180));
-        poseStack.translate(0, -1, 1);
-        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite, combinedLight, alpha);
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        poseStack.translate(1, 0, 0);
+        RenderHelper.drawCube(poseStack,builder,sprite,combinedLight,0xFFFFFFFF,alpha);
 
         poseStack.popPose();
 

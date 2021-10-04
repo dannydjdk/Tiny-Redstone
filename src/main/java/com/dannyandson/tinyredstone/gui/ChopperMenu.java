@@ -19,14 +19,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ChopperMenu extends AbstractContainerMenu {
-    //TODO dedicated server testing
-    // validate textures on client side and network back to server
-    // have blueprints enforce block data?
     public static ChopperMenu createChopperMenu(int containerId, Inventory playerInventory) {
         return createChopperMenu(containerId, playerInventory, new SimpleContainer(1));
     }
@@ -34,8 +30,6 @@ public class ChopperMenu extends AbstractContainerMenu {
     public static ChopperMenu createChopperMenu(int containerId, Inventory playerInventory, Container inventory) {
         return new ChopperMenu(containerId, playerInventory, inventory);
     }
-
-    public static List<String> validBlockCache = new ArrayList<>();
 
     public static List<Material> solidMaterials = Arrays.asList(
             Material.WOOD,
@@ -119,14 +113,14 @@ public class ChopperMenu extends AbstractContainerMenu {
             Material material = inputBlock.defaultBlockState().getMaterial();
 
             if (container instanceof ChopperBlockEntity chopperBlockEntity) {
-                Boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
+                boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
                 if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasBlockEntity()) {
                     ResourceLocation inputRegistryName = inputBlock.getRegistryName();
-                    if (!validBlockCache.contains(inputRegistryName.toString())){
+                    if (!Registration.TINY_BLOCK_OVERRIDES.hasUsableTexture(inputRegistryName)){
                         if (!chopperBlockEntity.getLevel().isClientSide)
                             ModNetworkHandler.sendToNearestClient(new ValidTinyBlockCacheSync(chopperBlockEntity.getBlockPos(),inputRegistryName),chopperBlockEntity.getLevel(),chopperBlockEntity.getBlockPos());
                     }
-                    else {
+                    else if (inputBlock.getRegistryName()!=null){
                         CompoundTag madeFromTag = new CompoundTag();
                         madeFromTag.putString("namespace", inputBlock.getRegistryName().getNamespace());
                         madeFromTag.putString("path", inputBlock.getRegistryName().getPath());

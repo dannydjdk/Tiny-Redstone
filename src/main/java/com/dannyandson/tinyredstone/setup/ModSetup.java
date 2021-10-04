@@ -4,6 +4,8 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
@@ -20,6 +22,11 @@ public class ModSetup {
     public static void init(final FMLCommonSetupEvent event) {
         Registration.registerPanelCells();
         ModNetworkHandler.registerMessages();
+    }
+
+    @SubscribeEvent
+    public static void onAddReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(Registration.TINY_BLOCK_OVERRIDES);
     }
 
 }

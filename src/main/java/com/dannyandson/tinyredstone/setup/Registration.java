@@ -8,6 +8,8 @@ import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
+import com.dannyandson.tinyredstone.codec.CodecTinyBlockOverrides;
+import com.dannyandson.tinyredstone.codec.TinyBlockData;
 import com.dannyandson.tinyredstone.gui.ChopperMenu;
 import com.dannyandson.tinyredstone.items.*;
 import net.minecraft.world.inventory.MenuType;
@@ -100,5 +102,7 @@ public class Registration {
 
     public static final RegistryObject<Item> PANEL_COVER_DARK = ITEMS.register("dark_panel_cover",PanelCellItem::new);
     public static final RegistryObject<Item> PANEL_COVER_LIGHT = ITEMS.register("light_panel_cover",PanelCellItem::new);
+
+    public static final CodecTinyBlockOverrides TINY_BLOCK_OVERRIDES = new CodecTinyBlockOverrides("tiny_block_overrides", TinyBlockData.CODEC);
 
 }

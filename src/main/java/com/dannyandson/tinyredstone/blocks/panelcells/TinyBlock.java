@@ -5,6 +5,7 @@ import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -39,30 +40,11 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         if (sprite==null)
-            sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TINY_BLOCK);
+            sprite = RenderHelper.getSprite(madeFrom!=null? Registration.TINY_BLOCK_OVERRIDES.getTexture(madeFrom) :TEXTURE_TINY_BLOCK);
 
-        matrixStack.translate(0,0,1.0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+        matrixStack.translate(-1, -1, 1);
+        RenderHelper.drawCube(matrixStack,builder,sprite,combinedLight,color,alpha);
 
     }
 
@@ -77,7 +59,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
             CompoundTag itemNBT = stack.getTag();
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
-                this.madeFrom = new ResourceLocation(madeFromTag.getString("namespace"), "block/" + madeFromTag.getString("path"));
+                this.madeFrom = new ResourceLocation(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
             }
         }
 
@@ -215,7 +197,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
         if (this.madeFrom != null) {
             CompoundTag madeFromTag = new CompoundTag();
             madeFromTag.putString("namespace", this.madeFrom.getNamespace());
-            madeFromTag.putString("path", this.madeFrom.getPath().substring(6));
+            madeFromTag.putString("path", this.madeFrom.getPath());
             CompoundTag itemTag = new CompoundTag();
             itemTag.put("made_from", madeFromTag);
             return itemTag;

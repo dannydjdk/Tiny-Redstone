@@ -40,28 +40,10 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
         if (sprite==null)
             sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TRANSPARENT_BLOCK);
 
-        matrixStack.translate(0,0,1.0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+        matrixStack.translate(-1, -1, 1);
+        RenderHelper.drawCube(matrixStack,builder,sprite,combinedLight,color,alpha-.01f);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
     }
 
     @Override

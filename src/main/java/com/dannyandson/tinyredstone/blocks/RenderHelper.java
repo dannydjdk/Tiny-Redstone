@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.blocks;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +30,36 @@ public class RenderHelper {
             11546150,
             1908001
     };
+
+    public static void drawCube(PoseStack poseStack, VertexConsumer  builder, TextureAtlasSprite sprite, int combinedLight,int color, float alpha){
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite,combinedLight,color,alpha);
+
+        //back
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        poseStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite,combinedLight,color,alpha);
+
+        //left
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite,combinedLight,color,alpha);
+
+        //front
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite,combinedLight,color,alpha);
+
+        //right
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite,combinedLight,color,alpha);
+
+        //bottom
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90));
+        poseStack.translate(-1,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite,combinedLight,color,alpha);
+    }
 
     public static void drawRectangle(VertexConsumer  builder, PoseStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , float alpha)
     {

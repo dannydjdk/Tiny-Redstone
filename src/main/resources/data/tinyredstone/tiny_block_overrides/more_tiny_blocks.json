@@ -1,0 +1,10 @@
+{
+  "tiny_block_definitions": {
+    "minecraft:hay_block": {
+      "texture": "minecraft:hay_block_side"
+    },
+    "minecraft:note_block": {
+      "status": "disabled"
+    }
+  }
+}

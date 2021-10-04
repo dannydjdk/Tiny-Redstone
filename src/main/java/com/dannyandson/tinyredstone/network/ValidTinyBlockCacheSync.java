@@ -2,7 +2,7 @@ package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
-import com.dannyandson.tinyredstone.gui.ChopperMenu;
+import com.dannyandson.tinyredstone.codec.TinyBlockData;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
@@ -64,8 +64,8 @@ public class ValidTinyBlockCacheSync {
     public boolean serverHandle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(() -> {
-            if (!ChopperMenu.validBlockCache.contains(this.itemRegistryName.toString()))
-                ChopperMenu.validBlockCache.add(this.itemRegistryName.toString());
+            if (!TinyBlockData.validBlockTextureCache.contains(this.itemRegistryName.toString()))
+                TinyBlockData.validBlockTextureCache.add(this.itemRegistryName.toString());
             if (this.chopperPos!=null){
                 if(ctx.get().getSender().getLevel().getBlockEntity(this.chopperPos) instanceof ChopperBlockEntity chopperBlockEntity)
                     chopperBlockEntity.setChanged();
