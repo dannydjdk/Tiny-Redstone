@@ -1,10 +1,37 @@
 {
   "tiny_block_definitions": {
     "minecraft:hay_block": {
-      "texture": "minecraft:hay_block_side"
+      "texture": "minecraft:hay_block_side",
+      "texture_top": "minecraft:hay_block_top",
+      "texture_bottom": "minecraft:hay_block_top"
+    },
+    "minecraft:bookshelf": {
+      "texture_top": "minecraft:oak_planks",
+      "texture_bottom": "minecraft:oak_planks"
+    },
+    "minecraft:chiseled_sandstone": {
+      "texture_top": "minecraft:sandstone_top"
+    },
+    "minecraft:cut_sandstone": {
+      "texture_top": "minecraft:sandstone_top"
+    },
+    "minecraft:smooth_sandstone": {
+      "texture": "minecraft:sandstone_top"
+    },
+    "minecraft:chiseled_red_sandstone": {
+      "texture_top": "minecraft:red_sandstone_top"
+    },
+    "minecraft:cut_red_sandstone": {
+      "texture_top": "minecraft:red_sandstone_top"
+    },
+    "minecraft:smooth_red_sandstone": {
+      "texture": "minecraft:red_sandstone_top"
     },
     "minecraft:note_block": {
-      "status": "disabled"
+      "type": "disabled"
+    },
+    "minecraft:slime_block": {
+      "type": "disabled"
     }
   }
 }

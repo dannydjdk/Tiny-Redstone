@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -31,20 +32,24 @@ public class TinyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
     public void renderByItem(ItemStack stack, ItemTransforms.TransformType transformType, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
 
         boolean isTransparent = stack.getItem() == Registration.TINY_TRANSPARENT_BLOCK.get();
-        TextureAtlasSprite sprite = null;
+        TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
 
         if (stack.hasTag()) {
             CompoundTag itemNBT = stack.getTag();
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
                 ResourceLocation itemId = new ResourceLocation(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
-                ResourceLocation texture = Registration.TINY_BLOCK_OVERRIDES.getTexture(itemId);
-                sprite = RenderHelper.getSprite(texture);
-            }
-        }
+                sprite_top = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId,Side.TOP);
+                sprite_front = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId,Side.FRONT);
+                sprite_right = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId,Side.RIGHT);
+                sprite_back = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId,Side.BACK);
+                sprite_left = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId,Side.LEFT);
+                sprite_bottom = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId,Side.BOTTOM);
+            }else
+                sprite_top=sprite_front=sprite_right=sprite_back=sprite_left=sprite_bottom = RenderHelper.getSprite(isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
 
-        if (sprite == null)
-            sprite = RenderHelper.getSprite(isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
+        }else
+            sprite_top=sprite_front=sprite_right=sprite_back=sprite_left=sprite_bottom = RenderHelper.getSprite(isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
 
         VertexConsumer builder = buffer.getBuffer(isTransparent ? RenderType.translucent() : RenderType.solid());
         float alpha = isTransparent ? .99f : 1.0f;
@@ -53,7 +58,7 @@ public class TinyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
 
         poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         poseStack.translate(1, 0, 0);
-        RenderHelper.drawCube(poseStack,builder,sprite,combinedLight,0xFFFFFFFF,alpha);
+        RenderHelper.drawCube(poseStack,builder,sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight,0xFFFFFFFF,alpha);
 
         poseStack.popPose();
 

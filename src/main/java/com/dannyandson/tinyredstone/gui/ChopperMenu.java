@@ -159,9 +159,11 @@ public class ChopperMenu extends AbstractContainerMenu {
             itemstack = itemstack1.copy();
 
             if (index < 2) {
-                if (!this.moveItemStackTo(itemstack1, 1, this.slots.size(), true)) {
+                if (!this.moveItemStackTo(itemstack1, 2, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
+                if(index==1)
+                    this.outputSlot.onTake(player,itemstack);
             } else if (!this.moveItemStackTo(itemstack1, 0, 1, false)) {
                 return ItemStack.EMPTY;
             }
@@ -171,6 +173,7 @@ public class ChopperMenu extends AbstractContainerMenu {
             } else {
                 slot.setChanged();
             }
+            setupResultSlot();
         }
 
         return itemstack;

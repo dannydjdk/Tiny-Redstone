@@ -26,7 +26,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     protected int strongSignalStrength = 0;
     protected int color= DyeColor.WHITE.getTextColor();
     protected ResourceLocation madeFrom;
-    protected TextureAtlasSprite sprite;
+    protected TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
 
     /**
      * Drawing the cell on the panel
@@ -39,13 +39,22 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
-        if (sprite==null)
-            sprite = RenderHelper.getSprite(madeFrom!=null? Registration.TINY_BLOCK_OVERRIDES.getTexture(madeFrom) :TEXTURE_TINY_BLOCK);
+        if (sprite_top==null) {
+            if (madeFrom != null){
+                sprite_top = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.TOP);
+                sprite_front = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.FRONT);
+                sprite_right = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.RIGHT);
+                sprite_back = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.BACK);
+                sprite_left = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.LEFT);
+                sprite_bottom = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.BOTTOM);
+            }else{
+                sprite_top=sprite_front=sprite_right=sprite_back=sprite_left=sprite_bottom=RenderHelper.getSprite(TEXTURE_TINY_BLOCK);
+            }
+        }
 
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         matrixStack.translate(-1, -1, 1);
-        RenderHelper.drawCube(matrixStack,builder,sprite,combinedLight,color,alpha);
-
+        RenderHelper.drawCube(matrixStack,builder,sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight,color,alpha);
     }
 
     @Override

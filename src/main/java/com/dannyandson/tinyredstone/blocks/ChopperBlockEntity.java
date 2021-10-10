@@ -1,8 +1,10 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.gui.ChopperItemHandler;
 import com.dannyandson.tinyredstone.gui.ChopperMenu;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -13,12 +15,22 @@ import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
 
     private NonNullList<ItemStack> items;
     private ResultContainer resultContainer = new ResultContainer();
     private ChopperMenu chopperMenu;
+
+    private final ChopperItemHandler itemHandler = createHandler();
+    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
 
 
     public ChopperBlockEntity(BlockPos pos, BlockState state) {
@@ -86,4 +98,24 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
 
         return compoundTag;
     }
+
+    private ChopperItemHandler createHandler() {
+        return new ChopperItemHandler(this);
+    }
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return handler.cast();
+        }
+        return super.getCapability(cap, side);
+    }
+
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        handler.invalidate();
+    }
+
 }

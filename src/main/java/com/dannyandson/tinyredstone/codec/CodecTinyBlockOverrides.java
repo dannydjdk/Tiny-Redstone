@@ -1,10 +1,14 @@
 package com.dannyandson.tinyredstone.codec;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.blocks.RenderHelper;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -59,23 +63,68 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
      * @param itemResourceId a resource location of the item whose texture we want
      * @return resource location of the block texture
      */
-    public ResourceLocation getTexture(ResourceLocation itemResourceId) {
-        for (Map.Entry<ResourceLocation, TinyBlockData> entry : this.data.entrySet()){
-            ResourceLocation texture = entry.getValue().getTexture(itemResourceId);
-            if (texture!=null)
-                return texture;
+    public TextureAtlasSprite getSprite(ResourceLocation itemResourceId, Side side) {
+
+        for (Map.Entry<ResourceLocation, TinyBlockData> entry : this.data.entrySet()) {
+            ResourceLocation texture = entry.getValue().getTexture(itemResourceId, side);
+            if (texture != null)
+                return RenderHelper.getSprite(texture);
         }
-        return TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString());
+
+        TextureAtlasSprite missingTextureSprite = RenderHelper.getSprite(TextureManager.INTENTIONAL_MISSING_TEXTURE);
+        TextureAtlasSprite sprite = null;
+        if (side == Side.FRONT) {
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_front"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_side"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+        } else if (side == Side.TOP) {
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_top"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+        } else if (side == Side.BOTTOM) {
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_bottom"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_top"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+        } else if (side == Side.LEFT) {
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_left"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_side"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+        } else if (side == Side.RIGHT) {
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_right"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_side"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+        } else if (side == Side.BACK) {
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_back"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+            sprite = RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString() + "_side"));
+            if (!sprite.equals(missingTextureSprite))
+                return sprite;
+        }
+
+        return RenderHelper.getSprite(TinyBlockData.textureResourceLocationFromResourceId(itemResourceId.toString()));
     }
 
     /**
-     * Does the item with the given resource id has a texture that can be used by a Tiny Block
+     * Does the item with the given resource id have a texture that can be used by a Tiny Block
      * @param itemResourceId a resource location of the item whose texture we want
      * @return true if the item with the given resource id has a texture that can be used by a Tiny Block
      */
     public boolean hasUsableTexture(ResourceLocation itemResourceId){
         for (Map.Entry<ResourceLocation, TinyBlockData> entry : this.data.entrySet()){
-            String status = entry.getValue().getStatus(itemResourceId);
+            String status = entry.getValue().getType(itemResourceId);
             if (status !=null && status.equals("disabled"))
                 return false;
             ResourceLocation texture = entry.getValue().getTexture(itemResourceId);
@@ -90,6 +139,7 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
     {
         TinyRedstone.LOGGER.info("Beginning loading of data for data loader: {}", this.folderName);
         this.data = this.mapValues(jsons);
+        TinyBlockData.validBlockTextureCache.clear();
         TinyRedstone.LOGGER.info("Data loader for {} loaded {} jsons", this.folderName, this.data.size());
     }
 

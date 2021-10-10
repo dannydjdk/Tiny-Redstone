@@ -49,9 +49,11 @@ public class ValidTinyBlockCacheSync {
     public boolean clientHandle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            ResourceLocation texture = new ResourceLocation(this.itemRegistryName.getNamespace(), "block/" + this.itemRegistryName.getPath());
-            TextureAtlasSprite sprite = RenderHelper.getSprite(texture);
-            if (sprite!=RenderHelper.getSprite(TextureManager.INTENTIONAL_MISSING_TEXTURE)) {
+            ResourceLocation texture1 = new ResourceLocation(this.itemRegistryName.getNamespace(), "block/" + this.itemRegistryName.getPath());
+            ResourceLocation texture2 = new ResourceLocation(this.itemRegistryName.getNamespace(), "block/" + this.itemRegistryName.getPath() + "_side");
+            TextureAtlasSprite sprite1 = RenderHelper.getSprite(texture1);
+            TextureAtlasSprite sprite2 = RenderHelper.getSprite(texture2);
+            if (sprite1!=RenderHelper.getSprite(TextureManager.INTENTIONAL_MISSING_TEXTURE) || sprite2!=RenderHelper.getSprite(TextureManager.INTENTIONAL_MISSING_TEXTURE)) {
                 //tell server chopper menu at block pos to update
                 ModNetworkHandler.sendToServer(new ValidTinyBlockCacheSync(this.chopperPos, this.itemRegistryName));
             }
