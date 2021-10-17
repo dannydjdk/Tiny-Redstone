@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.items;
 
+import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.nbt.CompoundTag;
@@ -14,16 +15,23 @@ public class TinyBlockItem extends PanelCellItem {
 
     @Override
     public Component getName(ItemStack stack) {
+        String thisName = super.getName(stack).getString();
+        String fromBlockName = null;
         if (stack.hasTag()) {
             CompoundTag itemNBT = stack.getTag();
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
-                String thisName = super.getName(stack).getString();
-                String fromBlockName = (new TranslatableComponent("block." + madeFromTag.getString("namespace") + "." + madeFromTag.getString("path"))).getString();
-                return Component.nullToEmpty(thisName + " (" + fromBlockName + ")");
+                fromBlockName = (new TranslatableComponent("block." + madeFromTag.getString("namespace") + "." + madeFromTag.getString("path"))).getString();
             }
         }
-        return super.getName(stack);
+        if (fromBlockName==null){
+            if (stack.getItem()== Registration.TINY_SOLID_BLOCK.get()){
+                    fromBlockName = new TranslatableComponent("block.minecraft.white_wool").getString();
+            } else if (stack.getItem()== Registration.TINY_TRANSPARENT_BLOCK.get()){
+                fromBlockName = new TranslatableComponent("block.minecraft.glass").getString();
+            }
+        }
+        return Component.nullToEmpty(thisName + " (" + fromBlockName + ")");
     }
 
     @Override

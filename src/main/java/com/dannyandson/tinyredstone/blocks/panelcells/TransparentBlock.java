@@ -1,6 +1,5 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IColorablePanelCell;
 import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
@@ -20,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider
 {
-    public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation(TinyRedstone.MODID,"block/panel_transparent_block");
+    public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation("minecraft","block/glass");
     private ResourceLocation madeFrom;
     private TextureAtlasSprite sprite;
     private int color= 16777215;

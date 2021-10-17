@@ -127,11 +127,13 @@ public class ChopperMenu extends AbstractContainerMenu {
                         if (solidMaterials.contains(material)) {
                             outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
                             outputStack.setCount(8);
-                            outputStack.addTagElement("made_from", madeFromTag);
+                            if(!inputBlock.getRegistryName().toString().equals("minecraft:white_wool"))
+                                outputStack.addTagElement("made_from", madeFromTag);
                         } else if (transparentMaterials.contains(material)) {
                             outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
                             outputStack.setCount(8);
-                            outputStack.addTagElement("made_from", madeFromTag);
+                            if(!inputBlock.getRegistryName().toString().equals("minecraft:glass"))
+                                outputStack.addTagElement("made_from", madeFromTag);
                         }
                     }
                 }

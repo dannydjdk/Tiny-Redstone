@@ -24,7 +24,7 @@
   "message.item.tinyredstone.tiny_redstone_block": "Outputs full redstone power in all 6 directions and can be pushed by tiny pistons",
   "item.tinyredstone.tiny_redstone_lamp": "Tiny Redstone Lamp",
   "message.item.tinyredstone.tiny_redstone_lamp": "Lights up when given a redstone signal.\nEach lamp outputs a light value of 1 additively.\n15 lit lamps will output the max light of 15.",
-  "item.tinyredstone.tiny_transparent_block": "Tiny Glass Block",
+  "item.tinyredstone.tiny_transparent_block": "Tiny Transparent Block",
   "message.item.tinyredstone.tiny_transparent_block": "Behaves like transparent blocks with vanilla redstone\nDoes not carry a redstone signal. Will allow signals to travel up, but not down.\nCan be pushed by tiny pistons.\nRight click with a Color Selector to change color.",
   "item.tinyredstone.tiny_button": "Tiny Wooden Button",
   "message.item.tinyredstone.tiny_button": "Output redstone on all 4 sides and bottom for 15 ticks when activated.",

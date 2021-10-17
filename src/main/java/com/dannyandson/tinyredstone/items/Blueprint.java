@@ -83,6 +83,7 @@ public class Blueprint extends Item {
                             panelTile.updateSide(Side.RIGHT);
                             panelTile.updateSide(Side.BACK);
                             panelTile.updateSide(Side.LEFT);
+                            panelTile.updateSide(Side.TOP);
                             panelTile.setChanged();
 
                         }catch (Exception e){

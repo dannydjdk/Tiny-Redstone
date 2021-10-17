@@ -66,7 +66,6 @@ public class ClientSetup {
         event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_OFF);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
-        event.addSprite(TransparentBlock.TEXTURE_TRANSPARENT_BLOCK);
 
         event.addSprite(LightCover.TEXTURE_LIGHT_COVER);
         event.addSprite(DarkCover.TEXTURE_DARK_COVER);
