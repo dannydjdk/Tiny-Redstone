@@ -66,6 +66,7 @@ public class ClientSetup {
         event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_OFF);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
+        event.addSprite(GhostRenderer.TEXTURE_REDSTONE_DUST_SEGMENT_GHOST);
 
         event.addSprite(LightCover.TEXTURE_LIGHT_COVER);
         event.addSprite(DarkCover.TEXTURE_DARK_COVER);

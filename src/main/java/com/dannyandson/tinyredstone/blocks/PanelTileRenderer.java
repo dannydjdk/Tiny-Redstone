@@ -2,7 +2,8 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
+import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -15,12 +16,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.CheckForNull;
 import java.lang.reflect.InvocationTargetException;
@@ -184,72 +181,75 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
     }
 
     @CheckForNull
-    public static PanelCellGhostPos getPlayerLookingAtCell(PanelTile panelTile)
-    {
-        Level world = panelTile.getLevel();
+    public static PanelCellGhostPos getPlayerLookingAtCell(PanelTile panelTile) {
         LocalPlayer player = Minecraft.getInstance().player;
+        BlockPos blockPos = panelTile.getBlockPos();
+        if (player != null) {
+            if (panelTile.getBlockPos().closerThan(player.position(), 4.0d)) {
+                BlockHitResult blockHitResult = panelTile.getPlayerCollisionHitResult(player);
+                PanelCellPos cellPos1 = PosInPanelCell.fromHitVec(panelTile, panelTile.getBlockPos(), blockHitResult);
+                panelTile.panelCellHovering = cellPos1;
 
-        if (player!=null && PanelBlock.isPanelCellItem(player.getMainHandItem().getItem())) {
+                if (panelTile.getBlockPos().closerThan(player.position(), 2.0d)) {
 
-            HitResult lookingAt = Minecraft.getInstance().hitResult;
+                    if (PanelBlock.isPanelCellItem(player.getMainHandItem().getItem())) {
+                        if (cellPos1 != null) {
+                            PanelCellPos cellPos = cellPos1;
+                            if (cellPos.getIPanelCell() != null && (!cellPos.getIPanelCell().hasActivation() || player.isCrouching())) {
+                                cellPos = cellPos.offset(panelTile.getSideFromDirection(blockHitResult.getDirection()));
+                            }
+                            if (cellPos != null && cellPos.getIPanelCell() == null) {
+                                try {
+                                    IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getMainHandItem().getItem()).getConstructors()[0].newInstance();
+                                    Side rotationLock = RotationLock.getRotationLock();
+                                    Side cellFacing = rotationLock == null ?
+                                            panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()))
+                                            : rotationLock;
 
-            if (lookingAt != null && lookingAt.getType() == HitResult.Type.BLOCK) {
+                                    if (panelCell.needsSolidBase()) {
+                                        Side attachingSideDir = panelTile.getSideFromDirection(blockHitResult.getDirection()).getOpposite();
+                                        Side attachingSideRel = (attachingSideDir == Side.TOP || attachingSideDir == Side.BOTTOM) ? attachingSideDir : Side.FRONT;
 
-                BlockHitResult blockHitResult = (BlockHitResult)lookingAt;
-                Vec3 lookVector = Minecraft.getInstance().hitResult.getLocation();
-                BlockPos blockPos = new BlockPos(lookVector);
-                BlockEntity te = world.getBlockEntity(blockPos);
-
-                if (te == panelTile) {
-
-                    PanelCellPos cellPos1 =  PosInPanelCell.fromHitVec(panelTile,panelTile.getBlockPos(),blockHitResult);
-                    if (cellPos1!=null) {
-                        PanelCellPos cellPos = cellPos1;
-                        if (cellPos.getIPanelCell()!=null && (!cellPos.getIPanelCell().hasActivation() || player.isCrouching()))
-                        {
-                            cellPos = cellPos.offset(panelTile.getSideFromDirection(blockHitResult.getDirection()));
-                        }
-                        if (cellPos!=null && cellPos.getIPanelCell()==null) {
-                            try {
-                                IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getMainHandItem().getItem()).getConstructors()[0].newInstance();
-                                Side rotationLock = RotationLock.getRotationLock();
-                                Side cellFacing = rotationLock == null ?
-                                        panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()))
-                                        : rotationLock;
-
-                                if (panelCell.needsSolidBase())
-                                {
-                                    Side attachingSideDir = panelTile.getSideFromDirection(blockHitResult.getDirection()).getOpposite();
-                                    Side attachingSideRel = (attachingSideDir==Side.TOP || attachingSideDir==Side.BOTTOM)?attachingSideDir:Side.FRONT;
-
-                                    if (
-                                            !cellPos1.equals(cellPos)
-                                                    && (
-                                                    cellPos1.getIPanelCell() == null
-                                                            || !cellPos1.getIPanelCell().isPushable()
-                                                            //check if the cell can attach to the side of the block facing
-                                                            || !cellPos1.getIPanelCell().canAttachToBaseOnSide(attachingSideRel)
-                                            )
-                                    )
-                                    {
-                                        return null;
-                                    }else{
-                                        panelCell.setBaseSide(attachingSideRel);
-                                        if (attachingSideRel==Side.FRONT)
-                                            cellFacing=attachingSideDir;
+                                        if (
+                                                !cellPos1.equals(cellPos)
+                                                        && (
+                                                        cellPos1.getIPanelCell() == null
+                                                                || !cellPos1.getIPanelCell().isPushable()
+                                                                //check if the cell can attach to the side of the block facing
+                                                                || !cellPos1.getIPanelCell().canAttachToBaseOnSide(attachingSideRel)
+                                                )
+                                        ) {
+                                            return null;
+                                        } else {
+                                            panelCell.setBaseSide(attachingSideRel);
+                                            if (attachingSideRel == Side.FRONT)
+                                                cellFacing = attachingSideDir;
+                                        }
                                     }
-                                }
 
-                                panelCell.onPlace(cellPos,player);
-                                return PanelCellGhostPos.fromPosInPanelCell(
-                                        cellPos,
-                                        panelCell,
-                                        cellFacing
-                                );
-                            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                                TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());
+                                    panelCell.onPlace(cellPos, player);
+                                    return PanelCellGhostPos.fromPosInPanelCell(
+                                            cellPos,
+                                            panelCell,
+                                            cellFacing
+                                    );
+                                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                                    TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());
+                                }
                             }
                         }
+                    }
+
+                    //if we are not rendering a ghost component, check if we are hovering over a tiny redstone dust
+                    PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, blockPos, blockHitResult);
+                    if (posInPanelCell != null && posInPanelCell.getIPanelCell() instanceof RedstoneDust) {
+                        PanelCellSegment segmentHovering = posInPanelCell.getSegment();
+                        return PanelCellGhostPos.fromPosInPanelCell(
+                                posInPanelCell,
+                                new GhostRenderer(segmentHovering),
+                                posInPanelCell.getCellFacing()
+                        );
+
                     }
                 }
             }

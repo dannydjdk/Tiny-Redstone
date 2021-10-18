@@ -38,6 +38,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.util.Constants;
 
@@ -122,6 +123,23 @@ public class PanelBlock extends BaseEntityBlock {
     @Override
     @SuppressWarnings("deprecation")
     public VoxelShape getShape(BlockState state, BlockGetter source, BlockPos pos, CollisionContext context) {
+        if (source.getBlockEntity(pos) instanceof PanelTile panelTile)
+        {
+            if (panelTile.panelCellHovering!=null) {
+                VoxelShape cellShape = panelTile.getCellVoxelShape(panelTile.panelCellHovering);
+                if (cellShape != null)
+                    return Shapes.or(
+                            BASE.get(state.getValue(BlockStateProperties.FACING)),
+                            cellShape
+                    );
+            }
+            return getCollisionShape(state, source, pos, context);
+        }
+        return BASE.get(state.getValue(BlockStateProperties.FACING));
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter source, BlockPos pos, CollisionContext context) {
         BlockEntity te =  source.getBlockEntity(pos);
         if(te instanceof PanelTile)
         {
@@ -299,7 +317,7 @@ public class PanelBlock extends BaseEntityBlock {
         BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) te;
-            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), Registration.REDSTONE_WRENCH.get().getHitResult(player.level,player));
+            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), panelTile.getPlayerCollisionHitResult(player));
             IPanelCell cell = panelTile.getIPanelCell(panelCellPos);
             if (cell != null) {
                 ItemStack itemStack = panelCellItemMap.get(cell.getClass()).getDefaultInstance();
@@ -325,7 +343,7 @@ public class PanelBlock extends BaseEntityBlock {
         BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile panelTile && hand==InteractionHand.MAIN_HAND) {
             try {
-
+                blockHitResult = panelTile.getPlayerCollisionHitResult(player);
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, blockHitResult);
 
                 if (posInPanelCell != null) {
@@ -526,7 +544,7 @@ public class PanelBlock extends BaseEntityBlock {
                                 ClearPanelGUI.open(panelTile);
                         }
                         else {
-                            BlockHitResult result = Registration.REDSTONE_WRENCH.get().getHitResult(world, player);
+                            BlockHitResult result = panelTile.getPlayerCollisionHitResult(player);
                             PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), result);
 
                             if (panelCellPos != null) {

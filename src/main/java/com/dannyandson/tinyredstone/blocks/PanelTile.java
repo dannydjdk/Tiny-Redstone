@@ -18,8 +18,10 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -27,6 +29,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.util.Constants;
@@ -38,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("NullableProblems")
 public class PanelTile extends BlockEntity {
 
     //panel data (saved)
@@ -57,6 +62,7 @@ public class PanelTile extends BlockEntity {
     //other state fields (not saved)
     private boolean flagSync = true;
     protected PanelCellGhostPos panelCellGhostPos;
+    protected PanelCellPos panelCellHovering;
     private VoxelShape voxelShape = null;
 
     public PanelTile(BlockPos p_155229_, BlockState p_155230_) {
@@ -1244,42 +1250,50 @@ public class PanelTile extends BlockEntity {
             if (!isCovered()) {
                 for (Integer index : cells.keySet()) {
                     PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
-                    IPanelCell cell = cellPos.getIPanelCell();
-                    if (cell != null) {
-                        PanelCellVoxelShape cellShape = cell.getShape();
-                        float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
-                        float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
-                        float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
-                        float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
-                        float levelStart = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
-                        float levelEnd = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
-
-                        switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
-                            case UP:
-                                voxelShape = Shapes.or(voxelShape, Block.box(rowStart, 16 - levelEnd, 16 - columnEnd, rowEnd, 16 - levelStart, 16 - columnStart));
-                                break;
-                            case NORTH:
-                                voxelShape = Shapes.or(voxelShape, Block.box(rowStart, 16 - columnEnd, levelStart, rowEnd, 16 - columnStart, levelEnd));
-                                break;
-                            case EAST:
-                                voxelShape = Shapes.or(voxelShape, Block.box(16 - levelEnd, rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd));
-                                break;
-                            case SOUTH:
-                                voxelShape = Shapes.or(voxelShape, Block.box(rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd, 16 - levelStart));
-                                break;
-                            case WEST:
-                                voxelShape = Shapes.or(voxelShape, Block.box(levelStart, 16 - rowEnd, columnStart, levelEnd, 16 - rowStart, columnEnd));
-                                break;
-                            default: //DOWN
-                                voxelShape = Shapes.or(voxelShape, Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
-                        }
-                    }
+                    VoxelShape cellVoxelShape = getCellVoxelShape(cellPos);
+                    if (cellVoxelShape!=null)
+                        voxelShape = Shapes.or(voxelShape,cellVoxelShape);
                 }
             }
         }
 
         return voxelShape;
     }
+
+    @CheckForNull
+    public VoxelShape getCellVoxelShape(PanelCellPos cellPos)
+    {
+        if (cellPos!=null)
+        {
+            IPanelCell cell = cellPos.getIPanelCell();
+            if (cell != null) {
+                PanelCellVoxelShape cellShape = cell.getShape();
+                float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
+                float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
+                float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
+                float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
+                float levelStart = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
+                float levelEnd = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
+
+                switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
+                    case UP:
+                        return Block.box(rowStart, 16 - levelEnd, 16 - columnEnd, rowEnd, 16 - levelStart, 16 - columnStart);
+                    case NORTH:
+                        return Block.box(rowStart, 16 - columnEnd, levelStart, rowEnd, 16 - columnStart, levelEnd);
+                    case EAST:
+                        return Block.box(16 - levelEnd, rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd);
+                    case SOUTH:
+                        return Block.box(rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd, 16 - levelStart);
+                    case WEST:
+                       return Block.box(levelStart, 16 - rowEnd, columnStart, levelEnd, 16 - rowStart, columnEnd);
+                    default: //DOWN
+                        return Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd);
+                }
+            }
+        }
+        return null;
+    }
+
     public void clearVoxelShape()
     {
         voxelShape=null;
@@ -1290,6 +1304,19 @@ public class PanelTile extends BlockEntity {
             PanelCellPos pos = PanelCellPos.fromIndex(this, index);
             pos.getIPanelCell().onRemove(pos);
         }
+    }
+
+    public BlockHitResult getPlayerCollisionHitResult(Player player) {
+        float xRotation = player.getXRot();
+        float yRotation = player.getYRot();
+        Vec3 eyePosition = player.getEyePosition();
+        float v = -Mth.cos(-xRotation * ((float)Math.PI / 180F));
+        float x = (Mth.sin(-yRotation * ((float)Math.PI / 180F) - (float)Math.PI)) * v;
+        float y = Mth.sin(-xRotation * ((float)Math.PI / 180F));
+        float z = (Mth.cos(-yRotation * ((float)Math.PI / 180F) - (float)Math.PI)) * v;
+        double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue();;
+        Vec3 vec31 = eyePosition.add((double)x * reachDistance, (double)y * reachDistance, (double)z * reachDistance);
+        return level.clip(new ClipContext(eyePosition, vec31, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player));
     }
 }
 
