@@ -8,7 +8,6 @@ import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
-import com.dannyandson.tinyredstone.codec.TinyBlockData;
 import com.dannyandson.tinyredstone.gui.BlueprintGUI;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import net.minecraft.nbt.CompoundTag;
@@ -28,9 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Blueprint extends Item {
 

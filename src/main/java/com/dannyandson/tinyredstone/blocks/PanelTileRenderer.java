@@ -71,34 +71,6 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         VertexConsumer builder = buffer.getBuffer(RenderType.solid());
-        int color = tileEntity.getColor();
-        matrixStack.pushPose();
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
-        matrixStack.translate(0,-1,0.125);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,1.0f);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-0.125,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color,1.0f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color,1.0f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color,1.0f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color,1.0f);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,1.0f);
-
-        matrixStack.popPose();
-
         if (tileEntity.isCovered())
         {
             matrixStack.pushPose();
@@ -106,10 +78,38 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
             matrixStack.popPose();
         }
         else {
+            int color = tileEntity.getColor();
+            matrixStack.pushPose();
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
+            matrixStack.translate(0, -1, 0.125);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.translate(0, -0.125, 0);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+            matrixStack.translate(0, 0, 1);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+            matrixStack.translate(0, 0, 1);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+            matrixStack.translate(0, 0, 1);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.translate(0, -1, 0);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.popPose();
+
             List<PanelCellPos> positions = tileEntity.getCellPositions();
             for (PanelCellPos pos : positions) {
                 IPanelCell panelCell = pos.getIPanelCell();
-                if (panelCell!=null) {
+                if (panelCell != null) {
                     renderCell(matrixStack, pos, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
                 }
             }

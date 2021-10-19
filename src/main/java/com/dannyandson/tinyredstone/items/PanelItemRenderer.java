@@ -43,39 +43,13 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
         matrixStack.translate(0,0.125,0);
 
 
-        matrixStack.pushPose();
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
-        matrixStack.translate(0,-1,0.125);
-        drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-0.125,0);
-        drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
-
-        matrixStack.popPose();
-
         if (stack.getTag() !=null && stack.getTag().contains("BlockEntityTag")) {
 
             if (stack.getTag().getCompound("BlockEntityTag").contains("cover")) {
                 String coverClass = stack.getTag().getCompound("BlockEntityTag").getString("cover");
                 try {
                     IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
+                    cover.readNBT(stack.getTag().getCompound("BlockEntityTag").getCompound("coverData"));
                     matrixStack.pushPose();
                     cover.render(matrixStack, buffer, combinedLight, combinedOverlay, color);
                     matrixStack.popPose();
@@ -85,6 +59,33 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
                 }
             }
             else {
+                matrixStack.pushPose();
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
+                matrixStack.translate(0,-1,0.125);
+                drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
+
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+                matrixStack.translate(0,-0.125,0);
+                drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
+
+                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+                matrixStack.translate(0,0,1);
+                drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
+
+                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+                matrixStack.translate(0,0,1);
+                drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
+
+                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+                matrixStack.translate(0,0,1);
+                drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
+
+                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+                matrixStack.translate(0,-1,0);
+                drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
+
+                matrixStack.popPose();
+
                 CompoundTag cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
                 for (Integer i = 0; i < 448; i++) {
                     if (cellsNBT.contains(i.toString())) {
