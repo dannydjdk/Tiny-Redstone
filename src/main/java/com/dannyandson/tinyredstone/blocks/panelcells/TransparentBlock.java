@@ -12,13 +12,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider
 {
-    public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation(TinyRedstone.MODID,"block/panel_transparent_block");
+    public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation("minecraft","block/glass");
+    private ResourceLocation madeFrom;
+    private TextureAtlasSprite sprite;
     private int color= 16777215;
 
     /**
@@ -32,33 +36,32 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         IVertexBuilder builder = buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent());
-        TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
+        if (sprite==null)
+            sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TRANSPARENT_BLOCK);
 
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+        matrixStack.translate(-1, -1, 1);
+        RenderHelper.drawCube(matrixStack,builder,sprite,combinedLight,color,alpha-.01f);
+   }
 
+    @Override
+    public boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
+        ItemStack stack = ItemStack.EMPTY;
+        if (player.getUsedItemHand() != null)
+            stack = player.getItemInHand(player.getUsedItemHand());
+        if (stack == ItemStack.EMPTY)
+            stack = player.getMainHandItem();
+        if (stack.hasTag()) {
+            CompoundNBT itemNBT = stack.getTag();
+            CompoundNBT madeFromTag = itemNBT.getCompound("made_from");
+            if (madeFromTag.contains("namespace")) {
+                this.madeFrom = new ResourceLocation(madeFromTag.getString("namespace"), "block/" + madeFromTag.getString("path"));
+            }
+        }
 
-        matrixStack.translate(0,0,1.0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-        matrixStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha-.01f);
-
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-        matrixStack.translate(0,-1,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
+        return IPanelCell.super.onPlace(cellPos, player);
     }
+
 
     /**
      * Called when neighboring redstone signal output changes.
@@ -112,12 +115,18 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("color",color);
+        if (this.madeFrom!=null) {
+            nbt.putString("made_from_namespace", this.madeFrom.getNamespace());
+            nbt.putString("made_from_path", this.madeFrom.getPath());
+        }
         return nbt;
     }
 
     @Override
     public void readNBT(CompoundNBT compoundNBT) {
         this.color=compoundNBT.getInt("color");
+        if (compoundNBT.contains("made_from_namespace"))
+            this.madeFrom = new ResourceLocation(compoundNBT.getString("made_from_namespace"), compoundNBT.getString("made_from_path"));
     }
 
     @Override
@@ -128,5 +137,18 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     @Override
     public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
         overlayBlockInfo.setPowerOutput(0);
+    }
+
+    @Override
+    public CompoundNBT getItemTag() {
+        if (this.madeFrom != null) {
+            CompoundNBT madeFromTag = new CompoundNBT();
+            madeFromTag.putString("namespace", this.madeFrom.getNamespace());
+            madeFromTag.putString("path", this.madeFrom.getPath().substring(6));
+            CompoundNBT itemTag = new CompoundNBT();
+            itemTag.put("made_from", madeFromTag);
+            return itemTag;
+        }
+        return null;
     }
 }

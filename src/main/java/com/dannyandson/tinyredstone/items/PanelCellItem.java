@@ -19,6 +19,10 @@ public class PanelCellItem extends AbstractPanelCellItem {
         super(new Item.Properties().tab(ModSetup.ITEM_GROUP));
     }
 
+    public PanelCellItem(Item.Properties properties){
+        super(properties);
+    }
+
     @Override
     public  void  appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> list, ITooltipFlag flags) {
         if (Screen.hasShiftDown()) {

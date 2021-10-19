@@ -15,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -75,7 +76,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
             if(!panelTile.isCovered() && block instanceof PanelBlock) {
                 PanelBlock panelBlock = (PanelBlock) block;
-                BlockRayTraceResult result = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
+                BlockRayTraceResult result = panelTile.getPlayerCollisionHitResult(playerEntity);// new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile,blockState.getValue(BlockStateProperties.FACING),result);
 
                 if(panelCellPos!=null) {
@@ -85,6 +86,12 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
                         Item item = panelBlock.getItemByIPanelCell(panelCell.getClass());
                         ItemStack itemStack = item.getDefaultInstance();
+                        CompoundNBT itemTag = panelCell.getItemTag();
+                        if (itemTag!=null){
+                            for (String key : itemTag.getAllKeys()){
+                                itemStack.addTagElement(key,itemTag.get(key));
+                            }
+                        }
 
                         if (Tools.show(probeMode, config.getShowModName())) {
                             probeInfo.horizontal()
@@ -119,7 +126,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
             if (!panelTile.isCovered()) {
 
-                BlockRayTraceResult rtr = new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
+                BlockRayTraceResult rtr = panelTile.getPlayerCollisionHitResult(playerEntity);// new BlockRayTraceResult(probeHitData.getHitVec(),probeHitData.getSideHit(),pos,true);
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, rtr);
 
                 if (posInPanelCell != null) {

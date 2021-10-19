@@ -70,7 +70,7 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
 
                 if(!panelTile.isCovered() && block instanceof PanelBlock) {
                     PanelBlock panelBlock = (PanelBlock) block;
-                    BlockRayTraceResult result = new BlockRayTraceResult(accessor.getHitResult().getLocation(), accessor.getSide(), pos, true);
+                    BlockRayTraceResult result = panelTile.getPlayerCollisionHitResult(accessor.getPlayer());// new BlockRayTraceResult(accessor.getHitResult().getLocation(), accessor.getSide(), pos, true);
                     PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, accessor.getBlockState().getValue(BlockStateProperties.FACING), result);
 
 
@@ -96,7 +96,7 @@ public class PanelProvider implements IWailaPlugin, IComponentProvider {
 
                 if (!panelTile.isCovered()) {
 
-                    BlockRayTraceResult rtr = new BlockRayTraceResult(accessor.getHitResult().getLocation(),accessor.getSide(),pos,true);
+                    BlockRayTraceResult rtr = panelTile.getPlayerCollisionHitResult(accessor.getPlayer());// new BlockRayTraceResult(accessor.getHitResult().getLocation(),accessor.getSide(),pos,true);
                     PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, rtr);
 
                     if (posInPanelCell != null) {

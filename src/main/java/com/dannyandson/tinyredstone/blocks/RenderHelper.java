@@ -8,8 +8,43 @@ import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class RenderHelper {
+
+    public static void drawCube(MatrixStack poseStack, IVertexBuilder  builder, TextureAtlasSprite sprite, int combinedLight,int color, float alpha) {
+        drawCube(poseStack, builder, sprite, sprite, sprite, sprite, sprite, sprite, combinedLight, color, alpha);
+    }
+    public static void drawCube(MatrixStack poseStack, IVertexBuilder  builder, TextureAtlasSprite sprite_top, TextureAtlasSprite sprite_front, TextureAtlasSprite sprite_right, TextureAtlasSprite sprite_back, TextureAtlasSprite sprite_left, TextureAtlasSprite sprite_bottom, int combinedLight,int color, float alpha){
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_top,combinedLight,color,alpha);
+
+        //back
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        poseStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_back,combinedLight,color,alpha);
+
+        //left
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_left,combinedLight,color,alpha);
+
+        //front
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_front,combinedLight,color,alpha);
+
+        //right
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.translate(0,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_right,combinedLight,color,alpha);
+
+        //bottom
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90));
+        poseStack.translate(-1,0,1);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_bottom,combinedLight,color,alpha);
+    }
+
 
     public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , float alpha)
     {

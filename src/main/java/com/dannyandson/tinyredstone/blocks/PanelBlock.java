@@ -29,6 +29,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ToolType;
@@ -115,10 +116,30 @@ public class PanelBlock extends Block {
         TileEntity te =  source.getBlockEntity(pos);
         if(te instanceof PanelTile)
         {
+            PanelTile panelTile = (PanelTile) te;
+            if (panelTile.panelCellHovering!=null) {
+                VoxelShape cellShape = panelTile.getCellVoxelShape(panelTile.panelCellHovering);
+                if (cellShape != null)
+                    return VoxelShapes.or(
+                            BASE.get(state.getValue(BlockStateProperties.FACING)),
+                            cellShape
+                    );
+            }
+            return getCollisionShape(state, source, pos, context);
+        }
+        return BASE.get(state.getValue(BlockStateProperties.FACING));
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(BlockState state, IBlockReader source, BlockPos pos, ISelectionContext context) {
+        TileEntity te =  source.getBlockEntity(pos);
+        if(te instanceof PanelTile)
+        {
             return ((PanelTile) te).getVoxelShape();
         }
         return BASE.get(state.getValue(BlockStateProperties.FACING));
     }
+
 
     /**
      * This block can provide redstone power
@@ -302,10 +323,17 @@ public class PanelBlock extends Block {
         TileEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) te;
-            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(player.level,player));
+            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), panelTile.getPlayerCollisionHitResult(player));
             IPanelCell cell = panelTile.getIPanelCell(panelCellPos);
             if (cell != null) {
-                return panelCellItemMap.get(cell.getClass()).getDefaultInstance();
+                ItemStack itemStack = panelCellItemMap.get(cell.getClass()).getDefaultInstance();
+                CompoundNBT itemTag = cell.getItemTag();
+                if (itemTag!=null){
+                    for (String key : itemTag.getAllKeys()){
+                        itemStack.addTagElement(key,itemTag.get(key));
+                    }
+                }
+                return itemStack;
             }
         }
         ItemStack itemStack = getItemWithNBT(world, pos, state);
@@ -503,7 +531,7 @@ public class PanelBlock extends Block {
                                 ClearPanelGUI.open(panelTile);
                         }
                         else {
-                            BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
+                            BlockRayTraceResult result = panelTile.getPlayerCollisionHitResult(player);
                             PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), result);
 
                             if (panelCellPos != null) {
@@ -534,6 +562,12 @@ public class PanelBlock extends Block {
             if (player==null || !player.isCreative()) {
                 Item item = panelCellItemMap.get(cellPos.getIPanelCell().getClass());
                 ItemStack itemStack = new ItemStack(item);
+                CompoundNBT itemTag = cellPos.getIPanelCell().getItemTag();
+                if (itemTag!=null){
+                    for (String key : itemTag.getAllKeys()){
+                        itemStack.addTagElement(key,itemTag.get(key));
+                    }
+                }
                 ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY()+.5, pos.getZ(), itemStack);
                 world.addFreshEntity(itemEntity);
                 if (player!=null)

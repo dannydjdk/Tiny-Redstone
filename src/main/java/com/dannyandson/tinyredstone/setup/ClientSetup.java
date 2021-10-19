@@ -7,9 +7,12 @@ import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
+import com.dannyandson.tinyredstone.gui.ChopperScreen;
 import com.dannyandson.tinyredstone.gui.ToolbarOverlay;
 import com.dannyandson.tinyredstone.items.PanelItemColor;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.inventory.container.BeaconContainer;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -26,6 +29,7 @@ public class ClientSetup {
         Minecraft.getInstance().getBlockColors().register(new PanelTileColor(), Registration.REDSTONE_PANEL_BLOCK.get());
         Minecraft.getInstance().getItemColors().register(new PanelItemColor(),Registration.REDSTONE_PANEL_ITEM.get());
         ClientBinding.registerKeyBindings();
+        ScreenManager.register(Registration.CUTTER_MENU_TYPE.get(), ChopperScreen::new);
     }
 
     @SuppressWarnings("unused")
@@ -61,6 +65,7 @@ public class ClientSetup {
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(TransparentBlock.TEXTURE_TRANSPARENT_BLOCK);
+        event.addSprite(GhostRenderer.TEXTURE_REDSTONE_DUST_SEGMENT_GHOST);
 
         event.addSprite(LightCover.TEXTURE_LIGHT_COVER);
         event.addSprite(DarkCover.TEXTURE_DARK_COVER);

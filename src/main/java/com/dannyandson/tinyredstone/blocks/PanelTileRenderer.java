@@ -2,6 +2,8 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
+import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
@@ -159,59 +161,67 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
     }
 
     @CheckForNull
-    public static PanelCellGhostPos getPlayerLookingAtCell(PanelTile panelTile)
-    {
-        World world = panelTile.getLevel();
+    public static PanelCellGhostPos getPlayerLookingAtCell(PanelTile panelTile) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
+        BlockPos blockPos = panelTile.getBlockPos();
+        if (player != null) {
+            if (panelTile.getBlockPos().closerThan(player.position(), 4.0d)) {
+                BlockRayTraceResult blockHitResult = panelTile.getPlayerCollisionHitResult(player);
+                PanelCellPos cellPos1 = PosInPanelCell.fromHitVec(panelTile, panelTile.getBlockPos(), blockHitResult);
+                panelTile.panelCellHovering = cellPos1;
 
-        if (player!=null && PanelBlock.isPanelCellItem(player.getMainHandItem().getItem())) {
+                if (panelTile.getBlockPos().closerThan(player.position(), 2.0d)) {
 
-            RayTraceResult lookingAt = Minecraft.getInstance().hitResult;
+                    if (PanelBlock.isPanelCellItem(player.getMainHandItem().getItem())) {
+                        if (cellPos1 != null) {
+                            PanelCellPos cellPos = cellPos1;
+                            if (cellPos.getIPanelCell() != null && (!cellPos.getIPanelCell().hasActivation() || player.isCrouching())) {
+                                cellPos = cellPos.offset(panelTile.getSideFromDirection(blockHitResult.getDirection()));
+                            }
+                            if (cellPos != null && cellPos.getIPanelCell() == null) {
+                                try {
+                                    IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getMainHandItem().getItem()).getConstructors()[0].newInstance();
+                                    Side rotationLock = RotationLock.getRotationLock();
+                                    Side cellFacing = rotationLock == null ?
+                                            panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()))
+                                            : rotationLock;
 
-            if (lookingAt != null && lookingAt.getType() == RayTraceResult.Type.BLOCK) {
-
-                Vector3d lookVector = Minecraft.getInstance().hitResult.getLocation();
-                BlockPos blockPos = new BlockPos(lookVector);
-                TileEntity te = world.getBlockEntity(blockPos);
-                if (te == panelTile) {
-                    BlockRayTraceResult result = Registration.REDSTONE_WRENCH.get().getBlockRayTraceResult(world, player);
-
-                    PanelCellPos cellPos =  PosInPanelCell.fromHitVec(panelTile,panelTile.getBlockPos(),result);
-                    if (cellPos!=null) {
-                        if (cellPos.getIPanelCell()!=null && (!cellPos.getIPanelCell().hasActivation() || player.isCrouching()))
-                        {
-                            cellPos = cellPos.offset(panelTile.getSideFromDirection(result.getDirection()));
-                        }
-                        if (cellPos!=null && cellPos.getIPanelCell()==null) {
-                            try {
-                                IPanelCell panelCell = (IPanelCell) PanelBlock.getPanelCellClassFromItem(player.getMainHandItem().getItem()).getConstructors()[0].newInstance();
-                                if (panelCell.needsSolidBase())
-                                {
-                                    PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
-                                    if (basePos!=null && (basePos.getIPanelCell()==null || !basePos.getIPanelCell().isPushable()))
-                                    {
-                                        return null;
+                                    if (panelCell.needsSolidBase()) {
+                                        PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
+                                        if (basePos!=null && (basePos.getIPanelCell()==null || !basePos.getIPanelCell().isPushable()))
+                                        {
+                                            return null;
+                                        }
                                     }
+
+                                    panelCell.onPlace(cellPos, player);
+                                    return PanelCellGhostPos.fromPosInPanelCell(
+                                            cellPos,
+                                            panelCell,
+                                            cellFacing
+                                    );
+                                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                                    TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());
                                 }
-                                Side rotationLock = RotationLock.getRotationLock();
-                                panelCell.onPlace(cellPos,player);
-                                return PanelCellGhostPos.fromPosInPanelCell(
-                                        cellPos,
-                                        panelCell,
-                                        rotationLock == null ?
-                                                panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, panelCell.canPlaceVertical()))
-                                                : rotationLock
-                                );
-                            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                                TinyRedstone.LOGGER.error("Exception thrown when attempting to draw ghost cell: " + e.getMessage());
                             }
                         }
+                    }
+
+                    //if we are not rendering a ghost component, check if we are hovering over a tiny redstone dust
+                    PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, blockPos, blockHitResult);
+                    if (posInPanelCell != null && posInPanelCell.getIPanelCell() instanceof RedstoneDust) {
+                        PanelCellSegment segmentHovering = posInPanelCell.getSegment();
+                        return PanelCellGhostPos.fromPosInPanelCell(
+                                posInPanelCell,
+                                new GhostRenderer(segmentHovering),
+                                posInPanelCell.getCellFacing()
+                        );
+
                     }
                 }
             }
         }
         return null;
     }
-
 
 }

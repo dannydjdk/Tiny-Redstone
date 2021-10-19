@@ -25,10 +25,10 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.CheckForNull;
@@ -57,6 +57,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private boolean flagUpdate = false;
     private boolean flagSync = true;
     protected PanelCellGhostPos panelCellGhostPos;
+    protected PanelCellPos panelCellHovering;
     private VoxelShape voxelShape = null;
 
     //for backward compat. Remove on next major update (2.x.x).
@@ -1206,42 +1207,50 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             if (!isCovered()) {
                 for (Integer index : cells.keySet()) {
                     PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
-                    IPanelCell cell = cellPos.getIPanelCell();
-                    if (cell != null) {
-                        PanelCellVoxelShape cellShape = cell.getShape();
-                        float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
-                        float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
-                        float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
-                        float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
-                        float levelStart = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
-                        float levelEnd = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
-
-                        switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
-                            case UP:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, 16 - levelStart, 16 - columnStart, rowEnd, 16 - levelEnd, 16 - columnEnd));
-                                break;
-                            case NORTH:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, 16 - columnStart, levelStart, rowEnd, 16 - columnEnd, levelEnd));
-                                break;
-                            case EAST:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(16 - levelStart, rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd));
-                                break;
-                            case SOUTH:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd, 16 - levelEnd));
-                                break;
-                            case WEST:
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(levelStart, 16 - rowStart, columnStart, levelEnd, 16 - rowEnd, columnEnd));
-                                break;
-                            default: //DOWN
-                                voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
-                        }
-                    }
+                    VoxelShape cellVoxelShape = getCellVoxelShape(cellPos);
+                    if (cellVoxelShape!=null)
+                        voxelShape = VoxelShapes.or(voxelShape,cellVoxelShape);
                 }
             }
         }
 
         return voxelShape;
     }
+
+    @CheckForNull
+    public VoxelShape getCellVoxelShape(PanelCellPos cellPos)
+    {
+        if (cellPos!=null)
+        {
+            IPanelCell cell = cellPos.getIPanelCell();
+            if (cell != null) {
+                PanelCellVoxelShape cellShape = cell.getShape();
+                float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
+                float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
+                float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
+                float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
+                float levelStart = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
+                float levelEnd = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
+
+                switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
+                    case UP:
+                        return Block.box(rowStart, 16 - levelEnd, 16 - columnEnd, rowEnd, 16 - levelStart, 16 - columnStart);
+                    case NORTH:
+                        return Block.box(rowStart, 16 - columnEnd, levelStart, rowEnd, 16 - columnStart, levelEnd);
+                    case EAST:
+                        return Block.box(16 - levelEnd, rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd);
+                    case SOUTH:
+                        return Block.box(rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd, 16 - levelStart);
+                    case WEST:
+                        return Block.box(levelStart, 16 - rowEnd, columnStart, levelEnd, 16 - rowStart, columnEnd);
+                    default: //DOWN
+                        return Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd);
+                }
+            }
+        }
+        return null;
+    }
+
     public void clearVoxelShape()
     {
         voxelShape=null;
@@ -1252,6 +1261,19 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             PanelCellPos pos = PanelCellPos.fromIndex(this, index);
             pos.getIPanelCell().onRemove(pos);
         }
+    }
+
+    public BlockRayTraceResult getPlayerCollisionHitResult(PlayerEntity player) {
+        float xRotation = player.xRot;
+        float yRotation = player.yRot;
+        Vector3d eyePosition = player.getEyePosition(1f);
+        float v = -MathHelper.cos(-xRotation * ((float)Math.PI / 180F));
+        float x = (MathHelper.sin(-yRotation * ((float)Math.PI / 180F) - (float)Math.PI)) * v;
+        float y = MathHelper.sin(-xRotation * ((float)Math.PI / 180F));
+        float z = (MathHelper.cos(-yRotation * ((float)Math.PI / 180F) - (float)Math.PI)) * v;
+        double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue();;
+        Vector3d vec31 = eyePosition.add((double)x * reachDistance, (double)y * reachDistance, (double)z * reachDistance);
+        return level.clip(new RayTraceContext(eyePosition, vec31, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.ANY, player));
     }
 }
 
