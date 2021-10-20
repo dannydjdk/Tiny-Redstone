@@ -10,6 +10,7 @@ import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -125,9 +126,13 @@ public class PanelBlock extends Block {
                             cellShape
                     );
             }
-            return getCollisionShape(state, source, pos, context);
         }
-        return BASE.get(state.getValue(BlockStateProperties.FACING));
+        return getCollisionShape(state, source, pos, context);
+    }
+
+    @Override
+    public VoxelShape getOcclusionShape(BlockState p_60578_, IBlockReader p_60579_, BlockPos p_60580_) {
+        return getCollisionShape(p_60578_,p_60579_,p_60580_,ISelectionContext.empty());
     }
 
     @Override
@@ -137,9 +142,13 @@ public class PanelBlock extends Block {
         {
             return ((PanelTile) te).getVoxelShape();
         }
-        return BASE.get(state.getValue(BlockStateProperties.FACING));
+        return VoxelShapes.empty();
     }
 
+    @Override
+    public BlockRenderType getRenderShape(BlockState p_149645_1_) {
+        return BlockRenderType.INVISIBLE;
+    }
 
     /**
      * This block can provide redstone power
@@ -323,17 +332,19 @@ public class PanelBlock extends Block {
         TileEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) te;
-            PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), panelTile.getPlayerCollisionHitResult(player));
-            IPanelCell cell = panelTile.getIPanelCell(panelCellPos);
-            if (cell != null) {
-                ItemStack itemStack = panelCellItemMap.get(cell.getClass()).getDefaultInstance();
-                CompoundNBT itemTag = cell.getItemTag();
-                if (itemTag!=null){
-                    for (String key : itemTag.getAllKeys()){
-                        itemStack.addTagElement(key,itemTag.get(key));
+            if (!panelTile.isCovered()) {
+                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), panelTile.getPlayerCollisionHitResult(player));
+                IPanelCell cell = panelTile.getIPanelCell(panelCellPos);
+                if (cell != null) {
+                    ItemStack itemStack = panelCellItemMap.get(cell.getClass()).getDefaultInstance();
+                    CompoundNBT itemTag = cell.getItemTag();
+                    if (itemTag != null) {
+                        for (String key : itemTag.getAllKeys()) {
+                            itemStack.addTagElement(key, itemTag.get(key));
+                        }
                     }
+                    return itemStack;
                 }
-                return itemStack;
             }
         }
         ItemStack itemStack = getItemWithNBT(world, pos, state);
@@ -393,7 +404,9 @@ public class PanelBlock extends Block {
                             Object panelCoverObject = itemPanelCoverMap.get(heldItem).getConstructors()[0].newInstance();
                             if (panelCoverObject instanceof IPanelCover) {
                                 panelTile.panelCover = (IPanelCover) panelCoverObject;
+                                ((IPanelCover) panelCoverObject).onPlace(panelTile,player);
                                 panelTile.flagLightUpdate = true;
+                                panelTile.clearVoxelShape();
 
                                 //do one last sync after covering panel
                                 if (!world.isClientSide)
@@ -592,6 +605,12 @@ public class PanelBlock extends Block {
             if (!player.isCreative()) {
                 Item item = panelCoverItemMap.get(panelTile.panelCover.getClass());
                 ItemStack itemStack = new ItemStack(item);
+                CompoundNBT coverTag = panelTile.panelCover.getItemTag();
+                if (coverTag!=null) {
+                    for (String key : coverTag.getAllKeys()) {
+                        itemStack.addTagElement(key, coverTag.get(key));
+                    }
+                }
                 ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY()+.5, pos.getZ(), itemStack);
                 world.addFreshEntity(itemEntity);
                 itemEntity.setPos(player.getX(),player.getY(),player.getZ());
@@ -599,7 +618,7 @@ public class PanelBlock extends Block {
 
             //remove from panel
             panelTile.panelCover = null;
-
+            panelTile.clearVoxelShape();
             panelTile.flagSync();
 
         }

@@ -6,6 +6,7 @@ import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -14,14 +15,10 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 import javax.annotation.CheckForNull;
@@ -37,11 +34,11 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
         super(rendererDispatcherIn);
     }
 
-    private float scale = 0.125f;
-    private float t2X = 0.0f;
-    private float t2Y = -1.0f;
-    private float t2Z = 0.0f;
-    private float rotation1 = 270f;
+    private static final float scale = 0.125f;
+    private static final float t2X = 0.0f;
+    private static final float t2Y = -1.0f;
+    private static final float t2Z = 0.0f;
+    private static final float rotation1 = 270f;
 
 
     private double cellSize = 1d/8d;
@@ -75,6 +72,8 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                 matrixStack.translate(-1,0,0);
                 break;
         }
+        TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
+        IVertexBuilder builder = buffer.getBuffer(RenderType.solid());
         if (tileEntity.isCovered())
         {
             matrixStack.pushPose();
@@ -82,10 +81,38 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             matrixStack.popPose();
         }
         else {
+            int color = tileEntity.getColor();
+            matrixStack.pushPose();
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
+            matrixStack.translate(0, -1, 0.125);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.translate(0, -0.125, 0);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+            matrixStack.translate(0, 0, 1);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+            matrixStack.translate(0, 0, 1);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+            matrixStack.translate(0, 0, 1);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.translate(0, -1, 0);
+            RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
+
+            matrixStack.popPose();
+
             List<PanelCellPos> positions = tileEntity.getCellPositions();
             for (PanelCellPos pos : positions) {
                 IPanelCell panelCell = pos.getIPanelCell();
-                if (panelCell!=null) {
+                if (panelCell != null) {
                     renderCell(matrixStack, pos, buffer, (tileEntity.isCrashed()) ? 0 : combinedLight, combinedOverlay, (tileEntity.isCrashed()) ? 0.5f : 1.0f);
                 }
             }
@@ -101,7 +128,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             matrixStack.translate(0, 0.126, 1);
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
 
-            TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
+            sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
             RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
             matrixStack.popPose();
         }

@@ -139,8 +139,12 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         compoundNBT.put("cells", cellsNBT);
         if(this.Color!=DyeColor.GRAY.getColorValue())
             compoundNBT.putInt("color", this.Color);
-        if (panelCover!=null)
-            compoundNBT.putString("cover",panelCover.getClass().getCanonicalName());
+        if (panelCover!=null) {
+            compoundNBT.putString("cover", panelCover.getClass().getCanonicalName());
+            CompoundNBT coverData = panelCover.writeNBT();
+            if (coverData!=null)
+                compoundNBT.put("coverData",coverData);
+        }
 
         return compoundNBT;
     }
@@ -227,6 +231,9 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         {
             try {
                 panelCover= (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
+                if (parentNBTTagCompound.contains("coverData")){
+                    panelCover.readNBT(parentNBTTagCompound.getCompound("coverData"));
+                }
             } catch (Exception exception) {
                 TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class " + coverClass +
                         ": " + exception.getMessage() + " " + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
@@ -299,11 +306,16 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         try {
             if (!flagCrashed) {
                 if (level.isClientSide) {
-                    PanelCellGhostPos gPos = PanelTileRenderer.getPlayerLookingAtCell(this);
-                    if (gPos != null)
-                        gPos.getPanelTile().panelCellGhostPos = gPos;
-                    else
+                    if (this.isCovered()) {
                         this.panelCellGhostPos = null;
+                        this.panelCellHovering = null;
+                    } else {
+                        PanelCellGhostPos gPos = PanelTileRenderer.getPlayerLookingAtCell(this);
+                        if (gPos != null)
+                            gPos.getPanelTile().panelCellGhostPos = gPos;
+                        else
+                            this.panelCellGhostPos = null;
+                    }
                 }else{
                     boolean dirty = false;
                     //backward compatibility. Remove on major update (2.x.x).
@@ -1181,39 +1193,65 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
     public VoxelShape getVoxelShape(){
 
-        if (isCovered())return VoxelShapes.block();
-
         if (voxelShape==null) {
-            switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
-                case UP:
-                    voxelShape = Block.box(0, 16, 0, 16, 14, 16);
-                    break;
-                case NORTH:
-                    voxelShape = Block.box(0, 0, 0, 16, 16, 2);
-                    break;
-                case EAST:
-                    voxelShape = Block.box(16, 0, 0, 14, 16, 16);
-                    break;
-                case SOUTH:
-                    voxelShape = Block.box(0, 0, 16, 16, 16, 14);
-                    break;
-                case WEST:
-                    voxelShape = Block.box(0, 0, 0, 2, 16, 16);
-                    break;
-                default: //DOWN
-                    voxelShape = Block.box(0, 0, 0, 16, 2, 16);
-            }
+            if (isCovered()) {
+                VoxelShape coverShape = panelCover.getShape();
+                if (VoxelShapes.block().equals(coverShape) || this.getBlockState().getValue(BlockStateProperties.FACING) == Direction.DOWN)
+                    voxelShape = coverShape;
+                else {
+                    VoxelShape[] buff = new VoxelShape[]{VoxelShapes.empty()};
+                    switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
+                        case UP:
+                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = VoxelShapes.box(minX, 1 - maxY, 1 - maxZ, maxX, 1 - minY, 1 - minZ));
+                            voxelShape = buff[0];
+                            break;
+                        case NORTH:
+                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = VoxelShapes.box(minX, 1 - maxZ, minY, maxX, 1 - minZ, maxY));
+                            voxelShape = buff[0];
+                            break;
+                        case EAST:
+                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = VoxelShapes.box(1 - maxY, minX, minZ, 1 - minY, maxX, maxZ));
+                            voxelShape = buff[0];
+                            break;
+                        case SOUTH:
+                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = VoxelShapes.box(minX, minZ, 1 - maxY, maxX, maxZ, 1 - minY));
+                            voxelShape = buff[0];
+                            break;
+                        case WEST:
+                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = VoxelShapes.box(minY, 1 - maxX, minZ, maxY, 1 - minX, maxZ));
+                            voxelShape = buff[0];
+                            break;
+                    }
+                }
+            } else {
+                switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
+                    case UP:
+                        voxelShape = Block.box(0, 16, 0, 16, 14, 16);
+                        break;
+                    case NORTH:
+                        voxelShape = Block.box(0, 0, 0, 16, 16, 2);
+                        break;
+                    case EAST:
+                        voxelShape = Block.box(16, 0, 0, 14, 16, 16);
+                        break;
+                    case SOUTH:
+                        voxelShape = Block.box(0, 0, 16, 16, 16, 14);
+                        break;
+                    case WEST:
+                        voxelShape = Block.box(0, 0, 0, 2, 16, 16);
+                        break;
+                    default: //DOWN
+                        voxelShape = Block.box(0, 0, 0, 16, 2, 16);
+                }
 
-            if (!isCovered()) {
                 for (Integer index : cells.keySet()) {
                     PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
                     VoxelShape cellVoxelShape = getCellVoxelShape(cellPos);
-                    if (cellVoxelShape!=null)
-                        voxelShape = VoxelShapes.or(voxelShape,cellVoxelShape);
+                    if (cellVoxelShape != null)
+                        voxelShape = VoxelShapes.or(voxelShape, cellVoxelShape);
                 }
             }
         }
-
         return voxelShape;
     }
 
