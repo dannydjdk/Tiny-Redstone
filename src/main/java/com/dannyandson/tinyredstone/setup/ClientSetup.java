@@ -66,6 +66,7 @@ public class ClientSetup {
         event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
         event.addSprite(TransparentBlock.TEXTURE_TRANSPARENT_BLOCK);
         event.addSprite(GhostRenderer.TEXTURE_REDSTONE_DUST_SEGMENT_GHOST);
+        event.addSprite(TinyBlock.TEXTURE_GRASS_BLOCK_TOP);
 
         event.addSprite(LightCover.TEXTURE_LIGHT_COVER);
         event.addSprite(DarkCover.TEXTURE_DARK_COVER);

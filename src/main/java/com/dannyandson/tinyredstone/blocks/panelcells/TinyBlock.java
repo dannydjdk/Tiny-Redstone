@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IColorablePanelCell;
 import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
@@ -20,6 +21,7 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider {
 
+    public static final ResourceLocation TEXTURE_GRASS_BLOCK_TOP = new ResourceLocation(TinyRedstone.MODID, "block/grass_block_top");
     public static ResourceLocation TEXTURE_TINY_BLOCK = new ResourceLocation("minecraft","block/white_wool");
 
     protected int weakSignalStrength = 0;
