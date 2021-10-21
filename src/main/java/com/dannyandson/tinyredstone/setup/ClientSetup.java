@@ -72,6 +72,7 @@ public class ClientSetup {
         event.addSprite(DarkCover.TEXTURE_DARK_COVER);
 
         event.addSprite(ToolbarOverlay.TEXTURE_ROTATION_LOCK);
+        event.addSprite(TinyBlock.TEXTURE_GRASS_BLOCK_TOP);
     }
 
 

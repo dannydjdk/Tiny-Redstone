@@ -27,6 +27,9 @@
     "minecraft:smooth_red_sandstone": {
       "texture": "minecraft:red_sandstone_top"
     },
+    "minecraft:grass_block": {
+      "texture_top": "tinyredstone:grass_block_top"
+    },
     "minecraft:note_block": {
       "type": "disabled"
     },

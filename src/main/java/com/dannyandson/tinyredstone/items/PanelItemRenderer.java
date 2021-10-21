@@ -59,32 +59,7 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
                 }
             }
             else {
-                matrixStack.pushPose();
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
-                matrixStack.translate(0,-1,0.125);
-                drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
-
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-                matrixStack.translate(0,-0.125,0);
-                drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
-
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-                matrixStack.translate(0,0,1);
-                drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
-
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-                matrixStack.translate(0,0,1);
-                drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
-
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
-                matrixStack.translate(0,0,1);
-                drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
-
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
-                matrixStack.translate(0,-1,0);
-                drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
-
-                matrixStack.popPose();
+                renderBase(matrixStack,builder,sprite,combinedLight,color);
 
                 CompoundTag cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
                 for (Integer i = 0; i < 448; i++) {
@@ -108,12 +83,42 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
                     }
                 }
             }
+        } else {
+            renderBase(matrixStack,builder,sprite,combinedLight,color);
         }
 
         matrixStack.popPose();
 
     }
 
+    private void renderBase(PoseStack matrixStack, VertexConsumer builder, TextureAtlasSprite sprite, int combinedLight, int color){
+        matrixStack.pushPose();
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
+        matrixStack.translate(0,-1,0.125);
+        drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
+
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.translate(0,-0.125,0);
+        drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
+
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
+
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
+
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.translate(0,0,1);
+        drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
+
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.translate(0,-1,0);
+        drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
+
+        matrixStack.popPose();
+    }
     private void renderCell(PoseStack matrixStack, Integer index, IPanelCell panelCell, Direction cellDirection, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
     {
         float scale = 0.125f;
