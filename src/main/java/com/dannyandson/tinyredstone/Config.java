@@ -3,6 +3,10 @@ package com.dannyandson.tinyredstone;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Mod.EventBusSubscriber
 public class Config {
     public static ForgeConfigSpec SERVER_CONFIG;
@@ -15,6 +19,7 @@ public class Config {
     public static ForgeConfigSpec.BooleanValue JSON_BLUEPRINT;
     public static ForgeConfigSpec.IntValue SUPER_REPEATER_MAX;
     public static ForgeConfigSpec.IntValue CIRCUIT_MAX_ITERATION;
+    public static ForgeConfigSpec.ConfigValue<List<String>> REDSTONE_WIRE_LIST;
 
     static {
 
@@ -41,6 +46,10 @@ public class Config {
                 "\n(Since each repeater can extend signal 2 full blocks.)" +
                 "\nVery large numbers may degrade performance and potentially risk crash. (default=32)")
                 .defineInRange("max_zero_tick_run",32,4,512);
+
+        List<String> redstoneWires = new ArrayList<>(Arrays.asList("block.redstonepen.track", "block.cb_multipart.multipart"));
+        REDSTONE_WIRE_LIST = SERVER_BUILDER.comment("List of blocks from other mods to be treated as redstone wire.")
+                        .define("redstone_wires",redstoneWires);
 
         SERVER_BUILDER.pop();
 

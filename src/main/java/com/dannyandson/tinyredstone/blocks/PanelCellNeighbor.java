@@ -1,9 +1,12 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
+import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 public class PanelCellNeighbor {
@@ -66,7 +69,20 @@ public class PanelCellNeighbor {
         }
         else if (blockPos!=null)
         {
-            return panelTile.getLevel().getDirectSignal(blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            int signal = panelTile.getLevel().getDirectSignal(blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            if (signal<15 && Config.REDSTONE_WIRE_LIST.get().contains(getNeighborBlockState().getBlock().getDescriptionId()))
+                signal = getWeakRsOutput();
+            if (signal<15) {
+                for (Direction direction : new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST}) {
+                    BlockPos neighborNeighborPos = blockPos.relative(direction);
+                    BlockState neighborNeighborState = panelTile.getLevel().getBlockState(neighborNeighborPos);
+                    if (neighborNeighborState.getBlock() != Blocks.REDSTONE_WIRE && neighborNeighborState.getBlock() != Registration.REDSTONE_PANEL_BLOCK.get()) {
+                        signal = Math.max(signal, panelTile.getLevel().getDirectSignal(neighborNeighborPos, direction));
+                    }
+                    if (signal >= 15) return signal;
+                }
+            }
+            return signal;
         }
         return 0;
     }
@@ -82,7 +98,7 @@ public class PanelCellNeighbor {
     public int getComparatorOverride()
     {
         if (blockPos!=null && hasComparatorOverride())
-            return getNeighborBlockState().getAnalogOutputSignal(panelTile.getLevel(), blockPos);;
+            return getNeighborBlockState().getAnalogOutputSignal(panelTile.getLevel(), blockPos);
         return 0;
     }
 
@@ -94,8 +110,10 @@ public class PanelCellNeighbor {
     public boolean powerDrops() {
         if (iPanelCell!=null)
             return iPanelCell.powerDrops();
-        if(blockPos!=null)
-            return getNeighborBlockState().getBlock() == Blocks.REDSTONE_WIRE;
+        if(blockPos!=null) {
+            return getNeighborBlockState().getBlock() == Blocks.REDSTONE_WIRE ||
+                    Config.REDSTONE_WIRE_LIST.get().contains(getNeighborBlockState().getBlock().getDescriptionId());
+        }
         return false;
     }
 
@@ -116,7 +134,7 @@ public class PanelCellNeighbor {
     public boolean canConnectRedstone()
     {
         BlockState blockState = getNeighborBlockState();
-        if (blockState!=null)
+        if (blockState!=null && !Config.REDSTONE_WIRE_LIST.get().contains(getNeighborBlockState().getBlock().getDescriptionId()))
             return blockState.canConnectRedstone(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
         if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;

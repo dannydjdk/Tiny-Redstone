@@ -213,7 +213,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
         if (w>input)
         {
             if (neighbor.canConnectRedstone())
-                input=neighbor.getWeakRsOutput();
+                input=w;
         }
         return input;
     }
