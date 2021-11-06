@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -23,6 +24,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ClientSetup {
+
+    public static final ResourceLocation TRANSPARENT_TEXTURE_LOC = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     public static void init(final FMLClientSetupEvent event)
     {
@@ -34,7 +37,7 @@ public class ClientSetup {
 
     @SubscribeEvent
     public static void onRegisterRenderer(EntityRenderersEvent.RegisterRenderers event){
-        TinyRedstone.LOGGER.info("Registering Renderer for Redstone Panel block entity.", Registration.REDSTONE_PANEL_BLOCK.get());
+        TinyRedstone.LOGGER.debug("Registering Renderer for Redstone Panel block entity.", Registration.REDSTONE_PANEL_BLOCK.get());
         event.registerBlockEntityRenderer(Registration.REDSTONE_PANEL_TILE.get(), PanelTileRenderer::new);
     }
 
@@ -50,11 +53,7 @@ public class ClientSetup {
 
         event.addSprite(Repeater.TEXTURE_REPEATER_ON);
         event.addSprite(Repeater.TEXTURE_REPEATER_OFF);
-        event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST);
-        event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_OFF);
         event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT);
-        event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_ON);
-        event.addSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
         event.addSprite(Torch.TEXTURE_TORCH_ON);
         event.addSprite(Torch.TEXTURE_TORCH_OFF);
         event.addSprite(Torch.TEXTURE_TORCH_TOP_ON);
@@ -64,8 +63,7 @@ public class ClientSetup {
         event.addSprite(Comparator.TEXTURE_COMPARATOR_OFF);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_ON);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_OFF);
-        event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
-        event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
+        event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_ON);
         event.addSprite(GhostRenderer.TEXTURE_REDSTONE_DUST_SEGMENT_GHOST);
 
         event.addSprite(LightCover.TEXTURE_LIGHT_COVER);
@@ -74,6 +72,5 @@ public class ClientSetup {
         event.addSprite(ToolbarOverlay.TEXTURE_ROTATION_LOCK);
         event.addSprite(TinyBlock.TEXTURE_GRASS_BLOCK_TOP);
     }
-
 
 }

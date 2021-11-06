@@ -22,11 +22,6 @@ import java.util.StringJoiner;
 
 public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_on");
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust_off");
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment_on");
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment_off");
-
     public static ResourceLocation TEXTURE_REDSTONE_DUST = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust");
     public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment");
 
@@ -37,6 +32,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
     private static final float s9 = 0.5625f;
     private static final float s10 = 0.625f;
 
+    protected static Float segmentU0=null, segmentU1=null, segmentV0=null, segmentV1=null, segmentU1b=null;
 
     protected int signalStrength = 0;
     protected boolean frontEnabled = true;
@@ -62,62 +58,73 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
         red = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         int color = RenderHelper.getColor(255,Math.round(red*255),0,0);
 
-        TextureAtlasSprite sprite_redstone_dust = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST);
-        TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
+        if (segmentU0==null) {
+            setTextureMapValues();
+        }
 
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
 
         matrixStack.translate(0,0,0.01);
-        RenderHelper.drawRectangle(builder,matrixStack,s6-.01f,s10+.01f,s6-.01f,s10+.01f,sprite_redstone_dust,combinedLight,color, alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,s6-.01f,s10+.01f,s6-.01f,s10+.01f,segmentU0,segmentU1b,segmentV0,segmentV1,combinedLight,color, alpha);
 
         if (rightEnabled) {
-            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
             if (crawlUpSide.contains(Side.RIGHT))
             {
                 matrixStack.pushPose();
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
                 matrixStack.translate(0,0,1.01);
-                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
                 matrixStack.popPose();
             }
         }
         if (leftEnabled) {
-            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
             if (crawlUpSide.contains(Side.LEFT))
             {
                 matrixStack.pushPose();
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,0.01);
-                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
                 matrixStack.popPose();
             }
         }
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         if (frontEnabled) {
-            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
             if (crawlUpSide.contains(Side.FRONT))
             {
                 matrixStack.pushPose();
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
                 matrixStack.translate(0,0,1.01);
-                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
                 matrixStack.popPose();
             }
         }
         if (backEnabled) {
-            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
             if (crawlUpSide.contains(Side.BACK))
             {
                 matrixStack.pushPose();
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,.01);
-                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color,alpha);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
                 matrixStack.popPose();
             }
         }
 
 
+    }
+
+    public static void setTextureMapValues()
+    {
+        TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
+        segmentU0 = sprite_redstone_segment.getU0();
+        segmentU1 = segmentU0 + ((sprite_redstone_segment.getU1()-segmentU0)*7/16);
+        segmentU1b = segmentU0 + ((sprite_redstone_segment.getU1()-segmentU0)/8);
+        segmentV0 = sprite_redstone_segment.getV0();
+        segmentV1 = segmentV0 + ((sprite_redstone_segment.getV1()-segmentV0)/8);
     }
 
     /**

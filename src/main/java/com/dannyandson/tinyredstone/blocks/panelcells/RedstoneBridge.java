@@ -42,55 +42,56 @@ public class RedstoneBridge extends RedstoneDust {
         int color1 = RenderHelper.getColor(255,Math.round(red1*255),0,0);
         int color2 = RenderHelper.getColor(255,Math.round(red2*255),0,0);
 
-        TextureAtlasSprite sprite_redstone_dust = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST);
-        TextureAtlasSprite sprite_redstone_segment = RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT);
+        if (segmentU0==null) {
+            setTextureMapValues();
+        }
 
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
 
         matrixStack.translate(0,0,0.05);
-        RenderHelper.drawRectangle(builder,matrixStack,s6-.05f,s10+.05f,s6-.05f,s10+.05f,sprite_redstone_dust,combinedLight,0xFF888888, alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,s6-.05f,s10+.05f,s6-.05f,s10+.05f,segmentU0,segmentU1b,segmentV0,segmentV1,combinedLight,0xFF888888, alpha);
         matrixStack.translate(0,0,-.04);
 
         if (rightEnabled) {
-            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color1,alpha);
             if (crawlUpSide.contains(Side.RIGHT))
             {
                 matrixStack.pushPose();
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
                 matrixStack.translate(0,0,1.01);
-                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color1,alpha);
                 matrixStack.popPose();
             }        }
         if (leftEnabled) {
-            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color1,alpha);
             if (crawlUpSide.contains(Side.LEFT))
             {
                 matrixStack.pushPose();
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,0.01);
-                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color1,alpha);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color1,alpha);
                 matrixStack.popPose();
             }       }
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         if (frontEnabled) {
-            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color2,alpha);
             if (crawlUpSide.contains(Side.FRONT))
             {
                 matrixStack.pushPose();
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
                 matrixStack.translate(0,0,1.01);
-                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color2,alpha);
                 matrixStack.popPose();
             }       }
         if (backEnabled) {
-            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,-.01f,s6,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color2,alpha);
             if (crawlUpSide.contains(Side.BACK))
             {
                 matrixStack.pushPose();
                 matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,.01);
-                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,sprite_redstone_segment,combinedLight,color2,alpha);
+                RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color2,alpha);
                 matrixStack.popPose();
             }        }
 

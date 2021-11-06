@@ -106,6 +106,7 @@ public class Blueprint extends Item {
                             }
                         }
                     }
+                    panelTile.removeOutOfRange(player);
                 }
             }
             else {

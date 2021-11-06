@@ -41,16 +41,20 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = this.getRepeaterTexture();
-        TextureAtlasSprite sprite_torch_head = RenderHelper.getSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_ON);
+        TextureAtlasSprite sprite_torch_head = RenderHelper.getSprite(Torch.TEXTURE_TORCH_TOP_ON);
 
 
         if (!this.output){
-            sprite_torch_head = RenderHelper.getSprite(RedstoneDust.TEXTURE_REDSTONE_DUST_SEGMENT_OFF);
+            sprite_torch_head = RenderHelper.getSprite(Torch.TEXTURE_TORCH_TOP_OFF);
         }
 
         if (locked)
             sprite_torch_head=RenderHelper.getSprite(new ResourceLocation("minecraft","block/bedrock"));
 
+        float tU0 = sprite_torch_head.getU0();
+        float tU1 = tU0 + ((sprite_torch_head.getU1()-tU0)/8);
+        float tV0 = sprite_torch_head.getV0();
+        float tV1 = tV0 + ((sprite_torch_head.getV1()-tV0)/8);
 
         matrixStack.translate(0,0,0.25);
 
@@ -65,18 +69,18 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         if (ticks>8) {
             matrixStack.pushPose();
             matrixStack.translate(0, 0, 0.01);
-            RenderHelper.drawRectangle(builder,matrixStack,0.25f,0.75f,0.125f,0.25f,sprite_torch_head,combinedLight,alpha);
+            RenderHelper.drawRectangle(builder,matrixStack,0.25f,0.75f,0.125f,0.25f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
             matrixStack.popPose();
         }
 
         matrixStack.pushPose();
         //draw static torch top
         matrixStack.translate(0,0,0.125);
-        RenderHelper.drawRectangle(builder,matrixStack,0.4375f,0.5625f,0.75f,0.875f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0.4375f,0.5625f,0.75f,0.875f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         //draw moving torch top
         float torch2Y = (ticks<8)? 0.75f - ticks.floatValue()*0.0625f : 0.25f;
-        RenderHelper.drawRectangle(builder,matrixStack,0.4375f,0.5625f,torch2Y-0.125f,torch2Y,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0.4375f,0.5625f,torch2Y-0.125f,torch2Y,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.popPose();
 
@@ -88,11 +92,11 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.pushPose();
         //draw static torch side
         matrixStack.translate(.4375f,.25,-0.75f);
-        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         //draw moving torch side
         matrixStack.translate(0,0,.875-torch2Y);
-        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.popPose();
 
@@ -104,11 +108,11 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.pushPose();
         //draw static torch side
         matrixStack.translate(.75,0.25f,-.4375f);
-        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         //draw moving torch side
         matrixStack.translate(torch2Y-.875,0,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.popPose();
 
@@ -119,11 +123,11 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.pushPose();
         //draw static torch front
         matrixStack.translate(.4375f,.25,-0.125f);
-        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         //draw moving torch front
         matrixStack.translate(0,0,torch2Y-.875);
-        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.popPose();
 
@@ -136,11 +140,11 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.pushPose();
         //draw static torch side
         matrixStack.translate(.125,0.25f,-.4375f);
-        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         //draw moving torch side
         matrixStack.translate(.875-torch2Y,0,0);
-        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,sprite_torch_head,combinedLight,alpha);
+        RenderHelper.drawRectangle(builder,matrixStack,0,0.125f,0,0.125f,tU0,tU1,tV0,tV1,combinedLight,0xFFFFFFFF,alpha);
 
         matrixStack.popPose();
 

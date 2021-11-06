@@ -45,7 +45,9 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
 
         if (stack.getTag() !=null && stack.getTag().contains("BlockEntityTag")) {
 
-            if (stack.getTag().getCompound("BlockEntityTag").contains("cover")) {
+            CompoundTag itemTag = stack.getTag().getCompound("BlockEntityTag");
+
+            if (itemTag.contains("cover")) {
                 String coverClass = stack.getTag().getCompound("BlockEntityTag").getString("cover");
                 try {
                     IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
@@ -59,10 +61,13 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
                 }
             }
             else {
-                renderBase(matrixStack,builder,sprite,combinedLight,color);
+                boolean hasBase = itemTag.getBoolean("hasBase");
 
-                CompoundTag cellsNBT = stack.getTag().getCompound("BlockEntityTag").getCompound("cells");
-                for (Integer i = 0; i < 448; i++) {
+                if (hasBase)
+                    renderBase(matrixStack,builder,sprite,combinedLight,color);
+
+                CompoundTag cellsNBT = itemTag.getCompound("cells");
+                for (Integer i = 0; i < (hasBase?448:512); i++) {
                     if (cellsNBT.contains(i.toString())) {
                         CompoundTag cellNBT = cellsNBT.getCompound(i.toString());
 

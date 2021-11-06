@@ -23,7 +23,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -116,7 +115,13 @@ public class PanelBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        if(context.getItemInHand().getItem()==Registration.REDSTONE_PANEL_ITEM.get()) {
+        Boolean hasBase = context.getItemInHand().getItem()==Registration.REDSTONE_PANEL_ITEM.get();
+        if (context.getItemInHand().hasTag()) {
+            CompoundTag itemTag = context.getItemInHand().getTag().getCompound("BlockEntityTag");
+            if (!itemTag.getBoolean("hasBase"))
+                hasBase=false;
+        }
+        if(hasBase) {
             return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite()).setValue(Registration.HAS_PANEL_BASE, true);
         }
         return defaultBlockState().setValue(BlockStateProperties.FACING, DOWN).setValue(Registration.HAS_PANEL_BASE,false);
@@ -288,13 +293,12 @@ public class PanelBlock extends BaseEntityBlock {
     }
 
     private ItemStack getItemWithNBT(BlockGetter worldIn, BlockPos pos, BlockState state) {
-        BlockEntity tileentity = worldIn.getBlockEntity(pos);
-        if (tileentity instanceof PanelTile) {
-            PanelTile panelTile = (PanelTile) tileentity;
+        if (worldIn.getBlockEntity(pos) instanceof PanelTile panelTile) {
             ItemStack itemstack = getCloneItemStack(worldIn, pos, state);
-            CompoundTag compoundnbt = panelTile.saveToNbt(new CompoundTag());
-            if (!compoundnbt.isEmpty()) {
-                itemstack.addTagElement("BlockEntityTag", compoundnbt);
+            CompoundTag compoundNBT = panelTile.saveToNbt(new CompoundTag());
+            compoundNBT.putBoolean("hasBase",panelTile.hasBase());
+            if (!compoundNBT.isEmpty()) {
+                itemstack.addTagElement("BlockEntityTag", compoundNBT);
             }
             return itemstack;
         }
@@ -613,11 +617,6 @@ public class PanelBlock extends BaseEntityBlock {
             panelTile.removeCell(cellPos);
 
             panelTile.getBlockState().updateNeighbourShapes(world,pos,UPDATE_ALL);
-
-            if (!panelTile.hasBase() && panelTile.getCellCount()==0){
-                this.playerWillDestroy(world, pos, panelTile.getBlockState(), player);
-                if(!world.isClientSide) world.destroyBlock(pos, true);
-            }
 
         }
 

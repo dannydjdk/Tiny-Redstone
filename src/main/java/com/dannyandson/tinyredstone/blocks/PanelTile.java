@@ -291,6 +291,16 @@ public class PanelTile extends BlockEntity {
         clearVoxelShape();
     }
 
+    public void removeOutOfRange(Player player) {
+        if (hasBase()) {
+            List<Integer> indices = new ArrayList<>(cells.keySet());
+            for (int i : indices) {
+                if (i > 447)
+                    ((PanelBlock) this.getBlockState().getBlock()).removeCell(PanelCellPos.fromIndex(this, (Integer) i), player);
+            }
+        }
+    }
+
     public void tick() {
         try {
             if (!flagCrashed && !flagOverflow) {
@@ -354,6 +364,10 @@ public class PanelTile extends BlockEntity {
                     if (flagSync || dirty) {
                         sync();
                         flagSync = false;
+                    }
+
+                    if (cells.size()==0 && !hasBase()) {
+                        level.destroyBlock(worldPosition, true);
                     }
                 }
             }
@@ -1231,7 +1245,7 @@ public class PanelTile extends BlockEntity {
     public void removeAllCells(@Nullable Player player){
         Object[] indices = cells.keySet().toArray();
         for (Object index : indices){
-            ((PanelBlock)this.getBlockState().getBlock()).removeCell(PanelCellPos.fromIndex(this,(Integer) index),player);
+            ((PanelBlock)getBlockState().getBlock()).removeCell(PanelCellPos.fromIndex(this,(Integer) index),player);
         }
     }
 
