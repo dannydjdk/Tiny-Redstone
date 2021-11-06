@@ -1,10 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import com.dannyandson.tinyredstone.api.IColorablePanelCell;
-import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
-import com.dannyandson.tinyredstone.api.IPanelCell;
-import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -14,13 +11,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 
-public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider
-{
+public class TransparentBlock extends TinyBlock {
     public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation("minecraft","block/glass");
-    private ResourceLocation madeFrom;
     private TextureAtlasSprite sprite;
     private int color= 16777215;
 
@@ -37,30 +30,12 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
 
         VertexConsumer builder = buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent());
         if (sprite==null)
-            sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TRANSPARENT_BLOCK);
+            sprite =(madeFrom!=null)? Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.FRONT):RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
 
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         matrixStack.translate(-1, -1, 1);
         RenderHelper.drawCube(matrixStack,builder,sprite,combinedLight,color,alpha-.01f);
 
-    }
-
-    @Override
-    public boolean onPlace(PanelCellPos cellPos, Player player) {
-        ItemStack stack = ItemStack.EMPTY;
-        if (player.getUsedItemHand() != null)
-            stack = player.getItemInHand(player.getUsedItemHand());
-        if (stack == ItemStack.EMPTY)
-            stack = player.getMainHandItem();
-        if (stack.hasTag()) {
-            CompoundTag itemNBT = stack.getTag();
-            CompoundTag madeFromTag = itemNBT.getCompound("made_from");
-            if (madeFromTag.contains("namespace")) {
-                this.madeFrom = new ResourceLocation(madeFromTag.getString("namespace"), "block/" + madeFromTag.getString("path"));
-            }
-        }
-
-        return IPanelCell.super.onPlace(cellPos, player);
     }
 
     /**
@@ -101,16 +76,6 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
         return true;
     }
 
-    /**
-     * Can this cell be pushed by a piston?
-     *
-     * @return true if a piston can push this block
-     */
-    @Override
-    public boolean isPushable() {
-        return true;
-    }
-
     @Override
     public CompoundTag writeNBT() {
         CompoundTag nbt = new CompoundTag();
@@ -129,26 +94,4 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
             this.madeFrom = new ResourceLocation(compoundNBT.getString("made_from_namespace"), compoundNBT.getString("made_from_path"));
     }
 
-    @Override
-    public void setColor(int color) {
-        this.color=color;
-    }
-
-    @Override
-    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
-        overlayBlockInfo.setPowerOutput(0);
-    }
-
-    @Override
-    public CompoundTag getItemTag() {
-        if (this.madeFrom != null) {
-            CompoundTag madeFromTag = new CompoundTag();
-            madeFromTag.putString("namespace", this.madeFrom.getNamespace());
-            madeFromTag.putString("path", this.madeFrom.getPath().substring(6));
-            CompoundTag itemTag = new CompoundTag();
-            itemTag.put("made_from", madeFromTag);
-            return itemTag;
-        }
-        return null;
-    }
 }

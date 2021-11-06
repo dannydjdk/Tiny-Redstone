@@ -138,7 +138,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
         PanelCellNeighbor topNeighbor = cellPos.getNeighbor(Side.TOP);
         if (topNeighbor!=null) {
-            top = (topNeighbor.canConnectRedstone())? topNeighbor.getWeakRsOutput():topNeighbor.getStrongRsOutput();
+            top = (topNeighbor.canConnectRedstone())? topNeighbor.getWeakRsOutput():topNeighbor.getStrongRsOutputForWire();
             if (topNeighbor.getNeighborIPanelCell() instanceof TransparentBlock)
                 above = cellPos.offset(Side.TOP);
         }
@@ -148,7 +148,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
         PanelCellNeighbor bottomNeighbor = cellPos.getNeighbor(Side.BOTTOM);
         if (bottomNeighbor!=null) {
-            bottom = bottomNeighbor.getStrongRsOutput();
+            bottom = bottomNeighbor.getStrongRsOutputForWire();
         }
         below=cellPos.offset(Side.BOTTOM);
 
@@ -207,7 +207,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
     protected int getNeighborOutput(PanelCellNeighbor neighbor)
     {
-        int s = neighbor.getStrongRsOutput();
+        int s = neighbor.getStrongRsOutputForWire();
         int w = neighbor.getWeakRsOutput();
         int input=(neighbor.powerDrops())?s-1:s;
         if (w>input)

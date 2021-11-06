@@ -17,6 +17,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
@@ -107,5 +108,7 @@ public class Registration {
     public static final RegistryObject<Item> PANEL_COVER_TRIM = ITEMS.register("trim_panel_cover",PanelCellItem::new);
 
     public static final CodecTinyBlockOverrides TINY_BLOCK_OVERRIDES = new CodecTinyBlockOverrides("tiny_block_overrides", TinyBlockData.CODEC);
+
+    public static final BooleanProperty HAS_PANEL_BASE = BooleanProperty.create("has_panel_base");
 
 }

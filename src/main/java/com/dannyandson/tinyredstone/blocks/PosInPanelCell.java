@@ -86,7 +86,11 @@ public class PosInPanelCell extends PanelCellPos {
 
         Direction panelFacing = panelTile.getBlockState().getValue(BlockStateProperties.FACING);
         Direction rayTraceDirection = result.getDirection().getOpposite();
-        Vec3 hitVec = result.getLocation().add((double)rayTraceDirection.getStepX()*.001d,(double)rayTraceDirection.getStepY()*.001d,(double)rayTraceDirection.getStepZ()*.001d);
+        Vec3 hitVec;
+        if (pos.equals(result.getBlockPos()))
+            hitVec = result.getLocation().add((double)rayTraceDirection.getStepX()*.001d,(double)rayTraceDirection.getStepY()*.001d,(double)rayTraceDirection.getStepZ()*.001d);
+        else
+            hitVec=result.getLocation();
 
         double relX,relY,relZ;
 
@@ -122,8 +126,12 @@ public class PosInPanelCell extends PanelCellPos {
         }
 
 
-        if (relY<.125 && relY>.0625)
+        if (panelTile.hasBase() && relY<.125 && relY>.0625)
             relY+=.002f;
+        if (relX==1.0)relX=.99;
+        if (relZ==1.0)relZ=.99;
+        if (relY==1.0)relY=.99;
+
         PanelCellPos panelCellPos = PanelCellPos.fromCoordinates(panelTile, relX, relY,relZ);
         if(panelCellPos == null) return null;
 

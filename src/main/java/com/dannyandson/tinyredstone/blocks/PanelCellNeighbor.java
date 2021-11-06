@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -61,12 +62,34 @@ public class PanelCellNeighbor {
     }
 
     public int getStrongRsOutput() {
-        if (iPanelCell!=null){
+        if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock)){
             return iPanelCell.getStrongRsOutput(neighborsSide);
         }
         else if (blockPos!=null)
         {
             return panelTile.getLevel().getDirectSignal(blockPos,panelTile.getDirectionFromSide(neighborDirection));
+        }
+        return 0;
+    }
+
+    public int getStrongRsOutputForWire()
+    {
+        if (iPanelCell!=null){
+            return iPanelCell.getStrongRsOutput(neighborsSide);
+        }
+        else if (blockPos!=null) {
+            int signal = getStrongRsOutput();
+            if (signal < 15) {
+                for (Direction direction : new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST}) {
+                    BlockPos neighborNeighborPos = blockPos.relative(direction);
+                    BlockState neighborNeighborState = panelTile.getLevel().getBlockState(neighborNeighborPos);
+                    if (neighborNeighborState.getBlock() != Blocks.REDSTONE_WIRE) {
+                        signal = Math.max(signal, panelTile.getLevel().getDirectSignal(neighborNeighborPos, direction));
+                    }
+                    if (signal >= 15) return signal;
+                }
+            }
+            return signal;
         }
         return 0;
     }
@@ -117,7 +140,7 @@ public class PanelCellNeighbor {
     {
         BlockState blockState = getNeighborBlockState();
         if (blockState!=null)
-            return blockState.isSignalSource();
+            return blockState.canRedstoneConnectTo(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
         if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;
         return false;

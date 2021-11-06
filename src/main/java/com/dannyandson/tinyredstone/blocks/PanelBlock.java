@@ -23,6 +23,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -109,12 +110,16 @@ public class PanelBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(BlockStateProperties.FACING);
+        builder.add(Registration.HAS_PANEL_BASE);
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite());
+        if(context.getItemInHand().getItem()==Registration.REDSTONE_PANEL_ITEM.get()) {
+            return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite()).setValue(Registration.HAS_PANEL_BASE, true);
+        }
+        return defaultBlockState().setValue(BlockStateProperties.FACING, DOWN).setValue(Registration.HAS_PANEL_BASE,false);
     }
 
     @Override
@@ -125,10 +130,13 @@ public class PanelBlock extends BaseEntityBlock {
             if (panelTile.panelCellHovering!=null) {
                 VoxelShape cellShape = panelTile.getCellVoxelShape(panelTile.panelCellHovering);
                 if (cellShape != null)
-                    return Shapes.or(
-                            BASE.get(state.getValue(BlockStateProperties.FACING)),
-                            cellShape
-                    );
+                    if (panelTile.hasBase())
+                        return Shapes.or(
+                                BASE.get(state.getValue(BlockStateProperties.FACING)),
+                                cellShape
+                        );
+                    else
+                        return cellShape;
             }
         }
         return getCollisionShape(state, source, pos, context);
@@ -157,6 +165,15 @@ public class PanelBlock extends BaseEntityBlock {
     @Override
     public boolean isSignalSource(BlockState iBlockState) {
         return true;
+    }
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction direction) {
+        if (world.getBlockEntity(pos) instanceof PanelTile panelTile && direction!=null){
+            Direction facing = direction.getOpposite();
+            return panelTile.hasCellsOnFace(facing);
+        }
+        return super.canConnectRedstone(state, world, pos, direction);
     }
 
     /**
@@ -240,10 +257,8 @@ public class PanelBlock extends BaseEntityBlock {
         else
             return;
 
-        BlockEntity tileentity = world.getBlockEntity(pos);
-        if (tileentity instanceof PanelTile) {
+        if (world.getBlockEntity(pos) instanceof PanelTile panelTile) {
                 boolean change = false;
-                PanelTile panelTile = (PanelTile) tileentity;
             try {
 
                 Side side = panelTile.getSideFromDirection(direction);
@@ -266,12 +281,6 @@ public class PanelBlock extends BaseEntityBlock {
             }
         }
     }
-
-//    @Nullable
-//    @Override
-//    public ToolAction getHarvestTool(BlockState state) {
-//        return ToolAction.get("wrench");
-//    }
 
     @Override
     public boolean canHarvestBlock(BlockState state, BlockGetter world, BlockPos pos, Player player) {
@@ -298,11 +307,13 @@ public class PanelBlock extends BaseEntityBlock {
      */
     @Override
     public void playerWillDestroy(Level worldIn, BlockPos pos, BlockState state, Player player) {
-        if (worldIn.getBlockEntity(pos) instanceof PanelTile panelTile){
+        PanelTile panelTile = null;
+        if (worldIn.getBlockEntity(pos) instanceof PanelTile pt){
+            panelTile=pt;
             panelTile.onBlockDestroy();
         }
 
-        if(!player.isCreative()) {
+        if(!player.isCreative() && (panelTile==null || panelTile.hasBase() || panelTile.getCellCount()>0)) {
             ItemStack itemstack = getItemWithNBT(worldIn, pos, state);
             if(itemstack != null) {
                 ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
@@ -361,6 +372,7 @@ public class PanelBlock extends BaseEntityBlock {
                         //rotate panel if holding wrench
                         panelTile.rotate(Rotation.CLOCKWISE_90);
                         handled = true;
+                        state.updateNeighbourShapes(world,pos,UPDATE_ALL);
                     } else if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isCrouching()) {
                         //harvest block on sneak right click with wrench
                         this.playerWillDestroy(world, pos, state, player);
@@ -369,6 +381,7 @@ public class PanelBlock extends BaseEntityBlock {
                     } else if (heldItem == Registration.TINY_COLOR_SELECTOR.get() && posInPanelCell.getIPanelCell() instanceof IColorablePanelCell) {
                         if(world.isClientSide)
                             TinyBlockGUI.open(panelTile, posInPanelCell.getIndex(), (IColorablePanelCell)posInPanelCell.getIPanelCell());
+                        handled = true;
                     } else if (heldItem instanceof DyeItem) {
                         //dye the panel if right clicking with a dye
                         int color = RenderHelper.getTextureDiffusedColor(((DyeItem) heldItem).getDyeColor());
@@ -400,6 +413,7 @@ public class PanelBlock extends BaseEntityBlock {
                                 if (!player.isCreative())
                                     player.getItemInHand(hand).setCount(player.getItemInHand(hand).getCount() - 1);
 
+                                handled = true;
                             }
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                             TinyRedstone.LOGGER.error("Exception thrown while" + e.getMessage());
@@ -451,7 +465,7 @@ public class PanelBlock extends BaseEntityBlock {
                                                         posInPanelCell.getIPanelCell() == null
                                                                 || !posInPanelCell.getIPanelCell().isPushable()
                                                                 //check if the cell can attach to the side of the block facing
-                                                                || !posInPanelCell.getIPanelCell().canAttachToBaseOnSide(attachingSideRel)
+                                                                || !cell.canAttachToBaseOnSide(attachingSideRel)
                                                 )
                                         ) {
                                             placementOK = false;
@@ -477,7 +491,11 @@ public class PanelBlock extends BaseEntityBlock {
                                         //remove an item from the player's stack
                                         if (!player.isCreative())
                                             player.getItemInHand(hand).setCount(player.getItemInHand(hand).getCount() - 1);
+
+                                        state.updateNeighbourShapes(world,pos,UPDATE_ALL);
                                     }
+
+                                    handled = true;
                                 }
 
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -487,7 +505,6 @@ public class PanelBlock extends BaseEntityBlock {
                                 TinyRedstone.LOGGER.error(e);
                             }
                         }
-                        handled = true;
                     } else if (panelTile.isOverflown())
                     {
                         //open crash GUI if on client and panel is in crashed state
@@ -594,6 +611,13 @@ public class PanelBlock extends BaseEntityBlock {
 
             //remove from panel
             panelTile.removeCell(cellPos);
+
+            panelTile.getBlockState().updateNeighbourShapes(world,pos,UPDATE_ALL);
+
+            if (!panelTile.hasBase() && panelTile.getCellCount()==0){
+                this.playerWillDestroy(world, pos, panelTile.getBlockState(), player);
+                if(!world.isClientSide) world.destroyBlock(pos, true);
+            }
 
         }
 

@@ -158,6 +158,8 @@ public class PanelTile extends BlockEntity {
                 strongPowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.strongPowerToNeighbors.get(Side.BACK));
                 strongPowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.strongPowerToNeighbors.get(Side.LEFT));
                 strongPowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.strongPowerToNeighbors.get(Side.TOP));
+                if (!hasBase())
+                    strongPowerToNeighbors.putInt(Side.BOTTOM.ordinal() + "",  this.strongPowerToNeighbors.get(Side.BOTTOM));
                 parentNBTTagCompound.put("strong_power_outgoing", strongPowerToNeighbors);
             }
             if (this.weakPowerToNeighbors.size()==5) {
@@ -167,6 +169,8 @@ public class PanelTile extends BlockEntity {
                 weakPowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BACK));
                 weakPowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.weakPowerToNeighbors.get(Side.LEFT));
                 weakPowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.weakPowerToNeighbors.get(Side.TOP));
+                if (!hasBase())
+                    weakPowerToNeighbors.putInt(Side.BOTTOM.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BOTTOM));
                 parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
             }
 
@@ -201,6 +205,8 @@ public class PanelTile extends BlockEntity {
             this.strongPowerToNeighbors.put(Side.BACK,  strongPowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
             this.strongPowerToNeighbors.put(Side.LEFT,  strongPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
             this.strongPowerToNeighbors.put(Side.TOP,  strongPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
+            if (!hasBase())
+                this.strongPowerToNeighbors.put(Side.BOTTOM,  strongPowerToNeighbors.getInt(Side.BOTTOM.ordinal() + ""));
         }
         CompoundTag weakPowerToNeighbors = parentNBTTagCompound.getCompound("weak_power_outgoing");
         if (!weakPowerToNeighbors.isEmpty()) {
@@ -209,6 +215,8 @@ public class PanelTile extends BlockEntity {
             this.weakPowerToNeighbors.put(Side.BACK,  weakPowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.LEFT,  weakPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.TOP,  weakPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
+            if (!hasBase())
+                this.weakPowerToNeighbors.put(Side.BOTTOM,  weakPowerToNeighbors.getInt(Side.BOTTOM.ordinal() + ""));
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
@@ -787,20 +795,32 @@ public class PanelTile extends BlockEntity {
         List<Direction> directionsUpdated = new ArrayList<>();
 
         //check edge cells
-        for (Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT,Side.TOP}) {
+        Side[] sides;
+        if (hasBase())
+            sides = new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT,Side.TOP};
+        else
+            sides = new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT,Side.TOP,Side.BOTTOM};
+
+        for (Side panelSide : sides) {
             Direction direction = getDirectionFromSide(panelSide);
+            BlockState neighborBlockState = level.getBlockState(worldPosition.relative(direction));
+            boolean neighborIsWire = neighborBlockState.getBlock() == Blocks.REDSTONE_WIRE;
             weak=0;strong=0;
             List<Integer> indices = getEdgeCellIndices(direction);
             for (int i:indices) {
                 PanelCellPos cellPos = PanelCellPos.fromIndex(this,i);
                 IPanelCell cell = cellPos.getIPanelCell();
                 Side side = getPanelCellSide(cellPos, direction);
-                int cellStrongOutput = cell.getStrongRsOutput(side);
+                int cellStrongOutput = (!neighborIsWire && cell instanceof TinyBlock)?0:cell.getStrongRsOutput(side);
                 int cellWeakOutput = cell.getWeakRsOutput(side);
 
-                if (cell.powerDrops() && level.getBlockState(worldPosition.relative(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
-                    cellStrongOutput -= 1;
-                    cellWeakOutput -= 1;
+                if (cell.powerDrops()) {
+                    if (level.getBlockState(worldPosition.relative(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
+                        cellStrongOutput -= 1;
+                        cellWeakOutput -= 1;
+                    }else{
+                        cellStrongOutput = 0;
+                    }
                 }
 
                 if (cell instanceof TinyBlock && level.getBlockState(worldPosition.relative(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
@@ -844,7 +864,7 @@ public class PanelTile extends BlockEntity {
                 BlockPos neighborPos = worldPosition.relative(direction);
                 BlockState neighborBlockState = level.getBlockState(neighborPos);
                 if (neighborBlockState!=null && neighborBlockState.canOcclude())
-                    level.updateNeighborsAtExceptFromFacing(neighborPos,neighborBlockState.getBlock(),direction.getOpposite());
+                    level.updateNeighborsAt(neighborPos,neighborBlockState.getBlock());
             }
         }
 
@@ -858,8 +878,9 @@ public class PanelTile extends BlockEntity {
     private List<Integer> getEdgeCellIndices(Side side){
 
         List<Integer> cellIndices = new ArrayList<>();
+        boolean hasBase = hasBase();
 
-        for (int i1 = 0 ; i1<447.0 ; i1+=64) {
+        for (int i1 = 0 ; i1<(hasBase?447:511) ; i1+=64) {
             if (side == Side.LEFT) {
                 for (int i = i1; i < i1+8; i++) {
                     if (cells.containsKey(i)) {
@@ -886,9 +907,8 @@ public class PanelTile extends BlockEntity {
                 }
             }
         }
-        if (side==Side.TOP)
-        {
-            for (int i = 384; i < 448; i++) {
+        if (side==Side.TOP) {
+            for (int i = (hasBase ? 384 : 448); i < (hasBase ? 448 : 512); i++) {
                 if (cells.containsKey(i)) {
                     cellIndices.add(i);
                 }
@@ -1133,6 +1153,14 @@ public class PanelTile extends BlockEntity {
 
     }
 
+    public boolean hasBase()
+    {
+        if(this.getBlockState().hasProperty(Registration.HAS_PANEL_BASE)
+            && !this.getBlockState().getValue(Registration.HAS_PANEL_BASE))
+            return false;
+        return true;
+    }
+
     @CheckForNull
     public IPanelCell getIPanelCell(PanelCellPos cellPos){
         if (cellPos==null)return null;
@@ -1267,25 +1295,32 @@ public class PanelTile extends BlockEntity {
                     }
                 }
             } else {
-                switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
-                    case UP:
-                        voxelShape = Block.box(0, 14, 0, 16, 16, 16);
-                        break;
-                    case NORTH:
-                        voxelShape = Block.box(0, 0, 0, 16, 16, 2);
-                        break;
-                    case EAST:
-                        voxelShape = Block.box(14, 0, 0, 16, 16, 16);
-                        break;
-                    case SOUTH:
-                        voxelShape = Block.box(0, 0, 14, 16, 16, 16);
-                        break;
-                    case WEST:
-                        voxelShape = Block.box(0, 0, 0, 2, 16, 16);
-                        break;
-                    default: //DOWN
-                        voxelShape = Block.box(0, 0, 0, 16, 2, 16);
-                }
+                if (hasBase()) {
+                    switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
+                        case UP:
+                            voxelShape = Block.box(0, 14, 0, 16, 16, 16);
+                            break;
+                        case NORTH:
+                            voxelShape = Block.box(0, 0, 0, 16, 16, 2);
+                            break;
+                        case EAST:
+                            voxelShape = Block.box(14, 0, 0, 16, 16, 16);
+                            break;
+                        case SOUTH:
+                            voxelShape = Block.box(0, 0, 14, 16, 16, 16);
+                            break;
+                        case WEST:
+                            voxelShape = Block.box(0, 0, 0, 2, 16, 16);
+                            break;
+                        default: //DOWN
+                            voxelShape = Block.box(0, 0, 0, 16, 2, 16);
+                    }
+                } else if (cells.isEmpty())
+                {
+                    voxelShape = Block.box(0,0,0,16,0.1,16);
+                } else //we have no base, but we do have cells
+                    voxelShape = Shapes.empty();
+
                 for (Integer index : cells.keySet()) {
                     PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
                     VoxelShape cellVoxelShape = getCellVoxelShape(cellPos);
@@ -1310,8 +1345,8 @@ public class PanelTile extends BlockEntity {
                 float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
                 float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
                 float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
-                float levelStart = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
-                float levelEnd = 2 + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
+                float levelStart = ((hasBase())?2:0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
+                float levelEnd = ((hasBase())?2:0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
 
                 switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
                     case UP:
@@ -1340,7 +1375,7 @@ public class PanelTile extends BlockEntity {
     public void onBlockDestroy() {
         for (Integer index : cells.keySet()) {
             PanelCellPos pos = PanelCellPos.fromIndex(this, index);
-            pos.getIPanelCell().onRemove(pos);
+            cells.get(index).onRemove(pos);
         }
     }
 
@@ -1352,7 +1387,7 @@ public class PanelTile extends BlockEntity {
         float x = (Mth.sin(-yRotation * ((float)Math.PI / 180F) - (float)Math.PI)) * v;
         float y = Mth.sin(-xRotation * ((float)Math.PI / 180F));
         float z = (Mth.cos(-yRotation * ((float)Math.PI / 180F) - (float)Math.PI)) * v;
-        double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue();;
+        double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue();
         Vec3 vec31 = eyePosition.add((double)x * reachDistance, (double)y * reachDistance, (double)z * reachDistance);
         return level.clip(new ClipContext(eyePosition, vec31, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player));
     }
