@@ -375,6 +375,7 @@ public class PanelBlock extends Block {
                     } else if (posInPanelCell.getIPanelCell()==null && heldItem == Registration.REDSTONE_WRENCH.get() && !player.isCrouching() && !panelTile.isCovered()) {
                         //rotate panel if holding wrench
                         panelTile.rotate(Rotation.CLOCKWISE_90);
+                        state.updateNeighbourShapes(world,pos,3);
                         handled = true;
                     } else if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isCrouching()) {
                         //harvest block on sneak right click with wrench
@@ -476,6 +477,8 @@ public class PanelBlock extends Block {
                                         //remove an item from the player's stack
                                         if (!player.isCreative())
                                             player.getItemInHand(hand).setCount(player.getItemInHand(hand).getCount() - 1);
+
+                                        state.updateNeighbourShapes(world,pos,3);
                                     }
                                 }
 
@@ -551,6 +554,8 @@ public class PanelBlock extends Block {
                                 if (panelCellPos.getIPanelCell() != null) {
                                     //if player left clicks with wrench, remove cell
                                     removeCell(panelCellPos, player);
+
+                                    state.updateNeighbourShapes(world,pos,3);
                                 }
                             }
                         }
