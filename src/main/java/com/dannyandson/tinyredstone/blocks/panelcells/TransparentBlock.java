@@ -1,27 +1,19 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
-import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.api.IColorablePanelCell;
-import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
-import com.dannyandson.tinyredstone.api.IPanelCell;
-import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider
-{
+public class TransparentBlock extends TinyBlock {
     public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation("minecraft","block/glass");
-    private ResourceLocation madeFrom;
     private TextureAtlasSprite sprite;
     private int color= 16777215;
 
@@ -37,31 +29,12 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
 
         IVertexBuilder builder = buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent());
         if (sprite==null)
-            sprite = RenderHelper.getSprite(madeFrom!=null?madeFrom:TEXTURE_TRANSPARENT_BLOCK);
+            sprite =(madeFrom!=null)? Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.FRONT):RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
 
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         matrixStack.translate(-1, -1, 1);
         RenderHelper.drawCube(matrixStack,builder,sprite,combinedLight,color,alpha-.01f);
    }
-
-    @Override
-    public boolean onPlace(PanelCellPos cellPos, PlayerEntity player) {
-        ItemStack stack = ItemStack.EMPTY;
-        if (player.getUsedItemHand() != null)
-            stack = player.getItemInHand(player.getUsedItemHand());
-        if (stack == ItemStack.EMPTY)
-            stack = player.getMainHandItem();
-        if (stack.hasTag()) {
-            CompoundNBT itemNBT = stack.getTag();
-            CompoundNBT madeFromTag = itemNBT.getCompound("made_from");
-            if (madeFromTag.contains("namespace")) {
-                this.madeFrom = new ResourceLocation(madeFromTag.getString("namespace"), "block/" + madeFromTag.getString("path"));
-            }
-        }
-
-        return IPanelCell.super.onPlace(cellPos, player);
-    }
-
 
     /**
      * Called when neighboring redstone signal output changes.
@@ -101,16 +74,6 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
         return true;
     }
 
-    /**
-     * Can this cell be pushed by a piston?
-     *
-     * @return true if a piston can push this block
-     */
-    @Override
-    public boolean isPushable() {
-        return true;
-    }
-
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
@@ -126,29 +89,8 @@ public class TransparentBlock  implements IPanelCell, IColorablePanelCell, IPane
     public void readNBT(CompoundNBT compoundNBT) {
         this.color=compoundNBT.getInt("color");
         if (compoundNBT.contains("made_from_namespace"))
-            this.madeFrom = new ResourceLocation(compoundNBT.getString("made_from_namespace"), compoundNBT.getString("made_from_path"));
+            this.madeFrom = new ResourceLocation(compoundNBT.getString("made_from_namespace"), compoundNBT.getString("made_from_path").replace("block/","") );
+        //TODO: ".replace("block/","")" above added for backward compatibility. Can be removed after a couple releases.
     }
 
-    @Override
-    public void setColor(int color) {
-        this.color=color;
-    }
-
-    @Override
-    public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
-        overlayBlockInfo.setPowerOutput(0);
-    }
-
-    @Override
-    public CompoundNBT getItemTag() {
-        if (this.madeFrom != null) {
-            CompoundNBT madeFromTag = new CompoundNBT();
-            madeFromTag.putString("namespace", this.madeFrom.getNamespace());
-            madeFromTag.putString("path", this.madeFrom.getPath().substring(6));
-            CompoundNBT itemTag = new CompoundNBT();
-            itemTag.put("made_from", madeFromTag);
-            return itemTag;
-        }
-        return null;
-    }
 }

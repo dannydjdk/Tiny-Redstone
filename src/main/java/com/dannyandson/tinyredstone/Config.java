@@ -47,7 +47,7 @@ public class Config {
                 "\nVery large numbers may degrade performance and potentially risk crash. (default=32)")
                 .defineInRange("max_zero_tick_run",32,4,512);
 
-        List<String> redstoneWires = new ArrayList<>(Arrays.asList("block.redstonepen.track", "block.cb_multipart.multipart"));
+        List<String> redstoneWires = new ArrayList<>(Arrays.asList("redstonepen:track", "cb_multipart:multipart"));
         REDSTONE_WIRE_LIST = SERVER_BUILDER.comment("List of blocks from other mods to be treated as redstone wire.")
                         .define("redstone_wires",redstoneWires);
 

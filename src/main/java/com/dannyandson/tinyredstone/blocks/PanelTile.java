@@ -756,21 +756,23 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         //check edge cells
         for (Side panelSide : new Side[]{Side.FRONT,Side.RIGHT,Side.BACK,Side.LEFT,Side.TOP}) {
             Direction direction = getDirectionFromSide(panelSide);
+            BlockState neighborBlockState = level.getBlockState(worldPosition.relative(direction));
+            boolean neighborIsWire = PanelCellNeighbor.blockIsRedstoneWire(neighborBlockState.getBlock());
             weak=0;strong=0;
             List<Integer> indices = getEdgeCellIndices(direction);
             for (int i:indices) {
                 PanelCellPos cellPos = PanelCellPos.fromIndex(this,i);
                 IPanelCell cell = cellPos.getIPanelCell();
                 Side side = getPanelCellSide(cellPos, direction);
-                int cellStrongOutput = cell.getStrongRsOutput(side);
+                int cellStrongOutput = (!neighborIsWire && cell instanceof TinyBlock)?0:cell.getStrongRsOutput(side);
                 int cellWeakOutput = cell.getWeakRsOutput(side);
 
-                if (cell.powerDrops() && level.getBlockState(worldPosition.relative(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
+                if (neighborIsWire && cell.powerDrops()) {
                     cellStrongOutput -= 1;
                     cellWeakOutput -= 1;
                 }
 
-                if (cell instanceof TinyBlock && level.getBlockState(worldPosition.relative(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
+                if (neighborIsWire && cell instanceof TinyBlock) {
                     cellWeakOutput = cellStrongOutput;
                 }
 
