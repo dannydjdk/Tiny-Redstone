@@ -1,9 +1,11 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -79,6 +81,8 @@ public class PanelCellNeighbor {
         }
         else if (blockPos!=null) {
             int signal = getStrongRsOutput();
+            if (signal<15 && blockIsRedstoneWire(getNeighborBlockState().getBlock(),false))
+                signal = getWeakRsOutput();
             if (signal < 15) {
                 for (Direction direction : new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST}) {
                     BlockPos neighborNeighborPos = blockPos.relative(direction);
@@ -118,7 +122,7 @@ public class PanelCellNeighbor {
         if (iPanelCell!=null)
             return iPanelCell.powerDrops();
         if(blockPos!=null)
-            return getNeighborBlockState().getBlock() == Blocks.REDSTONE_WIRE;
+            return blockIsRedstoneWire(getNeighborBlockState().getBlock());
         return false;
     }
 
@@ -139,7 +143,7 @@ public class PanelCellNeighbor {
     public boolean canConnectRedstone()
     {
         BlockState blockState = getNeighborBlockState();
-        if (blockState!=null)
+        if (blockState!=null && !blockIsRedstoneWire(getNeighborBlockState().getBlock(),false))
             return blockState.canRedstoneConnectTo(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
         if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;
@@ -166,6 +170,14 @@ public class PanelCellNeighbor {
             return blockState;
         }
         return null;
+    }
+
+    public static boolean blockIsRedstoneWire(Block block){
+        return blockIsRedstoneWire(block,true);
+    }
+    public static boolean blockIsRedstoneWire(Block block, boolean includeVanilla){
+        if (includeVanilla && block == Blocks.REDSTONE_WIRE) return true;
+        return Config.REDSTONE_WIRE_LIST.get().contains(block.getRegistryName().toString());
     }
 
 }

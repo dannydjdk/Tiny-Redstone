@@ -818,7 +818,7 @@ public class PanelTile extends BlockEntity {
         for (Side panelSide : sides) {
             Direction direction = getDirectionFromSide(panelSide);
             BlockState neighborBlockState = level.getBlockState(worldPosition.relative(direction));
-            boolean neighborIsWire = neighborBlockState.getBlock() == Blocks.REDSTONE_WIRE;
+            boolean neighborIsWire = PanelCellNeighbor.blockIsRedstoneWire(neighborBlockState.getBlock());
             weak=0;strong=0;
             List<Integer> indices = getEdgeCellIndices(direction);
             for (int i:indices) {
@@ -829,7 +829,7 @@ public class PanelTile extends BlockEntity {
                 int cellWeakOutput = cell.getWeakRsOutput(side);
 
                 if (cell.powerDrops()) {
-                    if (level.getBlockState(worldPosition.relative(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
+                    if (neighborIsWire) {
                         cellStrongOutput -= 1;
                         cellWeakOutput -= 1;
                     }else{
@@ -837,7 +837,7 @@ public class PanelTile extends BlockEntity {
                     }
                 }
 
-                if (cell instanceof TinyBlock && level.getBlockState(worldPosition.relative(direction)).getBlock() == Blocks.REDSTONE_WIRE) {
+                if (cell instanceof TinyBlock && neighborIsWire) {
                     cellWeakOutput = cellStrongOutput;
                 }
 
