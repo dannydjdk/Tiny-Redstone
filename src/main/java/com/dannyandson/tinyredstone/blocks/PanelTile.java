@@ -11,7 +11,6 @@ import com.dannyandson.tinyredstone.network.PlaySound;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.DyeColor;
@@ -45,6 +44,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private Map<Integer, Side> cellDirections = new HashMap<>();
     protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
+    protected Map<Side, Integer> wirePowerToNeighbors = new HashMap<>();
 
     protected Integer Color = DyeColor.GRAY.getColorValue();
     private Integer lightOutput = 0;
@@ -59,6 +59,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     protected PanelCellGhostPos panelCellGhostPos;
     protected PanelCellPos panelCellHovering;
     private VoxelShape voxelShape = null;
+    protected static boolean checkWireSignals = true;
 
     //for backward compat. Remove on next major update (2.x.x).
     private boolean fixLegacyFacing = false;
@@ -171,6 +172,15 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 weakPowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.weakPowerToNeighbors.get(Side.TOP));
                 parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
             }
+            if (this.wirePowerToNeighbors.size()==5) {
+                CompoundNBT wirePowerToNeighbors = new CompoundNBT();
+                wirePowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.wirePowerToNeighbors.get(Side.FRONT));
+                wirePowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.wirePowerToNeighbors.get(Side.RIGHT));
+                wirePowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.wirePowerToNeighbors.get(Side.BACK));
+                wirePowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.wirePowerToNeighbors.get(Side.LEFT));
+                wirePowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.wirePowerToNeighbors.get(Side.TOP));
+                parentNBTTagCompound.put("wire_power_outgoing", wirePowerToNeighbors);
+            }
 
             parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
@@ -210,6 +220,14 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.weakPowerToNeighbors.put(Side.BACK,  weakPowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.LEFT,  weakPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
             this.weakPowerToNeighbors.put(Side.TOP,  weakPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
+        }
+        CompoundNBT wirePowerToNeighbors = parentNBTTagCompound.getCompound("wire_power_outgoing");
+        if (!wirePowerToNeighbors.isEmpty()) {
+            this.wirePowerToNeighbors.put(Side.FRONT, wirePowerToNeighbors.getInt(Side.FRONT.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.RIGHT, wirePowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.BACK,  wirePowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.LEFT,  wirePowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.TOP,  wirePowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
@@ -749,7 +767,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
      */
     public boolean updateOutputs() {
         boolean change = false;
-        int weak, strong;
+        int weak, strong, wire;
 
         List<Direction> directionsUpdated = new ArrayList<>();
 
@@ -758,18 +776,20 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             Direction direction = getDirectionFromSide(panelSide);
             BlockState neighborBlockState = level.getBlockState(worldPosition.relative(direction));
             boolean neighborIsWire = PanelCellNeighbor.blockIsRedstoneWire(neighborBlockState.getBlock());
-            weak=0;strong=0;
+            weak=0;strong=0;wire=0;
             List<Integer> indices = getEdgeCellIndices(direction);
             for (int i:indices) {
                 PanelCellPos cellPos = PanelCellPos.fromIndex(this,i);
                 IPanelCell cell = cellPos.getIPanelCell();
                 Side side = getPanelCellSide(cellPos, direction);
-                int cellStrongOutput = (!neighborIsWire && cell instanceof TinyBlock)?0:cell.getStrongRsOutput(side);
+                int cellStrongOutput = ((!neighborIsWire && cell instanceof TinyBlock)||cell instanceof RedstoneDust)?0:cell.getStrongRsOutput(side);
                 int cellWeakOutput = cell.getWeakRsOutput(side);
+                int cellWireOutput = (cell instanceof RedstoneDust)?cellWeakOutput:0;
 
                 if (neighborIsWire && cell.powerDrops()) {
                     cellStrongOutput -= 1;
                     cellWeakOutput -= 1;
+                    cellWireOutput -= 1;
                 }
 
                 if (neighborIsWire && cell instanceof TinyBlock) {
@@ -782,13 +802,18 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 if (cellWeakOutput > weak) {
                     weak = cellWeakOutput;
                 }
+                if (cellWireOutput > wire)
+                    wire = cellWireOutput;
             }
 
             if (strongPowerToNeighbors.get(panelSide) == null || strong != strongPowerToNeighbors.get(panelSide) ||
-                    weakPowerToNeighbors.get(panelSide) == null || weak != weakPowerToNeighbors.get(panelSide)) {
+                    weakPowerToNeighbors.get(panelSide) == null || weak != weakPowerToNeighbors.get(panelSide) ||
+                    wirePowerToNeighbors.get(panelSide) == null || wire != wirePowerToNeighbors.get(panelSide)
+            ) {
                 change = true;
                 strongPowerToNeighbors.put(panelSide, strong);
                 weakPowerToNeighbors.put(panelSide, weak);
+                wirePowerToNeighbors.put(panelSide,wire);
                 directionsUpdated.add(direction);
             }
 
@@ -812,11 +837,21 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 BlockPos neighborPos = worldPosition.relative(direction);
                 BlockState neighborBlockState = level.getBlockState(neighborPos);
                 if (neighborBlockState!=null && neighborBlockState.canOcclude())
-                    level.updateNeighborsAtExceptFromFacing(neighborPos,neighborBlockState.getBlock(),direction.getOpposite());
+                    level.updateNeighborsAt(neighborPos,neighborBlockState.getBlock());
             }
         }
 
         return change;
+    }
+
+    /**
+     * Should neighboring blocks be checking for wire signals (from tiny redstone dust) when asking for direct signals?
+     * This is similar to vanilla redstone dust's "shouldSignal" flag which suppresses signal reading from redstone dust
+     * while another redstone dust is querying the inputs into a neighboring block.
+     * @return true if wire signals should be included when a neighbor asks for "direct" signal strength
+     */
+    public static boolean getCheckWireSignals(){
+        return checkWireSignals;
     }
 
     private List<Integer> getEdgeCellIndices(Direction edge) {

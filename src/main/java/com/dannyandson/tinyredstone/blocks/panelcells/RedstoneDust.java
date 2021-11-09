@@ -207,15 +207,16 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
     protected int getNeighborOutput(PanelCellNeighbor neighbor)
     {
-        int s = neighbor.getStrongRsOutputForWire();
-        int w = neighbor.getWeakRsOutput();
-        int input=(neighbor.powerDrops())?s-1:s;
-        if (w>input)
-        {
-            if (neighbor.canConnectRedstone())
-                input=w;
+        int output = neighbor.getStrongRsOutputForWire();
+        if (neighbor.powerDrops())
+            output--;
+        else {
+            int w = neighbor.getWeakRsOutput();
+            if (w > output && neighbor.canConnectRedstone()) {
+                output = w;
+            }
         }
-        return input;
+        return output;
     }
 
     protected boolean sideEnabled(Side side)

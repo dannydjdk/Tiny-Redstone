@@ -9,10 +9,7 @@ import com.dannyandson.tinyredstone.gui.ClearPanelGUI;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -227,7 +224,16 @@ public class PanelBlock extends Block {
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
 
+            //first get strong (direct) power
             Integer power = panelTile.strongPowerToNeighbors.get(panelTile.getSideFromDirection(directionFromNeighborToThis.getOpposite()));
+
+            //if it is not a full signal and vanilla redstone is looking for signals from wires (is it not checking a block for direct power)
+            //and panel tiles are checking signals from wires (they are not checking a block for direct power)
+            //provide the power provided by tiny redstone dust.
+            if ((power==null || power < 15) && Blocks.REDSTONE_WIRE.isSignalSource(state) && PanelTile.getCheckWireSignals()) {
+                Integer power2 = panelTile.wirePowerToNeighbors.get(panelTile.getSideFromDirection(directionFromNeighborToThis.getOpposite()));
+                power = (power==null||(power2!=null && power2>power))?power2:power;
+            }
 
             return (power == null) ? 0 : power;
         }

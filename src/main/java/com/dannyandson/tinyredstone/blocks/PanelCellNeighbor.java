@@ -80,18 +80,35 @@ public class PanelCellNeighbor {
             return iPanelCell.getStrongRsOutput(neighborsSide);
         }
         else if (blockPos!=null) {
+            //when checking if a redstone wire (tiny redstone dust) should pick up a signal from a block in the world
+            //first check that block's strong (direct) signal output.
             int signal = getStrongRsOutput();
+
+            //if the strong signal is not a full signal, check if the neighbor is a redstone wire
+            // (vanilla redstone dust or a similarly behaving modded block).
+            //If so, get its weak (indirect) signal.
             if (signal<15 && blockIsRedstoneWire(getNeighborBlockState().getBlock(),false))
                 signal = getWeakRsOutput();
-            if (signal<15) {
+
+            //if we still don't have a full redstone signal, check if the neighbor is a redstone conductor
+            //such as a full block that can carry a redstone signal.
+            //If so, check its inputs and see if any are strong (direct) signals such as those from a repeater.
+            if (signal<15 && getNeighborBlockState().isRedstoneConductor(panelTile.getLevel(),blockPos)) {
+                //Tell redstone panels not to include redstone wire signals when asked for direct signals.
+                //This is similar to vanilla redstone dust's "shouldSignal" flag.
+                PanelTile.checkWireSignals = false;
+                //Check all this neighbor's neighbors to see if any are providing direct signals
                 for (Direction direction : new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST}) {
                     BlockPos neighborNeighborPos = blockPos.relative(direction);
                     BlockState neighborNeighborState = panelTile.getLevel().getBlockState(neighborNeighborPos);
-                    if (neighborNeighborState.getBlock() != Blocks.REDSTONE_WIRE) {
+                    Block neighborNeighborBlock = neighborNeighborState.getBlock();
+                    if (neighborNeighborBlock != Blocks.REDSTONE_WIRE) {
                         signal = Math.max(signal, panelTile.getLevel().getDirectSignal(neighborNeighborPos, direction));
                     }
                     if (signal >= 15) return signal;
                 }
+                //Re-enable inclusion of wire signals
+                PanelTile.checkWireSignals = true;
             }
             return signal;
         }
