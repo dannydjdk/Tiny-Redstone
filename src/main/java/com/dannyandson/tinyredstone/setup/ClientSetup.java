@@ -12,7 +12,6 @@ import com.dannyandson.tinyredstone.gui.ToolbarOverlay;
 import com.dannyandson.tinyredstone.items.PanelItemColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.inventory.container.BeaconContainer;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -62,8 +61,7 @@ public class ClientSetup {
         event.addSprite(Comparator.TEXTURE_COMPARATOR_OFF);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_ON);
         event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_OFF);
-        event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
-        event.addSprite(Comparator.TEXTURE_Comparator_SUBTRACT_ON);
+        event.addSprite(Comparator.TEXTURE_COMPARATOR_SUBTRACT_ON);
         event.addSprite(TransparentBlock.TEXTURE_TRANSPARENT_BLOCK);
         event.addSprite(GhostRenderer.TEXTURE_REDSTONE_DUST_SEGMENT_GHOST);
         event.addSprite(TinyBlock.TEXTURE_GRASS_BLOCK_TOP);

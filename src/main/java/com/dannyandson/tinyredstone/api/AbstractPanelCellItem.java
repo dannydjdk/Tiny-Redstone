@@ -1,9 +1,14 @@
 package com.dannyandson.tinyredstone.api;
 
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
+import com.dannyandson.tinyredstone.blocks.PanelTile;
+import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -15,6 +20,21 @@ public abstract class AbstractPanelCellItem extends Item {
     public AbstractPanelCellItem(Item.Properties properties) {
         super(properties);
     }
+
+    @Override
+    public ActionResultType useOn(ItemUseContext context) {
+        ItemStack itemStackCopy = context.getItemInHand().copy();
+        ActionResultType result = Registration.REDSTONE_PANEL_ITEM.get().useOn(context);
+        context.getPlayer().setItemInHand(context.getHand(),itemStackCopy);
+
+        TileEntity te = context.getLevel().getBlockEntity(context.getClickedPos().offset(context.getClickedFace().getNormal()));
+        if(te instanceof PanelTile && context.getPlayer()!=null) {
+            PanelTile panelTile = (PanelTile) te;
+            Registration.REDSTONE_PANEL_BLOCK.get().use(panelTile.getBlockState(),context.getLevel(),panelTile.getBlockPos(), context.getPlayer(),context.getHand(),panelTile.getPlayerCollisionHitResult(context.getPlayer()));
+        }
+        return result;
+    }
+
 
     /**
      * Called before a block is broken. Return true to prevent default block

@@ -27,7 +27,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
     public static ResourceLocation TEXTURE_COMPARATOR_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_on");
     public static ResourceLocation TEXTURE_COMPARATOR_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_off");
-    public static ResourceLocation TEXTURE_Comparator_SUBTRACT_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_subtract_on");
+    public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_subtract_on");
     public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_subtract_off");
 
     /**
@@ -47,7 +47,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
         TextureAtlasSprite sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_OFF);
 
         if (this.output>0 && this.subtract) {
-            sprite_repeater = RenderHelper.getSprite(TEXTURE_Comparator_SUBTRACT_ON);
+            sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_SUBTRACT_ON);
         }
         else if(this.output>0){
             sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_ON);

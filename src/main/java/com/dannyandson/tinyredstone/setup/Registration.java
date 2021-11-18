@@ -16,6 +16,8 @@ import com.dannyandson.tinyredstone.items.*;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
+import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.Property;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -107,4 +109,8 @@ public class Registration {
     public static final RegistryObject<Item> PANEL_COVER_TRIM = ITEMS.register("trim_panel_cover",PanelCellItem::new);
 
     public static final CodecTinyBlockOverrides TINY_BLOCK_OVERRIDES = new CodecTinyBlockOverrides("tiny_block_overrides", TinyBlockData.CODEC);
+
+    public static final BooleanProperty HAS_PANEL_BASE = BooleanProperty.create("has_panel_base");
+
+
 }

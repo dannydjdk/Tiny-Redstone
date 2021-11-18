@@ -100,12 +100,22 @@ public class PanelBlock extends Block {
     @Override
     protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(BlockStateProperties.FACING);
+        builder.add(Registration.HAS_PANEL_BASE);
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite());
+        Boolean hasBase = context.getItemInHand().getItem()==Registration.REDSTONE_PANEL_ITEM.get();
+        if (context.getItemInHand().hasTag()) {
+            CompoundNBT itemTag = context.getItemInHand().getTag().getCompound("BlockEntityTag");
+            if (!itemTag.getBoolean("hasBase"))
+                hasBase=false;
+        }
+        if(hasBase) {
+            return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite()).setValue(Registration.HAS_PANEL_BASE, true);
+        }
+        return defaultBlockState().setValue(BlockStateProperties.FACING, DOWN).setValue(Registration.HAS_PANEL_BASE,false);
     }
 
     @Override
@@ -118,10 +128,13 @@ public class PanelBlock extends Block {
             if (panelTile.panelCellHovering!=null) {
                 VoxelShape cellShape = panelTile.getCellVoxelShape(panelTile.panelCellHovering);
                 if (cellShape != null)
-                    return VoxelShapes.or(
-                            BASE.get(state.getValue(BlockStateProperties.FACING)),
-                            cellShape
-                    );
+                    if (panelTile.hasBase())
+                        return VoxelShapes.or(
+                                BASE.get(state.getValue(BlockStateProperties.FACING)),
+                                cellShape
+                        );
+                    else
+                        return cellShape;
             }
         }
         return getCollisionShape(state, source, pos, context);
@@ -302,9 +315,10 @@ public class PanelBlock extends Block {
         if (tileentity instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) tileentity;
             ItemStack itemstack = getCloneItemStack(worldIn, pos, state);
-            CompoundNBT compoundnbt = panelTile.saveToNbt(new CompoundNBT());
-            if (!compoundnbt.isEmpty()) {
-                itemstack.addTagElement("BlockEntityTag", compoundnbt);
+            CompoundNBT compoundNBT = panelTile.saveToNbt(new CompoundNBT());
+            compoundNBT.putBoolean("hasBase",panelTile.hasBase());
+            if (!compoundNBT.isEmpty()) {
+                itemstack.addTagElement("BlockEntityTag", compoundNBT);
             }
             return itemstack;
         }
@@ -318,11 +332,12 @@ public class PanelBlock extends Block {
     @Override
     public void playerWillDestroy(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
         TileEntity te = worldIn.getBlockEntity(pos);
+        PanelTile panelTile = null;
         if (te instanceof PanelTile){
-            PanelTile panelTile = (PanelTile) te;
+            panelTile = (PanelTile) te;
             panelTile.onBlockDestroy();
         }
-        if(!player.isCreative()) {
+        if(!player.isCreative() && (panelTile==null || panelTile.hasBase() || panelTile.getCellCount()>0)) {
             ItemStack itemstack = getItemWithNBT(worldIn, pos, state);
             if(itemstack != null) {
                 ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
@@ -391,6 +406,7 @@ public class PanelBlock extends Block {
                     } else if (heldItem == Registration.TINY_COLOR_SELECTOR.get() && posInPanelCell.getIPanelCell() instanceof IColorablePanelCell) {
                         if(world.isClientSide)
                             TinyBlockGUI.open(panelTile, posInPanelCell.getIndex(), (IColorablePanelCell)posInPanelCell.getIPanelCell());
+                        handled = true;
                     } else if (heldItem instanceof DyeItem) {
                         //dye the panel if right clicking with a dye
                         int color = ((DyeItem) heldItem).getDyeColor().getColorValue();
@@ -422,6 +438,8 @@ public class PanelBlock extends Block {
                                 //remove an item from the player's stack
                                 if (!player.isCreative())
                                     player.getItemInHand(hand).setCount(player.getItemInHand(hand).getCount() - 1);
+
+                                handled = true;
 
                             }
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -486,13 +504,13 @@ public class PanelBlock extends Block {
 
                                         state.updateNeighbourShapes(world,pos,3);
                                     }
+                                    handled = true;
                                 }
 
                             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                                 TinyRedstone.LOGGER.error(e.getMessage());
                             }
                         }
-                        handled = true;
                     } else if (panelTile.isOverflown())
                     {
                         //open crash GUI if on client and panel is in crashed state
@@ -601,6 +619,7 @@ public class PanelBlock extends Block {
             //remove from panel
             panelTile.removeCell(cellPos);
 
+            panelTile.getBlockState().updateNeighbourShapes(world,pos,3);
         }
 
     }

@@ -29,15 +29,20 @@ public class TrimCover implements IPanelCover {
             setDefaultBoundaries();
         } else {
             Integer xMin = null, xMax = null, yMin = null, yMax = null, zMin = null, zMax = null;
+            boolean hasBase = panelTile.hasBase();
             for (PanelCellPos cellPos : cellPosList) {
                 if (xMin == null || cellPos.getRow() < xMin)
                     xMin = cellPos.getRow();
                 if (xMax == null || cellPos.getRow() > xMax)
                     xMax = cellPos.getRow();
-                if (yMin == null || ((cellPos.getLevel() == 0) ? 0 : cellPos.getLevel() + 1) < yMin)
-                    yMin = (cellPos.getLevel() == 0) ? 0 : cellPos.getLevel() + 1;
-                if (yMax == null || cellPos.getLevel() + 1 > yMax)
-                    yMax = cellPos.getLevel() + 1;
+
+                int y = !hasBase?cellPos.getLevel(): (cellPos.getLevel() == 0) ? 0 : cellPos.getLevel() + 1;
+                if (yMin == null || y < yMin)
+                    yMin = y;
+                y = !hasBase?cellPos.getLevel():cellPos.getLevel() + 1;
+                if (yMax == null || y > yMax)
+                    yMax = y;
+
                 if (zMin == null || cellPos.getColumn() < zMin)
                     zMin = cellPos.getColumn();
                 if (zMax == null || cellPos.getColumn() > zMax)

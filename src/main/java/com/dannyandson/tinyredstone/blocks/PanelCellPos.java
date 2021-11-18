@@ -61,8 +61,8 @@ public class PanelCellPos {
     public static PanelCellPos fromCoordinates(PanelTile panelTile,double x,double y, double z) {
         int row = Math.round((float) (x * 8f) - 0.5f);
         int cell = Math.round((float) (z * 8f) - 0.5f);
-        int level = Math.round((float)(y * 8f) - 0.5f)-1;
-        if (row >= 0 && row < 8 && cell >= 0 && cell < 8 && level>=0 && level<7) {
+        int level = Math.round((float)(y * 8f) - 0.5f)-((panelTile.hasBase())?1:0);
+        if (row >= 0 && row < 8 && cell >= 0 && cell < 8 && level>=0 && level<(panelTile.hasBase()?7:8)) {
             return new PanelCellPos(panelTile,row, cell, level);
         }
         return null;
@@ -107,7 +107,7 @@ public class PanelCellPos {
             relY = hitVec.y - pos.getY();
         }
 
-        if (relY<.125 && relY>.0625)
+        if (panelTile.hasBase() && relY<.125 && relY>.0625)
             relY+=.002f;
 
         return fromCoordinates(panelTile, relX,relY, relZ);
@@ -159,7 +159,7 @@ public class PanelCellPos {
             }
         }
         else if (side==Side.TOP) {
-            if (level < 6) {
+            if (level < (panelTile.hasBase()?6:7)) {
                 cellPos =  new PanelCellPos(panelTile,row,column,level+1);
             }
         }
@@ -169,8 +169,9 @@ public class PanelCellPos {
             }
         }
 
+        boolean panel1HasBase = panelTile.hasBase();
         //TODO consider support for linking panels facing in different directions
-        if (cellPos==null && side!=Side.TOP && side!=Side.BOTTOM)
+        if (cellPos==null && (!panel1HasBase || (side!=Side.TOP && side!=Side.BOTTOM)))
         {
             Direction direction = panelTile.getDirectionFromSide(side);
             TileEntity te = panelTile.getLevel().getBlockEntity(panelTile.getBlockPos().relative(direction));
@@ -178,22 +179,26 @@ public class PanelCellPos {
             if (te instanceof PanelTile)
             {
                 PanelTile panelTile2 = (PanelTile) te;
+                boolean panel2HasBase = panelTile2.hasBase();
                 if (panelTile2.getBlockState().getValue(BlockStateProperties.FACING)==panelTile.getBlockState().getValue(BlockStateProperties.FACING))
                 {
                     int neighborRow, neighborColumn, neighborLevel;
+                    int levelOffset = (panel1HasBase==panel2HasBase)?0:(panel1HasBase)?1:-1;
                     if (side==Side.FRONT || side==Side.BACK) {
                         neighborRow = row;
                         neighborColumn = (column - 7) * -1;
-                        neighborLevel = level;
-                    }/* else if (side==Side.TOP||side==Side.BOTTOM) {
+                        neighborLevel = level+levelOffset;
+                    } else if (side==Side.TOP||side==Side.BOTTOM) {
+                        if (panel2HasBase)
+                            return null;
                         neighborRow = row;
                         neighborColumn = column;
-                        neighborLevel = (level-6)*-1;
-                    }*/
+                        neighborLevel = (level - 7) * -1;
+                    }
                     else{
                         neighborRow = (row - 7) * -1;
                         neighborColumn = column;
-                        neighborLevel = level;
+                        neighborLevel = level+levelOffset;
                     }
                     cellPos = new PanelCellPos(panelTile2,neighborRow,neighborColumn,neighborLevel);
 
@@ -267,7 +272,7 @@ public class PanelCellPos {
                 return new PanelCellNeighbor(neighborPos, null, null, side);
             }
 
-        } else if (towardPanelSide!=Side.BOTTOM){
+        } else if (!panelTile.hasBase() || towardPanelSide!=Side.BOTTOM){
             BlockPos blockPos = this.panelTile.getBlockPos().relative(this.panelTile.getDirectionFromSide(towardPanelSide));
             return new PanelCellNeighbor(this.panelTile, blockPos, towardPanelSide);
         }
