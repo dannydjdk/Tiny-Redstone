@@ -462,39 +462,55 @@ public class PanelBlock extends Block {
                         handled = true;
                     } else if (itemPanelCellMap.containsKey(heldItem) && !panelTile.isCovered()) {
                         //if player is holding an item registered as a panel cell, try to place that cell on the panel
-                        PanelCellPos pos1 = posInPanelCell;
-                        if(pos1.getIPanelCell()!=null)
+                        PanelCellPos placementPos = posInPanelCell;
+                        if(placementPos.getIPanelCell()!=null)
                         {
-                            pos1 = posInPanelCell.offset(panelTile.getSideFromDirection(result.getDirection()));
+                            placementPos = posInPanelCell.offset(panelTile.getSideFromDirection(result.getDirection()));
                         }
 
                         //but first, check to see if cell exists and is empty
-                        if (pos1!=null && pos1.getIPanelCell()==null && !panelTile.checkCellForPistonExtension(pos1)) {
+                        if (placementPos!=null && placementPos.getIPanelCell()==null && !panelTile.checkCellForPistonExtension(placementPos)) {
                             try {
                                 //catch any exception thrown while attempting to construct from the registered IPanelCell class
                                 Object panelCell = itemPanelCellMap.get(heldItem).getConstructors()[0].newInstance();
 
                                 if (panelCell instanceof IPanelCell) {
-
+                                    IPanelCell cell = (IPanelCell) panelCell;
                                     boolean placementOK = true;
+                                    Side rotationLock = RotationLock.getServerRotationLock(player);
+                                    Side cellFacing = rotationLock == null
+                                            ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, cell.canPlaceVertical()))
+                                            : rotationLock;
 
-                                    if (((IPanelCell) panelCell).needsSolidBase()) {
-                                        PanelCellPos basePos = pos1.offset(Side.BOTTOM);
-                                        if (basePos != null && (basePos.getIPanelCell() == null || !basePos.getIPanelCell().isPushable())) {
+                                    if (cell.needsSolidBase()) {
+                                        Side attachingSideDir = panelTile.getSideFromDirection(result.getDirection()).getOpposite();
+                                        Side attachingSideRel = (attachingSideDir==Side.TOP || attachingSideDir==Side.BOTTOM)?attachingSideDir:Side.FRONT;
+                                        if (
+                                                !posInPanelCell.equals(placementPos)
+                                                        && (
+                                                        posInPanelCell.getIPanelCell() == null
+                                                                || !posInPanelCell.getIPanelCell().isPushable()
+                                                                //check if the cell can attach to the side of the block facing
+                                                                || !cell.canAttachToBaseOnSide(attachingSideRel)
+                                                )
+                                        ) {
                                             placementOK = false;
                                         }
+                                        else {
+                                            //set the direction of the base block
+                                            cell.setBaseSide(attachingSideRel);
+                                            //set the cell direction to face the base block
+                                            if (attachingSideRel==Side.FRONT)
+                                                cellFacing=attachingSideDir;
+                                        }
                                     }
-
                                     if (placementOK) {
                                         //place the cell on the panel
-                                        Side rotationLock = RotationLock.getServerRotationLock(player);
 
-                                        pos1.getPanelTile().addCell(
-                                                pos1,
-                                                (IPanelCell) panelCell,
-                                                rotationLock == null
-                                                        ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(player, ((IPanelCell) panelCell).canPlaceVertical()))
-                                                        : rotationLock,
+                                        placementPos.getPanelTile().addCell(
+                                                placementPos,
+                                                cell,
+                                                cellFacing,
                                                 player
                                         );
 

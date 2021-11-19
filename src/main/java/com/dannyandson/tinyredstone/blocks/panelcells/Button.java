@@ -22,6 +22,7 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
 
     protected boolean active = false;
     protected Integer ticksRemaining = 0;
+    protected Side baseSide=Side.BOTTOM;
 
     /**
      * Drawing the cell on the panel
@@ -36,7 +37,17 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
         TextureAtlasSprite sprite = getSprite();
         IVertexBuilder builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
 
-        matrixStack.translate(0,0,(active)?0.0625:0.125);
+        if (baseSide==Side.FRONT) {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.translate(0,0,(active)?-0.9375:-0.875);
+        }
+        else if (baseSide==Side.TOP) {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
+            matrixStack.translate(0,-1,(active)?-0.9375:-0.875);
+        }
+        else
+            matrixStack.translate(0,0,(active)?0.0625:0.125);
+
         float x1 = 0.3125f, x2 = .6875f, y1 = .375f, y2 = .625f;
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite,combinedLight,alpha);
@@ -66,12 +77,12 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public int getWeakRsOutput(Side outputDirection) {
-        return (active && outputDirection!=Side.TOP)?15:0;
+        return (active && outputDirection!=baseSide.getOpposite())?15:0;
     }
 
     @Override
     public int getStrongRsOutput(Side outputDirection) {
-        return (active && outputDirection==Side.BOTTOM)?15:0;
+        return (active && outputDirection==baseSide)?15:0;
     }
 
     /**
@@ -96,6 +107,17 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public boolean needsSolidBase(){return true;}
+
+    @Override
+    public boolean canAttachToBaseOnSide(Side side) {
+        return true;
+    }
+
+    @Override
+    public Side getBaseSide(){return this.baseSide;}
+
+    @Override
+    public void setBaseSide(Side side){this.baseSide=side;}
 
     /**
      * Called each each tick.
@@ -149,6 +171,7 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("active",this.active);
         nbt.putInt("ticksRemaining",this.ticksRemaining);
+        nbt.putString("baseSide",baseSide.name());
         return nbt;
     }
 
@@ -156,6 +179,10 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
     public void readNBT(CompoundNBT compoundNBT) {
         this.active=compoundNBT.getBoolean("active");
         this.ticksRemaining=compoundNBT.getInt("ticksRemaining");
+        if (compoundNBT.getString("baseSide").length()>0)
+            this.baseSide=Side.valueOf(compoundNBT.getString("baseSide"));
+        else
+            baseSide=Side.BOTTOM;
     }
 
     protected TextureAtlasSprite getSprite()
@@ -171,6 +198,10 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public PanelCellVoxelShape getShape()
     {
-        return PanelCellVoxelShape.BUTTONSHAPE;
+        if (baseSide==Side.BOTTOM)
+            return PanelCellVoxelShape.BUTTONSHAPE;
+        if (baseSide==Side.TOP)
+            return PanelCellVoxelShape.BUTTONSHAPE_TOP;
+        return PanelCellVoxelShape.BUTTONSHAPE_FRONT;
     }
 }

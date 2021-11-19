@@ -28,5 +28,7 @@ public class PanelCellVoxelShape {
     public static PanelCellVoxelShape FULLCELL = new PanelCellVoxelShape(new Vector3d(0d,0d,0d),new Vector3d(1d,1d,1d));
     public static PanelCellVoxelShape QUARTERCELLSLAB = new PanelCellVoxelShape(new Vector3d(0d,0d,0d),new Vector3d(1d,0.25d,1d));
     public static PanelCellVoxelShape BUTTONSHAPE = new PanelCellVoxelShape(new Vector3d(0.25d,0d,0.25d),new Vector3d(.75d,0.25d,.75d));
+    public static PanelCellVoxelShape BUTTONSHAPE_TOP = new PanelCellVoxelShape(new Vector3d(0.25d,0.75d,0.25d),new Vector3d(.75d,1.00d,.75d));
+    public static PanelCellVoxelShape BUTTONSHAPE_FRONT = new PanelCellVoxelShape(new Vector3d(0.25d,0.25d,0.25d),new Vector3d(.75d,0.75d,.75d));
 
 }

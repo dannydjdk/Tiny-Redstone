@@ -26,6 +26,7 @@ public class Torch implements IPanelCell
     private final LinkedList<Boolean> changeHx = new LinkedList<>();
     private boolean burnout = false;
     private boolean upright = false;
+    private Side baseSide=Side.BOTTOM;
 
     public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch");
     public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_off");
@@ -67,9 +68,14 @@ public class Torch implements IPanelCell
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
             matrixStack.translate(0, 0, -0.375f);
         }
-        else {
+        else if (this.baseSide==Side.FRONT) {
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+            matrixStack.translate(-1, -1.125f, 0.125f);
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(60));
-            matrixStack.translate(0,0.03125f,0);
+            //matrixStack.translate(0, 0.03125f, 0);
+        }else {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(60));
+            matrixStack.translate(0, 0.03125f, 0);
         }
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_torch,(output)?15728880:combinedLight,alpha);
@@ -134,7 +140,7 @@ public class Torch implements IPanelCell
     @Override
     public boolean neighborChanged(PanelCellPos cellPos){
 
-        PanelCellNeighbor inputNeighbor = cellPos.getNeighbor((upright)?Side.BOTTOM:Side.BACK);
+        PanelCellNeighbor inputNeighbor = cellPos.getNeighbor((baseSide==Side.FRONT)?Side.FRONT:(upright)?Side.BOTTOM:Side.BACK);
 
         boolean output = (inputNeighbor==null || inputNeighbor.getWeakRsOutput() ==0);
 
@@ -166,7 +172,10 @@ public class Torch implements IPanelCell
     @Override
     public int getWeakRsOutput(Side outputDirection)
     {
-        if (((!upright && outputDirection!= Side.BACK )|| (upright && outputDirection!=Side.BOTTOM)) && !burnout && ((output&&changePending==0)||(!output&&changePending>0)))
+        if (!burnout &&
+                ((baseSide==Side.FRONT && outputDirection!=Side.FRONT) || (!upright && outputDirection!= Side.BACK )|| (upright && outputDirection!=Side.BOTTOM)) &&
+                ((output&&changePending==0)||(!output&&changePending>0))
+        )
             return 15;
         else
             return 0;
@@ -215,12 +224,31 @@ public class Torch implements IPanelCell
     }
 
     @Override
+    public boolean needsSolidBase(){return true;}
+
+    @Override
+    public boolean canAttachToBaseOnSide(Side side) {
+        return side!=Side.TOP;
+    }
+
+    @Override
+    public Side getBaseSide(){return this.baseSide;}
+
+    @Override
+    public void setBaseSide(Side side){
+        this.baseSide=side;
+        if (side==Side.FRONT)
+            this.upright=false;
+    }
+
+    @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("output",output);
         nbt.putInt("changePending",changePending);
         nbt.putBoolean("burnout",burnout);
         nbt.putBoolean("upright",upright);
+        nbt.putString("baseSide",baseSide.name());
 
         StringBuilder changeHxString = new StringBuilder();
         for (Object b : changeHx.toArray())
@@ -238,6 +266,10 @@ public class Torch implements IPanelCell
         this.changePending = compoundNBT.getInt("changePending");
         this.burnout = compoundNBT.getBoolean("burnout");
         this.upright = compoundNBT.getBoolean("upright");
+        if (compoundNBT.getString("baseSide").length()>0)
+            this.baseSide=Side.valueOf(compoundNBT.getString("baseSide"));
+        else
+            baseSide=Side.BOTTOM;
 
         String changeHxString = compoundNBT.getString("changeHx");
         for (Byte b : changeHxString.getBytes())

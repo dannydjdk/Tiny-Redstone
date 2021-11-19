@@ -660,17 +660,21 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     private boolean updateNeighbor(PanelCellPos cellPos, Side side, List<PanelCellPos> cellPosList) {
         PanelCellPos neighborPos = cellPos.offset(side);
 
+        //A null neighbor position means we've reached the edge of the panel, so return true that the outputs have changed
         if (neighborPos == null)
             return true;
 
+        //get the cell that's being notified
         IPanelCell adjacentCell = neighborPos.getIPanelCell();
+        //if it's an observer, check if it's facing the updated panel and if so let it know
         if (adjacentCell instanceof IObservingPanelCell) {
             Side direction1 = neighborPos.getCellFacing();
             Side direction2 = side.getOpposite();
             if (direction1 == direction2) {
                 ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
             }
-        } else if (adjacentCell != null && (!adjacentCell.isIndependentState()||(side==Side.TOP&&adjacentCell.needsSolidBase())))
+        } else if (adjacentCell != null && (!adjacentCell.isIndependentState()||(adjacentCell.needsSolidBase()&&side.getOpposite()==neighborPos.getBaseDirection())))
+            //if a component exists within the cell and is either affected by inputs or needs a solid base and it's base changed, add it to the list to be notified
             cellPosList.add(neighborPos);
 
         return false;
@@ -717,18 +721,22 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             return cellPos.getPanelTile().updateCell(cellPos,iteration);
 
         IPanelCell thisCell = cellPos.getIPanelCell();
-
+        //if there is a cell at this position, notify it of the update and process any of its updates
         if (thisCell != null) {
-
+            //if the cell needs a solid base, check if its base has been removed
             if (thisCell.needsSolidBase()) {
-                PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
-                if (basePos != null && (basePos.getIPanelCell() == null || (!basePos.getIPanelCell().isPushable()) && !(basePos.getIPanelCell() instanceof Piston && basePos.getCellFacing()==Side.TOP ) )) {
+                Side baseDirection = cellPos.getBaseDirection();
+                PanelCellPos basePos = cellPos.offset(baseDirection);
+                if (basePos != null && (basePos.getIPanelCell() == null || (!basePos.getIPanelCell().isPushable()) && !(basePos.getIPanelCell() instanceof Piston && basePos.getCellFacing()==cellPos.getBaseDirection().getOpposite() ) )) {
                     Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
                     change = true;
                 }
             }
-            //TODO consider making this more efficient by only updating affected sides
+
+            //if change is still false (cell hasn't been removed, and this cell is affected by input changes
+            //notify the cell of the input change and check for output changes
             if (!change && !thisCell.isIndependentState() && thisCell.neighborChanged(cellPos)) {
+                //update neighbors if this cell output changed
                 updateNeighborCells(cellPos, iteration + 1);
                 if (thisCell instanceof RedstoneDust) {
                     PanelCellPos above = cellPos.offset(Side.TOP), below = cellPos.offset(Side.BOTTOM);

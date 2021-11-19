@@ -217,10 +217,23 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
                                             : rotationLock;
 
                                     if (panelCell.needsSolidBase()) {
-                                        PanelCellPos basePos = cellPos.offset(Side.BOTTOM);
-                                        if (basePos!=null && (basePos.getIPanelCell()==null || !basePos.getIPanelCell().isPushable()))
-                                        {
+                                        Side attachingSideDir = panelTile.getSideFromDirection(blockHitResult.getDirection()).getOpposite();
+                                        Side attachingSideRel = (attachingSideDir == Side.TOP || attachingSideDir == Side.BOTTOM) ? attachingSideDir : Side.FRONT;
+
+                                        if (
+                                                !cellPos1.equals(cellPos)
+                                                        && (
+                                                        cellPos1.getIPanelCell() == null
+                                                                || !cellPos1.getIPanelCell().isPushable()
+                                                                //check if the cell can attach to the side of the block facing
+                                                                || !panelCell.canAttachToBaseOnSide(attachingSideRel)
+                                                )
+                                        ) {
                                             return null;
+                                        } else {
+                                            panelCell.setBaseSide(attachingSideRel);
+                                            if (attachingSideRel == Side.FRONT)
+                                                cellFacing = attachingSideDir;
                                         }
                                     }
 

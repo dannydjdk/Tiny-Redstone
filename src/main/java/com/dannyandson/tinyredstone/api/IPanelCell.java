@@ -77,6 +77,28 @@ public interface IPanelCell {
     default boolean needsSolidBase(){return false;}
 
     /**
+     * If a solid base is needed, which sides can be used as support.
+     * @param side The side of the cell to face a base: Side.BOTTOM, Side.TOP or Side.FRONT
+     * @return true if this cell can attach to the side in question.
+     */
+    default boolean canAttachToBaseOnSide(Side side){return side==Side.BOTTOM;}
+
+    /**
+     * Getter for base side.
+     * If a solid base is needed, which side of this cell is currently attached
+     * @return either Side.BOTTOM, Side.TOP or Side.FRONT
+     */
+    default Side getBaseSide(){return Side.BOTTOM;}
+
+    /**
+     * Setter for base side.
+     * If a solid base is needed, upon placement, this will be called to set which
+     * side of this cell is to attach to a base tiny block.
+     * @param side Side of this cell to attach to base tiny block. Either Side.BOTTOM, Side.TOP or Side.FRONT
+     */
+    default void setBaseSide(Side side){}
+
+    /**
      * If this cell outputs light, return the level here. Otherwise, return 0.
      * @return Light level to output 0-15
      */

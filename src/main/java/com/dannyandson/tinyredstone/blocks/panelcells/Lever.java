@@ -23,6 +23,7 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
     public static ResourceLocation TEXTURE_LEVER_TOP = new ResourceLocation(TinyRedstone.MODID,"block/lever_top");
     public static ResourceLocation TEXTURE_COBBLESTONE = new ResourceLocation("minecraft","block/cobblestone");
     private boolean active = false;
+    protected Side baseSide=Side.BOTTOM;
     /**
      * Drawing the cell on the panel
      *
@@ -41,7 +42,16 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         float x1 = 0.3125f, x2 = .6875f, y1 = 0.25f, y2 = 0.75f;
         float w = .375f, d = 0.5f,h=0.1875f;
 
-        matrixStack.translate(0,0,h);
+        if (baseSide==Side.FRONT) {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.translate(0,0,h-1);
+        }
+        else if (baseSide==Side.TOP) {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
+            matrixStack.translate(0,-1,h-1);
+        }
+        else
+            matrixStack.translate(0,0,h);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_cobble,combinedLight,alpha);
 
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
@@ -70,7 +80,16 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         y1 = 0;
         y2 = .625f;
 
-        matrixStack.translate(0,0.40625,h/2f);
+        if (baseSide==Side.FRONT) {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.translate(0,0.40625,(h/2f)-1);
+        }
+        else if (baseSide==Side.TOP) {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
+            matrixStack.translate(0,0.40625-1,(h/2f)-1);
+        }
+        else
+            matrixStack.translate(0,0.40625,h/2f);
         matrixStack.mulPose(Vector3f.XP.rotationDegrees((active)?45:135));
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_lever,combinedLight,alpha);
@@ -114,12 +133,12 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
      */
     @Override
     public int getWeakRsOutput(Side outputDirection) {
-        return (active && outputDirection!=Side.TOP)?15:0;
+        return (active && outputDirection!=baseSide.getOpposite())?15:0;
     }
 
     @Override
     public int getStrongRsOutput(Side outputDirection) {
-        return (active && outputDirection==Side.BOTTOM)?15:0;
+        return (active && outputDirection==baseSide)?15:0;
     }
 
     /**
@@ -134,6 +153,17 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public boolean needsSolidBase(){return true;}
+
+    @Override
+    public boolean canAttachToBaseOnSide(Side side) {
+        return true;
+    }
+
+    @Override
+    public Side getBaseSide(){return this.baseSide;}
+
+    @Override
+    public void setBaseSide(Side side){this.baseSide=side;}
 
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.
@@ -162,12 +192,17 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("active",this.active);
+        nbt.putString("baseSide",baseSide.name());
         return nbt;
     }
 
     @Override
     public void readNBT(CompoundNBT compoundNBT) {
         this.active=compoundNBT.getBoolean("active");
+        if (compoundNBT.getString("baseSide").length()>0)
+            this.baseSide=Side.valueOf(compoundNBT.getString("baseSide"));
+        else
+            baseSide=Side.BOTTOM;
     }
 
     @Override
@@ -179,6 +214,10 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public PanelCellVoxelShape getShape()
     {
-        return PanelCellVoxelShape.BUTTONSHAPE;
+        if (baseSide==Side.BOTTOM)
+            return PanelCellVoxelShape.BUTTONSHAPE;
+        if (baseSide==Side.TOP)
+            return PanelCellVoxelShape.BUTTONSHAPE_TOP;
+        return PanelCellVoxelShape.BUTTONSHAPE_FRONT;
     }
 }
