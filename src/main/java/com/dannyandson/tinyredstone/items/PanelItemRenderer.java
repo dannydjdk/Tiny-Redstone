@@ -61,7 +61,7 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
                 }
             }
             else {
-                boolean hasBase = itemTag.getBoolean("hasBase");
+                boolean hasBase = !itemTag.contains("hasBase") || itemTag.getBoolean("hasBase");
 
                 if (hasBase)
                     renderBase(matrixStack,builder,sprite,combinedLight,color);

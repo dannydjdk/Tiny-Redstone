@@ -118,7 +118,7 @@ public class PanelBlock extends BaseEntityBlock {
         Boolean hasBase = context.getItemInHand().getItem()==Registration.REDSTONE_PANEL_ITEM.get();
         if (context.getItemInHand().hasTag()) {
             CompoundTag itemTag = context.getItemInHand().getTag().getCompound("BlockEntityTag");
-            if (!itemTag.getBoolean("hasBase"))
+            if (itemTag.contains("hasBase") && !itemTag.getBoolean("hasBase"))
                 hasBase=false;
         }
         if(hasBase) {
@@ -229,11 +229,18 @@ public class PanelBlock extends BaseEntityBlock {
     @Override
     @SuppressWarnings("deprecation")
     public int getDirectSignal(BlockState state, BlockGetter blockReader, BlockPos pos, Direction directionFromNeighborToThis) {
-        BlockEntity tileentity = blockReader.getBlockEntity(pos);
-        if (tileentity instanceof PanelTile) {
-            PanelTile panelTile = (PanelTile) tileentity;
+        if (blockReader.getBlockEntity(pos) instanceof PanelTile panelTile) {
 
+            //first get strong (direct) power
             Integer power = panelTile.strongPowerToNeighbors.get(panelTile.getSideFromDirection(directionFromNeighborToThis.getOpposite()));
+
+            //if it is not a full signal and vanilla redstone is looking for signals from wires (is it not checking a block for direct power)
+            //and panel tiles are checking signals from wires (they are not checking a block for direct power)
+            //provide the power provided by tiny redstone dust.
+            if ((power==null || power < 15) && Blocks.REDSTONE_WIRE.isSignalSource(state) && PanelTile.getCheckWireSignals()) {
+                Integer power2 = panelTile.wirePowerToNeighbors.get(panelTile.getSideFromDirection(directionFromNeighborToThis.getOpposite()));
+                power = (power==null||(power2!=null && power2>power))?power2:power;
+            }
 
             return (power == null) ? 0 : power;
         }
@@ -464,12 +471,13 @@ public class PanelBlock extends BaseEntityBlock {
                                         Side attachingSideDir = panelTile.getSideFromDirection(blockHitResult.getDirection()).getOpposite();
                                         Side attachingSideRel = (attachingSideDir==Side.TOP || attachingSideDir==Side.BOTTOM)?attachingSideDir:Side.FRONT;
                                         if (
-                                                !posInPanelCell.equals(placementPos)
-                                                        && (
-                                                        posInPanelCell.getIPanelCell() == null
-                                                                || !posInPanelCell.getIPanelCell().isPushable()
-                                                                //check if the cell can attach to the side of the block facing
-                                                                || !cell.canAttachToBaseOnSide(attachingSideRel)
+                                            //check if the cell can attach to the side of the block facing
+                                                !cell.canAttachToBaseOnSide(attachingSideRel) || (
+                                                        //if so, check if it's being placed against a full block
+                                                        !posInPanelCell.equals(placementPos) && (
+                                                                posInPanelCell.getIPanelCell() == null
+                                                                        || !posInPanelCell.getIPanelCell().isPushable()
+                                                        )
                                                 )
                                         ) {
                                             placementOK = false;

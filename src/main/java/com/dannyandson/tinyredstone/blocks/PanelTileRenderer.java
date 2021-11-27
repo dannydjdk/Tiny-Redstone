@@ -214,12 +214,13 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
                                         Side attachingSideRel = (attachingSideDir == Side.TOP || attachingSideDir == Side.BOTTOM) ? attachingSideDir : Side.FRONT;
 
                                         if (
-                                                !cellPos1.equals(cellPos)
-                                                        && (
-                                                        cellPos1.getIPanelCell() == null
-                                                                || !cellPos1.getIPanelCell().isPushable()
-                                                                //check if the cell can attach to the side of the block facing
-                                                                || !panelCell.canAttachToBaseOnSide(attachingSideRel)
+                                            //check if the cell can attach to the side of the block facing
+                                                !panelCell.canAttachToBaseOnSide(attachingSideRel) || (
+                                                        //if so, check if it's being placed against a full block
+                                                        !cellPos1.equals(cellPos) && (
+                                                                cellPos1.getIPanelCell() == null
+                                                                        || !cellPos1.getIPanelCell().isPushable()
+                                                        )
                                                 )
                                         ) {
                                             return null;

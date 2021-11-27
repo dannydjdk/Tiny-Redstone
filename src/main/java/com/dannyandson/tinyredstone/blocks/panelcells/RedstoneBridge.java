@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 
 public class RedstoneBridge extends RedstoneDust {
@@ -93,7 +92,8 @@ public class RedstoneBridge extends RedstoneDust {
                 matrixStack.translate(-1,0,.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color2,alpha);
                 matrixStack.popPose();
-            }        }
+            }
+        }
 
     }
 

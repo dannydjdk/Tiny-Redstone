@@ -23,7 +23,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,10 +36,7 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("NullableProblems")
 public class PanelTile extends BlockEntity {
@@ -50,6 +46,7 @@ public class PanelTile extends BlockEntity {
     private Map<Integer, Side> cellDirections = new HashMap<>();
     protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
+    protected Map<Side, Integer> wirePowerToNeighbors = new HashMap<>();
 
     protected Integer Color = RenderHelper.getTextureDiffusedColor(DyeColor.GRAY);
     private Integer lightOutput = 0;
@@ -64,6 +61,7 @@ public class PanelTile extends BlockEntity {
     protected PanelCellGhostPos panelCellGhostPos;
     protected PanelCellPos panelCellHovering;
     private VoxelShape voxelShape = null;
+    protected static boolean checkWireSignals = true;
 
     public PanelTile(BlockPos p_155229_, BlockState p_155230_) {
         super(Registration.REDSTONE_PANEL_TILE.get(), p_155229_, p_155230_);
@@ -173,6 +171,15 @@ public class PanelTile extends BlockEntity {
                     weakPowerToNeighbors.putInt(Side.BOTTOM.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BOTTOM));
                 parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
             }
+            if (this.wirePowerToNeighbors.size()==5) {
+                CompoundTag wirePowerToNeighbors = new CompoundTag();
+                wirePowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.wirePowerToNeighbors.get(Side.FRONT));
+                wirePowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.wirePowerToNeighbors.get(Side.RIGHT));
+                wirePowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.wirePowerToNeighbors.get(Side.BACK));
+                wirePowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.wirePowerToNeighbors.get(Side.LEFT));
+                wirePowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.wirePowerToNeighbors.get(Side.TOP));
+                parentNBTTagCompound.put("wire_power_outgoing", wirePowerToNeighbors);
+            }
 
             parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
@@ -217,6 +224,14 @@ public class PanelTile extends BlockEntity {
             this.weakPowerToNeighbors.put(Side.TOP,  weakPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
             if (!hasBase())
                 this.weakPowerToNeighbors.put(Side.BOTTOM,  weakPowerToNeighbors.getInt(Side.BOTTOM.ordinal() + ""));
+        }
+        CompoundTag wirePowerToNeighbors = parentNBTTagCompound.getCompound("wire_power_outgoing");
+        if (!wirePowerToNeighbors.isEmpty()) {
+            this.wirePowerToNeighbors.put(Side.FRONT, wirePowerToNeighbors.getInt(Side.FRONT.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.RIGHT, wirePowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.BACK,  wirePowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.LEFT,  wirePowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.TOP,  wirePowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
@@ -321,7 +336,8 @@ public class PanelTile extends BlockEntity {
 
                     //call the tick() method in all our cells and grab any updated pistons
                     List<Integer> pistons = null;
-                    for (Integer index : this.cells.keySet()) {
+                    Set<Integer> keys = new TreeSet<>(this.cells.keySet());
+                    for (Integer index : keys) {
                         PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
                         IPanelCell panelCell = this.cells.get(index);
                         boolean update = panelCell.tick(cellPos);
@@ -804,7 +820,7 @@ public class PanelTile extends BlockEntity {
      */
     protected boolean updateOutputs() {
         boolean change = false;
-        int weak, strong;
+        int weak, strong, wire;
 
         List<Direction> directionsUpdated = new ArrayList<>();
 
@@ -819,19 +835,21 @@ public class PanelTile extends BlockEntity {
             Direction direction = getDirectionFromSide(panelSide);
             BlockState neighborBlockState = level.getBlockState(worldPosition.relative(direction));
             boolean neighborIsWire = PanelCellNeighbor.blockIsRedstoneWire(neighborBlockState.getBlock());
-            weak=0;strong=0;
+            weak=0;strong=0;wire=0;
             List<Integer> indices = getEdgeCellIndices(direction);
             for (int i:indices) {
                 PanelCellPos cellPos = PanelCellPos.fromIndex(this,i);
                 IPanelCell cell = cellPos.getIPanelCell();
                 Side side = getPanelCellSide(cellPos, direction);
-                int cellStrongOutput = (!neighborIsWire && cell instanceof TinyBlock)?0:cell.getStrongRsOutput(side);
+                int cellStrongOutput = ((!neighborIsWire && cell instanceof TinyBlock)||cell instanceof RedstoneDust)?0:cell.getStrongRsOutput(side);
                 int cellWeakOutput = cell.getWeakRsOutput(side);
+                int cellWireOutput = (cell instanceof RedstoneDust)?cellWeakOutput:0;
 
                 if (cell.powerDrops()) {
                     if (neighborIsWire) {
                         cellStrongOutput -= 1;
                         cellWeakOutput -= 1;
+                        cellWireOutput -= 1;
                     }else{
                         cellStrongOutput = 0;
                     }
@@ -847,13 +865,18 @@ public class PanelTile extends BlockEntity {
                 if (cellWeakOutput > weak) {
                     weak = cellWeakOutput;
                 }
+                if (cellWireOutput > wire)
+                    wire = cellWireOutput;
             }
 
             if (strongPowerToNeighbors.get(panelSide) == null || strong != strongPowerToNeighbors.get(panelSide) ||
-                    weakPowerToNeighbors.get(panelSide) == null || weak != weakPowerToNeighbors.get(panelSide)) {
+                    weakPowerToNeighbors.get(panelSide) == null || weak != weakPowerToNeighbors.get(panelSide) ||
+                    wirePowerToNeighbors.get(panelSide) == null || wire != wirePowerToNeighbors.get(panelSide)
+            ) {
                 change = true;
                 strongPowerToNeighbors.put(panelSide, strong);
                 weakPowerToNeighbors.put(panelSide, weak);
+                wirePowerToNeighbors.put(panelSide,wire);
                 directionsUpdated.add(direction);
             }
 
@@ -884,6 +907,16 @@ public class PanelTile extends BlockEntity {
 
         flagOutputUpdate=false;
         return change;
+    }
+
+    /**
+     * Should neighboring blocks be checking for wire signals (from tiny redstone dust) when asking for direct signals?
+     * This is similar to vanilla redstone dust's "shouldSignal" flag which suppresses signal reading from redstone dust
+     * while another redstone dust is querying the inputs into a neighboring block.
+     * @return true if wire signals should be included when a neighbor asks for "direct" signal strength
+     */
+    public static boolean getCheckWireSignals(){
+        return checkWireSignals;
     }
 
     private List<Integer> getEdgeCellIndices(Direction edge) {
@@ -1329,7 +1362,7 @@ public class PanelTile extends BlockEntity {
                         default: //DOWN
                             voxelShape = Block.box(0, 0, 0, 16, 2, 16);
                     }
-                } else if (cells.isEmpty())
+                } else if (cells.isEmpty()||isCrashed())
                 {
                     voxelShape = Block.box(0,0,0,16,0.1,16);
                 } else //we have no base, but we do have cells
