@@ -32,10 +32,7 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PanelTile extends TileEntity implements ITickableTileEntity {
 
@@ -363,7 +360,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
                     //call the tick() method in all our cells and grab any updated pistons
                     List<Integer> pistons = null;
-                    for (Integer index : this.cells.keySet()) {
+                    Set<Integer> keys = new TreeSet<Integer>(this.cells.keySet());
+                    for (Integer index : keys) {
                         PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
                         IPanelCell panelCell = this.cells.get(index);
                         boolean update = panelCell.tick(cellPos);
@@ -967,7 +965,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     protected void handleCrash(Exception e)
     {
         this.flagCrashed=true;
-
+        sync();
         TinyRedstone.LOGGER.error("Redstone Panel Crashed at " + worldPosition.getX() + "," + worldPosition.getY() + "," + worldPosition.getZ(),e);
     }
 
@@ -1326,7 +1324,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         default: //DOWN
                             voxelShape = Block.box(0, 0, 0, 16, 2, 16);
                     }
-                } else if (cells.isEmpty())
+                } else if (cells.isEmpty()||isCrashed())
                 {
                     voxelShape = Block.box(0,0,0,16,0.1,16);
                 } else //we have no base, but we do have cells

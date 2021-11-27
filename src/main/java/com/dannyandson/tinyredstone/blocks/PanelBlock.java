@@ -109,7 +109,7 @@ public class PanelBlock extends Block {
         Boolean hasBase = context.getItemInHand().getItem()==Registration.REDSTONE_PANEL_ITEM.get();
         if (context.getItemInHand().hasTag()) {
             CompoundNBT itemTag = context.getItemInHand().getTag().getCompound("BlockEntityTag");
-            if (!itemTag.getBoolean("hasBase"))
+            if (itemTag.contains("hasBase") && !itemTag.getBoolean("hasBase"))
                 hasBase=false;
         }
         if(hasBase) {
@@ -486,12 +486,13 @@ public class PanelBlock extends Block {
                                         Side attachingSideDir = panelTile.getSideFromDirection(result.getDirection()).getOpposite();
                                         Side attachingSideRel = (attachingSideDir==Side.TOP || attachingSideDir==Side.BOTTOM)?attachingSideDir:Side.FRONT;
                                         if (
-                                                !posInPanelCell.equals(placementPos)
-                                                        && (
-                                                        posInPanelCell.getIPanelCell() == null
-                                                                || !posInPanelCell.getIPanelCell().isPushable()
-                                                                //check if the cell can attach to the side of the block facing
-                                                                || !cell.canAttachToBaseOnSide(attachingSideRel)
+                                            //check if the cell can attach to the side of the block facing
+                                                !cell.canAttachToBaseOnSide(attachingSideRel) || (
+                                                        //if so, check if it's being placed against a full block
+                                                        !posInPanelCell.equals(placementPos) && (
+                                                                posInPanelCell.getIPanelCell() == null
+                                                                        || !posInPanelCell.getIPanelCell().isPushable()
+                                                        )
                                                 )
                                         ) {
                                             placementOK = false;
