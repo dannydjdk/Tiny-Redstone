@@ -37,7 +37,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -336,7 +335,7 @@ public class PanelBlock extends BaseEntityBlock {
     }
 
     @Override
-    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
         BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) te;
@@ -356,7 +355,7 @@ public class PanelBlock extends BaseEntityBlock {
             }
         }
         ItemStack itemStack = getItemWithNBT(world, pos, state);
-        if(itemStack == null) return super.getPickBlock(state, target, world, pos, player);
+        if(itemStack == null) return super.getCloneItemStack(state, target, world, pos, player);
         return itemStack;
     }
 
@@ -418,7 +417,7 @@ public class PanelBlock extends BaseEntityBlock {
 
                                 //do one last sync after covering panel
                                 if (!world.isClientSide)
-                                    world.sendBlockUpdated(pos, state, state, Constants.BlockFlags.BLOCK_UPDATE);
+                                    world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
 
                                 //remove an item from the player's stack
                                 if (!player.isCreative())

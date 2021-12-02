@@ -90,13 +90,10 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
     }
 
     @Override
-    public CompoundTag save(CompoundTag compoundTag) {
-        super.save(compoundTag);
-
+    protected void saveAdditional(CompoundTag compoundTag) {
+        super.saveAdditional(compoundTag);
         compoundTag.put("input_container", this.items.get(0).serializeNBT());
         compoundTag.put("output_container", resultContainer.getItem(0).serializeNBT());
-
-        return compoundTag;
     }
 
     private ChopperItemHandler createHandler() {

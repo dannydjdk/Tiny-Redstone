@@ -44,7 +44,7 @@ public class ClientSetup {
     @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
-        if (!event.getMap().location().equals(InventoryMenu.BLOCK_ATLAS)) {
+        if (!event.getAtlas().location().equals(InventoryMenu.BLOCK_ATLAS)) {
             return;
         }
 

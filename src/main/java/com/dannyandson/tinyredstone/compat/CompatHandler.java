@@ -1,7 +1,6 @@
 package com.dannyandson.tinyredstone.compat;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.compat.theoneprobe.PanelProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
@@ -14,11 +13,11 @@ public class CompatHandler {
     static final ResourceLocation MEASURING_DEVICE = new ResourceLocation(TinyRedstone.MODID, "measuring_device");
     static final ResourceLocation TINY_COMPONENT = new ResourceLocation(TinyRedstone.MODID, "tiny_component");
 
-    public static void register()  {
-        if(ModList.get().isLoaded("theoneprobe")) {
-            InterModComms.sendTo("theoneprobe", "getTheOneProbe", PanelProvider::new);
-        }
-    }
+//    public static void register()  {
+//        if(ModList.get().isLoaded("theoneprobe")) {
+//            InterModComms.sendTo("theoneprobe", "getTheOneProbe", PanelProvider::new);
+//        }
+//    }
 
     public static boolean isMeasuringDevice(Item item) {
         Tag<Item> tag = ItemTags.getAllTags().getTag(CompatHandler.MEASURING_DEVICE);

@@ -32,7 +32,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -84,10 +83,7 @@ public class PanelTile extends BlockEntity {
     @Override
     @Nullable
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        CompoundTag nbtTagCompound = new CompoundTag();
-        this.save(nbtTagCompound);
-        int tileEntityType = -1;  // arbitrary number; only used for vanilla TileEntities.
-        return new ClientboundBlockEntityDataPacket(this.worldPosition, tileEntityType, nbtTagCompound);
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
@@ -102,9 +98,9 @@ public class PanelTile extends BlockEntity {
     /* Creates a tag containing the TileEntity information, used by vanilla to transmit from server to client*/
     @Override
     public CompoundTag getUpdateTag() {
-        CompoundTag nbtTagCompound = new CompoundTag();
-        this.save(nbtTagCompound);
-        return nbtTagCompound;
+        CompoundTag compoundtag = new CompoundTag();
+        this.saveAdditional(compoundtag);
+        return compoundtag;
     }
 
     /* Populates this TileEntity with information from the tag, used by vanilla to transmit from server to client*/
@@ -145,10 +141,10 @@ public class PanelTile extends BlockEntity {
         return compoundTag;
     }
 
-    /* This is where you save any data that you don't want to lose when the tile entity unloads*/
     @Override
-    public CompoundTag save(CompoundTag parentNBTTagCompound) {
-        try {
+    protected void saveAdditional(CompoundTag parentNBTTagCompound) {
+        super.saveAdditional(parentNBTTagCompound);
+       try {
             if (this.strongPowerToNeighbors.size()==5) {
                 CompoundTag strongPowerToNeighbors = new CompoundTag();
                 strongPowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.strongPowerToNeighbors.get(Side.FRONT));
@@ -191,7 +187,7 @@ public class PanelTile extends BlockEntity {
             TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.toString() + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
         }
 
-        return super.save(this.saveToNbt(parentNBTTagCompound));
+        this.saveToNbt(parentNBTTagCompound);
     }
 
     // This is where you load the data that you saved in writeToNBT
@@ -990,7 +986,7 @@ public class PanelTile extends BlockEntity {
     public void sync()
     {
         if (!level.isClientSide && (!isCovered() || panelCover.allowsLightOutput()))
-            this.level.sendBlockUpdated(worldPosition,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+            this.level.sendBlockUpdated(worldPosition,this.getBlockState(),this.getBlockState(), Block.UPDATE_CLIENTS);
         this.setChanged();
     }
 
