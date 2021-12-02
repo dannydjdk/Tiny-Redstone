@@ -32,7 +32,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -990,7 +989,7 @@ public class PanelTile extends BlockEntity {
     public void sync()
     {
         if (!level.isClientSide && (!isCovered() || panelCover.allowsLightOutput()))
-            this.level.sendBlockUpdated(worldPosition,this.getBlockState(),this.getBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
+            this.level.sendBlockUpdated(worldPosition,this.getBlockState(),this.getBlockState(), Block.UPDATE_CLIENTS);
         this.setChanged();
     }
 

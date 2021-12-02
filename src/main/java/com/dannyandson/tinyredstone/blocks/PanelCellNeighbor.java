@@ -189,6 +189,18 @@ public class PanelCellNeighbor {
         return null;
     }
 
+    public BlockPos getBlockPos() {
+        return blockPos;
+    }
+
+    public PanelCellPos getCellPos() {
+        return cellPos;
+    }
+
+    public Side getNeighborsSide() {
+        return neighborsSide;
+    }
+
     public static boolean blockIsRedstoneWire(Block block){
         return blockIsRedstoneWire(block,true);
     }
