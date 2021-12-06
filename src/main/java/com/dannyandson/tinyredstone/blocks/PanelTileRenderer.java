@@ -198,7 +198,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
                     if (PanelBlock.isPanelCellItem(player.getMainHandItem().getItem())) {
                         if (cellPos1 != null) {
                             PanelCellPos cellPos = cellPos1;
-                            if (cellPos.getIPanelCell() != null && (!cellPos.getIPanelCell().hasActivation() || player.isCrouching())) {
+                            if (cellPos.getIPanelCell() != null && (!cellPos.getIPanelCell().hasActivation(player) || player.isCrouching())) {
                                 cellPos = cellPos.offset(panelTile.getSideFromDirection(blockHitResult.getDirection()));
                             }
                             if (cellPos != null && cellPos.getIPanelCell() == null) {

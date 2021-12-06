@@ -124,8 +124,10 @@ public interface IPanelCell {
 
     /**
      * Does this component have an action that is performed on activation (right-click)?
+     * @param player player right-clicking for activation
      * @return true if something happens when the user right-clicks this cell.
      */
+    default boolean hasActivation(Player player){return hasActivation();}
     default boolean hasActivation(){return false;}
 
     CompoundTag writeNBT();
@@ -133,10 +135,16 @@ public interface IPanelCell {
     void readNBT(CompoundTag compoundNBT);
 
     /**
-     * Get the shape of the cell for defining the hit box
+     * Get the shape of the cell for defining the hit box (for simple cube components)
      * @return PanelCellVoxelShape object defining the cell shape
      */
     default PanelCellVoxelShape getShape() {return PanelCellVoxelShape.FULLCELL;}
+
+    /**
+     * Get the shape of the cell for defining the hit box (for complex shapes)
+     * @return array of PanelCellVoxelShape cube objects to be combined to make the complex shape
+     */
+    default PanelCellVoxelShape[] getShapes(PanelCellPos cellPos) {return new PanelCellVoxelShape[]{getShape()};}
 
     /**
      * Called just before the cell is removed from the panel

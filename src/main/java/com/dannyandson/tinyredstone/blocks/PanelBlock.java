@@ -37,7 +37,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -414,11 +413,11 @@ public class PanelBlock extends BaseEntityBlock {
                                 panelTile.panelCover = (IPanelCover) panelCoverObject;
                                 ((IPanelCover) panelCoverObject).onPlace(panelTile,player);
                                 panelTile.flagLightUpdate = true;
-                                panelTile.clearVoxelShape();
+                                panelTile.flagVoxelShapeUpdate();
 
                                 //do one last sync after covering panel
                                 if (!world.isClientSide)
-                                    world.sendBlockUpdated(pos, state, state, Constants.BlockFlags.BLOCK_UPDATE);
+                                    world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
 
                                 //remove an item from the player's stack
                                 if (!player.isCreative())
@@ -429,7 +428,7 @@ public class PanelBlock extends BaseEntityBlock {
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                             TinyRedstone.LOGGER.error("Exception thrown while" + e.getMessage());
                         }
-                    } else if (posInPanelCell.getIPanelCell() != null && !panelTile.isCovered() && posInPanelCell.getIPanelCell().hasActivation() && !player.isCrouching()) {
+                    } else if (posInPanelCell.getIPanelCell() != null && !panelTile.isCovered() && posInPanelCell.getIPanelCell().hasActivation(player) && !player.isCrouching()) {
 
                         //if player clicked on a panel cell, activate it
                         if (posInPanelCell.getIPanelCell().onBlockActivated(posInPanelCell, posInPanelCell.getSegment(), player)) {
@@ -654,7 +653,7 @@ public class PanelBlock extends BaseEntityBlock {
 
             //remove from panel
             panelTile.panelCover = null;
-            panelTile.clearVoxelShape();
+            panelTile.flagVoxelShapeUpdate();
             panelTile.flagSync();
 
         }

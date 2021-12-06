@@ -302,7 +302,7 @@ public class PanelTile extends BlockEntity {
                 }
             }
         }
-        clearVoxelShape();
+        flagVoxelShapeUpdate();
     }
 
     public void removeOutOfRange(Player player) {
@@ -468,9 +468,9 @@ public class PanelTile extends BlockEntity {
         cellPos.getPanelTile().updateNeighborCells(cellPos);
 
         newPos.getPanelTile().flagSync=true;
-        newPos.getPanelTile().clearVoxelShape();
+        newPos.getPanelTile().flagVoxelShapeUpdate();
         cellPos.getPanelTile().flagSync=true;
-        cellPos.getPanelTile().clearVoxelShape();
+        cellPos.getPanelTile().flagVoxelShapeUpdate();
 
         if (cell instanceof IObservingPanelCell)
             ((IObservingPanelCell) cell).frontNeighborUpdated();
@@ -557,7 +557,7 @@ public class PanelTile extends BlockEntity {
 
             updateOutputs();
 
-            clearVoxelShape();
+            flagVoxelShapeUpdate();
             flagSync();
         }catch (PanelOverflowException e) {
             this.handleCrash(e);
@@ -988,8 +988,10 @@ public class PanelTile extends BlockEntity {
 
     public void sync()
     {
-        if (!level.isClientSide && (!isCovered() || panelCover.allowsLightOutput()))
-            this.level.sendBlockUpdated(worldPosition,this.getBlockState(),this.getBlockState(), Block.UPDATE_CLIENTS);
+        if (!level.isClientSide && (!isCovered() || panelCover.allowsLightOutput())) {
+            this.level.sendBlockUpdated(worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_CLIENTS);
+            flagVoxelShapeUpdate();
+        }
         this.setChanged();
     }
 
@@ -1266,7 +1268,7 @@ public class PanelTile extends BlockEntity {
                         updateNeighborCells(below);
                 }
 
-                clearVoxelShape();
+                flagVoxelShapeUpdate();
                 flagSync();
             }catch (PanelOverflowException e){
                 this.handleCrash(e);
@@ -1296,7 +1298,7 @@ public class PanelTile extends BlockEntity {
 
         panelCell.onPlace(cellPos,player);
         updateNeighborCells(cellPos);
-        clearVoxelShape();
+        flagVoxelShapeUpdate();
     }
 
     public boolean hasCellsOnFace(Direction direction)
@@ -1308,75 +1310,85 @@ public class PanelTile extends BlockEntity {
         this.flagSync=true;
     }
 
+    public void flagVoxelShapeUpdate(){
+        this.voxelShape=null;
+    }
+
     public VoxelShape getVoxelShape(){
 
         if (voxelShape==null) {
-            if (isCovered()) {
-                VoxelShape coverShape = panelCover.getShape();
-                if (Shapes.block().equals(coverShape) || this.getBlockState().getValue(BlockStateProperties.FACING) == Direction.DOWN)
-                    voxelShape = coverShape;
-                else {
-                    VoxelShape[] buff = new VoxelShape[]{Shapes.empty()};
-                    switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
-                        case UP:
-                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(minX, 1 - maxY, 1 - maxZ, maxX, 1 - minY, 1 - minZ));
-                            voxelShape = buff[0];
-                            break;
-                        case NORTH:
-                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(minX, 1 - maxZ, minY, maxX, 1 - minZ, maxY));
-                            voxelShape = buff[0];
-                            break;
-                        case EAST:
-                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(1 - maxY, minX, minZ, 1 - minY, maxX, maxZ));
-                            voxelShape = buff[0];
-                            break;
-                        case SOUTH:
-                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(minX, minZ, 1 - maxY, maxX, maxZ, 1 - minY));
-                            voxelShape = buff[0];
-                            break;
-                        case WEST:
-                            coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(minY, 1 - maxX, minZ, maxY, 1 - minX, maxZ));
-                            voxelShape = buff[0];
-                            break;
-                    }
-                }
-            } else {
-                if (hasBase()) {
-                    switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
-                        case UP:
-                            voxelShape = Block.box(0, 14, 0, 16, 16, 16);
-                            break;
-                        case NORTH:
-                            voxelShape = Block.box(0, 0, 0, 16, 16, 2);
-                            break;
-                        case EAST:
-                            voxelShape = Block.box(14, 0, 0, 16, 16, 16);
-                            break;
-                        case SOUTH:
-                            voxelShape = Block.box(0, 0, 14, 16, 16, 16);
-                            break;
-                        case WEST:
-                            voxelShape = Block.box(0, 0, 0, 2, 16, 16);
-                            break;
-                        default: //DOWN
-                            voxelShape = Block.box(0, 0, 0, 16, 2, 16);
-                    }
-                } else if (cells.isEmpty()||isCrashed())
-                {
-                    voxelShape = Block.box(0,0,0,16,0.1,16);
-                } else //we have no base, but we do have cells
-                    voxelShape = Shapes.empty();
-
-                for (Integer index : cells.keySet()) {
-                    PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
-                    VoxelShape cellVoxelShape = getCellVoxelShape(cellPos);
-                    if (cellVoxelShape != null)
-                        voxelShape = Shapes.or(voxelShape, cellVoxelShape);
-                }
-            }
+            updateVoxelShape();
         }
 
         return voxelShape;
+    }
+
+    private void updateVoxelShape()
+    {
+        TinyRedstone.LOGGER.info("updating voxel shape at " + getBlockPos().toShortString() + ": " + ((level.isClientSide)?"client":"server"));
+        if (isCovered()) {
+            VoxelShape coverShape = panelCover.getShape();
+            if (Shapes.block().equals(coverShape) || this.getBlockState().getValue(BlockStateProperties.FACING) == Direction.DOWN)
+                voxelShape = coverShape;
+            else {
+                VoxelShape[] buff = new VoxelShape[]{Shapes.empty()};
+                switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
+                    case UP:
+                        coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(minX, 1 - maxY, 1 - maxZ, maxX, 1 - minY, 1 - minZ));
+                        voxelShape = buff[0];
+                        break;
+                    case NORTH:
+                        coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(minX, 1 - maxZ, minY, maxX, 1 - minZ, maxY));
+                        voxelShape = buff[0];
+                        break;
+                    case EAST:
+                        coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(1 - maxY, minX, minZ, 1 - minY, maxX, maxZ));
+                        voxelShape = buff[0];
+                        break;
+                    case SOUTH:
+                        coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(minX, minZ, 1 - maxY, maxX, maxZ, 1 - minY));
+                        voxelShape = buff[0];
+                        break;
+                    case WEST:
+                        coverShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> buff[0] = Shapes.box(minY, 1 - maxX, minZ, maxY, 1 - minX, maxZ));
+                        voxelShape = buff[0];
+                        break;
+                }
+            }
+        } else {
+            if (hasBase()) {
+                switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
+                    case UP:
+                        voxelShape = Block.box(0, 14, 0, 16, 16, 16);
+                        break;
+                    case NORTH:
+                        voxelShape = Block.box(0, 0, 0, 16, 16, 2);
+                        break;
+                    case EAST:
+                        voxelShape = Block.box(14, 0, 0, 16, 16, 16);
+                        break;
+                    case SOUTH:
+                        voxelShape = Block.box(0, 0, 14, 16, 16, 16);
+                        break;
+                    case WEST:
+                        voxelShape = Block.box(0, 0, 0, 2, 16, 16);
+                        break;
+                    default: //DOWN
+                        voxelShape = Block.box(0, 0, 0, 16, 2, 16);
+                }
+            } else if (cells.isEmpty()||isCrashed())
+            {
+                voxelShape = Block.box(0,0,0,16,0.1,16);
+            } else //we have no base, but we do have cells
+                voxelShape = Shapes.empty();
+
+            for (Integer index : cells.keySet()) {
+                PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
+                VoxelShape cellVoxelShape = getCellVoxelShape(cellPos);
+                if (cellVoxelShape != null)
+                    voxelShape = Shapes.or(voxelShape, cellVoxelShape);
+            }
+        }
     }
 
     @CheckForNull
@@ -1386,36 +1398,36 @@ public class PanelTile extends BlockEntity {
         {
             IPanelCell cell = cellPos.getIPanelCell();
             if (cell != null) {
-                PanelCellVoxelShape cellShape = cell.getShape();
-                float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
-                float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
-                float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
-                float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
-                float levelStart = ((hasBase())?2:0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
-                float levelEnd = ((hasBase())?2:0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
+                VoxelShape voxelShape = Shapes.empty();
+                Direction thisFacing = this.getBlockState().getValue(BlockStateProperties.FACING);
+                PanelCellVoxelShape[] cellShapes = cell.getShapes(cellPos);
+                for (PanelCellVoxelShape cellShape : cellShapes) {
+                    float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
+                    float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
+                    float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
+                    float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
+                    float levelStart = ((hasBase()) ? 2 : 0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
+                    float levelEnd = ((hasBase()) ? 2 : 0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
 
-                switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
-                    case UP:
-                        return Block.box(rowStart, 16 - levelEnd, 16 - columnEnd, rowEnd, 16 - levelStart, 16 - columnStart);
-                    case NORTH:
-                        return Block.box(rowStart, 16 - columnEnd, levelStart, rowEnd, 16 - columnStart, levelEnd);
-                    case EAST:
-                        return Block.box(16 - levelEnd, rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd);
-                    case SOUTH:
-                        return Block.box(rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd, 16 - levelStart);
-                    case WEST:
-                       return Block.box(levelStart, 16 - rowEnd, columnStart, levelEnd, 16 - rowStart, columnEnd);
-                    default: //DOWN
-                        return Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd);
+                    switch (thisFacing) {
+                        case UP:
+                            voxelShape = Shapes.or(voxelShape,Block.box(rowStart, 16 - levelEnd, 16 - columnEnd, rowEnd, 16 - levelStart, 16 - columnStart));
+                        case NORTH:
+                            voxelShape = Shapes.or(voxelShape, Block.box(rowStart, 16 - columnEnd, levelStart, rowEnd, 16 - columnStart, levelEnd));
+                        case EAST:
+                            voxelShape = Shapes.or(voxelShape, Block.box(16 - levelEnd, rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd));
+                        case SOUTH:
+                            voxelShape = Shapes.or(voxelShape, Block.box(rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd, 16 - levelStart));
+                        case WEST:
+                            voxelShape = Shapes.or(voxelShape, Block.box(levelStart, 16 - rowEnd, columnStart, levelEnd, 16 - rowStart, columnEnd));
+                        default: //DOWN
+                            voxelShape = Shapes.or(voxelShape, Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
+                    }
                 }
+                return voxelShape;
             }
         }
         return null;
-    }
-
-    public void clearVoxelShape()
-    {
-        voxelShape=null;
     }
 
     public void onBlockDestroy() {
