@@ -392,7 +392,7 @@ public class PanelBlock extends BaseEntityBlock {
                         if(world.isClientSide)
                             TinyBlockGUI.open(panelTile, posInPanelCell.getIndex(), (IColorablePanelCell)posInPanelCell.getIPanelCell());
                         handled = true;
-                    } else if (heldItem instanceof DyeItem) {
+                    } else if (heldItem instanceof DyeItem && posInPanelCell.getIPanelCell()==null) {
                         //dye the panel if right clicking with a dye
                         int color = RenderHelper.getTextureDiffusedColor(((DyeItem) heldItem).getDyeColor());
                         if (color != panelTile.Color) {

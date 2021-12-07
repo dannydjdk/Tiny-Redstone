@@ -1325,7 +1325,7 @@ public class PanelTile extends BlockEntity {
 
     private void updateVoxelShape()
     {
-        TinyRedstone.LOGGER.info("updating voxel shape at " + getBlockPos().toShortString() + ": " + ((level.isClientSide)?"client":"server"));
+        TinyRedstone.LOGGER.debug("updating voxel shape at " + getBlockPos().toShortString() + ": " + ((level.isClientSide)?"client":"server"));
         if (isCovered()) {
             VoxelShape coverShape = panelCover.getShape();
             if (Shapes.block().equals(coverShape) || this.getBlockState().getValue(BlockStateProperties.FACING) == Direction.DOWN)
