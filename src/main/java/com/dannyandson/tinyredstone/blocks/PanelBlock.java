@@ -407,7 +407,7 @@ public class PanelBlock extends Block {
                         if(world.isClientSide)
                             TinyBlockGUI.open(panelTile, posInPanelCell.getIndex(), (IColorablePanelCell)posInPanelCell.getIPanelCell());
                         handled = true;
-                    } else if (heldItem instanceof DyeItem) {
+                    } else if (heldItem instanceof DyeItem && posInPanelCell.getIPanelCell()==null) {
                         //dye the panel if right clicking with a dye
                         int color = ((DyeItem) heldItem).getDyeColor().getColorValue();
                         if (color != panelTile.Color) {
@@ -429,7 +429,7 @@ public class PanelBlock extends Block {
                                 panelTile.panelCover = (IPanelCover) panelCoverObject;
                                 ((IPanelCover) panelCoverObject).onPlace(panelTile,player);
                                 panelTile.flagLightUpdate = true;
-                                panelTile.clearVoxelShape();
+                                panelTile.flagVoxelShapeUpdate();
 
                                 //do one last sync after covering panel
                                 if (!world.isClientSide)
@@ -445,7 +445,7 @@ public class PanelBlock extends Block {
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                             TinyRedstone.LOGGER.error("Exception thrown while" + e.getMessage());
                         }
-                    } else if (posInPanelCell.getIPanelCell() != null && !panelTile.isCovered() && posInPanelCell.getIPanelCell().hasActivation() && !player.isCrouching()) {
+                    } else if (posInPanelCell.getIPanelCell() != null && !panelTile.isCovered() && posInPanelCell.getIPanelCell().hasActivation(player) && !player.isCrouching()) {
 
                         //if player clicked on a panel cell, activate it
                         if (posInPanelCell.getIPanelCell().onBlockActivated(posInPanelCell, posInPanelCell.getSegment(), player)) {
@@ -665,7 +665,7 @@ public class PanelBlock extends Block {
 
             //remove from panel
             panelTile.panelCover = null;
-            panelTile.clearVoxelShape();
+            panelTile.flagVoxelShapeUpdate();
             panelTile.flagSync();
 
         }

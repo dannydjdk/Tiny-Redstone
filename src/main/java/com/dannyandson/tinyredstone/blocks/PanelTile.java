@@ -310,7 +310,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                 }
             }
         }
-        clearVoxelShape();
+        flagVoxelShapeUpdate();
     }
 
     /**
@@ -496,10 +496,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         newPos.getPanelTile().setChanged();
         newPos.getPanelTile().flagSync=true;
-        newPos.getPanelTile().clearVoxelShape();
+        newPos.getPanelTile().flagVoxelShapeUpdate();
         cellPos.getPanelTile().setChanged();
         cellPos.getPanelTile().flagSync=true;
-        cellPos.getPanelTile().clearVoxelShape();
+        cellPos.getPanelTile().flagVoxelShapeUpdate();
 
         if (cell instanceof IObservingPanelCell)
             ((IObservingPanelCell) cell).frontNeighborUpdated();
@@ -582,7 +582,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         updateOutputs();
 
-        clearVoxelShape();
+        flagVoxelShapeUpdate();
         flagSync();
 
     }
@@ -1232,7 +1232,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     updateNeighborCells(below);
             }
 
-            clearVoxelShape();
+            flagVoxelShapeUpdate();
             flagSync();
         }
     }
@@ -1259,7 +1259,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
 
         panelCell.onPlace(cellPos,player);
         updateNeighborCells(cellPos);
-        clearVoxelShape();
+        flagVoxelShapeUpdate();
     }
 
     public boolean hasCellsOnFace(Direction direction)
@@ -1348,34 +1348,39 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         {
             IPanelCell cell = cellPos.getIPanelCell();
             if (cell != null) {
-                PanelCellVoxelShape cellShape = cell.getShape();
-                float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
-                float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
-                float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
-                float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
-                float levelStart = ((hasBase())?2:0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
-                float levelEnd = ((hasBase())?2:0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
+                VoxelShape voxelShape = VoxelShapes.empty();
+                Direction thisFacing = this.getBlockState().getValue(BlockStateProperties.FACING);
+                PanelCellVoxelShape[] cellShapes = cell.getShapes(cellPos);
+                for (PanelCellVoxelShape cellShape : cellShapes) {
+                    float rowStart = cellPos.getRow() * 2f + (float) cellShape.getPoint1().x * 2f;
+                    float rowEnd = cellPos.getRow() * 2f + (float) cellShape.getPoint2().x * 2f;
+                    float columnStart = cellPos.getColumn() * 2f + (float) cellShape.getPoint1().z * 2f;
+                    float columnEnd = cellPos.getColumn() * 2f + (float) cellShape.getPoint2().z * 2f;
+                    float levelStart = ((hasBase()) ? 2 : 0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint1().y * 2f;
+                    float levelEnd = ((hasBase()) ? 2 : 0) + cellPos.getLevel() * 2f + (float) cellShape.getPoint2().y * 2f;
 
-                switch (this.getBlockState().getValue(BlockStateProperties.FACING)) {
-                    case UP:
-                        return Block.box(rowStart, 16 - levelEnd, 16 - columnEnd, rowEnd, 16 - levelStart, 16 - columnStart);
-                    case NORTH:
-                        return Block.box(rowStart, 16 - columnEnd, levelStart, rowEnd, 16 - columnStart, levelEnd);
-                    case EAST:
-                        return Block.box(16 - levelEnd, rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd);
-                    case SOUTH:
-                        return Block.box(rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd, 16 - levelStart);
-                    case WEST:
-                        return Block.box(levelStart, 16 - rowEnd, columnStart, levelEnd, 16 - rowStart, columnEnd);
-                    default: //DOWN
-                        return Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd);
+                    switch (thisFacing) {
+                        case UP:
+                            voxelShape = VoxelShapes.or(voxelShape,Block.box(rowStart, 16 - levelEnd, 16 - columnEnd, rowEnd, 16 - levelStart, 16 - columnStart));
+                        case NORTH:
+                            voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, 16 - columnEnd, levelStart, rowEnd, 16 - columnStart, levelEnd));
+                        case EAST:
+                            voxelShape = VoxelShapes.or(voxelShape, Block.box(16 - levelEnd, rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd));
+                        case SOUTH:
+                            voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd, 16 - levelStart));
+                        case WEST:
+                            voxelShape = VoxelShapes.or(voxelShape, Block.box(levelStart, 16 - rowEnd, columnStart, levelEnd, 16 - rowStart, columnEnd));
+                        default: //DOWN
+                            voxelShape = VoxelShapes.or(voxelShape, Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
+                    }
                 }
+                return voxelShape;
             }
         }
         return null;
     }
 
-    public void clearVoxelShape()
+    public void flagVoxelShapeUpdate()
     {
         voxelShape=null;
     }
