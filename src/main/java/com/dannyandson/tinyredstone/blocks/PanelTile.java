@@ -793,6 +793,9 @@ public class PanelTile extends BlockEntity {
             return Side.TOP;
         if (cellDirection==panelSide.rotateBack())
             return Side.BOTTOM;
+        if (cellDirection==Side.TOP || cellDirection==Side.BOTTOM){
+            return panelSide;
+        }
 
         return null;
     }
@@ -1412,14 +1415,19 @@ public class PanelTile extends BlockEntity {
                     switch (thisFacing) {
                         case UP:
                             voxelShape = Shapes.or(voxelShape,Block.box(rowStart, 16 - levelEnd, 16 - columnEnd, rowEnd, 16 - levelStart, 16 - columnStart));
+                            break;
                         case NORTH:
                             voxelShape = Shapes.or(voxelShape, Block.box(rowStart, 16 - columnEnd, levelStart, rowEnd, 16 - columnStart, levelEnd));
+                            break;
                         case EAST:
                             voxelShape = Shapes.or(voxelShape, Block.box(16 - levelEnd, rowStart, columnStart, 16 - levelStart, rowEnd, columnEnd));
+                            break;
                         case SOUTH:
                             voxelShape = Shapes.or(voxelShape, Block.box(rowStart, columnStart, 16 - levelEnd, rowEnd, columnEnd, 16 - levelStart));
+                            break;
                         case WEST:
                             voxelShape = Shapes.or(voxelShape, Block.box(levelStart, 16 - rowEnd, columnStart, levelEnd, 16 - rowStart, columnEnd));
+                            break;
                         default: //DOWN
                             voxelShape = Shapes.or(voxelShape, Block.box(rowStart, levelStart, columnStart, rowEnd, levelEnd, columnEnd));
                     }

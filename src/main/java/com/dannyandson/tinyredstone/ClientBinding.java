@@ -1,10 +1,10 @@
 package com.dannyandson.tinyredstone;
 
+import com.dannyandson.tinyredstone.api.AbstractPanelCellItem;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
-import com.dannyandson.tinyredstone.items.PanelCellItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -44,7 +44,7 @@ public class ClientBinding {
             final ItemStack mainHand = player.getMainHandItem();
             final Item mainHandItem = mainHand.getItem();
 
-            if (mainHandItem instanceof PanelCellItem) {
+            if (mainHandItem instanceof AbstractPanelCellItem) {
                 RotationLock.removeLock();
             }
         }
@@ -61,7 +61,7 @@ public class ClientBinding {
         final ItemStack mainHand = player.getMainHandItem();
         final Item mainHandItem = mainHand.getItem();
 
-        if (mainHandItem instanceof PanelCellItem) {
+        if (mainHandItem instanceof AbstractPanelCellItem) {
             if(rotationLock.isDown()) {
                 Vec3 lookVector = Minecraft.getInstance().hitResult.getLocation();
                 BlockPos blockPos = new BlockPos(lookVector);
