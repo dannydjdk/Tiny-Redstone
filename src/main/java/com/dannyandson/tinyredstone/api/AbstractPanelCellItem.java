@@ -13,6 +13,7 @@ import net.minecraft.world.item.context.UseOnContext;
 /**
  * Helpful abstract class for panel cell items to inherit.
  * Prevents redstone panels from being broken when hit with a panel cell item.
+ * Allows rotation locking.
  * Also referenced by left click event to prevent creative players from breaking panels.
  */
 public abstract class AbstractPanelCellItem extends Item {

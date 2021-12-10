@@ -37,7 +37,7 @@ public class TinyRedstone {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
 
-        //CompatHandler.register();
+        CompatHandler.register();
     }
 
     public static void registerPanelCell(Class<? extends IPanelCell> iPanelCellClass, Item correspondingItem)
