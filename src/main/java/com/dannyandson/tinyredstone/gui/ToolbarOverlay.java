@@ -1,10 +1,10 @@
 package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.api.AbstractPanelCellItem;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.blocks.Side;
-import com.dannyandson.tinyredstone.items.PanelCellItem;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MainWindow;
@@ -33,7 +33,7 @@ public class ToolbarOverlay {
             if (!player.isSpectator()) {
                 final int currentSlot = player.inventory.selected;
                 final ItemStack stack = player.inventory.items.get(currentSlot);
-                if (stack.getItem() instanceof PanelCellItem) {
+                if (stack.getItem() instanceof AbstractPanelCellItem) {
                     final MainWindow window = event.getWindow();
                     final Side rotationLock = RotationLock.getRotationLock();
 

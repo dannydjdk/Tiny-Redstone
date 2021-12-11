@@ -171,7 +171,7 @@ public class PanelCellPos {
 
         boolean panel1HasBase = panelTile.hasBase();
         //TODO consider support for linking panels facing in different directions
-        if (cellPos==null && (!panel1HasBase || (side!=Side.TOP && side!=Side.BOTTOM)))
+        if (cellPos==null && !(panel1HasBase && side==Side.BOTTOM))
         {
             Direction direction = panelTile.getDirectionFromSide(side);
             TileEntity te = panelTile.getLevel().getBlockEntity(panelTile.getBlockPos().relative(direction));
@@ -189,11 +189,11 @@ public class PanelCellPos {
                         neighborColumn = (column - 7) * -1;
                         neighborLevel = level+levelOffset;
                     } else if (side==Side.TOP||side==Side.BOTTOM) {
-                        if (panel2HasBase)
+                        if ((panel2HasBase && side == Side.TOP) )
                             return null;
                         neighborRow = row;
                         neighborColumn = column;
-                        neighborLevel = (level - 7) * -1;
+                        neighborLevel = (side == Side.TOP)?0:(level - 7) * -1 + levelOffset;
                     }
                     else{
                         neighborRow = (row - 7) * -1;
