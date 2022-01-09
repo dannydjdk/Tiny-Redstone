@@ -271,6 +271,11 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.level.getLightEngine().checkBlock(worldPosition);
         }
 
+        if (!level.isClientSide) {
+            flagUpdate = true;
+        }
+
+
     }
 
     public void loadCellsFromNBT(CompoundNBT parentNBTTagCompound,boolean fixFacing)
@@ -404,6 +409,8 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                         updateSide(Side.RIGHT);
                         updateSide(Side.BACK);
                         updateSide(Side.LEFT);
+                        updateSide(Side.TOP);
+                        updateSide(Side.BOTTOM);
                     }
                     if (dirty || flagUpdate) {
                         setChanged();
