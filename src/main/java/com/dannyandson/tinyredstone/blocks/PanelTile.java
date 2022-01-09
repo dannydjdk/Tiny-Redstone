@@ -264,6 +264,21 @@ public class PanelTile extends BlockEntity {
             this.level.getLightEngine().checkBlock(worldPosition);
         }
 
+        if (!level.isClientSide) {
+            try {
+                updateSide(Side.FRONT);
+                updateSide(Side.RIGHT);
+                updateSide(Side.BACK);
+                updateSide(Side.LEFT);
+                updateSide(Side.TOP);
+                updateSide(Side.BOTTOM);
+
+                flagOutputUpdate();
+            } catch (PanelOverflowException e){
+                this.handleCrash(e);
+            }
+        }
+
     }
 
     public void loadCellsFromNBT(CompoundTag parentNBTTagCompound)
