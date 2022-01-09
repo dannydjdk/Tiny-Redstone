@@ -10,20 +10,13 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class LightCover  implements IPanelCover {
+public class LightCover  extends DarkCover {
 
     public static ResourceLocation TEXTURE_LIGHT_COVER = new ResourceLocation(TinyRedstone.MODID,"block/light_cover");
 
-    /**
-     * Drawing the cover on the panel
-     */
     @Override
-    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, int color) {
-        float x1 = 0, x2 = 1, y1 = 0.125f, y2 = 1;
-        TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_LIGHT_COVER);
-        matrixStack.translate(0, y2, 1);
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
-        RenderHelper.drawCube(matrixStack,buffer.getBuffer(RenderType.solid()),sprite,combinedLight,color,1f);
+    protected ResourceLocation getDefaultResourceLocation() {
+        return TEXTURE_LIGHT_COVER;
     }
 
     /**

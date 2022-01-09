@@ -64,7 +64,7 @@ public class TrimCover implements IPanelCover {
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, int color) {
         if (xMin ==null)setDefaultBoundaries();
-        if (sprite==null)sprite = RenderHelper.getSprite(DarkCover.TEXTURE_DARK_COVER);
+        if (sprite==null)sprite = RenderHelper.getSprite(DarkCover.TEXTURE_DEFAULT_COVER);
 
         //south face (+z)
         matrixStack.translate(0, 0, zMax);

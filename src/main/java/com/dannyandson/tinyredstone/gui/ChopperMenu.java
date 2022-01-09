@@ -2,6 +2,7 @@ package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
+import com.dannyandson.tinyredstone.network.PushChopperOutputType;
 import com.dannyandson.tinyredstone.network.ValidTinyBlockCacheSync;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.block.Block;
@@ -19,6 +20,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.Arrays;
 import java.util.List;
@@ -56,15 +58,17 @@ public class ChopperMenu extends Container {
     private final CraftResultInventory resultContainer;
     private Slot inputSlot;
     private Slot outputSlot;
+    private String itemType = "Tiny Block";
 
     protected ChopperMenu(int containerId, PlayerInventory playerInventory, IInventory container) {
         super(Registration.CUTTER_MENU_TYPE.get(), containerId);
         checkContainerSize(container, 1);
 
         this.container = container;
-        if (container instanceof ChopperBlockEntity ) {
-            ChopperBlockEntity chopperBlockEntity = (ChopperBlockEntity)container;
+        if (container instanceof ChopperBlockEntity) {
+            ChopperBlockEntity chopperBlockEntity = (ChopperBlockEntity) container;
             chopperBlockEntity.setCutterMenu(this);
+            chopperBlockEntity.setItemType(itemType);
             this.resultContainer = chopperBlockEntity.getResultContainer();
         } else
             this.resultContainer = new CraftResultInventory();
@@ -99,49 +103,62 @@ public class ChopperMenu extends Container {
             this.addSlot(new Slot(playerInventory, hotbarSlot, leftCol + hotbarSlot * 18, ySize - 24));
         }
 
+        setupResultSlot();
+
     }
 
     void setupResultSlot() {
-        ItemStack inputStack = this.inputSlot.getItem();
-        ItemStack outputStack = ItemStack.EMPTY;
-        Item item = inputStack.getItem();
+        if (this.inputSlot != null) {
+            ItemStack inputStack = this.inputSlot.getItem();
+            ItemStack outputStack = ItemStack.EMPTY;
+            Item item = inputStack.getItem();
 
-        if (inputStack.getItem() instanceof BlockItem) {
-            Block inputBlock = ((BlockItem)item).getBlock();
-            BlockState inputBlockState = inputBlock.defaultBlockState();
-            Material material = inputBlock.defaultBlockState().getMaterial();
+            if (inputStack.getItem() instanceof BlockItem) {
+                Block inputBlock = ((BlockItem) item).getBlock();
+                BlockState inputBlockState = inputBlock.defaultBlockState();
+                Material material = inputBlock.defaultBlockState().getMaterial();
 
-            if (container instanceof ChopperBlockEntity) {
-                ChopperBlockEntity chopperBlockEntity = (ChopperBlockEntity) container;
-                boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
-                if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasTileEntity()) {
-                    ResourceLocation inputRegistryName = inputBlock.getRegistryName();
-                    if (!Registration.TINY_BLOCK_OVERRIDES.hasUsableTexture(inputRegistryName)){
-                        if (!chopperBlockEntity.getLevel().isClientSide)
-                            ModNetworkHandler.sendToNearestClient(new ValidTinyBlockCacheSync(chopperBlockEntity.getBlockPos(),inputRegistryName),chopperBlockEntity.getLevel(),chopperBlockEntity.getBlockPos());
-                    }
-                    else if (inputBlock.getRegistryName()!=null){
-                        CompoundNBT madeFromTag = new CompoundNBT();
-                        madeFromTag.putString("namespace", inputBlock.getRegistryName().getNamespace());
-                        madeFromTag.putString("path", inputBlock.getRegistryName().getPath());
-                        if (solidMaterials.contains(material)) {
-                            outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
-                            outputStack.setCount(8);
-                            if(!inputBlock.getRegistryName().toString().equals("minecraft:white_wool"))
+                if (container instanceof ChopperBlockEntity) {
+                    ChopperBlockEntity chopperBlockEntity = (ChopperBlockEntity) container;
+                    boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
+                    if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasTileEntity()) {
+                        ResourceLocation inputRegistryName = inputBlock.getRegistryName();
+                        if (!Registration.TINY_BLOCK_OVERRIDES.hasUsableTexture(inputRegistryName)) {
+                            if (!chopperBlockEntity.getLevel().isClientSide)
+                                ModNetworkHandler.sendToNearestClient(new ValidTinyBlockCacheSync(chopperBlockEntity.getBlockPos(), inputRegistryName), chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
+                        } else if (inputBlock.getRegistryName() != null) {
+                            CompoundNBT madeFromTag = new CompoundNBT();
+                            madeFromTag.putString("namespace", inputBlock.getRegistryName().getNamespace());
+                            madeFromTag.putString("path", inputBlock.getRegistryName().getPath());
+                            if (getItemType().equals("Dark Cover")) {
+                                outputStack = Registration.PANEL_COVER_DARK.get().getDefaultInstance();
+                                outputStack.setCount(2);
                                 outputStack.addTagElement("made_from", madeFromTag);
-                        } else if (transparentMaterials.contains(material)) {
-                            outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
-                            outputStack.setCount(8);
-                            if(!inputBlock.getRegistryName().toString().equals("minecraft:glass"))
+                            } else if (getItemType().equals("Light Cover")) {
+                                outputStack = Registration.PANEL_COVER_LIGHT.get().getDefaultInstance();
+                                outputStack.setCount(2);
                                 outputStack.addTagElement("made_from", madeFromTag);
+                            } else {
+                                if (solidMaterials.contains(material)) {
+                                    outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
+                                    outputStack.setCount(8);
+                                    if (!inputBlock.getRegistryName().toString().equals("minecraft:white_wool"))
+                                        outputStack.addTagElement("made_from", madeFromTag);
+                                } else if (transparentMaterials.contains(material)) {
+                                    outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
+                                    outputStack.setCount(8);
+                                    if (!inputBlock.getRegistryName().toString().equals("minecraft:glass"))
+                                        outputStack.addTagElement("made_from", madeFromTag);
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
 
-        this.outputSlot.set(outputStack);
-        this.broadcastChanges();
+            this.outputSlot.set(outputStack);
+            this.broadcastChanges();
+        }
     }
 
     @Override
@@ -162,8 +179,8 @@ public class ChopperMenu extends Container {
                 if (!this.moveItemStackTo(itemstack1, 2, this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-                if(index==1)
-                    this.outputSlot.onTake(player,itemstack);
+                if (index == 1)
+                    this.outputSlot.onTake(player, itemstack);
             } else if (!this.moveItemStackTo(itemstack1, 0, 1, false)) {
                 return ItemStack.EMPTY;
             }
@@ -182,6 +199,22 @@ public class ChopperMenu extends Container {
     @Override
     public boolean stillValid(PlayerEntity player) {
         return this.container.stillValid(player);
+    }
+
+    public String getItemType() {
+        if (this.container instanceof ChopperBlockEntity)
+            return ((ChopperBlockEntity) this.container).getItemType();
+        return itemType;
+    }
+
+    public void toggleItemType(BlockPos pos) {
+        if (itemType == "Tiny Block")
+            itemType = "Dark Cover";
+        else if (itemType == "Dark Cover")
+            itemType = "Light Cover";
+        else if (itemType == "Light Cover")
+            itemType = "Tiny Block";
+        ModNetworkHandler.sendToServer(new PushChopperOutputType(itemType, pos));
     }
 
 }

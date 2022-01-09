@@ -1,5 +1,5 @@
 {
-  "parent": "item/handheld",
+  "parent": "builtin/entity",
   "textures": {
     "layer0": "tinyredstone:block/light_cover"
   },
