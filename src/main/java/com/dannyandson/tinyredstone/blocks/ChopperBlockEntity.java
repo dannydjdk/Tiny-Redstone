@@ -31,6 +31,7 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
 
     private final ChopperItemHandler itemHandler = createHandler();
     private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> itemHandler);
+    private String itemType = "Tiny Block";
 
 
     public ChopperBlockEntity(BlockPos pos, BlockState state) {
@@ -86,7 +87,7 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
 
         this.items.set(0, ItemStack.of(compoundTag.getCompound("input_container")));
         this.resultContainer.setItem(0, ItemStack.of(compoundTag.getCompound("output_container")));
-
+        this.itemType = compoundTag.getString("output_type");
     }
 
     @Override
@@ -95,7 +96,7 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
 
         compoundTag.put("input_container", this.items.get(0).serializeNBT());
         compoundTag.put("output_container", resultContainer.getItem(0).serializeNBT());
-
+        compoundTag.putString("output_type", itemType);
         return compoundTag;
     }
 
@@ -118,4 +119,13 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
         handler.invalidate();
     }
 
+    public String getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(String itemType) {
+        this.itemType = itemType;
+        if(this.chopperMenu != null)
+            this.chopperMenu.slotsChanged(null);
+    }
 }

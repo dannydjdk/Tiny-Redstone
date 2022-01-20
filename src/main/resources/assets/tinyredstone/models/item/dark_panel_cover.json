@@ -1,11 +1,48 @@
 {
-  "parent": "item/handheld",
+  "parent": "builtin/entity",
   "textures": {
-    "layer0": "tinyredstone:block/dark_cover"
+    "layer0": "tinyredstone:block/light_cover"
   },
   "display": {
-    "gui" : {
-      "scale": [0.7,0.7,0.7]
+    "gui": {
+      "rotation": [60, 45, 0],
+      "translation": [0.2, -6, 0.2],
+      "scale":[0.55, 0.55, 0.55]
+    },
+    "ground": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 3, 0],
+      "scale": [0.22, 0.22, 0.22]
+    },
+    "head": {
+      "rotation": [0, 180, 0],
+      "translation": [0, 0.5, 0],
+      "scale":[0.5,0.5, 0.5]
+    },
+    "fixed": {
+      "rotation": [0,0, 0],
+      "translation": [-11, 11, 8],
+      "scale":[0.65,0.65,0.65]
+    },
+    "thirdperson_righthand": {
+      "rotation": [75, 315, 0],
+      "translation": [-8, 4, 4],
+      "scale": [0.35, 0.35, 0.35]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [75, 0, 0],
+      "translation": [4,-4,4],
+      "scale": [0.35, 0.35, 0.35]
+    },
+    "firstperson_righthand": {
+      "rotation": [75, 315, 0],
+      "translation": [-6, 0, 4],
+      "scale": [0.32, 0.32, 0.32]
+    },
+    "firstperson_lefthand": {
+      "rotation": [75, 240, 0],
+      "translation": [-6, 0, 4],
+      "scale": [0.32, 0.32, 0.32]
     }
   }
 }
