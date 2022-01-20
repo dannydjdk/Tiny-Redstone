@@ -10,11 +10,10 @@ import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
 import com.dannyandson.tinyredstone.gui.BlueprintGUI;
 import com.dannyandson.tinyredstone.setup.ModSetup;
+import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
+import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResult;
@@ -61,9 +60,20 @@ public class Blueprint extends Item {
     @Nonnull
     public ActionResultType useOn(ItemUseContext context) {
         TileEntity te = context.getLevel().getBlockEntity(context.getClickedPos());
-        if (te instanceof PanelTile)
-        {
-            PanelTile panelTile = (PanelTile)te;
+        PanelTile panelTile = null;
+        if (te instanceof PanelTile) {
+            panelTile = (PanelTile) te;
+        } else {
+            ItemStack itemStackCopy = context.getItemInHand().copy();
+            BlockItemUseContext bpContext = new BlockItemUseContext(context);
+            ((BlockItem) Registration.REDSTONE_PANEL_ITEM.get()).place(bpContext);
+            context.getPlayer().setItemInHand(context.getHand(),itemStackCopy);
+            te = context.getLevel().getBlockEntity(bpContext.getClickedPos());
+            if (te instanceof PanelTile) {
+                panelTile = (PanelTile) te;
+            }
+        }
+        if (panelTile != null) {
             if (context.getItemInHand().getTag() !=null && context.getItemInHand().getTag().contains("blueprint"))
             {
                 PlayerEntity player = context.getPlayer();

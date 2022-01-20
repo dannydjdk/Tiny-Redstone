@@ -271,7 +271,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             this.level.getLightEngine().checkBlock(worldPosition);
         }
 
-        if (!level.isClientSide) {
+        if (level!=null && !level.isClientSide) {
             flagUpdate = true;
         }
 
