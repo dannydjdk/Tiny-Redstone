@@ -267,7 +267,7 @@ public class PanelTile extends BlockEntity {
             this.level.getLightEngine().checkBlock(worldPosition);
         }
 
-        if (!level.isClientSide) {
+        if (level!=null && !level.isClientSide) {
             try {
                 updateSide(Side.FRONT);
                 updateSide(Side.RIGHT);
