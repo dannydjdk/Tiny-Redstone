@@ -3,7 +3,9 @@ package com.dannyandson.tinyredstone.items;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -16,6 +18,10 @@ public class PanelCoverItem extends PanelCellItem{
         );
     }
 
+    @Override
+    public ActionResultType useOn(ItemUseContext context) {
+        return ActionResultType.PASS;
+    }
 
     @Override
     public ITextComponent getName(ItemStack stack) {
