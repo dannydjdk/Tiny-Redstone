@@ -3,17 +3,21 @@ package com.dannyandson.tinyredstone.gui;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implements MenuAccess<ChopperMenu> {
 
     public static final ResourceLocation CUTTER_GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/block_chopper.png");
     private ChopperMenu chopperMenu;
+    private Button itemTypeButton = null;
 
     public ChopperScreen(ChopperMenu chopperMenu, Inventory playerInventory, Component title) {
         super(chopperMenu, playerInventory, title);
@@ -21,6 +25,24 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
         this.chopperMenu = chopperMenu;
         this.imageWidth = 184;
         this.imageHeight = 184;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        itemTypeButton=new Button(leftPos+(imageWidth/2)-35,topPos+18,70,20,Component.nullToEmpty(chopperMenu.getItemType()),button->toggleItemType());
+        addRenderableWidget(itemTypeButton);
+    }
+
+    private void toggleItemType(){
+        if (this.minecraft.hitResult instanceof BlockHitResult) {
+
+            chopperMenu.toggleItemType(new BlockPos(((BlockHitResult) this.minecraft.hitResult).getBlockPos()));
+
+            removeWidget(itemTypeButton);
+            itemTypeButton = new Button(leftPos + (imageWidth / 2) - 35, topPos + 18, 70, 20, Component.nullToEmpty(chopperMenu.getItemType()), button -> toggleItemType());
+            addRenderableWidget(itemTypeButton);
+        }
     }
 
     @Override

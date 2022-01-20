@@ -91,6 +91,12 @@ public class ModNetworkHandler {
                 .decoder(ValidTinyBlockCacheSync::new)
                 .consumer(ValidTinyBlockCacheSync::handle)
                 .add();
+
+        INSTANCE.messageBuilder(PushChopperOutputType.class,nextID())
+                .encoder(PushChopperOutputType::toBytes)
+                .decoder(PushChopperOutputType::new)
+                .consumer(PushChopperOutputType::handle)
+                .add();
     }
 
     public static void sendToClient(Object packet, ServerPlayer player) {
