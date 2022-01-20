@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.api;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -23,16 +24,19 @@ public abstract class AbstractPanelCellItem extends Item {
 
     @Override
     public ActionResultType useOn(ItemUseContext context) {
-        ItemStack itemStackCopy = context.getItemInHand().copy();
-        ActionResultType result = Registration.REDSTONE_PANEL_ITEM.get().useOn(context);
-        context.getPlayer().setItemInHand(context.getHand(),itemStackCopy);
+        if (Config.ALLOW_WORLD_PLACEMENT.get()) {
+            ItemStack itemStackCopy = context.getItemInHand().copy();
+            ActionResultType result = Registration.REDSTONE_PANEL_ITEM.get().useOn(context);
+            context.getPlayer().setItemInHand(context.getHand(), itemStackCopy);
 
-        TileEntity te = context.getLevel().getBlockEntity(context.getClickedPos().offset(context.getClickedFace().getNormal()));
-        if(te instanceof PanelTile && context.getPlayer()!=null) {
-            PanelTile panelTile = (PanelTile) te;
-            Registration.REDSTONE_PANEL_BLOCK.get().use(panelTile.getBlockState(),context.getLevel(),panelTile.getBlockPos(), context.getPlayer(),context.getHand(),panelTile.getPlayerCollisionHitResult(context.getPlayer()));
+            TileEntity te = context.getLevel().getBlockEntity(context.getClickedPos().offset(context.getClickedFace().getNormal()));
+            if (te instanceof PanelTile && context.getPlayer() != null) {
+                PanelTile panelTile = (PanelTile) te;
+                Registration.REDSTONE_PANEL_BLOCK.get().use(panelTile.getBlockState(), context.getLevel(), panelTile.getBlockPos(), context.getPlayer(), context.getHand(), panelTile.getPlayerCollisionHitResult(context.getPlayer()));
+            }
+            return result;
         }
-        return result;
+        return super.useOn(context);
     }
 
 

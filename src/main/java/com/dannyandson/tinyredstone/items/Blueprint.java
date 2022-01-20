@@ -63,7 +63,7 @@ public class Blueprint extends Item {
         PanelTile panelTile = null;
         if (te instanceof PanelTile) {
             panelTile = (PanelTile) te;
-        } else {
+        } else if (Config.ALLOW_WORLD_PLACEMENT.get()){
             ItemStack itemStackCopy = context.getItemInHand().copy();
             BlockItemUseContext bpContext = new BlockItemUseContext(context);
             ((BlockItem) Registration.REDSTONE_PANEL_ITEM.get()).place(bpContext);
