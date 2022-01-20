@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.api;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.setup.Registration;
@@ -23,13 +24,16 @@ public abstract class AbstractPanelCellItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        ItemStack itemStackCopy = context.getItemInHand().copy();
-        InteractionResult result = Registration.REDSTONE_PANEL_ITEM.get().useOn(context);
-        context.getPlayer().setItemInHand(context.getHand(),itemStackCopy);
-        if(context.getLevel().getBlockEntity(context.getClickedPos().offset(context.getClickedFace().getNormal())) instanceof PanelTile panelTile && context.getPlayer()!=null) {
-            Registration.REDSTONE_PANEL_BLOCK.get().use(panelTile.getBlockState(),context.getLevel(),panelTile.getBlockPos(), context.getPlayer(),context.getHand(),panelTile.getPlayerCollisionHitResult(context.getPlayer()));
+        if (Config.ALLOW_WORLD_PLACEMENT.get()) {
+            ItemStack itemStackCopy = context.getItemInHand().copy();
+            InteractionResult result = Registration.REDSTONE_PANEL_ITEM.get().useOn(context);
+            context.getPlayer().setItemInHand(context.getHand(), itemStackCopy);
+            if (context.getLevel().getBlockEntity(context.getClickedPos().offset(context.getClickedFace().getNormal())) instanceof PanelTile panelTile && context.getPlayer() != null) {
+                Registration.REDSTONE_PANEL_BLOCK.get().use(panelTile.getBlockState(), context.getLevel(), panelTile.getBlockPos(), context.getPlayer(), context.getHand(), panelTile.getPlayerCollisionHitResult(context.getPlayer()));
+            }
+            return result;
         }
-        return result;
+        return super.useOn(context);
     }
 
     /**

@@ -20,6 +20,7 @@ public class Config {
     public static ForgeConfigSpec.IntValue SUPER_REPEATER_MAX;
     public static ForgeConfigSpec.IntValue CIRCUIT_MAX_ITERATION;
     public static ForgeConfigSpec.ConfigValue<List<String>> REDSTONE_WIRE_LIST;
+    public static ForgeConfigSpec.BooleanValue ALLOW_WORLD_PLACEMENT;
 
     static {
 
@@ -46,6 +47,9 @@ public class Config {
                 "\n(Since each repeater can extend signal 2 full blocks.)" +
                 "\nVery large numbers may degrade performance and potentially risk crash. (default=32)")
                 .defineInRange("max_zero_tick_run",32,4,512);
+
+        ALLOW_WORLD_PLACEMENT = SERVER_BUILDER.comment("Allow components to be placed anywhere, not just on panels. (default: true)")
+                .define("allow_world_placement",true);
 
         List<String> redstoneWires = new ArrayList<>(Arrays.asList("redstonepen:track", "cb_multipart:multipart"));
         REDSTONE_WIRE_LIST = SERVER_BUILDER.comment("List of blocks from other mods to be treated as redstone wire.")
