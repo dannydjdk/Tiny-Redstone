@@ -147,8 +147,13 @@ public class PanelBlock extends BaseEntityBlock {
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState p_60578_, BlockGetter p_60579_, BlockPos p_60580_) {
-        return getCollisionShape(p_60578_,p_60579_,p_60580_,CollisionContext.empty());
+    public VoxelShape getOcclusionShape(BlockState state, BlockGetter source, BlockPos pos) {
+        BlockEntity te =  source.getBlockEntity(pos);
+        if(te instanceof PanelTile)
+        {
+            return ((PanelTile) te).getVoxelShape();
+        }
+        return Shapes.empty();
     }
 
     @Override
@@ -158,7 +163,7 @@ public class PanelBlock extends BaseEntityBlock {
         {
             return ((PanelTile) te).getVoxelShape();
         }
-        return Shapes.empty();
+        return Block.box(7, 7, 7,8, 8, 8);
     }
 
     /**
