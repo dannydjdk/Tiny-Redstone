@@ -55,6 +55,9 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
             mods {
                 tinyredstone {
                     source sourceSets.main
@@ -135,16 +138,15 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.18.1-39.0.0'
-
-    //implementation fg.deobf('curse.maven:theoneprobe-245211:3430022')
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.46'
 
     implementation fg.deobf('curse.maven:jei-238222:3550020')
     implementation fg.deobf('curse.maven:theoneprobe-245211:3550084')
     implementation fg.deobf('curse.maven:jade-324717:3544015')
 
     //implementation fg.deobf('curse.maven:redstonepen-461710:3480057')
-
+    implementation fg.deobf('curse.maven:flywheel-486392:3623314')
+    implementation fg.deobf('curse.maven:create-328085:3623348')
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

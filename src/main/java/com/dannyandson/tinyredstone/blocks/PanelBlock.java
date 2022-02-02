@@ -153,6 +153,10 @@ public class PanelBlock extends BaseEntityBlock {
         {
             return ((PanelTile) te).getVoxelShape();
         }
+
+        if (state.hasProperty(Registration.HAS_PANEL_BASE) && state.getValue(Registration.HAS_PANEL_BASE))
+            return BASE.get(state.getValue(BlockStateProperties.FACING));
+
         return Shapes.empty();
     }
 
@@ -163,7 +167,15 @@ public class PanelBlock extends BaseEntityBlock {
         {
             return ((PanelTile) te).getVoxelShape();
         }
-        return Block.box(7, 7, 7,8, 8, 8);
+        if (state.hasProperty(Registration.HAS_PANEL_BASE) && state.getValue(Registration.HAS_PANEL_BASE))
+            return BASE.get(state.getValue(BlockStateProperties.FACING));
+        if (context == CollisionContext.empty()) {
+            //if there's no PanelTile and an empty context, Minecraft is caching the shape for the block state
+            //this is used to calculate light blocking and also when mods like Create query block state collisions
+            //without providing context
+            return Block.box(2, 2, 2, 14, 14, 14);
+        }
+        return Shapes.empty();
     }
 
     /**
