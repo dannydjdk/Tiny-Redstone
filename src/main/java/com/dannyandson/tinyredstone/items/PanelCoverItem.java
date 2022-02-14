@@ -7,6 +7,7 @@ import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class PanelCoverItem extends PanelCellItem{
@@ -33,7 +34,7 @@ public class PanelCoverItem extends PanelCellItem{
             if (madeFromTag.contains("namespace")) {
                 fromBlockName = (new TranslationTextComponent("block." + madeFromTag.getString("namespace") + "." + madeFromTag.getString("path"))).getString();
             }
-            return ITextComponent.nullToEmpty(thisName + " (" + fromBlockName + ")");
+            return new StringTextComponent(thisName + " (" + fromBlockName + ")");
         }
 
         return super.getName(stack);

@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class TinyBlockItem extends PanelCellItem {
@@ -36,7 +37,7 @@ public class TinyBlockItem extends PanelCellItem {
                 fromBlockName = new TranslationTextComponent("block.minecraft.glass").getString();
             }
         }
-        return ITextComponent.nullToEmpty(thisName + " (" + fromBlockName + ")");
+        return new StringTextComponent(thisName + " (" + fromBlockName + ")");
     }
 
 }
