@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.16.5-1.13.1'
+version = '1.16.5-1.13.3'
 group = 'com.dannyandson.tinyredstone' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'tinyredstone'
 
@@ -21,6 +21,7 @@ def top_version = '1.16:1.16-3.1.4-22'
 def hwyla_version = '1.10.11-B78_1.16.2'
 def include_project_red = false
 def include_redstone_pen = false
+def include_create = true
 
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -54,6 +55,11 @@ minecraft {
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
+
+            if (include_create) {
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            }
 
             mods {
                 tinyredstone {
@@ -168,6 +174,12 @@ dependencies {
 
     if (include_redstone_pen)
         implementation fg.deobf('curse.maven:redstonepen-461710:3348960')
+
+
+    if(include_create) {
+        implementation fg.deobf('curse.maven:flywheel-486392:3535459')
+        implementation fg.deobf('curse.maven:create-328085:3536025')
+    }
 
 }
 
