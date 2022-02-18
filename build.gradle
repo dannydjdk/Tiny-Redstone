@@ -13,9 +13,12 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.18-3.1.1'
+version = '1.18-3.1.2'
 group = 'com.dannyandson.tinyredstone' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'tinyredstone'
+
+def include_create = true
+def include_redstone_pen = false
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -55,8 +58,10 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            if (include_create) {
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            }
 
             mods {
                 tinyredstone {
@@ -144,9 +149,13 @@ dependencies {
     implementation fg.deobf('curse.maven:theoneprobe-245211:3550084')
     implementation fg.deobf('curse.maven:jade-324717:3544015')
 
-    //implementation fg.deobf('curse.maven:redstonepen-461710:3480057')
-    implementation fg.deobf('curse.maven:flywheel-486392:3623314')
-    implementation fg.deobf('curse.maven:create-328085:3623348')
+    if (include_redstone_pen)
+        implementation fg.deobf('curse.maven:redstonepen-461710:3480057')
+
+    if(include_create) {
+        implementation fg.deobf('curse.maven:flywheel-486392:3623314')
+        implementation fg.deobf('curse.maven:create-328085:3623348')
+    }
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
