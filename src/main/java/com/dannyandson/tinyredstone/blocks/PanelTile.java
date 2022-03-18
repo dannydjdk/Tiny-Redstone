@@ -1455,6 +1455,20 @@ public class PanelTile extends BlockEntity {
             PanelCellPos pos = PanelCellPos.fromIndex(this, index);
             cells.get(index).onRemove(pos);
         }
+
+        this.wirePowerToNeighbors.clear();
+        this.weakPowerToNeighbors.clear();
+        this.strongPowerToNeighbors.clear();
+
+        level.updateNeighborsAt(worldPosition,this.getBlockState().getBlock());
+        for (Direction direction : Direction.values()) {
+            BlockPos neighborPos = worldPosition.relative(direction);
+            BlockState neighborBlockState = level.getBlockState(neighborPos);
+            if (neighborBlockState!=null && neighborBlockState.canOcclude())
+                level.updateNeighborsAt(neighborPos,neighborBlockState.getBlock());
+        }
+
+
     }
 
     public BlockHitResult getPlayerCollisionHitResult(Player player) {
