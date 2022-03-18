@@ -3,9 +3,7 @@ package com.dannyandson.tinyredstone.compat;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.compat.theoneprobe.PanelProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.ModList;
@@ -21,19 +19,18 @@ public class CompatHandler {
     }
 
     public static boolean isMeasuringDevice(Item item) {
-        Tag<Item> tag = ItemTags.getAllTags().getTag(CompatHandler.MEASURING_DEVICE);
-        return tag != null && tag.contains(item);
+        for (TagKey<Item> tagKey: item.getDefaultInstance().getTags().toList()) {
+            if (tagKey.location().compareTo(CompatHandler.MEASURING_DEVICE)==0)
+                return true;
+        }
+        return false;
     }
 
     public static boolean isTinyComponent(Item item) {
-        TagCollection<Item> collection = ItemTags.getAllTags();
-        Tag<Item> tag = collection.getTag(CompatHandler.MEASURING_DEVICE);
-        if(tag == null || !tag.contains(item)) {
-            tag = collection.getTag(CompatHandler.TINY_COMPONENT);
-            if(tag == null || !tag.contains(item)) {
-                return false;
-            }
+        for (TagKey<Item> tagKey: item.getDefaultInstance().getTags().toList()) {
+            if (tagKey.location().compareTo(CompatHandler.TINY_COMPONENT)==0)
+                return true;
         }
-        return true;
+        return false;
     }
 }
