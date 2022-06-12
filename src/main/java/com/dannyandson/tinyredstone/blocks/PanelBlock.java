@@ -154,9 +154,6 @@ public class PanelBlock extends BaseEntityBlock {
             return ((PanelTile) te).getVoxelShape();
         }
 
-        if (state.hasProperty(Registration.HAS_PANEL_BASE) && state.getValue(Registration.HAS_PANEL_BASE))
-            return BASE.get(state.getValue(BlockStateProperties.FACING));
-
         return Shapes.empty();
     }
 
