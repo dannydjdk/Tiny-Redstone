@@ -5,7 +5,6 @@ import com.dannyandson.tinyredstone.setup.ModSetup;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -22,9 +21,9 @@ public class PanelCellItem extends AbstractPanelCellItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags) {
         if (Screen.hasShiftDown()) {
-            list.add(new TranslatableComponent("message.item.redstone_panel_cell").withStyle(ChatFormatting.GRAY));
-            list.add(new TranslatableComponent("message." + this.getDescriptionId()).withStyle(ChatFormatting.RED));
+            list.add(Component.translatable("message.item.redstone_panel_cell").withStyle(ChatFormatting.GRAY));
+            list.add(Component.translatable("message." + this.getDescriptionId()).withStyle(ChatFormatting.RED));
         } else
-            list.add(new TranslatableComponent("tinyredstone.tooltip.press_shift").withStyle(ChatFormatting.DARK_GRAY));
+            list.add(Component.translatable("tinyredstone.tooltip.press_shift").withStyle(ChatFormatting.DARK_GRAY));
     }
 }

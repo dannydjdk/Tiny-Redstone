@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 
@@ -24,7 +24,7 @@ public class PanelCrashGUI  extends Screen {
     private final PanelTile panelTile;
 
     protected PanelCrashGUI(PanelTile panelTile) {
-        super(new TranslatableComponent("tinyredstone:crashGUI"));
+        super(Component.translatable("tinyredstone:crashGUI"));
         this.panelTile = panelTile;
     }
 
@@ -36,7 +36,7 @@ public class PanelCrashGUI  extends Screen {
         addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EE0000));
 
-        TranslatableComponent crashTextComponent = new TranslatableComponent((panelTile.isCrashed())?"tinyredstone.gui.crash.msg":"tinyredstone.gui.overflow.msg");
+        Component crashTextComponent = Component.translatable((panelTile.isCrashed())?"tinyredstone.gui.crash.msg":"tinyredstone.gui.overflow.msg");
         int lineY = relY+2;
         for (String line : crashTextComponent.getString().split("\n",5))
         {
@@ -45,8 +45,8 @@ public class PanelCrashGUI  extends Screen {
         }
 
 
-        addRenderableWidget(new Button(relX + 60, relY + 68, 60, 20, new TranslatableComponent("tinyredstone.enable"), button -> enable()));
-        addRenderableWidget(new Button(relX + 140, relY + 68, 60, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
+        addRenderableWidget(new Button(relX + 60, relY + 68, 60, 20, Component.translatable("tinyredstone.enable"), button -> enable()));
+        addRenderableWidget(new Button(relX + 140, relY + 68, 60, 20, Component.translatable("tinyredstone.close"), button -> close()));
 
 
     }

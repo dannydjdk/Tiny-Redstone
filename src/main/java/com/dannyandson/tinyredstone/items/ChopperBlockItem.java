@@ -4,7 +4,6 @@ import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -22,7 +21,7 @@ public class ChopperBlockItem extends BlockItem {
 
     @Override
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag flag) {
-        list.add(new TranslatableComponent("message." + this.getDescriptionId()).withStyle(ChatFormatting.DARK_GRAY));
+        list.add(Component.translatable("message." + this.getDescriptionId()).withStyle(ChatFormatting.DARK_GRAY));
     }
 
 }

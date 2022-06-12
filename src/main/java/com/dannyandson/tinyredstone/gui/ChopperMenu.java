@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Arrays;
 import java.util.List;
@@ -124,14 +125,14 @@ public class ChopperMenu extends AbstractContainerMenu {
                 if (container instanceof ChopperBlockEntity chopperBlockEntity) {
                     boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
                     if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasBlockEntity()) {
-                        ResourceLocation inputRegistryName = inputBlock.getRegistryName();
+                        ResourceLocation inputRegistryName = ForgeRegistries.BLOCKS.getKey(inputBlock);
                         if (!Registration.TINY_BLOCK_OVERRIDES.hasUsableTexture(inputRegistryName)) {
                             if (!chopperBlockEntity.getLevel().isClientSide)
                                 ModNetworkHandler.sendToNearestClient(new ValidTinyBlockCacheSync(chopperBlockEntity.getBlockPos(), inputRegistryName), chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
-                        } else if (inputBlock.getRegistryName() != null) {
+                        } else if (ForgeRegistries.BLOCKS.getKey(inputBlock) != null) {
                             CompoundTag madeFromTag = new CompoundTag();
-                            madeFromTag.putString("namespace", inputBlock.getRegistryName().getNamespace());
-                            madeFromTag.putString("path", inputBlock.getRegistryName().getPath());
+                            madeFromTag.putString("namespace", ForgeRegistries.BLOCKS.getKey(inputBlock).getNamespace());
+                            madeFromTag.putString("path", ForgeRegistries.BLOCKS.getKey(inputBlock).getPath());
                             if (getItemType().equals("Dark Cover")) {
                                 outputStack = Registration.PANEL_COVER_DARK.get().getDefaultInstance();
                                 outputStack.setCount(2);
@@ -144,12 +145,12 @@ public class ChopperMenu extends AbstractContainerMenu {
                                 if (solidMaterials.contains(material)) {
                                     outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
-                                    if (!inputBlock.getRegistryName().toString().equals("minecraft:white_wool"))
+                                    if (!ForgeRegistries.BLOCKS.getKey(inputBlock).toString().equals("minecraft:white_wool"))
                                         outputStack.addTagElement("made_from", madeFromTag);
                                 } else if (transparentMaterials.contains(material)) {
                                     outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
-                                    if (!inputBlock.getRegistryName().toString().equals("minecraft:glass"))
+                                    if (!ForgeRegistries.BLOCKS.getKey(inputBlock).toString().equals("minecraft:glass"))
                                         outputStack.addTagElement("made_from", madeFromTag);
                                 }
                             }

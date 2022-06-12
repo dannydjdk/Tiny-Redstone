@@ -12,7 +12,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.PointerBuffer;
@@ -37,7 +37,7 @@ public class BlueprintGUI  extends Screen {
     private Button button;
 
     protected BlueprintGUI(ItemStack blueprint) {
-        super(new TranslatableComponent("tinyredstone.gui.blueprint.msg"));
+        super(Component.translatable("tinyredstone.gui.blueprint.msg"));
         this.blueprint=blueprint;
     }
 
@@ -48,12 +48,12 @@ public class BlueprintGUI  extends Screen {
 
         addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addRenderableWidget(new Button(relX + 20, relY + 50, 80, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
+        addRenderableWidget(new Button(relX + 20, relY + 50, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
 
         if (this.blueprint.hasTag())
-            button=new Button(relX + 20, relY + 20, 80, 20, new TranslatableComponent("tinyredstone.export"), button -> exportToFile());
+            button=new Button(relX + 20, relY + 20, 80, 20, Component.translatable("tinyredstone.export"), button -> exportToFile());
         else
-            button=new Button(relX + 20, relY + 20, 80, 20, new TranslatableComponent("tinyredstone.import"), button -> importFromFile());
+            button=new Button(relX + 20, relY + 20, 80, 20, Component.translatable("tinyredstone.import"), button -> importFromFile());
 
         addRenderableWidget(button);
 
@@ -97,7 +97,7 @@ public class BlueprintGUI  extends Screen {
                 filters.flip();
 
                 String path = TinyFileDialogs.tinyfd_saveFileDialog(
-                        new TranslatableComponent("tinyredstone.save_file").getString(),
+                        Component.translatable("tinyredstone.save_file").getString(),
                         "blueprint.json", filters, null
                 );
                 this.dialogOpen=false;
@@ -137,7 +137,7 @@ public class BlueprintGUI  extends Screen {
 
 
                 String path = TinyFileDialogs.tinyfd_openFileDialog(
-                        new TranslatableComponent("tinyredstone.choose_file").getString(),
+                        Component.translatable("tinyredstone.choose_file").getString(),
                         null, filters, "JSON File (*.json)", false
                 );
                 this.dialogOpen=false;

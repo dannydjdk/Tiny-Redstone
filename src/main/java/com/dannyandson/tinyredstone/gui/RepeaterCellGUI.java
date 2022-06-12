@@ -11,7 +11,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public class RepeaterCellGUI extends Screen {
@@ -27,7 +26,7 @@ public class RepeaterCellGUI extends Screen {
     private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     protected RepeaterCellGUI(PanelTile panelTile, Integer cellIndex, Repeater repeaterCell) {
-        super(new TranslatableComponent("tinyredstone:repeaterGUI"));
+        super(Component.translatable("tinyredstone:repeaterGUI"));
         this.panelTile = panelTile;
         this.cellIndex = cellIndex;
         this.repeaterCell = repeaterCell;
@@ -45,10 +44,10 @@ public class RepeaterCellGUI extends Screen {
 
         addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addRenderableWidget(new Button(relX + 35, relY + 48, 80, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
+        addRenderableWidget(new Button(relX + 35, relY + 48, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
         addRenderableWidget(this.tickCount);
 
-        addRenderableWidget(new ModWidget(relX,relY+3,WIDTH-2,20,new TranslatableComponent("tinyredstone.gui.repeater.msg")))
+        addRenderableWidget(new ModWidget(relX,relY+3,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg")))
             .setTextHAlignment(ModWidget.HAlignment.CENTER);
         addRenderableWidget(new Button(relX + 10, relY + 15, 20, 20, Component.nullToEmpty("--"), button -> changeTicks(-20)));
         addRenderableWidget(new Button(relX + 35, relY + 15, 20, 20, Component.nullToEmpty("-"), button -> changeTicks(-2)));

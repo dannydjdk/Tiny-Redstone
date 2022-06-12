@@ -4,7 +4,6 @@ import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -52,7 +51,7 @@ public class RedstoneWrench extends Item {
     @Override
     public  void  appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags)
     {
-        list.add(new TranslatableComponent("message.item.redstone_wrench"));
+        list.add(Component.translatable("message.item.redstone_wrench"));
     }
 
     public boolean canPlayerBreakBlockWhileHolding(BlockState state, Level worldIn, BlockPos pos, Player player) {

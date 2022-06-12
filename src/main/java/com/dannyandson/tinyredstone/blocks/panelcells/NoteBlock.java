@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -142,7 +142,7 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     @Override
     public void addInfo(IOverlayBlockInfo overlayBlockInfo, PanelTile panelTile, PosInPanelCell pos) {
-        overlayBlockInfo.addText("Instrument", new TranslatableComponent("tinyredstone.noteblock." + this.instrument).getString() );
+        overlayBlockInfo.addText("Instrument", Component.translatable("tinyredstone.noteblock." + this.instrument).getString() );
         overlayBlockInfo.addText("Note", this.pitch + " (" + noteNames[this.pitch%12] + ")");
     }
 

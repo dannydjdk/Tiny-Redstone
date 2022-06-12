@@ -5,7 +5,6 @@ import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +46,7 @@ public class PanelItem extends BlockItem {
     @Override
     public  void  appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags)
     {
-        list.add(new TranslatableComponent("message.item.redstone_panel"));
+        list.add(Component.translatable("message.item.redstone_panel"));
     }
 
 

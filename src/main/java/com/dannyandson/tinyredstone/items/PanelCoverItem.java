@@ -4,7 +4,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -43,7 +42,7 @@ public class PanelCoverItem extends PanelCellItem{
             CompoundTag itemNBT = stack.getTag();
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
-                fromBlockName = (new TranslatableComponent("block." + madeFromTag.getString("namespace") + "." + madeFromTag.getString("path"))).getString();
+                fromBlockName = (Component.translatable("block." + madeFromTag.getString("namespace") + "." + madeFromTag.getString("path"))).getString();
             }
             return Component.nullToEmpty(thisName + " (" + fromBlockName + ")");
         }

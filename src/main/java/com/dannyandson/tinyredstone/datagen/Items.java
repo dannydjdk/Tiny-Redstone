@@ -6,6 +6,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class Items extends ItemModelProvider {
 
@@ -15,7 +16,7 @@ public class Items extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        singleTexture(Registration.REDSTONE_PANEL_ITEM.get().getRegistryName().getPath(), new ResourceLocation("item/handheld"),
+        singleTexture(ForgeRegistries.ITEMS.getKey(Registration.REDSTONE_PANEL_ITEM.get()).getPath(), new ResourceLocation("item/handheld"),
                 "layer0", new ResourceLocation(TinyRedstone.MODID, "item/redstone_panel"));
     }
 }

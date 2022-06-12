@@ -9,7 +9,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 public class ClearPanelGUI extends Screen {
@@ -22,7 +22,7 @@ public class ClearPanelGUI extends Screen {
     private final PanelTile panelTile;
 
     protected ClearPanelGUI(PanelTile panelTile) {
-        super(new TranslatableComponent("tinyredstone.gui.clearpanel.msg"));
+        super(Component.translatable("tinyredstone.gui.clearpanel.msg"));
         this.panelTile=panelTile;
     }
 
@@ -34,10 +34,10 @@ public class ClearPanelGUI extends Screen {
         addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
 
-        addRenderableWidget(new ModWidget(relX,relY+10,WIDTH,20,new TranslatableComponent("tinyredstone.gui.clearpanel.msg")))
+        addRenderableWidget(new ModWidget(relX,relY+10,WIDTH,20,Component.translatable("tinyredstone.gui.clearpanel.msg")))
             .setTextHAlignment(ModWidget.HAlignment.CENTER);
-        addRenderableWidget(new Button(relX + 20, relY + 30, 80, 20, new TranslatableComponent("tinyredstone.yes"), button -> removeCells()));
-        addRenderableWidget(new Button(relX + 120, relY + 30, 80, 20, new TranslatableComponent("tinyredstone.cancel"), button -> close()));
+        addRenderableWidget(new Button(relX + 20, relY + 30, 80, 20, Component.translatable("tinyredstone.yes"), button -> removeCells()));
+        addRenderableWidget(new Button(relX + 120, relY + 30, 80, 20, Component.translatable("tinyredstone.cancel"), button -> close()));
 
     }
 

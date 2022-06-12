@@ -8,7 +8,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ResultContainer;
@@ -52,7 +51,7 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("block.tinyredstone.block_chopper");
+        return Component.translatable("block.tinyredstone.block_chopper");
     }
 
     @Override

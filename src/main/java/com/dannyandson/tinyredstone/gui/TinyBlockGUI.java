@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 
@@ -26,7 +26,7 @@ public class TinyBlockGUI extends Screen {
     private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     protected TinyBlockGUI(PanelTile panelTile, Integer cellIndex, IColorablePanelCell iColorablePanelCell) {
-        super(new TranslatableComponent("tinyredstone:tinyBlockGUI"));
+        super(Component.translatable("tinyredstone:tinyBlockGUI"));
         this.panelTile = panelTile;
         this.cellIndex = cellIndex;
         this.iColorablePanelCell = iColorablePanelCell;
@@ -41,7 +41,7 @@ public class TinyBlockGUI extends Screen {
 
         addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addRenderableWidget(new Button(relX + 45, relY + 68, 80, 20, new TranslatableComponent("tinyredstone.close"), button -> close()));
+        addRenderableWidget(new Button(relX + 45, relY + 68, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
 
         addRenderableWidget(new ModWidget(relX + 5, relY+ 20,20,20, DyeColor.WHITE.getTextColor()+0xFF000000-1, button->setColor(DyeColor.WHITE.getMaterialColor().col)));
         addRenderableWidget(new ModWidget(relX + 25, relY+ 20,20,20, DyeColor.BLACK.getTextColor()+0xFF000000, button->setColor(DyeColor.BLACK.getMaterialColor().col)));
@@ -62,7 +62,7 @@ public class TinyBlockGUI extends Screen {
         addRenderableWidget(new ModWidget(relX + 145, relY+ 40,20,20, DyeColor.ORANGE.getTextColor()+0xFF000000, button->setColor(DyeColor.ORANGE.getMaterialColor().col)));
 
 
-        addRenderableWidget(new ModWidget(relX,relY+3,WIDTH-2,20,new TranslatableComponent("tinyredstone.gui.tinyblock.msg")))
+        addRenderableWidget(new ModWidget(relX,relY+3,WIDTH-2,20,Component.translatable("tinyredstone.gui.tinyblock.msg")))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER);
 
 

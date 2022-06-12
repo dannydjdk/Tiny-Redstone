@@ -13,7 +13,6 @@ import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -43,18 +42,18 @@ public class Blueprint extends Item {
     {
         if (stack.getTag() !=null && stack.getTag().contains("blueprint"))
         {
-            list.add(new TranslatableComponent("message.item.blueprint.full"));
+            list.add(Component.translatable("message.item.blueprint.full"));
             List<ItemStack> blueprintItems = getRequiredItemStacks(stack.getTagElement("blueprint"));
             for (ItemStack item : blueprintItems)
             {
-                Component itemNameComponent = item.getHoverName();// new TranslatableComponent(item.getDescriptionId());
+                Component itemNameComponent = item.getHoverName();
                 String itemName = itemNameComponent.getString();
                 list.add(Component.nullToEmpty(itemName + " : " + item.getCount()));
             }
         }
         else
         {
-            list.add(new TranslatableComponent("message.item.blueprint.empty"));
+            list.add(Component.translatable("message.item.blueprint.empty"));
         }
     }
 
