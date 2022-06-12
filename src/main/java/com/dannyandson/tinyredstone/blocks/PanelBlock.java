@@ -148,9 +148,6 @@ public class PanelBlock extends Block {
             return ((PanelTile) te).getVoxelShape();
         }
 
-        if (state.hasProperty(Registration.HAS_PANEL_BASE) && state.getValue(Registration.HAS_PANEL_BASE))
-            return BASE.get(state.getValue(BlockStateProperties.FACING));
-
         return VoxelShapes.empty();
     }
 
@@ -319,6 +316,27 @@ public class PanelBlock extends Block {
                 panelTile.handleCrash(e);
             }
         }
+    }
+
+    @Override
+    public void onRemove(BlockState p_196243_1_, World world, BlockPos pos, BlockState p_196243_4_, boolean p_196243_5_) {
+        TileEntity tileentity = world.getBlockEntity(pos);
+        if (tileentity instanceof PanelTile) {
+            PanelTile panelTile = (PanelTile) tileentity;
+            panelTile.wirePowerToNeighbors.clear();
+            panelTile.weakPowerToNeighbors.clear();
+            panelTile.strongPowerToNeighbors.clear();
+
+            world.updateNeighborsAt(pos, this);
+            for (Direction direction : Direction.values()) {
+                BlockPos neighborPos = pos.relative(direction);
+                BlockState neighborBlockState = world.getBlockState(neighborPos);
+                if (neighborBlockState != null && neighborBlockState.canOcclude())
+                    world.updateNeighborsAt(neighborPos, neighborBlockState.getBlock());
+            }
+        }
+
+        super.onRemove(p_196243_1_, world, pos, p_196243_4_, p_196243_5_);
     }
 
     @Nullable
