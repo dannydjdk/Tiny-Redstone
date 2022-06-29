@@ -4,6 +4,7 @@ import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.BlockItem;
@@ -50,5 +51,15 @@ public class PanelItem extends BlockItem {
         list.add(new TranslatableComponent("message.item.redstone_panel"));
     }
 
+    @Override
+    public Component getName(ItemStack stack) {
+        if (stack.getTag()!=null && stack.getTag().contains("BlockEntityTag") ) {
+            CompoundTag itemTag = stack.getTag().getCompound("BlockEntityTag");
+            if(itemTag.contains("hasBase") && !itemTag.getBoolean("hasBase"))
+                return new TranslatableComponent("block.tinyredstone.tiny_container");
+        }
+
+        return super.getName(stack);
+    }
 
 }
