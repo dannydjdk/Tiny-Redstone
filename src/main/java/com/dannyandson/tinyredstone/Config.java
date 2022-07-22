@@ -38,15 +38,14 @@ public class Config {
         TORCH_LIGHT = SERVER_BUILDER.comment("Should redstone torches output light to the surrounding area? (default:false)")
                 .define("torch_light",false);
 
-        SUPER_REPEATER_MAX = SERVER_BUILDER.comment("Maximum redstone tick delay for super repeaters. 10 redstone ticks = 1 second." +
-                "\nLarge numbers require more memory. (default:100)")
-                .defineInRange("super_repeater_max",100,4,Integer.MAX_VALUE);
+        SUPER_REPEATER_MAX = SERVER_BUILDER.comment("Maximum redstone tick delay for super repeaters. 10 redstone ticks = 1 second. (default:1000)")
+                .defineInRange("super_repeater_max",1000,4,Integer.MAX_VALUE);
 
         CIRCUIT_MAX_ITERATION = SERVER_BUILDER.comment("How many blocks long can a line of redstone run in a single tick?" +
                 "\nThis number determines approximately 2x how many zero tick super repeaters can extend a single redstone line?" +
                 "\n(Since each repeater can extend signal 2 full blocks.)" +
                 "\nVery large numbers may degrade performance and potentially risk crash. (default=32)")
-                .defineInRange("max_zero_tick_run",32,4,512);
+                .defineInRange("max_zero_tick_run",32,4,1024);
 
         ALLOW_WORLD_PLACEMENT = SERVER_BUILDER.comment("Allow components to be placed anywhere, not just on panels. (default: true)")
                 .define("allow_world_placement",true);
