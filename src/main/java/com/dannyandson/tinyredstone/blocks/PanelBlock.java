@@ -383,20 +383,20 @@ public class PanelBlock extends BaseEntityBlock {
             try {
                 blockHitResult = panelTile.getPlayerCollisionHitResult(player);
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, blockHitResult);
+                Item heldItem = player.getItemInHand(hand).getItem();
 
+                if ((posInPanelCell == null || posInPanelCell.getIPanelCell()==null) && heldItem == Registration.REDSTONE_WRENCH.get() && !player.isCrouching() && !panelTile.isCovered()) {
+                    //rotate panel if holding wrench
+                    panelTile.rotate(Rotation.CLOCKWISE_90);
+                    handled = true;
+                    state.updateNeighbourShapes(world, pos, UPDATE_ALL);
+                }
                 if (posInPanelCell != null) {
-                    Item heldItem = player.getItemInHand(hand).getItem();
-
                     if (panelTile.isCrashed() || panelTile.isOverflown()) {
                         //open crash GUI if on client and panel is in crashed state
                         if (world.isClientSide)
                             PanelCrashGUI.open(panelTile);
                         handled = true;
-                    } else if (posInPanelCell.getIPanelCell()==null && heldItem == Registration.REDSTONE_WRENCH.get() && !player.isCrouching() && !panelTile.isCovered()) {
-                        //rotate panel if holding wrench
-                        panelTile.rotate(Rotation.CLOCKWISE_90);
-                        handled = true;
-                        state.updateNeighbourShapes(world,pos,UPDATE_ALL);
                     } else if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isCrouching()) {
                         //harvest block on sneak right click with wrench
                         this.playerWillDestroy(world, pos, state, player);
