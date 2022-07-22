@@ -5,6 +5,7 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -77,7 +78,7 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
 
                                 IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
                                 cell.readNBT(cellNBT.getCompound("data"));
-                                Direction cellDirection = Direction.from3DDataValue(cellNBT.getInt("direction"));
+                                Side cellDirection = Side.valueOf(cellNBT.getString("facing"));
                                 renderCell(matrixStack, i, cell, cellDirection, buffer, combinedLight, combinedOverlay);
 
                             } catch (Exception exception) {
@@ -124,7 +125,7 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
 
         matrixStack.popPose();
     }
-    private void renderCell(PoseStack matrixStack, Integer index, IPanelCell panelCell, Direction cellDirection, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
+    private void renderCell(PoseStack matrixStack, Integer index, IPanelCell panelCell, Side cellDirection, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
     {
         float scale = 0.125f;
         float t2X = 0.0f;
@@ -142,19 +143,16 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
         matrixStack.translate(cellSize*(double)row, 0.125+(cellSize*(double)level), cellSize*(cell));
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
 
-        if (cellDirection== Direction.WEST)
-        {
-            matrixStack.translate(0,-cellSize,0);
+        if (cellDirection==Side.LEFT) {
+            matrixStack.translate(0, -cellSize, 0);
             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
         }
-        else if (cellDirection== Direction.SOUTH)
-        {
-            matrixStack.translate(cellSize,-cellSize,0);
+        else if (cellDirection== Side.BACK) {
+            matrixStack.translate(cellSize, -cellSize, 0);
             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         }
-        else if (cellDirection== Direction.EAST)
-        {
-            matrixStack.translate(cellSize,0,0);
+        else if (cellDirection==Side.RIGHT) {
+            matrixStack.translate(cellSize, 0, 0);
             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(270));
         }
 
