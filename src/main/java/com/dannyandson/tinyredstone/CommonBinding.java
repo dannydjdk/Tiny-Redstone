@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.Mod;
 public class CommonBinding {
     @SubscribeEvent
     public static void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if(player.level.isClientSide) {
             RotationLock.removeLock(false);
         } else {
@@ -29,15 +29,15 @@ public class CommonBinding {
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event)
     {
         //allow creative players to remove cells by left clicking with wrench or cell item
-        if (event.getPlayer().isCreative() &&
-                event.getPlayer().level.getBlockState(event.getPos()).getBlock() instanceof PanelBlock &&
+        if (event.getEntity().isCreative() &&
+                event.getEntity().level.getBlockState(event.getPos()).getBlock() instanceof PanelBlock &&
                 (
-                        event.getPlayer().getMainHandItem().getItem()==Registration.REDSTONE_WRENCH.get() ||
-                                event.getPlayer().getMainHandItem().getItem() instanceof AbstractPanelCellItem
+                        event.getEntity().getMainHandItem().getItem()==Registration.REDSTONE_WRENCH.get() ||
+                                event.getEntity().getMainHandItem().getItem() instanceof AbstractPanelCellItem
                 )) {
-            BlockState blockState = event.getPlayer().level.getBlockState(event.getPos());
+            BlockState blockState = event.getEntity().level.getBlockState(event.getPos());
             PanelBlock panelBlock = (PanelBlock)blockState.getBlock();
-            panelBlock.attack(blockState,event.getPlayer().level,event.getPos(), event.getPlayer());
+            panelBlock.attack(blockState,event.getEntity().level,event.getPos(), event.getEntity());
             event.setCanceled(true);
         }
     }
@@ -45,12 +45,12 @@ public class CommonBinding {
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event)
     {
-        if (event.getPlayer().isCrouching() && PanelBlock.isPanelCellItem(event.getItemStack().getItem()))
+        if (event.getEntity().isCrouching() && PanelBlock.isPanelCellItem(event.getItemStack().getItem()))
         {
-            BlockEntity te = event.getPlayer().level.getBlockEntity(event.getPos());
+            BlockEntity te = event.getEntity().level.getBlockEntity(event.getPos());
             if (te instanceof PanelTile)
             {
-                Registration.REDSTONE_PANEL_BLOCK.get().use(te.getBlockState(),event.getPlayer().level,event.getPos(),event.getPlayer(),event.getHand(),event.getHitVec());
+                Registration.REDSTONE_PANEL_BLOCK.get().use(te.getBlockState(),event.getEntity().level,event.getPos(),event.getEntity(),event.getHand(),event.getHitVec());
                 event.setCanceled(true);
             }
         }

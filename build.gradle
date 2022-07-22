@@ -4,7 +4,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
 }
 
-version = '1.19-4.0.0'
+version = '1.19-4.1.0'
 group = 'com.dannyandson.tinyredstone' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'tinyredstone'
 
@@ -137,10 +137,10 @@ dependencies {
     // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.19-41.0.17'
+    minecraft 'net.minecraftforge:forge:1.19-41.0.107'
 
     //implementation fg.deobf('curse.maven:jei-238222:3696757')
-    implementation fg.deobf('curse.maven:theoneprobe-245211:3825695')
+    implementation fg.deobf('curse.maven:theoneprobe-245211:3871444')
     //implementation fg.deobf('curse.maven:jade-324717:3824831')
 
     if (include_redstone_pen)

@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.function.Consumer;
 
@@ -19,14 +19,14 @@ public class PanelCoverItem extends PanelCellItem{
     }
 
     @Override
-    public void initializeClient(Consumer<IItemRenderProperties> consumer) {
-        consumer.accept(new IItemRenderProperties() {
+    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+        consumer.accept(new IClientItemExtensions() {
                             /**
                              * @return This Item's renderer, or the default instance if it does not have
                              * one.
                              */
                             @Override
-                            public BlockEntityWithoutLevelRenderer getItemStackRenderer() {
+                            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
                                 return new PanelCoverItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
                             }
                         }

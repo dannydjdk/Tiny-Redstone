@@ -15,7 +15,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -25,8 +26,8 @@ public class ToolbarOverlay {
     public static ResourceLocation TEXTURE_ROTATION_LOCK = new ResourceLocation(TinyRedstone.MODID,"block/rotation_lock");
 
     @SubscribeEvent
-    public static void onRenderGUI(final RenderGameOverlayEvent.Post event) {
-        if(event.getType() == RenderGameOverlayEvent.ElementType.LAYER) {
+    public static void onRenderGUI(final RenderGuiOverlayEvent.Post event) {
+        if(event.getOverlay() == VanillaGuiOverlay.HOTBAR.type()) {
             final Minecraft mcInstance = Minecraft.getInstance();
             final LocalPlayer player = mcInstance.player;
 

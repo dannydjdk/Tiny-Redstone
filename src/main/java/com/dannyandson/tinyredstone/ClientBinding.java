@@ -15,8 +15,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
@@ -28,13 +28,13 @@ public class ClientBinding {
 
     public static KeyMapping rotationLock;
 
-    public static void registerKeyBindings() {
+    public static void registerKeyBindings(RegisterKeyMappingsEvent event) {
         rotationLock =  new KeyMapping("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, "TinyRedstone");
-        ClientRegistry.registerKeyBinding(rotationLock);
+        event.register(rotationLock);
     }
 
     @SubscribeEvent
-    public static void onKeyInput(InputEvent.KeyInputEvent keyInputEvent) {
+    public static void onKeyInput(InputEvent.Key keyInputEvent) {
         if (keyInputEvent.isCanceled()) return;
         int numberKey = keyInputEvent.getKey() - GLFW.GLFW_KEY_0;
         if(numberKey > 0 && numberKey <= 9) {
@@ -51,7 +51,7 @@ public class ClientBinding {
     }
 
     @SubscribeEvent
-    public static void wheelEvent(final InputEvent.MouseScrollEvent mouseScrollEvent) {
+    public static void wheelEvent(final InputEvent.MouseScrollingEvent mouseScrollEvent) {
         if (mouseScrollEvent.isCanceled()) return;
         final double scrollDelta = mouseScrollEvent.getScrollDelta();
         if (scrollDelta == 0) return;
