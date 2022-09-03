@@ -419,21 +419,20 @@ public class PanelBlock extends Block {
             try {
 
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, result);
+                Item heldItem = player.getItemInHand(hand).getItem();
 
-                if (posInPanelCell != null) {
-                    Item heldItem = player.getItemInHand(hand).getItem();
-
-                    if (panelTile.isCrashed()) {
-                        //open crash GUI if on client and panel is in crashed state
-                        if (world.isClientSide)
-                            PanelCrashGUI.open(panelTile);
-                        handled = true;
-                    } else if (posInPanelCell.getIPanelCell()==null && heldItem == Registration.REDSTONE_WRENCH.get() && !player.isCrouching() && !panelTile.isCovered()) {
-                        //rotate panel if holding wrench
-                        panelTile.rotate(Rotation.CLOCKWISE_90);
-                        state.updateNeighbourShapes(world,pos,3);
-                        handled = true;
-                    } else if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isCrouching()) {
+                if (panelTile.isCrashed() || panelTile.isOverflown()) {
+                    //open crash GUI if on client and panel is in crashed state
+                    if (world.isClientSide)
+                        PanelCrashGUI.open(panelTile);
+                    handled = true;
+                } else if ((posInPanelCell==null || posInPanelCell.getIPanelCell()==null) && heldItem == Registration.REDSTONE_WRENCH.get() && !player.isCrouching() && !panelTile.isCovered()) {
+                    //rotate panel if holding wrench
+                    panelTile.rotate(Rotation.CLOCKWISE_90);
+                    handled = true;
+                    state.updateNeighbourShapes(world, pos, 3);
+                } else if (posInPanelCell != null) {
+                    if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isCrouching()) {
                         //harvest block on sneak right click with wrench
                         this.playerWillDestroy(world, pos, state, player);
                         if(!world.isClientSide) world.destroyBlock(pos, true);
