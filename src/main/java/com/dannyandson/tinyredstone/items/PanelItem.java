@@ -6,6 +6,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -31,4 +32,16 @@ public class PanelItem extends BlockItem {
     {
         list.add(new TranslationTextComponent("message.item.redstone_panel"));
     }
+
+    @Override
+    public ITextComponent getName(ItemStack stack) {
+        if (stack.getTag()!=null && stack.getTag().contains("BlockEntityTag") ) {
+            CompoundNBT itemTag = stack.getTag().getCompound("BlockEntityTag");
+            if(itemTag.contains("hasBase") && !itemTag.getBoolean("hasBase"))
+                return new TranslationTextComponent("block.tinyredstone.tiny_container");
+        }
+
+        return super.getName(stack);
+    }
+
 }
