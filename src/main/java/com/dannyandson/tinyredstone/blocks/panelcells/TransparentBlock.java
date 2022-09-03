@@ -33,7 +33,7 @@ public class TransparentBlock extends TinyBlock {
 
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         matrixStack.translate(-1, -1, 1);
-        RenderHelper.drawCube(matrixStack,builder,sprite,combinedLight,color,alpha-.01f);
+        RenderHelper.drawCube(matrixStack,builder,sprite,combinedLight,combinedOverlay,color,alpha-.01f);
    }
 
     /**

@@ -12,56 +12,70 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class RenderHelper {
 
-    public static void drawCube(MatrixStack poseStack, IVertexBuilder  builder, TextureAtlasSprite sprite, int combinedLight,int color, float alpha) {
-        drawCube(poseStack, builder, sprite, sprite, sprite, sprite, sprite, sprite, combinedLight, color, alpha);
+    public static void drawCube(MatrixStack poseStack, IVertexBuilder  builder, TextureAtlasSprite sprite, int combinedLight, int combinedOverlay,int color, float alpha) {
+        drawCube(poseStack, builder, sprite, sprite, sprite, sprite, sprite, sprite, combinedLight, combinedOverlay, color, alpha);
     }
-    public static void drawCube(MatrixStack poseStack, IVertexBuilder  builder, TextureAtlasSprite sprite_top, TextureAtlasSprite sprite_front, TextureAtlasSprite sprite_right, TextureAtlasSprite sprite_back, TextureAtlasSprite sprite_left, TextureAtlasSprite sprite_bottom, int combinedLight,int color, float alpha){
-        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_top,combinedLight,color,alpha);
+    public static void drawCube(MatrixStack poseStack, IVertexBuilder  builder, TextureAtlasSprite sprite_top, TextureAtlasSprite sprite_front, TextureAtlasSprite sprite_right, TextureAtlasSprite sprite_back, TextureAtlasSprite sprite_left, TextureAtlasSprite sprite_bottom, int combinedLight, int combinedOverlay,int color, float alpha){
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_top,combinedLight, combinedOverlay,color,alpha);
 
         //back
         poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         poseStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_back,combinedLight,color,alpha);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_back,combinedLight, combinedOverlay, color,alpha);
 
         //left
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
         poseStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_left,combinedLight,color,alpha);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_left,combinedLight, combinedOverlay,color,alpha);
 
         //front
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
         poseStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_front,combinedLight,color,alpha);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_front,combinedLight, combinedOverlay,color,alpha);
 
         //right
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
         poseStack.translate(0,0,1);
-        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_right,combinedLight,color,alpha);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_right,combinedLight, combinedOverlay,color,alpha);
 
         //bottom
         poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90));
         poseStack.translate(-1,0,1);
-        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_bottom,combinedLight,color,alpha);
+        RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_bottom,combinedLight, combinedOverlay,color,alpha);
     }
 
 
-    public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , float alpha)
+    public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight, int combinedOverlay, int color, float alpha) {
+        drawRectangle(builder, matrixStack, x1, x2, y1, y2, sprite.getU0(), sprite.getU1(), sprite.getV0(), sprite.getV1(), combinedLight, combinedOverlay, color, alpha);
+    }
+
+    public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, float u0, float u1, float v0, float v1, int combinedLight, int combinedOverlay , int color, float alpha){
+        Matrix4f matrix4f = matrixStack.last().pose();
+        add(builder, matrix4f, x1, y1, 0, u0, v0, combinedLight, combinedOverlay, color, alpha);
+        add(builder, matrix4f, x2, y1, 0, u1, v0, combinedLight, combinedOverlay, color, alpha);
+        add(builder, matrix4f, x2, y2, 0, u1, v1, combinedLight, combinedOverlay, color, alpha);
+        add(builder, matrix4f, x1, y2, 0, u0, v1, combinedLight, combinedOverlay, color, alpha);
+    }
+
+
+    public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight, float alpha)
     {
         drawRectangle(builder, matrixStack, x1, x2, y1, y2, sprite, combinedLight, 0xFFFFFFFF, alpha);
     }
 
-    public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight , int color, float alpha) {
+    public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight, int color, float alpha) {
         drawRectangle(builder, matrixStack, x1, x2, y1, y2, sprite.getU0(), sprite.getU1(), sprite.getV0(), sprite.getV1(), combinedLight, color, alpha);
     }
 
-    public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, float u0, float u1, float v0, float v1, int combinedLight , int color, float alpha){
+    public static void drawRectangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float x2, float y1, float y2, float u0, float u1, float v0, float v1, int combinedOverlay , int color, float alpha){
         Matrix4f matrix4f = matrixStack.last().pose();
-        add(builder, matrix4f, x1, y1, 0, u0, v0, combinedLight, color, alpha);
-        add(builder, matrix4f, x2, y1, 0, u1, v0, combinedLight, color, alpha);
-        add(builder, matrix4f, x2, y2, 0, u1, v1, combinedLight, color, alpha);
-        add(builder, matrix4f, x1, y2, 0, u0, v1, combinedLight, color, alpha);
+        add(builder, matrix4f, x1, y1, 0, u0, v0, combinedOverlay, color, alpha);
+        add(builder, matrix4f, x2, y1, 0, u1, v0, combinedOverlay, color, alpha);
+        add(builder, matrix4f, x2, y2, 0, u1, v1, combinedOverlay, color, alpha);
+        add(builder, matrix4f, x1, y2, 0, u0, v1, combinedOverlay, color, alpha);
     }
+
 
     public static void drawTriangle(IVertexBuilder builder, MatrixStack matrixStack, float x1, float y1, float x2, float y2, float x3, float y3, int color, float alpha) {
         Matrix4f matrix4f = matrixStack.last().pose();
@@ -86,6 +100,16 @@ public class RenderHelper {
     public static void add(IVertexBuilder renderer, Matrix4f matrix4f, float x, float y, float z, int color, float alpha) {
         renderer.vertex(matrix4f, x, y, z)
                 .color(ColorHelper.PackedColor.red(color),ColorHelper.PackedColor.green(color), ColorHelper.PackedColor.blue(color), (int)(alpha*255f))
+                .endVertex();
+    }
+
+    public static void add(IVertexBuilder renderer, Matrix4f matrix4f, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlay, int color, float alpha) {
+        renderer.vertex(matrix4f, x, y, z)
+                .color(ColorHelper.PackedColor.red(color),ColorHelper.PackedColor.green(color), ColorHelper.PackedColor.blue(color), (int)(alpha*255f))
+                .uv(u, v)
+                .uv2(combinedLightIn)
+                .overlayCoords(combinedOverlay)
+                .normal(1, 0, 0)
                 .endVertex();
     }
 

@@ -49,7 +49,7 @@ public class TinyBlockItemRenderer extends ItemStackTileEntityRenderer {
 
         poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
         poseStack.translate(1, 0, 0);
-        RenderHelper.drawCube(poseStack,builder,sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight,0xFFFFFFFF,alpha);
+        RenderHelper.drawCube(poseStack,builder,sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight, combinedOverlay,0xFFFFFFFF,alpha);
 
         poseStack.popPose();
 

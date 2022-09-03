@@ -55,7 +55,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
 
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
         matrixStack.translate(-1, -1, 1);
-        RenderHelper.drawCube(matrixStack,builder,sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight,color,alpha);
+        RenderHelper.drawCube(matrixStack,builder,sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight,combinedOverlay,color,alpha);
     }
 
     @Override

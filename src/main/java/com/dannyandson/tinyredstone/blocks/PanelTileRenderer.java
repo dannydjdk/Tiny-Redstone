@@ -132,7 +132,7 @@ public class PanelTileRenderer extends TileEntityRenderer<PanelTile> {
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
 
             sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
-            RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
+            RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent()),matrixStack,0,1,0,1,sprite,combinedLight, combinedOverlay,0.9f);
             matrixStack.popPose();
         }
 
