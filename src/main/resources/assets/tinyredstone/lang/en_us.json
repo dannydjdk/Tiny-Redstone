@@ -59,6 +59,8 @@
   "tinyredstone.close" : "Close",
   "tinyredstone.yes" : "Yes",
   "tinyredstone.gui.repeater.msg" : "Set tick delay (10/second)",
+  "tinyredstone.gui.repeater.msg2" : "Use buttons or scroll to set delay.",
+  "tinyredstone.gui.repeater.msg3" : "Shift-scroll to change by seconds.",
   "tinyredstone.gui.tinyblock.msg" : "Select a color",
   "tinyredstone.gui.blueprint.msg" : "Blueprint",
   "message.item.blueprint.full" : "§7Right click to place this circuit on a panel or in world.\nRight click the air to export to a JSON file.\n\n§dRequires the following:§r",
