@@ -3,7 +3,7 @@
   "block.tinyredstone.redstone_panel" : "Redstone Panel",
   "message.item.redstone_panel" : "§7Panel to hold tiny redstone bits.\nRight click with dye to change color.§r",
   "message.item.redstone_wrench": "§7Right-click a Redstone Panel to rotate.\nLeft click to remove tiny redstone bits.\nShift-left click to remove all of them.§r",
-  "message.item.redstone_panel_cell": "Can be placed on a Redstone Panel or in-world to form a redstone circuit.",
+  "message.item.redstone_panel_cell": "Can be placed on a Redstone Panel or in-world.",
   "message.item.tiny_color_selector": "§7Right click on a tiny block to select its color.\nWorks with most cube shaped components.§r",
   "item.tinyredstone.tiny_redstone" : "Tiny Redstone Dust",
   "message.item.tinyredstone.tiny_redstone" : "Transfers redstone signals similar to vanilla redstone dust.\nRight click to select which sides to connect.",
