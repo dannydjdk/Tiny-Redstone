@@ -15,7 +15,7 @@ import java.util.List;
 
 public class PanelCellItem extends AbstractPanelCellItem {
     public PanelCellItem() {
-        super(new Item.Properties().tab(ModSetup.ITEM_GROUP));
+        super(new Item.Properties());
     }
 
     @Override

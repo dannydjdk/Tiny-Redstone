@@ -8,7 +8,7 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -16,7 +16,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -99,27 +98,27 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
 
     private void renderBase(PoseStack matrixStack, VertexConsumer builder, TextureAtlasSprite sprite, int combinedLight, int color){
         matrixStack.pushPose();
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(270));
         matrixStack.translate(0,-1,0.125);
         drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.125,0);
         drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         drawRectangle(builder,matrixStack,0,1,0,.125f,sprite,combinedLight,color);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color);
 
@@ -141,19 +140,19 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
         matrixStack.pushPose();
 
         matrixStack.translate(cellSize*(double)row, 0.125+(cellSize*(double)level), cellSize*(cell));
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(rotation1));
 
         if (cellDirection==Side.LEFT) {
             matrixStack.translate(0, -cellSize, 0);
-            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(90));
         }
         else if (cellDirection== Side.BACK) {
             matrixStack.translate(cellSize, -cellSize, 0);
-            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
         }
         else if (cellDirection==Side.RIGHT) {
             matrixStack.translate(cellSize, 0, 0);
-            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(270));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(270));
         }
 
         matrixStack.scale(scale, scale, scale);

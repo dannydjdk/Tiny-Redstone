@@ -7,7 +7,7 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -46,7 +46,7 @@ public class Piston implements IPanelCell {
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
 
 
-        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+        matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
         matrixStack.translate(-1,-1,0);
 
         //draw top
@@ -57,28 +57,28 @@ public class Piston implements IPanelCell {
 
         //draw right side
         matrixStack.pushPose();
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-1,0,1);
         drawSide(matrixStack,builder,combinedLight, alpha);
         matrixStack.popPose();
 
         //draw left side
         matrixStack.pushPose();
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(-90));
         matrixStack.translate(0,0,0);
         drawSide(matrixStack,builder,combinedLight, alpha);
         matrixStack.popPose();
 
         //draw bottom side
         matrixStack.pushPose();
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(180));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(180));
         matrixStack.translate(-1,0,0);
         drawSide(matrixStack,builder,combinedLight, alpha);
         matrixStack.popPose();
 
         //draw front (bottom texture of piston)
         matrixStack.pushPose();
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,0,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_bottom,combinedLight,alpha);
 
@@ -90,7 +90,7 @@ public class Piston implements IPanelCell {
         matrixStack.popPose();
 
         //draw back (top texture of piston)
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(-90));
         matrixStack.translate(0,-1, 1);
         if (renderExtended)
         {
@@ -118,7 +118,7 @@ public class Piston implements IPanelCell {
             matrixStack.scale(1, .75f, 1);
             bv0 = bv0 + ((bv1-bv0)*.25f);
         }
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(180));
         matrixStack.translate(0,-1,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,bu0,bu1,bv0,bv1,combinedLight,0xFFFFFFFF,alpha);
         matrixStack.popPose();
@@ -138,7 +138,7 @@ public class Piston implements IPanelCell {
             RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,tu0,tu1,tv0,tv1,combinedLight,0xFFFFFFFF,alpha);
 
             matrixStack.scale(.25f,4,1);
-            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(90));
             matrixStack.translate(-1,-2.5,-0.375);
             RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,tu0,tu1,tv0,tv1,combinedLight,0xFFFFFFFF,alpha);
 

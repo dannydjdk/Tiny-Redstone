@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -79,13 +80,18 @@ public class ModWidget extends AbstractWidget {
     @Override
     protected boolean clicked(double mouseX, double mouseY) {
         if (pressedAction==null ||
-                mouseX<this.x || mouseX>this.x+this.width ||
-                mouseY<this.y || mouseY>this.y+this.height
+                mouseX<this.getX() || mouseX>this.getX()+this.width ||
+                mouseY<this.getY() || mouseY>this.getY()+this.height
         )
             return false;
 
         pressedAction.onPress(this);
         return true;
+    }
+
+    @Override
+    protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
+
     }
 
     @Override
@@ -98,25 +104,25 @@ public class ModWidget extends AbstractWidget {
             switch (halignment) {
                 case LEFT:
                 default:
-                    drawX = x;
+                    drawX = getX();
                     break;
                 case CENTER:
-                    drawX = x + (int)((width-textWidth) / 2 * scale);
+                    drawX = getX() + (int)((width-textWidth) / 2 * scale);
                     break;
                 case RIGHT:
-                    drawX = x + (int)((width-textWidth) * scale);
+                    drawX = getX() + (int)((width-textWidth) * scale);
                     break;
             }
             switch (valignment) {
                 case TOP:
                 default:
-                    drawY = y;
+                    drawY = getY();
                     break;
                 case MIDDLE:
-                    drawY = y + (int)((height-textHeight) / 2 * scale);
+                    drawY = getY() + (int)((height-textHeight) / 2 * scale);
                     break;
                 case BOTTOM:
-                    drawY = y + (int)((height-textHeight) * scale);
+                    drawY = getY() + (int)((height-textHeight) * scale);
                     break;
             }
 
@@ -124,19 +130,19 @@ public class ModWidget extends AbstractWidget {
             if (scale != 1.0f) {
                 matrixStack.pushPose();
                 matrixStack.scale(scale, scale, scale);
-                matrixStack.translate(drawX, y, 0);
-                fr.draw(matrixStack, getMessage().getVisualOrderText(), drawX, y, this.color);
+                matrixStack.translate(drawX, getY(), 0);
+                fr.draw(matrixStack, getMessage().getVisualOrderText(), drawX, getY(), this.color);
                 matrixStack.popPose();
             } else {
-                fr.draw(matrixStack, getMessage().getVisualOrderText(), drawX, y, this.color);
+                fr.draw(matrixStack, getMessage().getVisualOrderText(), drawX, getY(), this.color);
             }
 
             if (bgcolor!=-1)
             {
-                fill(matrixStack,x,y,x+width,y+height,bgcolor);
+                fill(matrixStack,getX(),getY(),getX()+width,getY()+height,bgcolor);
             }
 
-            if (this.toolTipTextComponent!=null && mouseX>=x && mouseX<=x+width && mouseY>=y && mouseY<=y+height)
+            if (this.toolTipTextComponent!=null && mouseX>=getX() && mouseX<=getX()+width && mouseY>=getY() && mouseY<=getY()+height)
                 this.renderHoverToolTip(matrixStack,mouseX,mouseY);
         }
     }
@@ -154,9 +160,11 @@ public class ModWidget extends AbstractWidget {
         }
     }
 
-    @Override
-    public void updateNarration(NarrationElementOutput p_169152_) {
-
+    public static Button buildButton(Integer xPos, Integer yPos, Integer width, Integer height, Component component, Button.OnPress onPress){
+        return Button.builder(component,onPress)
+                .pos(xPos, yPos)
+                .size(width, height)
+                .build();
     }
 
     @OnlyIn(Dist.CLIENT)

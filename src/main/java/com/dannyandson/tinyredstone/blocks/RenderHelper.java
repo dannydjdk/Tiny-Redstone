@@ -2,13 +2,13 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.DyeColor;
+import org.joml.Matrix4f;
 
 public class RenderHelper {
 
@@ -38,28 +38,28 @@ public class RenderHelper {
         RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_top,combinedLight,color,alpha);
 
         //back
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_back,combinedLight,color,alpha);
 
         //left
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.mulPose(Axis.YP.rotationDegrees(90));
         poseStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_left,combinedLight,color,alpha);
 
         //front
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.mulPose(Axis.YP.rotationDegrees(90));
         poseStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_front,combinedLight,color,alpha);
 
         //right
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        poseStack.mulPose(Axis.YP.rotationDegrees(90));
         poseStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_right,combinedLight,color,alpha);
 
         //bottom
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(-90));
         poseStack.translate(-1,0,1);
         RenderHelper.drawRectangle(builder,poseStack,0,1,0,1,sprite_bottom,combinedLight,color,alpha);
     }

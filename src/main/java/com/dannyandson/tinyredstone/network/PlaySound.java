@@ -54,7 +54,7 @@ public class PlaySound {
             {
                 te.getLevel().playLocalSound(
                         pos.getX(), pos.getY(), pos.getZ(),
-                        new SoundEvent(new ResourceLocation(namespace,path)),
+                        SoundEvent.createVariableRangeEvent(new ResourceLocation(namespace,path)),
                         SoundSource.BLOCKS, volume, pitch, false
                 );
             }

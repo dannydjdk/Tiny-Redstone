@@ -30,7 +30,7 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
     @Override
     protected void init() {
         super.init();
-        itemTypeButton=new Button(leftPos+(imageWidth/2)-35,topPos+18,70,20,Component.nullToEmpty(chopperMenu.getItemType()),button->toggleItemType());
+        itemTypeButton=ModWidget.buildButton(leftPos+(imageWidth/2)-35,topPos+18,70,20,Component.nullToEmpty(chopperMenu.getItemType()),button->toggleItemType());
         addRenderableWidget(itemTypeButton);
     }
 
@@ -40,7 +40,7 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
             chopperMenu.toggleItemType(new BlockPos(((BlockHitResult) this.minecraft.hitResult).getBlockPos()));
 
             removeWidget(itemTypeButton);
-            itemTypeButton = new Button(leftPos + (imageWidth / 2) - 35, topPos + 18, 70, 20, Component.nullToEmpty(chopperMenu.getItemType()), button -> toggleItemType());
+            itemTypeButton = ModWidget.buildButton(leftPos + (imageWidth / 2) - 35, topPos + 18, 70, 20, Component.nullToEmpty(chopperMenu.getItemType()), button -> toggleItemType());
             addRenderableWidget(itemTypeButton);
         }
     }

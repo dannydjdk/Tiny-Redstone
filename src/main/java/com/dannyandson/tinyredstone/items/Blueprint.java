@@ -9,7 +9,6 @@ import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
 import com.dannyandson.tinyredstone.gui.BlueprintGUI;
-import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -34,7 +33,7 @@ import java.util.List;
 public class Blueprint extends Item {
 
     public Blueprint() {
-        super(new Item.Properties().tab(ModSetup.ITEM_GROUP));
+        super(new Item.Properties());
     }
 
     @Override

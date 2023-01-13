@@ -45,8 +45,8 @@ public class PanelCrashGUI  extends Screen {
         }
 
 
-        addRenderableWidget(new Button(relX + 60, relY + 68, 60, 20, Component.translatable("tinyredstone.enable"), button -> enable()));
-        addRenderableWidget(new Button(relX + 140, relY + 68, 60, 20, Component.translatable("tinyredstone.close"), button -> close()));
+        addRenderableWidget(ModWidget.buildButton(relX + 60, relY + 68, 60, 20, Component.translatable("tinyredstone.enable"), button -> enable()));
+        addRenderableWidget(ModWidget.buildButton(relX + 140, relY + 68, 60, 20, Component.translatable("tinyredstone.close"), button -> close()));
 
 
     }

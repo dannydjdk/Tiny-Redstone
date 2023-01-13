@@ -1,6 +1,5 @@
 package com.dannyandson.tinyredstone.items;
 
-import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -22,9 +21,7 @@ public class PanelItem extends BlockItem {
 
     public PanelItem()
     {
-        super(Registration.REDSTONE_PANEL_BLOCK.get(),new Item.Properties()
-                .tab(ModSetup.ITEM_GROUP)
-        );
+        super(Registration.REDSTONE_PANEL_BLOCK.get(),new Item.Properties());
 
     }
 

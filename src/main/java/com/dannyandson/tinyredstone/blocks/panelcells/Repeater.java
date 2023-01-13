@@ -8,7 +8,7 @@ import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -60,7 +60,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
 
         //draw base top
         matrixStack.pushPose();
-        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+        matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
         matrixStack.translate(-1,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_repeater,combinedLight,alpha);
         matrixStack.popPose();
@@ -85,7 +85,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.popPose();
 
         //draw back side
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.25,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 
@@ -101,7 +101,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.popPose();
 
         //right side
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 
@@ -117,7 +117,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.popPose();
 
         //front side
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
         matrixStack.pushPose();
@@ -133,7 +133,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
 
 
         //left side
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 

@@ -45,18 +45,18 @@ public class RepeaterCellGUI extends Screen {
 
         addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addRenderableWidget(new Button(relX + 55, relY + 48, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
+        addRenderableWidget(ModWidget.buildButton(relX + 55, relY + 48, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
         addRenderableWidget(this.tickCount);
 
         addRenderableWidget(new ModWidget(relX,relY+3,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg")))
             .setTextHAlignment(ModWidget.HAlignment.CENTER);
-        addRenderableWidget(new Button(relX + 15, relY + 15, 20, 20, Component.nullToEmpty("---"), button -> changeTicks(-200)));
-        addRenderableWidget(new Button(relX + 40, relY + 15, 20, 20, Component.nullToEmpty("--"), button -> changeTicks(-20)));
-        addRenderableWidget(new Button(relX + 65, relY + 15, 20, 20, Component.nullToEmpty("-"), button -> changeTicks(-2)));
+        addRenderableWidget(ModWidget.buildButton(relX + 15, relY + 15, 20, 20, Component.nullToEmpty("---"), button -> changeTicks(-200)));
+        addRenderableWidget(ModWidget.buildButton(relX + 40, relY + 15, 20, 20, Component.nullToEmpty("--"), button -> changeTicks(-20)));
+        addRenderableWidget(ModWidget.buildButton(relX + 65, relY + 15, 20, 20, Component.nullToEmpty("-"), button -> changeTicks(-2)));
 
-        addRenderableWidget(new Button(relX + 105, relY + 15, 20, 20, Component.nullToEmpty("+"), button -> changeTicks(2)));
-        addRenderableWidget(new Button(relX + 130, relY + 15, 20, 20, Component.nullToEmpty("++"), button -> changeTicks(20)));
-        addRenderableWidget(new Button(relX + 155, relY + 15, 20, 20, Component.nullToEmpty("+++"), button -> changeTicks(200)));
+        addRenderableWidget(ModWidget.buildButton(relX + 105, relY + 15, 20, 20, Component.nullToEmpty("+"), button -> changeTicks(2)));
+        addRenderableWidget(ModWidget.buildButton(relX + 130, relY + 15, 20, 20, Component.nullToEmpty("++"), button -> changeTicks(20)));
+        addRenderableWidget(ModWidget.buildButton(relX + 155, relY + 15, 20, 20, Component.nullToEmpty("+++"), button -> changeTicks(200)));
 
         addRenderableWidget(new ModWidget(relX,relY+73,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg2"),0xFF000000))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER);

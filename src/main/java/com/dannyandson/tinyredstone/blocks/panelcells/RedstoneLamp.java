@@ -7,7 +7,7 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -40,23 +40,23 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
         matrixStack.translate(0,0,1.0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,color,alpha);
 

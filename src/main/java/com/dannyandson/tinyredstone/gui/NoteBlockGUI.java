@@ -40,28 +40,36 @@ public class NoteBlockGUI extends Screen {
 
         addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
-        addRenderableWidget(new Button(relX + 85, relY + 105, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
+        addRenderableWidget(ModWidget.buildButton(relX + 85, relY + 105, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
 
-        addRenderableWidget(new Button(relX + 5, relY+ 20,60,20,  Component.translatable("tinyredstone.noteblock.bass"), button-> setInstrument("bass")));
-        addRenderableWidget(new Button(relX + 65, relY+ 20,60,20, Component.translatable("tinyredstone.noteblock.snare"), button->setInstrument("snare")));
-        addRenderableWidget(new Button(relX + 125, relY+ 20,60,20, Component.translatable("tinyredstone.noteblock.hat"), button->setInstrument("hat")));
-        addRenderableWidget(new Button(relX + 185, relY+ 20,60,20, Component.translatable("tinyredstone.noteblock.basedrum"), button->setInstrument("basedrum")));
+        addInstrumentButton("bass",relX + 5, relY+ 20);
+        addInstrumentButton("snare",relX + 65, relY+ 20);
+        addInstrumentButton("hat",relX + 125, relY+ 20);
+        addInstrumentButton("basedrum",relX + 185, relY+ 20);
 
-        addRenderableWidget(new Button(relX + 5,  relY+ 40,60,20, Component.translatable("tinyredstone.noteblock.bell"), button->setInstrument("bell")));
-        addRenderableWidget(new Button(relX + 65, relY+ 40,60,20,Component.translatable("tinyredstone.noteblock.flute"), button->setInstrument("flute")));
-        addRenderableWidget(new Button(relX + 125, relY+ 40,60,20,Component.translatable("tinyredstone.noteblock.chime"), button->setInstrument("chime")));
-        addRenderableWidget(new Button(relX + 185, relY+ 40,60,20,Component.translatable("tinyredstone.noteblock.guitar"), button->setInstrument("guitar")));
+        addInstrumentButton("bell",relX + 5, relY+ 40);
+        addInstrumentButton("flute",relX + 65, relY+ 40);
+        addInstrumentButton("chime",relX + 125, relY+ 40);
+        addInstrumentButton("guitar",relX + 185, relY+ 40);
 
-        addRenderableWidget(new Button(relX + 5,  relY+ 60,60,20,  Component.translatable("tinyredstone.noteblock.xylophone"),button->setInstrument("xylophone")));
-        addRenderableWidget(new Button(relX + 65,  relY+ 60,60,20, Component.translatable("tinyredstone.noteblock.iron_xylophone"),button->setInstrument("iron_xylophone")));
-        addRenderableWidget(new Button(relX + 125, relY+ 60,60,20, Component.translatable("tinyredstone.noteblock.cow_bell"),button->setInstrument("cow_bell")));
-        addRenderableWidget(new Button(relX + 185, relY+ 60,60,20, Component.translatable("tinyredstone.noteblock.didgeridoo"),button->setInstrument("didgeridoo")));
+        addInstrumentButton("xylophone",relX + 5, relY+ 60);
+        addInstrumentButton("iron_xylophone",relX + 65, relY+ 60);
+        addInstrumentButton("cow_bell",relX + 125, relY+ 60);
+        addInstrumentButton("didgeridoo",relX + 185, relY+ 60);
 
-        addRenderableWidget(new Button(relX + 5,  relY+ 80,60,20, Component.translatable("tinyredstone.noteblock.bit"),button->setInstrument("bit")));
-        addRenderableWidget(new Button(relX + 65,  relY+ 80,60,20,Component.translatable("tinyredstone.noteblock.banjo"),button->setInstrument("banjo")));
-        addRenderableWidget(new Button(relX + 125, relY+ 80,60,20,Component.translatable("tinyredstone.noteblock.pling"),button->setInstrument("pling")));
-        addRenderableWidget(new Button(relX + 185, relY+ 80,60,20,Component.translatable("tinyredstone.noteblock.harp"),button->setInstrument("harp")));
+        addInstrumentButton("bit",relX + 5, relY+ 80);
+        addInstrumentButton("banjo",relX + 65, relY+ 80);
+        addInstrumentButton("pling",relX + 125, relY+ 80);
+        addInstrumentButton("harp",relX + 185, relY+ 80);
 
+    }
+
+    private void addInstrumentButton(String instrument, Integer xPos, Integer yPos) {
+        addRenderableWidget(Button.builder(Component.translatable("tinyredstone.noteblock." + instrument), button -> setInstrument(instrument))
+                .pos(xPos, yPos)
+                .size(60, 20)
+                .build()
+        );
     }
 
     private void close() {

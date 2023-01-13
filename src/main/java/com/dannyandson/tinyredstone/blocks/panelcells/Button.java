@@ -6,7 +6,7 @@ import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -39,11 +39,11 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
 
         if (baseSide==Side.FRONT) {
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(90));
             matrixStack.translate(0,0,(active)?-0.9375:-0.875);
         }
         else if (baseSide==Side.TOP) {
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(180));
             matrixStack.translate(0,-1,(active)?-0.9375:-0.875);
         }
         else
@@ -53,19 +53,19 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.125,-y1);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,0,0.125f,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,.6875);
         RenderHelper.drawRectangle(builder,matrixStack,0,0.25f,0,0.125f,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,.25);
         RenderHelper.drawRectangle(builder,matrixStack,0,.375f,0,.125f,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,0.375);
         RenderHelper.drawRectangle(builder,matrixStack,0,0.25f,0,0.125f,sprite,combinedLight,alpha);
 

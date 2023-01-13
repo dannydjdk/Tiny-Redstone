@@ -6,7 +6,7 @@ import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -49,23 +49,23 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
         switch (tileEntity.getBlockState().getValue(BlockStateProperties.FACING))
         {
             case UP:
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
+                matrixStack.mulPose(Axis.XP.XP.rotationDegrees(180));
                 matrixStack.translate(0,-1,-1);
                 break;
             case NORTH:
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+                matrixStack.mulPose(Axis.XP.XP.rotationDegrees(90));
                 matrixStack.translate(0,0,-1);
                 break;
             case EAST:
-                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
+                matrixStack.mulPose(Axis.XP.ZP.rotationDegrees(90));
                 matrixStack.translate(0,-1,0);
                 break;
             case SOUTH:
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+                matrixStack.mulPose(Axis.XP.XP.rotationDegrees(-90));
                 matrixStack.translate(0,-1,0);
                 break;
             case WEST:
-                matrixStack.mulPose(Vector3f.ZP.rotationDegrees(-90));
+                matrixStack.mulPose(Axis.XP.ZP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,0);
                 break;
         }
@@ -82,27 +82,27 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
             if (hasBase) {
                 int color = tileEntity.getColor();
                 matrixStack.pushPose();
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
+                matrixStack.mulPose(Axis.XP.rotationDegrees(270));
                 matrixStack.translate(0, -1, 0.125);
                 RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
 
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+                matrixStack.mulPose(Axis.XP.rotationDegrees(90));
                 matrixStack.translate(0, -0.125, 0);
                 RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+                matrixStack.mulPose(Axis.YP.rotationDegrees(90));
                 matrixStack.translate(0, 0, 1);
                 RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+                matrixStack.mulPose(Axis.YP.rotationDegrees(90));
                 matrixStack.translate(0, 0, 1);
                 RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+                matrixStack.mulPose(Axis.YP.rotationDegrees(90));
                 matrixStack.translate(0, 0, 1);
                 RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-                matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+                matrixStack.mulPose(Axis.XP.rotationDegrees(90));
                 matrixStack.translate(0, -1, 0);
                 RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
 
@@ -126,7 +126,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
         {
             matrixStack.pushPose();
             matrixStack.translate(0, 0.126, 1);
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(rotation1));
 
             sprite = RenderHelper.getSprite(TEXTURE_CRASHED);
             RenderHelper.drawRectangle(buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent()),matrixStack,0,1,0,1,sprite,combinedLight,0.9f);
@@ -144,34 +144,34 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
         matrixStack.pushPose();
 
         matrixStack.translate(cellSize*(double)pos.getRow(), ((hasBase)?0.125:0)+(pos.getLevel()*0.125), cellSize*(pos.getColumn()));
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(rotation1));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(rotation1));
 
         Side facing = pos.getCellFacing();
 
         if (facing == Side.LEFT)
         {
             matrixStack.translate(0,-cellSize,0);
-            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(90));
         }
         else if (facing == Side.BACK)
         {
             matrixStack.translate(cellSize,-cellSize,0);
-            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
         }
         else if (facing == Side.RIGHT)
         {
             matrixStack.translate(cellSize,0,0);
-            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(270));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(270));
         }
         else if (pos.getCellFacing()==Side.BOTTOM)
         {
             matrixStack.translate(0,-cellSize,0);
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(-90));
         }
         else if (pos.getCellFacing()==Side.TOP)
         {
             matrixStack.translate(0,0,cellSize);
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         }
 
         matrixStack.scale(scale, scale, scale);

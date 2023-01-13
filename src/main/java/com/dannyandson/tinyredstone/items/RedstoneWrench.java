@@ -1,7 +1,6 @@
 package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
-import com.dannyandson.tinyredstone.setup.ModSetup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -23,7 +22,7 @@ import java.util.List;
 
 public class RedstoneWrench extends Item {
     public RedstoneWrench() {
-        super(new Item.Properties().tab(ModSetup.ITEM_GROUP).stacksTo(1));
+        super(new Item.Properties().stacksTo(1));
     }
 
     @Override

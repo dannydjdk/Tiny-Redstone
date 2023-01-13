@@ -6,8 +6,7 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3d;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -16,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import org.joml.Vector3d;
 
 import java.util.LinkedList;
 
@@ -76,34 +76,34 @@ public class Torch implements IPanelCell
         float y2 = 1f;
 
         if (this.upright) {
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(90));
             matrixStack.translate(0, 0, -0.375f);
         }
         else if (this.baseSide==Side.FRONT) {
-            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+            matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
             matrixStack.translate(-1, -1.125f, 0.125f);
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(60));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(60));
             //matrixStack.translate(0, 0.03125f, 0);
         }else {
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(60));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(60));
             matrixStack.translate(0, 0.03125f, 0);
         }
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,tU0,tU1,tV0,tV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,tU0,tU1,tV0,tV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,tU0,tU1,tV0,tV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,tU0,tU1,tV0,tV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,topU0,topU1,topV0,topV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 

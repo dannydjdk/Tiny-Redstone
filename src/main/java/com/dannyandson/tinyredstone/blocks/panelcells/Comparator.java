@@ -7,7 +7,7 @@ import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -64,28 +64,28 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
         add(builder, matrixStack, 1,1,0, sprite_repeater.getU1(), sprite_repeater.getV0(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 0,1,0, sprite_repeater.getU0(), sprite_repeater.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.25,0);
         add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);

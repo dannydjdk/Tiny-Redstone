@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class Items extends ItemModelProvider {
 
     public Items(DataGenerator generator, ExistingFileHelper existingFileHelper) {
-        super(generator, TinyRedstone.MODID, existingFileHelper);
+        super(generator.getPackOutput(), TinyRedstone.MODID, existingFileHelper);
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -51,24 +51,24 @@ public class Observer implements IPanelCell, IObservingPanelCell {
         matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_top,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(-90));
         matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_front,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_side,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_back,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         addRectangle(builder,matrixStack,sprite_side,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(-90));
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(-90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(-90));
         matrixStack.translate(-1,0,1);
         addRectangle(builder,matrixStack,sprite_top,combinedLight,alpha);
 

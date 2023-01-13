@@ -7,7 +7,7 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -46,7 +46,7 @@ public class DarkCover implements IPanelCover {
 
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_DEFAULT_COVER);
         matrixStack.translate(0, y2, 1);
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(270));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(270));
         RenderHelper.drawCube(matrixStack,buffer.getBuffer(RenderType.solid()),sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight, madeFrom != null?0x00FFFFFF:color,1f);
     }
 

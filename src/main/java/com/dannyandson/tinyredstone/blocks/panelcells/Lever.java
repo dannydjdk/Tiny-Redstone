@@ -6,7 +6,7 @@ import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -51,34 +51,34 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         float w = .375f, d = 0.5f,h=0.1875f;
 
         if (baseSide==Side.FRONT) {
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(90));
             matrixStack.translate(0,0,h-1);
         }
         else if (baseSide==Side.TOP) {
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(180));
             matrixStack.translate(0,-1,h-1);
         }
         else
             matrixStack.translate(0,0,h);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-h,-y1);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,0,h,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1f-x1);
         RenderHelper.drawRectangle(builder,matrixStack,0,d,0,h,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,d);
         RenderHelper.drawRectangle(builder,matrixStack,0,w,0,h,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,w);
         RenderHelper.drawRectangle(builder,matrixStack,0,d,0,h,sprite_cobble,combinedLight,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(60));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(60));
         matrixStack.translate(0,0.03125f,0);
 
         matrixStack.popPose();
@@ -89,32 +89,32 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         y2 = .625f;
 
         if (baseSide==Side.FRONT) {
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(90));
             matrixStack.translate(0,0.40625,(h/2f)-1);
         }
         else if (baseSide==Side.TOP) {
-            matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(180));
             matrixStack.translate(0,0.40625-1,(h/2f)-1);
         }
         else
             matrixStack.translate(0,0.40625,h/2f);
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees((active)?45:135));
+        matrixStack.mulPose(Axis.XP.rotationDegrees((active)?45:135));
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,lhu1,lhu0,lhv1,lhv0,combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,lhu1,lhu0,lhv1,lhv0,combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,lhu1,lhu0,lhv1,lhv0,combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Vector3f.YP.rotationDegrees(90));
+        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,lhu1,lhu0,lhv1,lhv0,combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,lhu1,lhu0,lhv0 + ((lv1-lv0)*2f/16f),lhv0,combinedLight,0xFFFFFFFF,alpha);
 

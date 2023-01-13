@@ -95,10 +95,9 @@ public class Registration {
     public static final RegistryObject<Item> BLUEPRINT = ITEMS.register("blueprint", Blueprint::new);
 
     public static final RegistryObject<Item> SILICON = ITEMS.register("silicon",()->new Item(new Item.Properties()
-            .tab(ModSetup.ITEM_GROUP)
     ));
     public static final RegistryObject<Item> SILICON_COMPOUND = ITEMS.register("silicon_compound",()->new Item(new Item.Properties()
-            .tab(ModSetup.ITEM_GROUP)));
+    ));
 
     public static final RegistryObject<RedstoneWrench> REDSTONE_WRENCH = ITEMS.register("redstone_wrench", RedstoneWrench::new);
     public static final RegistryObject<RedstoneWrench> TINY_COLOR_SELECTOR = ITEMS.register("tiny_color_selector", TinyColorSelector::new);

@@ -8,7 +8,7 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -53,7 +53,7 @@ public class GhostRenderer implements IPanelCell {
         if (segmentHovering==PanelCellSegment.LEFT || segmentHovering==PanelCellSegment.CENTER) {
             RenderHelper.drawRectangle(builder,poseStack,-.01f,s6,0,1,sprite,combinedLight,color,alpha);
         }
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(90));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(90));
         poseStack.translate(0,-1,0);
         if (segmentHovering==PanelCellSegment.FRONT || segmentHovering==PanelCellSegment.CENTER) {
             RenderHelper.drawRectangle(builder,poseStack,s10,1.01f,0,1,sprite,combinedLight,color,alpha);

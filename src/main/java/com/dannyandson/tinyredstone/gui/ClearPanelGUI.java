@@ -36,8 +36,17 @@ public class ClearPanelGUI extends Screen {
 
         addRenderableWidget(new ModWidget(relX,relY+10,WIDTH,20,Component.translatable("tinyredstone.gui.clearpanel.msg")))
             .setTextHAlignment(ModWidget.HAlignment.CENTER);
-        addRenderableWidget(new Button(relX + 20, relY + 30, 80, 20, Component.translatable("tinyredstone.yes"), button -> removeCells()));
-        addRenderableWidget(new Button(relX + 120, relY + 30, 80, 20, Component.translatable("tinyredstone.cancel"), button -> close()));
+        addRenderableWidget(Button.builder(Component.translatable("tinyredstone.yes"),button -> removeCells())
+                .pos(relX + 20, relY + 30)
+                .size(80, 20)
+                .build()
+        );
+
+        addRenderableWidget(Button.builder(Component.translatable("tinyredstone.cancel"),button -> close())
+                .pos(relX + 120, relY + 30)
+                .size(80, 20)
+                .build()
+        );
 
     }
 

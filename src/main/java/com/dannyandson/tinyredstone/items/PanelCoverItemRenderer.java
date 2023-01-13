@@ -7,7 +7,7 @@ import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
 import com.dannyandson.tinyredstone.setup.Registration;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -54,7 +54,7 @@ public class PanelCoverItemRenderer extends BlockEntityWithoutLevelRenderer {
 
         poseStack.pushPose();
 
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.translate(1, 0, 0);
         RenderHelper.drawCube(poseStack, builder, sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom, combinedLight, 0xFFFFFFFF, alpha);
 
