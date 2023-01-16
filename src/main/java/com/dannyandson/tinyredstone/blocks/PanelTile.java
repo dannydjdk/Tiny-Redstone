@@ -66,6 +66,13 @@ public class PanelTile extends BlockEntity {
         super(Registration.REDSTONE_PANEL_TILE.get(), p_155229_, p_155230_);
     }
 
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (getLevel()!=null && !getLevel().isClientSide())
+            flagOutputUpdate();
+    }
+
     //Tell Minecraft to render this block whenever any of the block space is within view.
     //By default, it only renders when the base model is within view.
     @Override
