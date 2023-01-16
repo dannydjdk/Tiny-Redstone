@@ -122,21 +122,23 @@ public class PanelTile extends BlockEntity {
 
     public CompoundTag saveToNbt(CompoundTag compoundTag) {
 
-        CompoundTag cellsNBT = new CompoundTag();
+        if (!this.cells.isEmpty()) {
+            CompoundTag cellsNBT = new CompoundTag();
 
-        for (Integer key : this.cells.keySet()) {
-            IPanelCell cell = this.cells.get(key);
-            CompoundTag cellNBT = new CompoundTag();
+            for (Integer key : this.cells.keySet()) {
+                IPanelCell cell = this.cells.get(key);
+                CompoundTag cellNBT = new CompoundTag();
 
-            cellNBT.putString("class", cell.getClass().getCanonicalName());
-            cellNBT.putString("facing", this.cellDirections.get(key).name());
-            cellNBT.put("data", cell.writeNBT());
+                cellNBT.putString("class", cell.getClass().getCanonicalName());
+                cellNBT.putString("facing", this.cellDirections.get(key).name());
+                cellNBT.put("data", cell.writeNBT());
 
-            cellsNBT.put(key.toString(), cellNBT);
+                cellsNBT.put(key.toString(), cellNBT);
+            }
+
+            compoundTag.put("cells", cellsNBT);
         }
-
-        compoundTag.put("cells", cellsNBT);
-        if(this.Color!=DyeColor.GRAY.getId())
+        if(this.Color!=RenderHelper.getTextureDiffusedColor(DyeColor.GRAY))
             compoundTag.putInt("color", this.Color);
         if (panelCover!=null) {
             compoundTag.putString("cover", panelCover.getClass().getCanonicalName());

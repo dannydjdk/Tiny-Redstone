@@ -16,10 +16,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -338,7 +335,10 @@ public class PanelBlock extends BaseEntityBlock {
         }
 
         if(!player.isCreative() && (panelTile==null || panelTile.hasBase() || panelTile.getCellCount()>0)) {
-            ItemStack itemstack = getItemWithNBT(worldIn, pos, state);
+            ItemStack itemstack =
+                    (panelTile.getCellCount()>0||panelTile.Color!=RenderHelper.getTextureDiffusedColor(DyeColor.GRAY)||panelTile.panelCover!=null)
+                            ? getItemWithNBT(worldIn, pos, state)
+                            : new ItemStack(this);
             if(itemstack != null) {
                 ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
                 itementity.setDefaultPickUpDelay();
