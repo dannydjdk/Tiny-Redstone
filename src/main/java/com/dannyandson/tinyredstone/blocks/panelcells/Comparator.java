@@ -135,7 +135,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     private boolean updateOutput()
     {
         Integer output1 = 0;
-        Integer input = (comparatorOverride)?Math.max(input1,comparatorInput):input1;
+        Integer input = (comparatorOverride)?comparatorInput:input1;
 
         if (this.subtract)
         {
