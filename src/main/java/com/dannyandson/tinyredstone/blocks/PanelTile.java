@@ -66,6 +66,13 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         super(Registration.REDSTONE_PANEL_TILE.get());
     }
 
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (getLevel()!=null && !getLevel().isClientSide())
+            flagUpdate=true;
+    }
+
     //Tell Minecraft to render this block whenever any of the block space is within view.
     //By default, it only renders when the base model is within view.
     @Override

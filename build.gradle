@@ -12,16 +12,15 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.16.5-1.13.5'
+version = '1.16.5-1.13.6'
 group = 'com.dannyandson.tinyredstone' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'tinyredstone'
 
 def jei_version = '1.16.4:7.6.1.71'
 def top_version = '1.16:1.16-3.1.4-22'
-def hwyla_version = '1.10.11-B78_1.16.2'
 def include_project_red = false
 def include_redstone_pen = false
-def include_create = true
+def include_create = false
 
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -135,10 +134,6 @@ repositories {
         name 'tterrag maven'
         url "http://maven.tterrag.com/"
         allowInsecureProtocol = true
-    }
-    maven { // Hwyla
-        name = "Tehnut"
-        url "https://maven.tehnut.info"
     }
     maven {
         name = "curse.maven"
