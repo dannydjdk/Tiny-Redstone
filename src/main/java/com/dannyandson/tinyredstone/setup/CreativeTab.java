@@ -18,7 +18,7 @@ public class CreativeTab {
     @SubscribeEvent
     public static void register(CreativeModeTabEvent.Register event) {
         TAB = event.registerCreativeModeTab(
-                new ResourceLocation("elevators_tab", TinyRedstone.MODID), builder -> builder
+                new ResourceLocation("tinyredstone", TinyRedstone.MODID), builder -> builder
                         .icon(() -> new ItemStack(Registration.REDSTONE_PANEL_BLOCK.get()))
                         .displayItems((featureFlags, output, hasOp) -> Registration.ITEMS.getEntries().forEach(o -> output.accept(o.get())))
                         .title(Component.translatable("tinyredstone"))
