@@ -373,7 +373,10 @@ public class PanelBlock extends Block {
             panelTile.onBlockDestroy();
         }
         if(!player.isCreative() && (panelTile==null || panelTile.hasBase() || panelTile.getCellCount()>0)) {
-            ItemStack itemstack = getItemWithNBT(worldIn, pos, state);
+            ItemStack itemstack =
+                    (panelTile.getCellCount()>0||panelTile.Color!=DyeColor.GRAY.getColorValue()||panelTile.panelCover!=null)
+                            ? getItemWithNBT(worldIn, pos, state)
+                            : new ItemStack(this);
             if(itemstack != null) {
                 ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
                 itementity.setDefaultPickUpDelay();
