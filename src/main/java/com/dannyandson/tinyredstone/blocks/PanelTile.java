@@ -299,7 +299,14 @@ public class PanelTile extends BlockEntity {
             if (cellNBT.contains("data")) {
                 String className = cellNBT.getString("class");
                 try {
-                    IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
+                    IPanelCell cell;
+                    try {
+                        cell=(IPanelCell) Class.forName(className).getConstructor().newInstance();
+                    }catch(Exception e){
+                        if (className.indexOf("tinypipes.components.")==-1)
+                            throw e;
+                        cell=(IPanelCell) Class.forName(className.replaceFirst("tinypipes.components.","tinypipes.components.tiny.")).getConstructor().newInstance();
+                    }
                     cell.readNBT(cellNBT.getCompound("data"));
                     Integer i = Integer.parseInt(index);
                     this.cells.put(i, cell);
