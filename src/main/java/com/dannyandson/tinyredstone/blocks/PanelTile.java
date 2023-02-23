@@ -57,6 +57,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
     protected PanelCellPos panelCellHovering;
     private VoxelShape voxelShape = null;
     protected static boolean checkWireSignals = true;
+    private int relTickTime = 0;
 
     //for backward compat. Remove on next major update (2.x.x).
     private boolean fixLegacyFacing = false;
@@ -363,6 +364,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
                     }
                 }else{
                     boolean dirty = false;
+                    this.relTickTime = (this.relTickTime+1)%(1048576);
                     //backward compatibility. Remove on major update (2.x.x).
                     if (fixLegacyFacing) {
                         level.setBlockAndUpdate(worldPosition, Registration.REDSTONE_PANEL_BLOCK.get().defaultBlockState().setValue(BlockStateProperties.FACING, Direction.DOWN));
@@ -439,6 +441,10 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         } catch (Exception e) {
             this.handleCrash(e);
         }
+    }
+
+    public int getRelTickTime() {
+        return relTickTime;
     }
 
     private void updatePiston(int index) {

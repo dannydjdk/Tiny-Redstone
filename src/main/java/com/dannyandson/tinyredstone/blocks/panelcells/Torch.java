@@ -28,6 +28,8 @@ public class Torch implements IPanelCell
     private boolean upright = false;
     private Side baseSide=Side.BOTTOM;
 
+    private int changedTick = -1;
+
     public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch");
     public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_off");
     public static ResourceLocation TEXTURE_TORCH_TOP_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_top");
@@ -138,7 +140,12 @@ public class Torch implements IPanelCell
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellPos cellPos){
+    public boolean neighborChanged(PanelCellPos cellPos) {
+        this.changedTick = cellPos.getPanelTile().getRelTickTime();
+        return false;
+    }
+
+    private void checkInputs(PanelCellPos cellPos){
 
         PanelCellNeighbor inputNeighbor = cellPos.getNeighbor((baseSide==Side.FRONT)?Side.FRONT:(upright)?Side.BOTTOM:Side.BACK);
 
@@ -160,7 +167,6 @@ public class Torch implements IPanelCell
             this.output=output;
             this.changePending=2;
         }
-        return false;
     }
 
     /**
@@ -204,6 +210,14 @@ public class Torch implements IPanelCell
      */
     @Override
     public boolean tick(PanelCellPos cellPos) {
+
+        if (this.changedTick>-1 && this.changedTick<cellPos.getPanelTile().getRelTickTime()){
+            this.checkInputs(cellPos);
+            this.changedTick=-1;
+        }
+
+        boolean changed = false;
+
         changeHx.add(changePending==2);
         if (changeHx.size()>60) changeHx.pop();
         int changes = 0;
@@ -213,14 +227,20 @@ public class Torch implements IPanelCell
         }
         if (changes>16) burnout=true;
 
-        if (changePending == 0)
-            return false;
         if (changePending > 1) {
             changePending--;
-            return false;
+        } else if (changePending == 1) {
+            changePending--;
+            changed = true;
         }
-        changePending--;
-        return true;
+
+        if (this.changedTick>-1){
+            this.checkInputs(cellPos);
+            this.changedTick=-1;
+        }
+
+        return changed;
+
     }
 
     @Override
@@ -256,6 +276,7 @@ public class Torch implements IPanelCell
             changeHxString.append(((Boolean) b) ? "1" : "0");
         }
         nbt.putString("changeHx", changeHxString.toString());
+        nbt.putInt("changedTick",this.changedTick);
 
         return nbt;
     }
@@ -277,6 +298,7 @@ public class Torch implements IPanelCell
             changeHx.add(b==49);
             if (changeHx.size()>60)changeHx.pop();
         }
+        this.changedTick=compoundNBT.getInt("changedTick");
 
     }
 

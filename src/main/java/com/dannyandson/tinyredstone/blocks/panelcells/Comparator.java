@@ -25,6 +25,8 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     private Integer comparatorInput = 0;
     protected int changePending = -1;
 
+    private int changedTick = -1;
+
     public static ResourceLocation TEXTURE_COMPARATOR_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_on");
     public static ResourceLocation TEXTURE_COMPARATOR_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_off");
     public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_subtract_on");
@@ -112,8 +114,12 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellPos cellPos)
-    {
+    public boolean neighborChanged(PanelCellPos cellPos) {
+        this.changedTick = cellPos.getPanelTile().getRelTickTime();
+        return false;
+    }
+
+    private void checkInputs(PanelCellPos cellPos){
         PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK),
                 leftNeighbor = cellPos.getNeighbor(Side.LEFT),
                 rightNeighbor = cellPos.getNeighbor(Side.RIGHT);
@@ -129,8 +135,6 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
             this.comparatorOverride=co;
             this.changePending=1;
         }
-
-        return false;
     }
 
     private boolean updateOutput()
@@ -185,6 +189,13 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public boolean tick(PanelCellPos cellPos) {
 
+        if (this.changedTick>-1 && this.changedTick<cellPos.getPanelTile().getRelTickTime()){
+            this.checkInputs(cellPos);
+            this.changedTick=-1;
+        }
+
+        boolean changed = false;
+
         if (!cellPos.getPanelTile().getLevel().isClientSide) {
             if (comparatorOverride) {
                 PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK);
@@ -195,16 +206,20 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
                 }
             }
 
-            if (changePending < 0)
-                return false;
             if (changePending > 0) {
                 changePending--;
-                return false;
+            }else if (changePending==0) {
+                changePending--;
+                changed = updateOutput();
             }
-            changePending--;
-            return updateOutput();
         }
-        return false;
+
+        if (this.changedTick>-1){
+            this.checkInputs(cellPos);
+            this.changedTick=-1;
+        }
+
+        return changed;
     }
 
     /**
@@ -235,6 +250,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
         nbt.putInt("comparatorInput",comparatorInput);
         nbt.putBoolean("subtract",subtract);
         nbt.putBoolean("comparatorOverride",comparatorOverride);
+        nbt.putInt("changedTick",this.changedTick);
 
         return nbt;
     }
@@ -248,6 +264,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
         this.comparatorInput=compoundNBT.getInt("comparatorInput");
         this.subtract = compoundNBT.getBoolean("subtract");
         this.comparatorOverride = compoundNBT.getBoolean("comparatorOverride");
+        this.changedTick=compoundNBT.getInt("changedTick");
     }
 
     @Override
