@@ -169,7 +169,10 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
      */
     @Override
     public boolean neighborChanged(PanelCellPos cellPos) {
-        this.changedTick = cellPos.getPanelTile().getRelTickTime();
+        if (this.ticks==0)
+            checkInputs(cellPos);
+        else
+            this.changedTick = cellPos.getPanelTile().getRelTickTime();
         return false;
     }
 
