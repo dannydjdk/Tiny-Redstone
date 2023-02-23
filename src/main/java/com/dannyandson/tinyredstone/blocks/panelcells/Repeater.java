@@ -24,6 +24,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     private int onPending = -1;
     private int offPending = -1;
     protected Integer ticks = 2;
+    private int changedTick = -1;
 
     public static ResourceLocation TEXTURE_REPEATER_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_repeater_on");
     public static ResourceLocation TEXTURE_REPEATER_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_repeater_off");
@@ -167,7 +168,12 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
-    public boolean neighborChanged(PanelCellPos cellPos){
+    public boolean neighborChanged(PanelCellPos cellPos) {
+        this.changedTick = cellPos.getPanelTile().getRelTickTime();
+        return false;
+    }
+
+    private void checkInputs(PanelCellPos cellPos){
 
         PanelCellNeighbor rightNeighbor = cellPos.getNeighbor(Side.RIGHT),
                 leftNeighbor = cellPos.getNeighbor(Side.LEFT),
@@ -201,7 +207,6 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
             if (input)onPending=ticks;
             else offPending=ticks;
 
-        return false;
     }
 
     /**
@@ -242,6 +247,11 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public boolean tick(PanelCellPos cellPos) {
 
+        if (this.changedTick>-1 && this.changedTick<cellPos.getPanelTile().getRelTickTime()){
+            this.checkInputs(cellPos);
+            this.changedTick=-1;
+        }
+
         if (this.input!=this.output){
             if (this.input && this.onPending==-1)
             {
@@ -256,20 +266,27 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
             onPending--;
         if (this.offPending>=0)
             offPending--;
+
+        boolean change = false;
+
         if (this.onPending == 0 && !this.locked) {
             this.output = true;
             if (this.input)
                 this.offPending=-1;
             else
                 this.offPending=this.ticks;
-            return true;
-        }
-        if (this.offPending==0 && !this.locked && (!input||(this.output && this.onPending>-1)) ){
+            change = true;
+        }else if (this.offPending==0 && !this.locked && (!input||(this.output && this.onPending>-1)) ){
             if ((this.output && this.onPending>-1))this.onPending=this.ticks;
             this.output=false;
-            return true;
+            change = true;
         }
-        return false;
+
+        if (this.changedTick>-1){
+            this.checkInputs(cellPos);
+            this.changedTick=-1;
+        }
+        return change;
     }
 
     /**
@@ -303,6 +320,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         nbt.putBoolean("locked",locked);
         nbt.putInt("offPending",this.offPending);
         nbt.putInt("onPending",this.onPending);
+        nbt.putInt("changedTick",this.changedTick);
 
         nbt.putInt("ticks",this.ticks);
 
@@ -317,6 +335,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         this.ticks = compoundNBT.getInt("ticks");
         this.offPending=compoundNBT.getInt("offPending");
         this.onPending=compoundNBT.getInt("onPending");
+        this.changedTick=compoundNBT.getInt("changedTick");
 
     }
 
