@@ -61,6 +61,7 @@ public class PanelTile extends BlockEntity {
     protected PanelCellPos panelCellHovering;
     private VoxelShape voxelShape = null;
     protected static boolean checkWireSignals = true;
+    private int relTickTime = 0;
 
     public PanelTile(BlockPos p_155229_, BlockState p_155230_) {
         super(Registration.REDSTONE_PANEL_TILE.get(), p_155229_, p_155230_);
@@ -360,6 +361,7 @@ public class PanelTile extends BlockEntity {
                 } else {
                     //only on server side
                     boolean dirty = false;
+                    this.relTickTime = (this.relTickTime+1)%(1048576);
 
                     //call the tick() method in all our cells and grab any updated pistons
                     List<Integer> pistons = null;
@@ -419,6 +421,10 @@ public class PanelTile extends BlockEntity {
             this.handleCrash(e);
         }
 
+    }
+
+    public int getRelTickTime() {
+        return relTickTime;
     }
 
     private void updatePiston(int index) throws PanelOverflowException{
@@ -1356,7 +1362,7 @@ public class PanelTile extends BlockEntity {
 
     private void updateVoxelShape()
     {
-        TinyRedstone.LOGGER.debug("updating voxel shape at " + getBlockPos().toShortString() + ": " + ((level.isClientSide)?"client":"server"));
+        //TinyRedstone.LOGGER.debug("updating voxel shape at " + getBlockPos().toShortString() + ": " + ((level.isClientSide)?"client":"server"));
         if (isCovered()) {
             VoxelShape coverShape = panelCover.getShape();
             if (Shapes.block().equals(coverShape) || this.getBlockState().getValue(BlockStateProperties.FACING) == Direction.DOWN)
