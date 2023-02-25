@@ -27,6 +27,7 @@ public class Observer implements IPanelCell, IObservingPanelCell {
 
     boolean output = false;
     private LinkedList<Boolean> queue = new LinkedList<>();
+    private int changedTick = -1;
     /**
      * Drawing the cell on the panel
      *
@@ -131,24 +132,34 @@ public class Observer implements IPanelCell, IObservingPanelCell {
     public boolean canPlaceVertical(){return true;}
 
     /**
-     * Called each each tick.
+     * Called each tick.
      *
      * @return boolean indicating whether redstone output of this cell has changed
      */
     @Override
     public boolean tick(PanelCellPos cellPos)
     {
-        if (queue.size()>0)
-        {
-            return setOutput(queue.remove());
-        }
-        if (output)
-        {
-            output=false;
-            return true;
+        if (this.changedTick>-1 && this.changedTick<cellPos.getPanelTile().getRelTickTime()){
+            this.frontNeighborUpdated();
+            this.changedTick=-1;
         }
 
-        return false;
+        boolean change = false;
+        if (queue.size()>0)
+        {
+            change = setOutput(queue.remove());
+        }else if (output)
+        {
+            output=false;
+            change = true;
+        }
+
+        if (this.changedTick>-1){
+            this.frontNeighborUpdated();
+            this.changedTick=-1;
+        }
+
+        return change;
     }
 
     private boolean setOutput(boolean output)
@@ -174,6 +185,7 @@ public class Observer implements IPanelCell, IObservingPanelCell {
             queueString += ((Boolean)b)?"1":"0";
         }
         nbt.putString("queue",queueString);
+        nbt.putInt("changedTick",this.changedTick);
 
         return nbt;
     }
@@ -186,16 +198,20 @@ public class Observer implements IPanelCell, IObservingPanelCell {
         {
             queue.add(b==49);
         }
+        this.changedTick=compoundNBT.getInt("changedTick");
     }
 
     @Override
-    public boolean frontNeighborUpdated() {
+    public boolean frontNeighborUpdated(PanelCellPos cellPos) {
+        this.changedTick=cellPos.getPanelTile().getRelTickTime();
+        return false;
+    }
+
+    private void frontNeighborUpdated(){
         if(queue.isEmpty()) {
             queue.add(false);
             queue.add(true);
             queue.add(true);
         }
-
-        return false;
     }
 }
