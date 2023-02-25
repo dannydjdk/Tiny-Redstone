@@ -12,6 +12,8 @@ import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -385,7 +387,7 @@ public class PanelBlock extends BaseEntityBlock {
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, blockHitResult);
                 Item heldItem = player.getItemInHand(hand).getItem();
 
-                if ((posInPanelCell == null || posInPanelCell.getIPanelCell()==null) && heldItem == Registration.REDSTONE_WRENCH.get() && !player.isCrouching() && !panelTile.isCovered()) {
+                if ((posInPanelCell == null || posInPanelCell.getIPanelCell()==null) && heldItem.getDefaultInstance().is(ItemTags.create(new ResourceLocation("forge", "tools/wrench"))) && !player.isCrouching() && !panelTile.isCovered()) {
                     //rotate panel if holding wrench
                     panelTile.rotate(Rotation.CLOCKWISE_90);
                     handled = true;
@@ -397,7 +399,7 @@ public class PanelBlock extends BaseEntityBlock {
                         if (world.isClientSide)
                             PanelCrashGUI.open(panelTile);
                         handled = true;
-                    } else if (heldItem == Registration.REDSTONE_WRENCH.get() && player.isCrouching()) {
+                    } else if (heldItem.getDefaultInstance().is(ItemTags.create(new ResourceLocation("forge", "tools/wrench"))) && player.isCrouching()) {
                         //harvest block on sneak right click with wrench
                         this.playerWillDestroy(world, pos, state, player);
                         if(!world.isClientSide) world.destroyBlock(pos, true);
@@ -573,7 +575,7 @@ public class PanelBlock extends BaseEntityBlock {
     public void attack(BlockState state, Level world, BlockPos pos, Player player) {
         Item heldItem = player.getMainHandItem().getItem();
 
-        if ((heldItem==Registration.REDSTONE_WRENCH.get() || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)))
+        if ((heldItem.getDefaultInstance().is(ItemTags.create(new ResourceLocation("forge", "tools/wrench"))) || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)))
         {
             BlockEntity te = world.getBlockEntity(pos);
             if (te instanceof PanelTile) {
@@ -586,7 +588,7 @@ public class PanelBlock extends BaseEntityBlock {
                         panelTile.flagLightUpdate=true;
                     }
                     else {
-                        if(heldItem==Registration.REDSTONE_WRENCH.get() && player.isCrouching()) {
+                        if(heldItem.getDefaultInstance().is(ItemTags.create(new ResourceLocation("forge", "tools/wrench"))) && player.isCrouching()) {
                             if(world.isClientSide())
                                 ClearPanelGUI.open(panelTile);
                         }
