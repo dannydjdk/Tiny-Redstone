@@ -15,7 +15,7 @@ plugins {
 }
 apply plugin: 'net.minecraftforge.gradle'
 
-version = '1.18.2-3.2.6'
+version = '1.18.2-3.2.7'
 group = 'com.dannyandson.tinyredstone' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'tinyredstone'
 
