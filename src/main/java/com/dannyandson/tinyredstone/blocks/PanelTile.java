@@ -522,7 +522,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         cellPos.getPanelTile().flagVoxelShapeUpdate();
 
         if (cell instanceof IObservingPanelCell)
-            ((IObservingPanelCell) cell).frontNeighborUpdated();
+            ((IObservingPanelCell) cell).frontNeighborUpdated(cellPos);
 
         return true;
     }
@@ -615,7 +615,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
         List<Integer> cellIndices = getEdgeCellIndices(side);
         for (Integer i : cellIndices)
             if (cells.containsKey(i) && cells.get(i) instanceof IObservingPanelCell && cellDirections.get(i)==side) {
-                if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated())
+                if(((IObservingPanelCell)cells.get(i)).frontNeighborUpdated(PanelCellPos.fromIndex(this,i)))
                     updated=true;
             }
 
@@ -689,7 +689,7 @@ public class PanelTile extends TileEntity implements ITickableTileEntity {
             Side direction1 = neighborPos.getCellFacing();
             Side direction2 = side.getOpposite();
             if (direction1 == direction2) {
-                ((IObservingPanelCell) adjacentCell).frontNeighborUpdated();
+                ((IObservingPanelCell) adjacentCell).frontNeighborUpdated(neighborPos);
             }
         } else if (adjacentCell != null && (!adjacentCell.isIndependentState()||(adjacentCell.needsSolidBase()&&side.getOpposite()==neighborPos.getBaseDirection())))
             //if a component exists within the cell and is either affected by inputs or needs a solid base and it's base changed, add it to the list to be notified

@@ -1,5 +1,7 @@
 package com.dannyandson.tinyredstone.api;
 
+import com.dannyandson.tinyredstone.blocks.PanelCellPos;
+
 public interface IObservingPanelCell {
-    boolean frontNeighborUpdated();
+    boolean frontNeighborUpdated(PanelCellPos cellPos);
 }
