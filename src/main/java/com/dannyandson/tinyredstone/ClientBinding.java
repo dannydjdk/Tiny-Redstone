@@ -29,7 +29,7 @@ public class ClientBinding {
     public static KeyMapping rotationLock;
 
     public static void registerKeyBindings(RegisterKeyMappingsEvent event) {
-        rotationLock =  new KeyMapping("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, "TinyRedstone");
+        rotationLock =  new KeyMapping("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, "tinyredstone");
         event.register(rotationLock);
     }
 
@@ -64,7 +64,7 @@ public class ClientBinding {
         if (mainHandItem instanceof AbstractPanelCellItem) {
             if(rotationLock.isDown()) {
                 Vec3 lookVector = Minecraft.getInstance().hitResult.getLocation();
-                BlockPos blockPos = new BlockPos(lookVector);
+                BlockPos blockPos = BlockPos.containing(lookVector.x,lookVector.y,lookVector.z);
                 BlockEntity te = world.getBlockEntity(blockPos);
                 if (te instanceof PanelTile) {
                     try {

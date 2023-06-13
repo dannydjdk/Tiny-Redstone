@@ -40,7 +40,7 @@ public class NoteBlockInstrumentSync {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(()-> {
-            BlockEntity te =  ctx.get().getSender().getLevel().getBlockEntity(this.pos);
+            BlockEntity te =  ctx.get().getSender().level().getBlockEntity(this.pos);
             if (te instanceof PanelTile)
             {
                 PanelCellPos cellPos = PanelCellPos.fromIndex((PanelTile) te,this.cellIndex);

@@ -8,6 +8,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
@@ -66,15 +67,15 @@ public class BlueprintGUI  extends Screen {
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.setShaderTexture(0, GUI);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bindForSetup(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
-        this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
+        guiGraphics.blit(GUI, relX, relY, 0, 0, WIDTH, HEIGHT);
 
-        super.render(matrixStack,mouseX, mouseY, partialTicks);
+        super.render(guiGraphics,mouseX, mouseY, partialTicks);
     }
 
 

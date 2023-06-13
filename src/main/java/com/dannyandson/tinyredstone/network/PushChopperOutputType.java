@@ -29,7 +29,7 @@ public class PushChopperOutputType {
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            BlockEntity te = ctx.get().getSender().getLevel().getBlockEntity(this.pos);
+            BlockEntity te = ctx.get().getSender().level().getBlockEntity(this.pos);
             if (te instanceof ChopperBlockEntity) {
                 ((ChopperBlockEntity) te).setItemType(type);
             }

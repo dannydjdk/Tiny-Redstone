@@ -29,73 +29,73 @@ public class ModNetworkHandler {
         INSTANCE.messageBuilder(RepeaterTickSync.class,nextID())
                 .encoder(RepeaterTickSync::toBytes)
                 .decoder(RepeaterTickSync::new)
-                .consumer(RepeaterTickSync::handle)
+                .consumerNetworkThread(RepeaterTickSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(TinyBlockColorSync.class,nextID())
                 .encoder(TinyBlockColorSync::toBytes)
                 .decoder(TinyBlockColorSync::new)
-                .consumer(TinyBlockColorSync::handle)
+                .consumerNetworkThread(TinyBlockColorSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(NoteBlockInstrumentSync.class,nextID())
                 .encoder(NoteBlockInstrumentSync::toBytes)
                 .decoder(NoteBlockInstrumentSync::new)
-                .consumer(NoteBlockInstrumentSync::handle)
+                .consumerNetworkThread(NoteBlockInstrumentSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(BlueprintSync.class,nextID())
                 .encoder(BlueprintSync::toBytes)
                 .decoder(BlueprintSync::new)
-                .consumer(BlueprintSync::handle)
+                .consumerNetworkThread(BlueprintSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(RotationLockSync.class,nextID())
                 .encoder(RotationLockSync::toBytes)
                 .decoder(RotationLockSync::new)
-                .consumer(RotationLockSync::handle)
+                .consumerNetworkThread(RotationLockSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(RotationLockRemoveSync.class,nextID())
                 .encoder(RotationLockRemoveSync::toBytes)
                 .decoder(RotationLockRemoveSync::new)
-                .consumer(RotationLockRemoveSync::handle)
+                .consumerNetworkThread(RotationLockRemoveSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(CrashFlagResetSync.class,nextID())
                 .encoder(CrashFlagResetSync::toBytes)
                 .decoder(CrashFlagResetSync::new)
-                .consumer(CrashFlagResetSync::handle)
+                .consumerNetworkThread(CrashFlagResetSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(ClearPanelSync.class,nextID())
                 .encoder(ClearPanelSync::toBytes)
                 .decoder(ClearPanelSync::new)
-                .consumer(ClearPanelSync::handle)
+                .consumerNetworkThread(ClearPanelSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(PlaySound.class,nextID())
                 .encoder(PlaySound::toBytes)
                 .decoder(PlaySound::new)
-                .consumer(PlaySound::handle)
+                .consumerNetworkThread(PlaySound::handle)
                 .add();
 
         INSTANCE.messageBuilder(PanelCellSync.class,nextID())
                 .encoder(PanelCellSync::toBytes)
                 .decoder(PanelCellSync::new)
-                .consumer(PanelCellSync::handle)
+                .consumerNetworkThread(PanelCellSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(ValidTinyBlockCacheSync.class,nextID())
                 .encoder(ValidTinyBlockCacheSync::toBytes)
                 .decoder(ValidTinyBlockCacheSync::new)
-                .consumer(ValidTinyBlockCacheSync::handle)
+                .consumerNetworkThread(ValidTinyBlockCacheSync::handle)
                 .add();
 
         INSTANCE.messageBuilder(PushChopperOutputType.class,nextID())
                 .encoder(PushChopperOutputType::toBytes)
                 .decoder(PushChopperOutputType::new)
-                .consumer(PushChopperOutputType::handle)
+                .consumerNetworkThread(PushChopperOutputType::handle)
                 .add();
     }
 

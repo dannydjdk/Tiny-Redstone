@@ -13,8 +13,13 @@ import com.dannyandson.tinyredstone.codec.CodecTinyBlockOverrides;
 import com.dannyandson.tinyredstone.codec.TinyBlockData;
 import com.dannyandson.tinyredstone.gui.ChopperMenu;
 import com.dannyandson.tinyredstone.items.*;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -28,6 +33,7 @@ public class Registration {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, TinyRedstone.MODID);
     private static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, TinyRedstone.MODID);
     private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES,TinyRedstone.MODID);
+    private static final DeferredRegister<CreativeModeTab> TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TinyRedstone.MODID);
 
     //called from main mod constructor
     public static void register() {
@@ -35,6 +41,7 @@ public class Registration {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         TILES.register(FMLJavaModLoadingContext.get().getModEventBus());
         MENU_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
+        TAB.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
     //called at FMLCommonSetupEvent in ModSetup
@@ -71,7 +78,7 @@ public class Registration {
     public static final RegistryObject<BlockEntityType<ChopperBlockEntity>> CUTTER_BLOCK_ENTITY =
             TILES.register("block_chopper", ()->BlockEntityType.Builder.of(ChopperBlockEntity::new,CUTTER_BLOCK.get()).build(null));
     public static final RegistryObject<Item> CUTTER_BLOCK_ITEM = ITEMS.register("block_chopper", ChopperBlockItem::new);
-    public static final RegistryObject<MenuType<ChopperMenu>> CUTTER_MENU_TYPE = MENU_TYPES.register("block_chopper", () -> new MenuType<>(ChopperMenu::createChopperMenu));
+    public static final RegistryObject<MenuType<ChopperMenu>> CUTTER_MENU_TYPE = MENU_TYPES.register("block_chopper", () -> new MenuType<>(ChopperMenu::createChopperMenu, FeatureFlags.DEFAULT_FLAGS));
 
     public static final RegistryObject<Item> TINY_SOLID_BLOCK = ITEMS.register("tiny_solid_block",TinyBlockItem::new);
     public static final RegistryObject<Item> TINY_TRANSPARENT_BLOCK = ITEMS.register("tiny_transparent_block",TinyBlockItem::new);
@@ -110,4 +117,11 @@ public class Registration {
 
     public static final BooleanProperty HAS_PANEL_BASE = BooleanProperty.create("has_panel_base");
 
+
+    public static RegistryObject<CreativeModeTab> CREATIVE_TAB = TAB.register("tinyredstonetab", () ->
+            CreativeModeTab.builder()
+                    .title(Component.translatable("tinyredstone"))
+                    .icon(() -> new ItemStack(Registration.REDSTONE_PANEL_BLOCK.get()))
+                    .displayItems((parameters,output) -> Registration.ITEMS.getEntries().forEach(o -> output.accept(o.get())))
+                    .build());
 }

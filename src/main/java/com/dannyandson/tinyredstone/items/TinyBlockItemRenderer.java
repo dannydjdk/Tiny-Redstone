@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public class TinyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
@@ -29,7 +30,7 @@ public class TinyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
     }
 
     @Override
-    public void renderByItem(ItemStack stack, ItemTransforms.TransformType transformType, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void renderByItem(ItemStack stack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
 
         boolean isTransparent = stack.getItem() == Registration.TINY_TRANSPARENT_BLOCK.get();
         TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;

@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
@@ -17,7 +16,7 @@ import javax.annotation.Nullable;
 public class ChopperBlock extends BaseEntityBlock {
     public ChopperBlock() {
         super(
-                Properties.of(Material.STONE)
+                Properties.of()
                         .sound(SoundType.STONE)
                         .strength(2.0f)
         );

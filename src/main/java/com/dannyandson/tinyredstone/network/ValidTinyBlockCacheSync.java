@@ -69,7 +69,7 @@ public class ValidTinyBlockCacheSync {
             if (!TinyBlockData.validBlockTextureCache.contains(this.itemRegistryName.toString()))
                 TinyBlockData.validBlockTextureCache.add(this.itemRegistryName.toString());
             if (this.chopperPos!=null){
-                if(ctx.get().getSender().getLevel().getBlockEntity(this.chopperPos) instanceof ChopperBlockEntity chopperBlockEntity)
+                if(ctx.get().getSender().level().getBlockEntity(this.chopperPos) instanceof ChopperBlockEntity chopperBlockEntity)
                     chopperBlockEntity.setChanged();
             }
             ctx.get().setPacketHandled(true);

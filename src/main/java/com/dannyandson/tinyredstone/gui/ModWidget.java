@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -95,7 +96,7 @@ public class ModWidget extends AbstractWidget {
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTick) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (visible) {
             int drawX,drawY;
             Font fr = Minecraft.getInstance().font;
@@ -127,36 +128,37 @@ public class ModWidget extends AbstractWidget {
             }
 
 
+            PoseStack matrixStack = guiGraphics.pose();
             if (scale != 1.0f) {
                 matrixStack.pushPose();
                 matrixStack.scale(scale, scale, scale);
                 matrixStack.translate(drawX, getY(), 0);
-                fr.draw(matrixStack, getMessage().getVisualOrderText(), drawX, getY(), this.color);
+                guiGraphics.drawString(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
                 matrixStack.popPose();
             } else {
-                fr.draw(matrixStack, getMessage().getVisualOrderText(), drawX, getY(), this.color);
+                guiGraphics.drawString(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
             }
 
             if (bgcolor!=-1)
             {
-                fill(matrixStack,getX(),getY(),getX()+width,getY()+height,bgcolor);
+                guiGraphics.fill(getX(),getY(),getX()+width,getY()+height,bgcolor);
             }
 
             if (this.toolTipTextComponent!=null && mouseX>=getX() && mouseX<=getX()+width && mouseY>=getY() && mouseY<=getY()+height)
-                this.renderHoverToolTip(matrixStack,mouseX,mouseY);
+                this.renderHoverToolTip(guiGraphics,mouseX,mouseY);
         }
     }
 
 
-    public void renderHoverToolTip(PoseStack matrixStack, int mouseX, int mouseY) {
+    public void renderHoverToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         if (this.toolTipTextComponent != null) {
             Font fr = Minecraft.getInstance().font;
             int width = fr.width(this.toolTipTextComponent);
             int height = fr.lineHeight;
 
-            fill(matrixStack, mouseX, mouseY+10, mouseX + width + 4, mouseY +10 + height + 4, 0xCC000000);
-            fill(matrixStack, mouseX + 1, mouseY + 11, mouseX + width + 3, mouseY + 10 + height + 3, 0x66EEEEEE);
-            fr.draw(matrixStack, this.toolTipTextComponent.getVisualOrderText(), (float) (mouseX + 3.0), (float) (mouseY + 13.0), 0xFFFEFEFE);
+            guiGraphics.fill( mouseX, mouseY+10, mouseX + width + 4, mouseY +10 + height + 4, 0xCC000000);
+            guiGraphics.fill( mouseX + 1, mouseY + 11, mouseX + width + 3, mouseY + 10 + height + 3, 0x66EEEEEE);
+            guiGraphics.drawString(fr, this.toolTipTextComponent.getVisualOrderText(), mouseX + 3, mouseY + 13, 0xFFFEFEFE);
         }
     }
 

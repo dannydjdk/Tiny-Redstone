@@ -8,6 +8,7 @@ import com.dannyandson.tinyredstone.network.TinyBlockColorSync;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -42,23 +43,23 @@ public class TinyBlockGUI extends Screen {
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
         addRenderableWidget(ModWidget.buildButton(relX + 45, relY + 68, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
 
-        addRenderableWidget(new ModWidget(relX + 5, relY+ 20,20,20, DyeColor.WHITE.getTextColor()+0xFF000000-1, button->setColor(DyeColor.WHITE.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 25, relY+ 20,20,20, DyeColor.BLACK.getTextColor()+0xFF000000, button->setColor(DyeColor.BLACK.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 45, relY+ 20,20,20, DyeColor.RED.getTextColor()+0xFF000000, button->setColor(DyeColor.RED.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 65, relY+ 20,20,20, DyeColor.GREEN.getTextColor()+0xFF000000, button->setColor(DyeColor.GREEN.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 85, relY+ 20,20,20, DyeColor.BROWN.getTextColor()+0xFF000000, button->setColor(DyeColor.BROWN.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 105, relY+ 20,20,20, DyeColor.BLUE.getTextColor()+0xFF000000, button->setColor(DyeColor.BLUE.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 125, relY+ 20,20,20, DyeColor.PURPLE.getTextColor()+0xFF000000, button->setColor(DyeColor.PURPLE.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 145, relY+ 20,20,20, DyeColor.CYAN.getTextColor()+0xFF000000, button->setColor(DyeColor.CYAN.getMaterialColor().col)));
+        addRenderableWidget(new ModWidget(relX + 5, relY+ 20,20,20, DyeColor.WHITE.getTextColor()+0xFF000000-1, button->setColor(DyeColor.WHITE.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 25, relY+ 20,20,20, DyeColor.BLACK.getTextColor()+0xFF000000, button->setColor(DyeColor.BLACK.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 45, relY+ 20,20,20, DyeColor.RED.getTextColor()+0xFF000000, button->setColor(DyeColor.RED.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 65, relY+ 20,20,20, DyeColor.GREEN.getTextColor()+0xFF000000, button->setColor(DyeColor.GREEN.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 85, relY+ 20,20,20, DyeColor.BROWN.getTextColor()+0xFF000000, button->setColor(DyeColor.BROWN.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 105, relY+ 20,20,20, DyeColor.BLUE.getTextColor()+0xFF000000, button->setColor(DyeColor.BLUE.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 125, relY+ 20,20,20, DyeColor.PURPLE.getTextColor()+0xFF000000, button->setColor(DyeColor.PURPLE.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 145, relY+ 20,20,20, DyeColor.CYAN.getTextColor()+0xFF000000, button->setColor(DyeColor.CYAN.getMapColor().col)));
 
-        addRenderableWidget(new ModWidget(relX + 5, relY+ 40,20,20, DyeColor.LIGHT_GRAY.getTextColor()+0xFF000000, button->setColor(DyeColor.LIGHT_GRAY.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 25, relY+ 40,20,20, DyeColor.GRAY.getTextColor()+0xFF000000, button->setColor(DyeColor.GRAY.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 45, relY+ 40,20,20, DyeColor.PINK.getTextColor()+0xFF000000, button->setColor(DyeColor.PINK.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 65, relY+ 40,20,20, DyeColor.LIME.getTextColor()+0xFF000000, button->setColor(DyeColor.LIME.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 85, relY+ 40,20,20, DyeColor.YELLOW.getTextColor()+0xFF000000, button->setColor(DyeColor.YELLOW.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 105, relY+ 40,20,20, DyeColor.LIGHT_BLUE.getTextColor()+0xFF000000, button->setColor(DyeColor.LIGHT_BLUE.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 125, relY+ 40,20,20, DyeColor.MAGENTA.getTextColor()+0xFF000000, button->setColor(DyeColor.MAGENTA.getMaterialColor().col)));
-        addRenderableWidget(new ModWidget(relX + 145, relY+ 40,20,20, DyeColor.ORANGE.getTextColor()+0xFF000000, button->setColor(DyeColor.ORANGE.getMaterialColor().col)));
+        addRenderableWidget(new ModWidget(relX + 5, relY+ 40,20,20, DyeColor.LIGHT_GRAY.getTextColor()+0xFF000000, button->setColor(DyeColor.LIGHT_GRAY.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 25, relY+ 40,20,20, DyeColor.GRAY.getTextColor()+0xFF000000, button->setColor(DyeColor.GRAY.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 45, relY+ 40,20,20, DyeColor.PINK.getTextColor()+0xFF000000, button->setColor(DyeColor.PINK.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 65, relY+ 40,20,20, DyeColor.LIME.getTextColor()+0xFF000000, button->setColor(DyeColor.LIME.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 85, relY+ 40,20,20, DyeColor.YELLOW.getTextColor()+0xFF000000, button->setColor(DyeColor.YELLOW.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 105, relY+ 40,20,20, DyeColor.LIGHT_BLUE.getTextColor()+0xFF000000, button->setColor(DyeColor.LIGHT_BLUE.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 125, relY+ 40,20,20, DyeColor.MAGENTA.getTextColor()+0xFF000000, button->setColor(DyeColor.MAGENTA.getMapColor().col)));
+        addRenderableWidget(new ModWidget(relX + 145, relY+ 40,20,20, DyeColor.ORANGE.getTextColor()+0xFF000000, button->setColor(DyeColor.ORANGE.getMapColor().col)));
 
 
         addRenderableWidget(new ModWidget(relX,relY+3,WIDTH-2,20,Component.translatable("tinyredstone.gui.tinyblock.msg")))
@@ -85,15 +86,15 @@ public class TinyBlockGUI extends Screen {
     }
 
     @Override
-    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         RenderSystem.setShaderTexture(0, GUI);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bindForSetup(GUI);
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
-        this.blit(matrixStack, relX, relY, 0, 0, WIDTH, HEIGHT);
+        guiGraphics.blit(GUI, relX, relY, 0, 0, WIDTH, HEIGHT);
 
-        super.render(matrixStack,mouseX, mouseY, partialTicks);
+        super.render(guiGraphics,mouseX, mouseY, partialTicks);
     }
 
 

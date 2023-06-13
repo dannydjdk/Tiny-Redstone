@@ -44,13 +44,11 @@ public class ToolbarOverlay {
                         final int x = (window.getGuiScaledWidth() / 2 - 180/2 + currentSlot * 20) + 2 + 1;
                         final int y = (window.getGuiScaledHeight() - 20) + 1 + 1;
 
-                        PoseStack matrixStack = event.getPoseStack();
-
                         Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
                         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_ROTATION_LOCK);
 
                         RenderSystem.enableBlend();
-                        mcInstance.gui.blit(matrixStack,x,y,0,5,5,sprite);
+                        event.getGuiGraphics().blit(x,y,0,5,5,sprite);
                         RenderSystem.disableBlend();
                     }
                 }

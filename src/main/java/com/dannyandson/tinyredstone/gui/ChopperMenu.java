@@ -19,12 +19,9 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.GlassBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.registries.ForgeRegistries;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class ChopperMenu extends AbstractContainerMenu {
     public static ChopperMenu createChopperMenu(int containerId, Inventory playerInventory) {
@@ -35,7 +32,7 @@ public class ChopperMenu extends AbstractContainerMenu {
         return new ChopperMenu(containerId, playerInventory, inventory);
     }
 
-    public static List<Material> solidMaterials = Arrays.asList(
+/*    public static List<Material> solidMaterials = Arrays.asList(
             Material.WOOD,
             Material.STONE,
             Material.METAL,
@@ -51,10 +48,11 @@ public class ChopperMenu extends AbstractContainerMenu {
     );
 
     public static List<Material> transparentMaterials = Arrays.asList(
+            Blocks.GLASS
             Material.GLASS,
             Material.ICE
     );
-
+*/
     private final Container container;
     private final ResultContainer resultContainer;
     private Slot inputSlot;
@@ -86,7 +84,7 @@ public class ChopperMenu extends AbstractContainerMenu {
             }
 
             public void onTake(Player player, ItemStack itemStack) {
-                itemStack.onCraftedBy(player.level, player, itemStack.getCount());
+                itemStack.onCraftedBy(player.level(), player, itemStack.getCount());
                 ItemStack itemstack = ChopperMenu.this.inputSlot.remove(1);
                 if (!itemstack.isEmpty()) {
                     ChopperMenu.this.setupResultSlot();
@@ -120,7 +118,7 @@ public class ChopperMenu extends AbstractContainerMenu {
             if (inputStack.getItem() instanceof BlockItem blockItem) {
                 Block inputBlock = blockItem.getBlock();
                 BlockState inputBlockState = inputBlock.defaultBlockState();
-                Material material = inputBlock.defaultBlockState().getMaterial();
+                //Material material = inputBlock.defaultBlockState().getMaterial();
 
                 if (container instanceof ChopperBlockEntity chopperBlockEntity) {
                     boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
@@ -142,15 +140,15 @@ public class ChopperMenu extends AbstractContainerMenu {
                                 outputStack.setCount(2);
                                 outputStack.addTagElement("made_from", madeFromTag);
                             } else {
-                                if (solidMaterials.contains(material)) {
-                                    outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
-                                    outputStack.setCount(8);
-                                    if (!ForgeRegistries.BLOCKS.getKey(inputBlock).toString().equals("minecraft:white_wool"))
-                                        outputStack.addTagElement("made_from", madeFromTag);
-                                } else if (transparentMaterials.contains(material)) {
+                                if (inputBlock instanceof GlassBlock) {
                                     outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
                                     if (!ForgeRegistries.BLOCKS.getKey(inputBlock).toString().equals("minecraft:glass"))
+                                        outputStack.addTagElement("made_from", madeFromTag);
+                                } else {
+                                    outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
+                                    outputStack.setCount(8);
+                                    if (!ForgeRegistries.BLOCKS.getKey(inputBlock).toString().equals("minecraft:white_wool"))
                                         outputStack.addTagElement("made_from", madeFromTag);
                                 }
                             }

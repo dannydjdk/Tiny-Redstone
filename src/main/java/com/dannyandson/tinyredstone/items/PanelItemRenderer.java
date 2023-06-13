@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
@@ -27,11 +28,11 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
     }
 
     @Override
-    public void renderByItem(ItemStack stack, ItemTransforms.TransformType p_239207_2_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
+    public void renderByItem(ItemStack stack, ItemDisplayContext p_239207_2_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
     {
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         VertexConsumer builder = buffer.getBuffer(RenderType.solid());
-        Integer color = DyeColor.GRAY.getMaterialColor().col;
+        Integer color = DyeColor.GRAY.getMapColor().col;
         if (stack.getTag()!=null && stack.getTag().contains("BlockEntityTag") ) {
             CompoundTag blockEntityTag = stack.getTag().getCompound("BlockEntityTag");
             if (blockEntityTag.contains("color")) {

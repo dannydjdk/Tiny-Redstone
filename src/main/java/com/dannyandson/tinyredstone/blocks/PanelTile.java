@@ -32,6 +32,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.ForgeMod;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -1501,7 +1502,7 @@ public class PanelTile extends BlockEntity {
         float x = (Mth.sin(-yRotation * ((float)Math.PI / 180F) - (float)Math.PI)) * v;
         float y = Mth.sin(-xRotation * ((float)Math.PI / 180F));
         float z = (Mth.cos(-yRotation * ((float)Math.PI / 180F) - (float)Math.PI)) * v;
-        double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue();
+        double reachDistance = player.getAttribute(ForgeMod.BLOCK_REACH.get()).getValue();
         Vec3 vec31 = eyePosition.add((double)x * reachDistance, (double)y * reachDistance, (double)z * reachDistance);
         return level.clip(new ClipContext(eyePosition, vec31, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player));
     }
