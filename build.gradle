@@ -167,7 +167,7 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    implementation fg.deobf('curse.maven:jei-238222:4581323')
+    implementation fg.deobf('curse.maven:jei-238222:4593536')
     implementation fg.deobf('curse.maven:theoneprobe-245211:4579432')
     //implementation fg.deobf('curse.maven:jade-324717:3824831')
 
