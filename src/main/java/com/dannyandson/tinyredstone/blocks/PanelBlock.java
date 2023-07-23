@@ -296,9 +296,10 @@ public class PanelBlock extends BaseEntityBlock {
                     if (panelTile.isFlagOutputUpdate()) {
                         panelTile.updateOutputs();
                     }
-                    if (change) {
-                        panelTile.flagSync();
-                    }
+                 }
+
+                if (panelTile.updateSideConnections() || change) {
+                    panelTile.flagSync();
                 }
             } catch (Exception e) {
                 panelTile.handleCrash(e);

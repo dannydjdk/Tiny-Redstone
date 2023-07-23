@@ -47,6 +47,7 @@ public class PanelTile extends BlockEntity {
     protected Map<Side, Integer> strongPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> weakPowerToNeighbors = new HashMap<>();
     protected Map<Side, Integer> wirePowerToNeighbors = new HashMap<>();
+    protected Map<Side, Boolean> connectedPanelNeighbor = new HashMap<>();
 
     protected Integer Color = RenderHelper.getTextureDiffusedColor(DyeColor.GRAY);
     private Integer lightOutput = 0;
@@ -178,15 +179,24 @@ public class PanelTile extends BlockEntity {
                     weakPowerToNeighbors.putInt(Side.BOTTOM.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BOTTOM));
                 parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
             }
-            if (this.wirePowerToNeighbors.size()==5) {
-                CompoundTag wirePowerToNeighbors = new CompoundTag();
-                wirePowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.wirePowerToNeighbors.get(Side.FRONT));
-                wirePowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.wirePowerToNeighbors.get(Side.RIGHT));
-                wirePowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.wirePowerToNeighbors.get(Side.BACK));
-                wirePowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.wirePowerToNeighbors.get(Side.LEFT));
-                wirePowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.wirePowerToNeighbors.get(Side.TOP));
-                parentNBTTagCompound.put("wire_power_outgoing", wirePowerToNeighbors);
-            }
+           if (this.wirePowerToNeighbors.size()==5) {
+               CompoundTag wirePowerToNeighbors = new CompoundTag();
+               wirePowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.wirePowerToNeighbors.get(Side.FRONT));
+               wirePowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.wirePowerToNeighbors.get(Side.RIGHT));
+               wirePowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.wirePowerToNeighbors.get(Side.BACK));
+               wirePowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.wirePowerToNeighbors.get(Side.LEFT));
+               wirePowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.wirePowerToNeighbors.get(Side.TOP));
+               parentNBTTagCompound.put("wire_power_outgoing", wirePowerToNeighbors);
+           }
+           if (!this.connectedPanelNeighbor.isEmpty()) {
+               CompoundTag connectedPanelNeighbors = new CompoundTag();
+               connectedPanelNeighbors.putBoolean(Side.FRONT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.FRONT) && this.connectedPanelNeighbor.get(Side.FRONT));
+               connectedPanelNeighbors.putBoolean(Side.RIGHT.ordinal() + "",this.connectedPanelNeighbor.containsKey(Side.RIGHT) &&  this.connectedPanelNeighbor.get(Side.RIGHT));
+               connectedPanelNeighbors.putBoolean(Side.BACK.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.BACK) &&  this.connectedPanelNeighbor.get(Side.BACK));
+               connectedPanelNeighbors.putBoolean(Side.LEFT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.LEFT) &&  this.connectedPanelNeighbor.get(Side.LEFT));
+               connectedPanelNeighbors.putBoolean(Side.TOP.ordinal() + "",  this.connectedPanelNeighbor.containsKey(Side.TOP) && this.connectedPanelNeighbor.get(Side.TOP));
+               parentNBTTagCompound.put("connected_panel_neighbors", connectedPanelNeighbors);
+           }
 
             parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
@@ -239,6 +249,14 @@ public class PanelTile extends BlockEntity {
             this.wirePowerToNeighbors.put(Side.BACK,  wirePowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
             this.wirePowerToNeighbors.put(Side.LEFT,  wirePowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
             this.wirePowerToNeighbors.put(Side.TOP,  wirePowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
+        }
+        CompoundTag connectedPanelNeighbors = parentNBTTagCompound.getCompound("connected_panel_neighbors");
+        if (!wirePowerToNeighbors.isEmpty()) {
+            this.connectedPanelNeighbor.put(Side.FRONT, connectedPanelNeighbors.getBoolean(Side.FRONT.ordinal() + ""));
+            this.connectedPanelNeighbor.put(Side.RIGHT, connectedPanelNeighbors.getBoolean(Side.RIGHT.ordinal() + ""));
+            this.connectedPanelNeighbor.put(Side.BACK,  connectedPanelNeighbors.getBoolean(Side.BACK.ordinal() + ""));
+            this.connectedPanelNeighbor.put(Side.LEFT,  connectedPanelNeighbors.getBoolean(Side.LEFT.ordinal() + ""));
+            this.connectedPanelNeighbor.put(Side.TOP,  connectedPanelNeighbors.getBoolean(Side.TOP.ordinal() + ""));
         }
 
         this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
@@ -639,6 +657,20 @@ public class PanelTile extends BlockEntity {
         }
     }
 
+    public boolean updateSideConnections(){
+        boolean change = false;
+        if (level!=null)
+            for (Side side : Side.values()) {
+                boolean neighborIsPanel = level.getBlockEntity(getBlockPos().relative(getDirectionFromSide(side))) instanceof PanelTile;
+                if (!this.connectedPanelNeighbor.containsKey(side) || this.connectedPanelNeighbor.get(side)!=neighborIsPanel) {
+                    this.connectedPanelNeighbor.put(side, neighborIsPanel);
+                    change=true;
+                }
+            }
+
+        return change;
+    }
+
     /**
      * Notify neighboring cells of a change to this cell
      * @param cellPos position of the cell that changed
@@ -833,6 +865,10 @@ public class PanelTile extends BlockEntity {
         }
 
         return null;
+    }
+
+    public boolean getConnectedPanelNeighbor(Side side) {
+        return connectedPanelNeighbor.containsKey(side) && connectedPanelNeighbor.get(side);
     }
 
     /**

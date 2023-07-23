@@ -25,7 +25,26 @@ import java.util.List;
 
 public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
-    public static ResourceLocation TEXTURE = new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel");
+    public static ResourceLocation[] TEXTURES = {
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0001"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0010"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0011"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0100"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0101"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0110"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0111"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1000"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1001"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1010"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1011"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1100"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1101"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1110"),
+            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1111")
+    };
+    public static ResourceLocation TEXTURE = TEXTURES[0];
+    public static ResourceLocation TEXTURE_BORDER = new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_border");
     public static ResourceLocation TEXTURE_CRASHED = new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_crashed");
 
     private float scale = 0.125f;
@@ -71,6 +90,8 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
         }
 
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
+        TextureAtlasSprite borderSprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE_BORDER);
+
         VertexConsumer builder = buffer.getBuffer(RenderType.solid());
         if (tileEntity.isCovered())
         {
@@ -80,11 +101,19 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
         }
         else {
             if (hasBase) {
+                int topTextureIndex =
+                        ((tileEntity.getConnectedPanelNeighbor(Side.FRONT))?2:0)
+                                + ((tileEntity.getConnectedPanelNeighbor(Side.RIGHT))?1:0)
+                                + ((tileEntity.getConnectedPanelNeighbor(Side.BACK))?8:0)
+                                + ((tileEntity.getConnectedPanelNeighbor(Side.LEFT))?4:0);
+
+                TextureAtlasSprite topSprite = (topTextureIndex==0)?sprite:RenderHelper.getSprite(TEXTURES[topTextureIndex]);
+
                 int color = tileEntity.getColor();
                 matrixStack.pushPose();
                 matrixStack.mulPose(Axis.XP.rotationDegrees(270));
                 matrixStack.translate(0, -1, 0.125);
-                RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
+                RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, topSprite, combinedLight, color, 1.0f);
 
                 matrixStack.mulPose(Axis.XP.rotationDegrees(90));
                 matrixStack.translate(0, -0.125, 0);
