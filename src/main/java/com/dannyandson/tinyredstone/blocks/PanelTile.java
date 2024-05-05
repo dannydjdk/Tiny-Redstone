@@ -1419,7 +1419,8 @@ public class PanelTile extends BlockEntity {
             } else //we have no base, but we do have cells
                 voxelShape = Shapes.empty();
 
-            for (Integer index : cells.keySet()) {
+            Set<Integer> cellkeys = new HashSet<>(cells.keySet());
+            for (Integer index : cellkeys) {
                 PanelCellPos cellPos = PanelCellPos.fromIndex(this, index);
                 VoxelShape cellVoxelShape = getCellVoxelShape(cellPos);
                 if (cellVoxelShape != null)

@@ -50,7 +50,7 @@ public class Config {
         ALLOW_WORLD_PLACEMENT = SERVER_BUILDER.comment("Allow components to be placed anywhere, not just on panels. (default: true)")
                 .define("allow_world_placement",true);
 
-        List<String> redstoneWires = new ArrayList<>(Arrays.asList("redstonepen:track", "cb_multipart:multipart", "cyclic:clock"));
+        List<String> redstoneWires = new ArrayList<>(Arrays.asList("redstonepen:track", "cb_multipart:multipart", "cyclic:clock", "tinyredstone:redstone_panel"));
         REDSTONE_WIRE_LIST = SERVER_BUILDER.comment("List of blocks from other mods to be treated as redstone wire.")
                         .define("redstone_wires",redstoneWires);
 

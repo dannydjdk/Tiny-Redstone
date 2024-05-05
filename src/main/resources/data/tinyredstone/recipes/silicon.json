@@ -1,5 +1,5 @@
 {
-  "type": "blasting",
+  "type": "minecraft:smelting",
   "ingredient": {
     "item": "tinyredstone:silicon_compound"
   },
