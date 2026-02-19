@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{
+    "item": "minecraft:glass"
+  },
+    {
+      "tag": "c:silicon"
+    }],
+  "result": {
+    "item": "tinyredstone:tiny_transparent_block",
+    "count": 8
+  }
+}

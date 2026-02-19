@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients":[
+    {
+      "item": "minecraft:piston"
+    },
+    {
+      "tag": "c:silicon"
+    }
+  ],
+  "result": {
+    "item": "tinyredstone:tiny_piston",
+    "count": 8
+  }
+}

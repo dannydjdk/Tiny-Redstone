@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients":[ {
+    "item": "minecraft:sticky_piston"
+  },
+    {
+      "tag": "c:silicon"
+    }],
+  "result": {
+    "item": "tinyredstone:tiny_sticky_piston",
+    "count": 8
+  }
+}

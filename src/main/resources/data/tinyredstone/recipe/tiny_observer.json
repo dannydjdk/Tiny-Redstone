@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:observer"
+    },
+    {
+      "tag": "c:silicon"
+    }
+  ],
+  "result": {
+    "item": "tinyredstone:tiny_observer",
+    "count": 8
+  }
+}

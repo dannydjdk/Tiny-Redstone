@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  R",
+    " S ",
+    "S  "
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "S":
+    {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "tinyredstone:redstone_wrench"
+  }
+}

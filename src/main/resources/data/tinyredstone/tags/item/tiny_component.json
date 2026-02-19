@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "tinyredstone:tiny_button",
+    "tinyredstone:tiny_comparator",
+    "tinyredstone:tiny_lever",
+    "tinyredstone:tiny_observer",
+    "tinyredstone:tiny_piston",
+    "tinyredstone:tiny_redstone",
+    "tinyredstone:tiny_redstone_block",
+    "tinyredstone:tiny_redstone_lamp",
+    "tinyredstone:tiny_redstone_torch",
+    "tinyredstone:tiny_repeater",
+    "tinyredstone:tiny_solid_block",
+    "tinyredstone:tiny_sticky_piston",
+    "tinyredstone:tiny_stone_button",
+    "tinyredstone:tiny_super_repeater",
+    "tinyredstone:tiny_transparent_block"
+  ]
+}
