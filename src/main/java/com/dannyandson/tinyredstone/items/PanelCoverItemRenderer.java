@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
@@ -33,11 +34,11 @@ public class PanelCoverItemRenderer extends BlockEntityWithoutLevelRenderer {
         boolean isTransparent = stack.getItem() == Registration.PANEL_COVER_LIGHT.get();
         TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
 
-        if (stack.hasTag()) {
-            CompoundTag itemNBT = stack.getTag();
+        if (ItemStackHelper.getCustomTag(stack) != null) {
+            CompoundTag itemNBT = ItemStackHelper.getCustomTag(stack);
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
-                ResourceLocation itemId = new ResourceLocation(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
+                ResourceLocation itemId = ResourceLocation.fromNamespaceAndPath(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
                 sprite_top = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId, Side.TOP);
                 sprite_front = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId, Side.FRONT);
                 sprite_right = Registration.TINY_BLOCK_OVERRIDES.getSprite(itemId, Side.RIGHT);

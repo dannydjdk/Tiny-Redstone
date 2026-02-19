@@ -1,30 +1,28 @@
 package com.dannyandson.tinyredstone;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Mod.EventBusSubscriber
 public class Config {
-    public static ForgeConfigSpec SERVER_CONFIG;
-    public static ForgeConfigSpec CLIENT_CONFIG;
+    public static ModConfigSpec SERVER_CONFIG;
+    public static ModConfigSpec CLIENT_CONFIG;
 
     public static final String CATEGORY_FEATURE = "feature";
     public static final String CATEGORY_PERFORMANCE = "performance";
-    public static ForgeConfigSpec.BooleanValue TORCH_LIGHT;
-    public static ForgeConfigSpec.IntValue DISPLAY_MODE;
-    public static ForgeConfigSpec.BooleanValue JSON_BLUEPRINT;
-    public static ForgeConfigSpec.IntValue SUPER_REPEATER_MAX;
-    public static ForgeConfigSpec.IntValue CIRCUIT_MAX_ITERATION;
-    public static ForgeConfigSpec.ConfigValue<List<String>> REDSTONE_WIRE_LIST;
-    public static ForgeConfigSpec.BooleanValue ALLOW_WORLD_PLACEMENT;
+    public static ModConfigSpec.BooleanValue TORCH_LIGHT;
+    public static ModConfigSpec.IntValue DISPLAY_MODE;
+    public static ModConfigSpec.BooleanValue JSON_BLUEPRINT;
+    public static ModConfigSpec.IntValue SUPER_REPEATER_MAX;
+    public static ModConfigSpec.IntValue CIRCUIT_MAX_ITERATION;
+    public static ModConfigSpec.ConfigValue<List<String>> REDSTONE_WIRE_LIST;
+    public static ModConfigSpec.BooleanValue ALLOW_WORLD_PLACEMENT;
 
     static {
 
-        ForgeConfigSpec.Builder SERVER_BUILDER = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder SERVER_BUILDER = new ModConfigSpec.Builder();
 
         SERVER_BUILDER.comment("Feature Settings").push(CATEGORY_FEATURE);
 
@@ -58,7 +56,7 @@ public class Config {
 
         SERVER_CONFIG = SERVER_BUILDER.build();
 
-        ForgeConfigSpec.Builder CLIENT_BUILDER = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
 
         CLIENT_BUILDER.comment("Performance Settings").push(CATEGORY_PERFORMANCE);
 

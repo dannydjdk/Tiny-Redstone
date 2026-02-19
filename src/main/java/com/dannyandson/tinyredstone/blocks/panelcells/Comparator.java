@@ -27,10 +27,10 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
     private int changedTick = -1;
 
-    public static ResourceLocation TEXTURE_COMPARATOR_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_on");
-    public static ResourceLocation TEXTURE_COMPARATOR_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_off");
-    public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_subtract_on");
-    public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_comparator_subtract_off");
+    public static ResourceLocation TEXTURE_COMPARATOR_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_on");
+    public static ResourceLocation TEXTURE_COMPARATOR_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_off");
+    public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_subtract_on");
+    public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_subtract_off");
 
     /**
      * Drawing the cell on the panel
@@ -97,12 +97,11 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
     }
 
     private void add(VertexConsumer renderer, PoseStack stack, float x, float y, float z, float u, float v, int combinedLightIn, int combinedOverlayIn, float alpha) {
-        renderer.vertex(stack.last().pose(), x, y, z)
-                .color(1.0f, 1.0f, 1.0f, alpha)
-                .uv(u, v)
-                .uv2(combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
+        renderer.addVertex(stack.last().pose(), x, y, z)
+                .setColor(1.0f, 1.0f, 1.0f, alpha)
+                .setUv(u, v)
+                .setUv2(combinedLightIn & 0xFFFF, (combinedLightIn >> 16) & 0xFFFF)
+                .setNormal(1, 0, 0);
     }
 
     /**

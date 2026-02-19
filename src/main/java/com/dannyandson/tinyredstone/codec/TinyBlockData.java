@@ -95,9 +95,9 @@ public class TinyBlockData {
     protected static ResourceLocation textureResourceLocationFromResourceId(String resourceId) {
         String[] resourceIdStrings = resourceId.split(":");
         if (resourceIdStrings.length == 1)
-            return new ResourceLocation("minecraft", "block/" + resourceIdStrings[0]);
+            return ResourceLocation.fromNamespaceAndPath("minecraft", "block/" + resourceIdStrings[0]);
         else if (resourceIdStrings.length == 2)
-            return new ResourceLocation(resourceIdStrings[0], "block/" + resourceIdStrings[1]);
+            return ResourceLocation.fromNamespaceAndPath(resourceIdStrings[0], "block/" + resourceIdStrings[1]);
         return null;
     }
 }

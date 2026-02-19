@@ -7,25 +7,31 @@ import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.gui.ChopperScreen;
 import com.dannyandson.tinyredstone.items.PanelItemColor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
-@Mod.EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ClientSetup {
 
-    public static final ResourceLocation TRANSPARENT_TEXTURE_LOC = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
+    public static final ResourceLocation TRANSPARENT_TEXTURE_LOC = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     public static void init(final FMLClientSetupEvent event)
     {
-        Minecraft.getInstance().getBlockColors().register(new PanelTileColor(), Registration.REDSTONE_PANEL_BLOCK.get());
-        Minecraft.getInstance().getItemColors().register(new PanelItemColor(),Registration.REDSTONE_PANEL_ITEM.get());
-        MenuScreens.register(Registration.CUTTER_MENU_TYPE.get(), ChopperScreen::new);
+        event.enqueueWork(() -> {
+            Minecraft.getInstance().getBlockColors().register(new PanelTileColor(), Registration.REDSTONE_PANEL_BLOCK.get());
+            Minecraft.getInstance().getItemColors().register(new PanelItemColor(), Registration.REDSTONE_PANEL_ITEM.get());
+        });
+    }
+
+    @SubscribeEvent
+    public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
+        event.register(Registration.CUTTER_MENU_TYPE.get(), ChopperScreen::new);
     }
 
     @SubscribeEvent

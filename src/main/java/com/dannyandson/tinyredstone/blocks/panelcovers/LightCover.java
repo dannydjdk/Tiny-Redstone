@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class LightCover  extends DarkCover {
 
-    public static ResourceLocation TEXTURE_LIGHT_COVER = new ResourceLocation(TinyRedstone.MODID,"block/light_cover");
+    public static ResourceLocation TEXTURE_LIGHT_COVER = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/light_cover");
 
 
     protected ResourceLocation getDefaultResourceLocation() {

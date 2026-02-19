@@ -8,7 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class PanelCellNeighbor {
     private IPanelCell iPanelCell=null;
@@ -207,7 +207,7 @@ public class PanelCellNeighbor {
     }
     public static boolean blockIsRedstoneWire(Block block, boolean includeVanilla){
         if (includeVanilla && block == Blocks.REDSTONE_WIRE) return true;
-        return Config.REDSTONE_WIRE_LIST.get().contains(ForgeRegistries.BLOCKS.getKey(block).toString());
+        return Config.REDSTONE_WIRE_LIST.get().contains(BuiltInRegistries.BLOCK.getKey(block).toString());
     }
 
 }

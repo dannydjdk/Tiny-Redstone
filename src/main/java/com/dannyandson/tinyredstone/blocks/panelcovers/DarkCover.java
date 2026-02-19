@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcovers;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
@@ -18,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class DarkCover implements IPanelCover {
 
-    public static ResourceLocation TEXTURE_DEFAULT_COVER = new ResourceLocation(TinyRedstone.MODID,"block/dark_cover");
+    public static ResourceLocation TEXTURE_DEFAULT_COVER = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/dark_cover");
     protected ResourceLocation madeFrom;
     protected TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
 
@@ -61,11 +62,11 @@ public class DarkCover implements IPanelCover {
             stack = player.getItemInHand(player.getUsedItemHand());
         if (stack == ItemStack.EMPTY)
             stack = player.getMainHandItem();
-        if (stack.hasTag()) {
-            CompoundTag itemNBT = stack.getTag();
+        if (ItemStackHelper.getCustomTag(stack) != null) {
+            CompoundTag itemNBT = ItemStackHelper.getCustomTag(stack);
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
-                this.madeFrom = new ResourceLocation(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
+                this.madeFrom = ResourceLocation.fromNamespaceAndPath(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
             }
         }
 
@@ -95,7 +96,7 @@ public class DarkCover implements IPanelCover {
     @Override
     public void readNBT(CompoundTag compoundNBT) {
         if (compoundNBT.contains("made_from_namespace"))
-            this.madeFrom=new ResourceLocation(compoundNBT.getString("made_from_namespace"),compoundNBT.getString("made_from_path"));
+            this.madeFrom=ResourceLocation.fromNamespaceAndPath(compoundNBT.getString("made_from_namespace"),compoundNBT.getString("made_from_path"));
     }
 
 

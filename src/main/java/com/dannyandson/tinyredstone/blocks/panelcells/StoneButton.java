@@ -11,7 +11,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 public class StoneButton extends Button {
-    public static ResourceLocation TEXTURE_OAK_PLANKS = new ResourceLocation("minecraft","block/stone");
+    public static ResourceLocation TEXTURE_OAK_PLANKS = ResourceLocation.fromNamespaceAndPath("minecraft","block/stone");
 
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.

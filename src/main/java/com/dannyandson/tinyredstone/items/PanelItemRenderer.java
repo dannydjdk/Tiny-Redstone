@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
@@ -33,8 +34,8 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         VertexConsumer builder = buffer.getBuffer(RenderType.solid());
         Integer color = DyeColor.GRAY.getMapColor().col;
-        if (stack.getTag()!=null && stack.getTag().contains("BlockEntityTag") ) {
-            CompoundTag blockEntityTag = stack.getTag().getCompound("BlockEntityTag");
+        CompoundTag blockEntityTag = ItemStackHelper.getBlockEntityTag(stack);
+        if (blockEntityTag != null) {
             if (blockEntityTag.contains("color")) {
                 color = blockEntityTag.getInt("color");
             }
@@ -44,15 +45,15 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
         matrixStack.translate(0,0.125,0);
 
 
-        if (stack.getTag() !=null && stack.getTag().contains("BlockEntityTag")) {
+        if (blockEntityTag != null) {
 
-            CompoundTag itemTag = stack.getTag().getCompound("BlockEntityTag");
+            CompoundTag itemTag = blockEntityTag;
 
             if (itemTag.contains("cover")) {
-                String coverClass = stack.getTag().getCompound("BlockEntityTag").getString("cover");
+                String coverClass = blockEntityTag.getString("cover");
                 try {
                     IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
-                    cover.readNBT(stack.getTag().getCompound("BlockEntityTag").getCompound("coverData"));
+                    cover.readNBT(blockEntityTag.getCompound("coverData"));
                     matrixStack.pushPose();
                     cover.render(matrixStack, buffer, combinedLight, combinedOverlay, color);
                     matrixStack.popPose();
@@ -173,12 +174,11 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
     }
 
     private void add(VertexConsumer renderer, PoseStack stack, float x, float y, float z, float u, float v, int combinedLightIn, Integer color) {
-        renderer.vertex(stack.last().pose(), x, y, z)
-                .color(RenderHelper.getRed(color),RenderHelper.getGreen(color),RenderHelper.getBlue(color),RenderHelper.getAlpha(color))
-                .uv(u, v)
-                .uv2(combinedLightIn)
-                .normal(1, 0, 0)
-                .endVertex();
+        renderer.addVertex(stack.last().pose(), x, y, z)
+                .setColor(RenderHelper.getRed(color),RenderHelper.getGreen(color),RenderHelper.getBlue(color),RenderHelper.getAlpha(color))
+                .setUv(u, v)
+                .setUv2(combinedLightIn & 0xFFFF, (combinedLightIn >> 16) & 0xFFFF)
+                .setNormal(1, 0, 0);
     }
 
 

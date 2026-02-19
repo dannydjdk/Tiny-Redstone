@@ -7,7 +7,6 @@ import com.dannyandson.tinyredstone.blocks.panelcells.Repeater;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.RepeaterTickSync;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -25,7 +24,7 @@ public class RepeaterCellGUI extends Screen {
     private final Repeater repeaterCell;
     private ModWidget tickCount;
 
-    private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
+    private final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     protected RepeaterCellGUI(PanelTile panelTile, Integer cellIndex, Repeater repeaterCell) {
         super(Component.translatable("tinyredstone:repeaterGUI"));
@@ -65,8 +64,9 @@ public class RepeaterCellGUI extends Screen {
                 .setTextHAlignment(ModWidget.HAlignment.CENTER);
     }
 
+    // Fix: mouseScrolled signature changed in 1.21 - added scrollX parameter before scrollY
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scroll)
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scroll)
     {
         if (
                 mouseX>(this.width - WIDTH) / 2 &&
@@ -83,7 +83,7 @@ public class RepeaterCellGUI extends Screen {
             }
             return false;
         }
-        return super.mouseScrolled(mouseX, mouseY, scroll);
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scroll);
     }
 
     private void close() {
@@ -128,5 +128,4 @@ public class RepeaterCellGUI extends Screen {
     public static void open(PanelTile panelTile, Integer cellIndex, Repeater repeaterCell) {
         Minecraft.getInstance().setScreen(new RepeaterCellGUI(panelTile, cellIndex, repeaterCell));
     }
-
 }

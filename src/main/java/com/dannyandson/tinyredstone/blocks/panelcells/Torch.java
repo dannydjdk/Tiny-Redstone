@@ -29,10 +29,10 @@ public class Torch implements IPanelCell
 
     private int changedTick = -1;
 
-    public static ResourceLocation TEXTURE_TORCH_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch");
-    public static ResourceLocation TEXTURE_TORCH_OFF = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_off");
-    public static ResourceLocation TEXTURE_TORCH_TOP_ON = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_top");
-    public static ResourceLocation TEXTURE_TORCH_TOP_OFF = new ResourceLocation(TinyRedstone.MODID,"block/redstone_torch_top_off");
+    public static ResourceLocation TEXTURE_TORCH_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch");
+    public static ResourceLocation TEXTURE_TORCH_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_off");
+    public static ResourceLocation TEXTURE_TORCH_TOP_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_top");
+    public static ResourceLocation TEXTURE_TORCH_TOP_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_top_off");
     private Side baseSide=Side.BOTTOM;
 
 

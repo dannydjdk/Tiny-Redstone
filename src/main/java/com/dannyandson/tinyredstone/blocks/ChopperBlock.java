@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Player;
@@ -14,6 +15,16 @@ import net.minecraft.world.phys.BlockHitResult;
 import javax.annotation.Nullable;
 
 public class ChopperBlock extends BaseEntityBlock {
+
+    // Fix for 1.21: BaseEntityBlock now requires codec() to be implemented.
+    // A simple no-data codec is sufficient for blocks that don't serialize extra properties.
+    public static final MapCodec<ChopperBlock> CODEC = MapCodec.unit(ChopperBlock::new);
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
+
     public ChopperBlock() {
         super(
                 Properties.of()
@@ -50,7 +61,9 @@ public class ChopperBlock extends BaseEntityBlock {
     @SuppressWarnings("deprecation")
     @Override
     @Deprecated
-    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    // Fix for 1.21: use() is renamed to useWithoutItem() / the interaction pipeline changed.
+    // Use useWithoutItem for right-click with empty hand (no item context).
+    protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         } else {
@@ -58,7 +71,6 @@ public class ChopperBlock extends BaseEntityBlock {
 
             if (menuProvider != null) {
                 player.openMenu(menuProvider);
-                //TODO stats?
             }
 
             return InteractionResult.CONSUME;

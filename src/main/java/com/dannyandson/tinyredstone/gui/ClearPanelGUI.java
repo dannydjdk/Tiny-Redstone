@@ -18,7 +18,7 @@ public class ClearPanelGUI extends Screen {
     private static final int WIDTH = 220;
     private static final int HEIGHT = 60;
 
-    private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
+    private final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     private final PanelTile panelTile;
 

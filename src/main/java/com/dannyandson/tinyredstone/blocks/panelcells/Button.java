@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 
 public class Button implements IPanelCell, IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_OAK_PLANKS = new ResourceLocation("minecraft","block/oak_planks");
+    public static ResourceLocation TEXTURE_OAK_PLANKS = ResourceLocation.fromNamespaceAndPath("minecraft","block/oak_planks");
 
     protected boolean active = false;
     protected Integer ticksRemaining = 0;

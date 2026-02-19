@@ -1,65 +1,53 @@
 package com.dannyandson.tinyredstone.network;
 
+import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record PlaySound(BlockPos pos, String namespace, String path, float volume, float pitch) implements CustomPacketPayload {
 
-public class PlaySound {
-    private final BlockPos pos;
-    private final String namespace;
-    private final String path;
-    private final float volume;
-    private final float pitch;
+    public static final Type<PlaySound> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "play_sound"));
 
-    public PlaySound(BlockPos pos, String namespace, String path, float volume, float pitch)
-    {
-        this.pos = pos;
-        this.namespace = namespace;
-        this.path = path;
-        this.volume = volume;
-        this.pitch = pitch;
+    public static final StreamCodec<FriendlyByteBuf, PlaySound> STREAM_CODEC =
+            StreamCodec.of(PlaySound::write, PlaySound::read);
+
+    public static PlaySound read(FriendlyByteBuf buf) {
+        return new PlaySound(buf.readBlockPos(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat());
     }
 
-    public PlaySound(FriendlyByteBuf buffer)
-    {
-        this.pos = buffer.readBlockPos();
-        this.namespace = buffer.readUtf();
-        this.path = buffer.readUtf();
-        this.volume = buffer.readFloat();
-        this.pitch = buffer.readFloat();
+    public static void write(FriendlyByteBuf buf, PlaySound msg) {
+        buf.writeBlockPos(msg.pos);
+        buf.writeUtf(msg.namespace);
+        buf.writeUtf(msg.path);
+        buf.writeFloat(msg.volume);
+        buf.writeFloat(msg.pitch);
     }
 
-    public void toBytes(FriendlyByteBuf buf)
-    {
-        buf.writeBlockPos(pos);
-        buf.writeUtf(this.namespace);
-        buf.writeUtf(this.path);
-        buf.writeFloat(volume);
-        buf.writeFloat(pitch);
-    }
-
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-
-        ctx.get().enqueueWork(()-> {
-            BlockEntity te = Minecraft.getInstance().level.getBlockEntity(this.pos);
-            if (te instanceof PanelTile)
-            {
+    public static void handle(PlaySound msg, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            BlockEntity te = Minecraft.getInstance().level.getBlockEntity(msg.pos);
+            if (te instanceof PanelTile) {
                 te.getLevel().playLocalSound(
-                        pos.getX(), pos.getY(), pos.getZ(),
-                        SoundEvent.createVariableRangeEvent(new ResourceLocation(namespace,path)),
-                        SoundSource.BLOCKS, volume, pitch, false
+                        msg.pos.getX(), msg.pos.getY(), msg.pos.getZ(),
+                        SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(msg.namespace, msg.path)),
+                        SoundSource.BLOCKS, msg.volume, msg.pitch, false
                 );
             }
-            ctx.get().setPacketHandled(true);
         });
-        return true;
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }

@@ -22,7 +22,7 @@ public class GhostRenderer implements IPanelCell {
     private static final float s6 = 0.375f;
     private static final float s10 = 0.625f;
     private static final int color = RenderHelper.getColor(255,80,0,0);
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT_GHOST = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment_ghost");
+    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT_GHOST = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_segment_ghost");
     private static TextureAtlasSprite sprite;
 
     public GhostRenderer(PanelCellSegment segmentHovering){

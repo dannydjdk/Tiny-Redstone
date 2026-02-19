@@ -23,7 +23,7 @@ public class TinyBlockGUI extends Screen {
     private final Integer cellIndex;
     private final IColorablePanelCell iColorablePanelCell;
 
-    private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
+    private final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     protected TinyBlockGUI(PanelTile panelTile, Integer cellIndex, IColorablePanelCell iColorablePanelCell) {
         super(Component.translatable("tinyredstone:tinyBlockGUI"));

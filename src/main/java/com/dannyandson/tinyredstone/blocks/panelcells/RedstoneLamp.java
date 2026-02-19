@@ -18,8 +18,8 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
 
     private boolean lit = false;
 
-    public static ResourceLocation TEXTURE_REDSTONE_LAMP = new ResourceLocation("minecraft","block/redstone_lamp");
-    public static ResourceLocation TEXTURE_REDSTONE_LAMP_ON = new ResourceLocation("minecraft","block/redstone_lamp_on");
+    public static ResourceLocation TEXTURE_REDSTONE_LAMP = ResourceLocation.fromNamespaceAndPath("minecraft","block/redstone_lamp");
+    public static ResourceLocation TEXTURE_REDSTONE_LAMP_ON = ResourceLocation.fromNamespaceAndPath("minecraft","block/redstone_lamp_on");
 
     /**
      * Drawing the cell on the panel

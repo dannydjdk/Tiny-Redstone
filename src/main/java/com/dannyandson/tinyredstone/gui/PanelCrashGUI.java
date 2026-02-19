@@ -11,13 +11,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 
 public class PanelCrashGUI  extends Screen {
 
-    private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
+    private final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     private static final int WIDTH = 250;
     private static final int HEIGHT = 90;

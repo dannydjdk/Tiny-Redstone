@@ -16,10 +16,10 @@ import net.minecraft.resources.ResourceLocation;
 
 public class Piston implements IPanelCell {
 
-    public static ResourceLocation TEXTURE_PISTON_SIDE = new ResourceLocation("minecraft","block/piston_side");
-    public static ResourceLocation TEXTURE_PISTON_TOP = new ResourceLocation("minecraft","block/piston_top");
-    public static ResourceLocation TEXTURE_PISTON_BOTTOM = new ResourceLocation("minecraft","block/piston_bottom");
-    public static ResourceLocation TEXTURE_PISTON_INNER = new ResourceLocation("minecraft","block/piston_inner");
+    public static ResourceLocation TEXTURE_PISTON_SIDE = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_side");
+    public static ResourceLocation TEXTURE_PISTON_TOP = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_top");
+    public static ResourceLocation TEXTURE_PISTON_BOTTOM = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_bottom");
+    public static ResourceLocation TEXTURE_PISTON_INNER = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_inner");
 
     protected boolean extended = false;
     protected int changePending = -1;

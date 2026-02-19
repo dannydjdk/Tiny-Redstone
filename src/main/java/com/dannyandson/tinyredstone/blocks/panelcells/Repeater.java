@@ -26,8 +26,8 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     protected Integer ticks = 2;
     private int changedTick = -1;
 
-    public static ResourceLocation TEXTURE_REPEATER_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_repeater_on");
-    public static ResourceLocation TEXTURE_REPEATER_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_repeater_off");
+    public static ResourceLocation TEXTURE_REPEATER_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_repeater_on");
+    public static ResourceLocation TEXTURE_REPEATER_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_repeater_off");
 
     /**
      * Drawing the cell on the panel
@@ -50,7 +50,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         }
 
         if (locked)
-            sprite_torch_head=RenderHelper.getSprite(new ResourceLocation("minecraft","block/bedrock"));
+            sprite_torch_head=RenderHelper.getSprite(ResourceLocation.fromNamespaceAndPath("minecraft","block/bedrock"));
 
         float tU0 = sprite_torch_head.getU0();
         float tU1 = tU0 + ((sprite_torch_head.getU1()-tU0)/8);

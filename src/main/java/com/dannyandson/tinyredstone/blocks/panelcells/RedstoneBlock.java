@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 public class RedstoneBlock  implements IPanelCell, IPanelCellInfoProvider {
-    public static ResourceLocation TEXTURE_REDSTONE_BLOCK = new ResourceLocation("minecraft","block/redstone_block");
+    public static ResourceLocation TEXTURE_REDSTONE_BLOCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/redstone_block");
 
     /**
      * Drawing the cell on the panel

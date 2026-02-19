@@ -9,8 +9,8 @@ import net.minecraft.world.entity.player.Player;
 
 public class SuperRepeater extends Repeater {
 
-    public static ResourceLocation TEXTURE_SUPER_REPEATER_ON = new ResourceLocation(TinyRedstone.MODID,"block/panel_super_repeater_on");
-    public static ResourceLocation TEXTURE_SUPER_REPEATER_OFF = new ResourceLocation(TinyRedstone.MODID,"block/panel_super_repeater_off");
+    public static ResourceLocation TEXTURE_SUPER_REPEATER_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_super_repeater_on");
+    public static ResourceLocation TEXTURE_SUPER_REPEATER_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_super_repeater_off");
 
     /**
      * Called when neighboring redstone signal output changes.

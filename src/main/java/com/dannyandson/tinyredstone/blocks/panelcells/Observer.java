@@ -18,11 +18,11 @@ import java.util.LinkedList;
 
 public class Observer implements IPanelCell, IObservingPanelCell {
 
-    public static ResourceLocation TEXTURE_OBSERVER_TOP      = new ResourceLocation("minecraft","block/observer_top");
-    public static ResourceLocation TEXTURE_OBSERVER_BACK_ON  = new ResourceLocation("minecraft","block/observer_back_on");
-    public static ResourceLocation TEXTURE_OBSERVER_BACK     = new ResourceLocation("minecraft","block/observer_back");
-    public static ResourceLocation TEXTURE_OBSERVER_FRONT    = new ResourceLocation("minecraft","block/observer_front");
-    public static ResourceLocation TEXTURE_OBSERVER_SIDE     = new ResourceLocation("minecraft","block/observer_side");
+    public static ResourceLocation TEXTURE_OBSERVER_TOP      = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_top");
+    public static ResourceLocation TEXTURE_OBSERVER_BACK_ON  = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_back_on");
+    public static ResourceLocation TEXTURE_OBSERVER_BACK     = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_back");
+    public static ResourceLocation TEXTURE_OBSERVER_FRONT    = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_front");
+    public static ResourceLocation TEXTURE_OBSERVER_SIDE     = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_side");
 
 
     boolean output = false;

@@ -18,8 +18,8 @@ import net.minecraft.world.entity.player.Player;
 
 public class Lever implements IPanelCell, IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_LEVER = new ResourceLocation("minecraft","block/lever");
-    public static ResourceLocation TEXTURE_COBBLESTONE = new ResourceLocation("minecraft","block/cobblestone");
+    public static ResourceLocation TEXTURE_LEVER = ResourceLocation.fromNamespaceAndPath("minecraft","block/lever");
+    public static ResourceLocation TEXTURE_COBBLESTONE = ResourceLocation.fromNamespaceAndPath("minecraft","block/cobblestone");
     private boolean active = false;
     private Side baseSide = Side.BOTTOM;
 

@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class StickyPiston extends Piston {
 
-    public static ResourceLocation TEXTURE_PISTON_TOP = new ResourceLocation("minecraft","block/piston_top_sticky");
+    public static ResourceLocation TEXTURE_PISTON_TOP = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_top_sticky");
 
    /**
      * Called each each tick.

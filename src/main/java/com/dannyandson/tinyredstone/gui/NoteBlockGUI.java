@@ -23,7 +23,7 @@ public class NoteBlockGUI extends Screen {
     private final Integer cellIndex;
     private final NoteBlock tinyNoteBlock;
 
-    private final ResourceLocation GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/transparent.png");
+    private final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     protected NoteBlockGUI(PanelTile panelTile, Integer cellIndex, NoteBlock tinyNoteBlock) {
         super(Component.translatable("tinyredstone:tinyNoteBlockGUI"));

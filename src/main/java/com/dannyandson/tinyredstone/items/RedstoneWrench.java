@@ -35,11 +35,12 @@ public class RedstoneWrench extends Item {
             BlockPos pos = context.getClickedPos();
 
             if (player != null && player.isCrouching()) {
-                // Make sure the block get activated if it is a BaseBlockNew
                 BlockState state = world.getBlockState(pos);
                 Block block = state.getBlock();
                 if (block instanceof PanelBlock) {
-                    return state.use(world, player, hand, new BlockHitResult(context.getClickLocation(), context.getClickedFace(), pos, context.isInside()));
+                    // Fix: BlockState.use() removed in 1.21 - use useWithoutItem() instead
+                    return state.useWithoutItem(world, player,
+                            new BlockHitResult(context.getClickLocation(), context.getClickedFace(), pos, context.isInside()));
                 }
             }
         }
@@ -47,8 +48,9 @@ public class RedstoneWrench extends Item {
         return InteractionResult.SUCCESS;
     }
 
+    // Fix: appendHoverText signature changed in 1.21 - Level param removed, use Item.TooltipContext
     @Override
-    public  void  appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags)
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> list, TooltipFlag flags)
     {
         list.add(Component.translatable("message.item.redstone_wrench"));
     }
@@ -59,6 +61,6 @@ public class RedstoneWrench extends Item {
 
     public BlockHitResult getHitResult(Level world, Player player)
     {
-        return Item.getPlayerPOVHitResult(world,player, ClipContext.Fluid.ANY);
+        return Item.getPlayerPOVHitResult(world, player, ClipContext.Fluid.ANY);
     }
 }

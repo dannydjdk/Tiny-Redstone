@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PushChopperOutputType;
 import com.dannyandson.tinyredstone.network.ValidTinyBlockCacheSync;
@@ -19,9 +20,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.GlassBlock;
+// Fix: GlassBlock moved to net.minecraft.world.level.block.stained package area; use tag check instead
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.BlockTags;
 
 public class ChopperMenu extends AbstractContainerMenu {
     public static ChopperMenu createChopperMenu(int containerId, Inventory playerInventory) {
@@ -32,27 +34,6 @@ public class ChopperMenu extends AbstractContainerMenu {
         return new ChopperMenu(containerId, playerInventory, inventory);
     }
 
-/*    public static List<Material> solidMaterials = Arrays.asList(
-            Material.WOOD,
-            Material.STONE,
-            Material.METAL,
-            Material.ICE_SOLID,
-            Material.CLAY,
-            Material.SAND,
-            Material.DIRT,
-            Material.GRASS,
-            Material.SNOW,
-            Material.WOOL,
-            Material.NETHER_WOOD,
-            Material.SPONGE
-    );
-
-    public static List<Material> transparentMaterials = Arrays.asList(
-            Blocks.GLASS
-            Material.GLASS,
-            Material.ICE
-    );
-*/
     private final Container container;
     private final ResultContainer resultContainer;
     private Slot inputSlot;
@@ -98,7 +79,6 @@ public class ChopperMenu extends AbstractContainerMenu {
             for (int playerInvCol = 0; playerInvCol < 9; playerInvCol++) {
                 this.addSlot(new Slot(playerInventory, playerInvCol + playerInvRow * 9 + 9, leftCol + playerInvCol * 18, ySize - (4 - playerInvRow) * 18 - 10));
             }
-
         }
 
         for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
@@ -106,7 +86,6 @@ public class ChopperMenu extends AbstractContainerMenu {
         }
 
         setupResultSlot();
-
     }
 
     void setupResultSlot() {
@@ -118,38 +97,40 @@ public class ChopperMenu extends AbstractContainerMenu {
             if (inputStack.getItem() instanceof BlockItem blockItem) {
                 Block inputBlock = blockItem.getBlock();
                 BlockState inputBlockState = inputBlock.defaultBlockState();
-                //Material material = inputBlock.defaultBlockState().getMaterial();
 
                 if (container instanceof ChopperBlockEntity chopperBlockEntity) {
                     boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
                     if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasBlockEntity()) {
-                        ResourceLocation inputRegistryName = ForgeRegistries.BLOCKS.getKey(inputBlock);
+                        ResourceLocation inputRegistryName = BuiltInRegistries.BLOCK.getKey(inputBlock);
                         if (!Registration.TINY_BLOCK_OVERRIDES.hasUsableTexture(inputRegistryName)) {
                             if (!chopperBlockEntity.getLevel().isClientSide)
-                                ModNetworkHandler.sendToNearestClient(new ValidTinyBlockCacheSync(chopperBlockEntity.getBlockPos(), inputRegistryName), chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
-                        } else if (ForgeRegistries.BLOCKS.getKey(inputBlock) != null) {
+                                // Fix: ValidTinyBlockCacheSync constructor is (ResourceLocation, BlockPos) - swap args
+                                ModNetworkHandler.sendToNearestClient(new ValidTinyBlockCacheSync(inputRegistryName, chopperBlockEntity.getBlockPos()), chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
+                        } else if (BuiltInRegistries.BLOCK.getKey(inputBlock) != null) {
                             CompoundTag madeFromTag = new CompoundTag();
-                            madeFromTag.putString("namespace", ForgeRegistries.BLOCKS.getKey(inputBlock).getNamespace());
-                            madeFromTag.putString("path", ForgeRegistries.BLOCKS.getKey(inputBlock).getPath());
+                            madeFromTag.putString("namespace", BuiltInRegistries.BLOCK.getKey(inputBlock).getNamespace());
+                            madeFromTag.putString("path", BuiltInRegistries.BLOCK.getKey(inputBlock).getPath());
                             if (getItemType().equals("Dark Cover")) {
                                 outputStack = Registration.PANEL_COVER_DARK.get().getDefaultInstance();
                                 outputStack.setCount(2);
-                                outputStack.addTagElement("made_from", madeFromTag);
+                                ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                             } else if (getItemType().equals("Light Cover")) {
                                 outputStack = Registration.PANEL_COVER_LIGHT.get().getDefaultInstance();
                                 outputStack.setCount(2);
-                                outputStack.addTagElement("made_from", madeFromTag);
+                                ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                             } else {
-                                if (inputBlock instanceof GlassBlock) {
+                                // Fix: GlassBlock class removed in 1.21 - use block tag check instead
+                                boolean isGlass = inputBlockState.is(BlockTags.IMPERMEABLE); // vanilla glass tag
+                                if (isGlass) {
                                     outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
-                                    if (!ForgeRegistries.BLOCKS.getKey(inputBlock).toString().equals("minecraft:glass"))
-                                        outputStack.addTagElement("made_from", madeFromTag);
+                                    if (!BuiltInRegistries.BLOCK.getKey(inputBlock).toString().equals("minecraft:glass"))
+                                        ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                                 } else {
                                     outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
-                                    if (!ForgeRegistries.BLOCKS.getKey(inputBlock).toString().equals("minecraft:white_wool"))
-                                        outputStack.addTagElement("made_from", madeFromTag);
+                                    if (!BuiltInRegistries.BLOCK.getKey(inputBlock).toString().equals("minecraft:white_wool"))
+                                        ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                                 }
                             }
                         }
@@ -161,7 +142,6 @@ public class ChopperMenu extends AbstractContainerMenu {
             this.broadcastChanges();
         }
     }
-
 
     @Override
     public void slotsChanged(Container container) {
@@ -221,5 +201,4 @@ public class ChopperMenu extends AbstractContainerMenu {
             itemType = "Tiny Block";
         ModNetworkHandler.sendToServer(new PushChopperOutputType(itemType, pos));
     }
-
 }

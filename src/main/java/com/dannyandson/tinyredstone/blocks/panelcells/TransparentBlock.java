@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
 public class TransparentBlock extends TinyBlock {
-    public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = new ResourceLocation("minecraft","block/glass");
+    public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/glass");
     private TextureAtlasSprite sprite;
     private int color= 16777215;
 
@@ -91,7 +91,7 @@ public class TransparentBlock extends TinyBlock {
     public void readNBT(CompoundTag compoundNBT) {
         this.color=compoundNBT.getInt("color");
         if (compoundNBT.contains("made_from_namespace"))
-            this.madeFrom = new ResourceLocation(compoundNBT.getString("made_from_namespace"), compoundNBT.getString("made_from_path"));
+            this.madeFrom = ResourceLocation.fromNamespaceAndPath(compoundNBT.getString("made_from_namespace"), compoundNBT.getString("made_from_path"));
     }
 
 }

@@ -2,7 +2,6 @@ package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -16,7 +15,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implements MenuAccess<ChopperMenu> {
 
-    public static final ResourceLocation CUTTER_GUI = new ResourceLocation(TinyRedstone.MODID, "textures/gui/block_chopper.png");
+    public static final ResourceLocation CUTTER_GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/block_chopper.png");
     private ChopperMenu chopperMenu;
     private Button itemTypeButton = null;
 
@@ -31,15 +30,13 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
     @Override
     protected void init() {
         super.init();
-        itemTypeButton=ModWidget.buildButton(leftPos+(imageWidth/2)-35,topPos+18,70,20,Component.nullToEmpty(chopperMenu.getItemType()),button->toggleItemType());
+        itemTypeButton = ModWidget.buildButton(leftPos+(imageWidth/2)-35, topPos+18, 70, 20, Component.nullToEmpty(chopperMenu.getItemType()), button -> toggleItemType());
         addRenderableWidget(itemTypeButton);
     }
 
     private void toggleItemType(){
         if (this.minecraft.hitResult instanceof BlockHitResult) {
-
             chopperMenu.toggleItemType(new BlockPos(((BlockHitResult) this.minecraft.hitResult).getBlockPos()));
-
             removeWidget(itemTypeButton);
             itemTypeButton = ModWidget.buildButton(leftPos + (imageWidth / 2) - 35, topPos + 18, 70, 20, Component.nullToEmpty(chopperMenu.getItemType()), button -> toggleItemType());
             addRenderableWidget(itemTypeButton);
@@ -47,10 +44,11 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
     }
 
     @Override
-    public void render(GuiGraphics matrixStack, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(matrixStack);
-        super.render(matrixStack, mouseX, mouseY, partialTicks);
-        this.renderTooltip(matrixStack, mouseX, mouseY);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        // Fix: renderBackground now requires (GuiGraphics, int, int, float) in 1.21
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        this.renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override
@@ -62,8 +60,6 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
 
-        poseStack.blit(CUTTER_GUI,x, y, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
-
+        poseStack.blit(CUTTER_GUI, x, y, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
     }
-
 }

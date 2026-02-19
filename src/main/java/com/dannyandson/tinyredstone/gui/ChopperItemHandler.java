@@ -1,10 +1,8 @@
 package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 
@@ -41,7 +39,8 @@ public class ChopperItemHandler implements IItemHandler {
 
         if (!existing.isEmpty())
         {
-            if (!ItemHandlerHelper.canItemStacksStack(stack, existing))
+            // Fix: ItemHandlerHelper.canItemStacksStack() removed in 1.21 - use ItemStack.isSameItemSameComponents()
+            if (!ItemStack.isSameItemSameComponents(stack, existing))
                 return stack;
 
             limit -= existing.getCount();
@@ -56,7 +55,8 @@ public class ChopperItemHandler implements IItemHandler {
         {
             if (existing.isEmpty())
             {
-                innerHandler.setItem(slot, reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, limit) : stack);
+                // Fix: ItemHandlerHelper.copyStackWithSize() removed - use ItemStack.copyWithCount()
+                innerHandler.setItem(slot, reachedLimit ? stack.copyWithCount(limit) : stack);
             }
             else
             {
@@ -65,7 +65,8 @@ public class ChopperItemHandler implements IItemHandler {
             innerHandler.setChanged();
         }
 
-        return reachedLimit ? ItemHandlerHelper.copyStackWithSize(stack, stack.getCount()- limit) : ItemStack.EMPTY;
+        // Fix: ItemHandlerHelper.copyStackWithSize() removed - use ItemStack.copyWithCount()
+        return reachedLimit ? stack.copyWithCount(stack.getCount() - limit) : ItemStack.EMPTY;
     }
 
     @Nonnull
@@ -87,7 +88,6 @@ public class ChopperItemHandler implements IItemHandler {
         } else {
             return existing.copy();
         }
-
     }
 
     @Override
@@ -99,5 +99,4 @@ public class ChopperItemHandler implements IItemHandler {
     public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
         return true;
     }
-
 }

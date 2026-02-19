@@ -8,10 +8,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -41,7 +39,7 @@ public class PanelItem extends BlockItem {
     }
 
     @Override
-    public  void  appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags)
+    public  void  appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> list, TooltipFlag flags)
     {
         list.add(Component.translatable("message.item.redstone_panel"));
     }

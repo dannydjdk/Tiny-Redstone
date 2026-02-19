@@ -8,12 +8,12 @@ import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-@Mod.EventBusSubscriber(modid = TinyRedstone.MODID)
+@EventBusSubscriber(modid = TinyRedstone.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class CommonBinding {
     @SubscribeEvent
     public static void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
@@ -50,7 +50,7 @@ public class CommonBinding {
             BlockEntity te = event.getEntity().level().getBlockEntity(event.getPos());
             if (te instanceof PanelTile)
             {
-                Registration.REDSTONE_PANEL_BLOCK.get().use(te.getBlockState(),event.getEntity().level(),event.getPos(),event.getEntity(),event.getHand(),event.getHitVec());
+                Registration.REDSTONE_PANEL_BLOCK.get().useItemOn(event.getItemStack(), te.getBlockState(),event.getEntity().level(),event.getPos(),event.getEntity(),event.getHand(),event.getHitVec());
                 event.setCanceled(true);
             }
         }

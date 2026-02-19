@@ -8,9 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class PanelCellItem extends AbstractPanelCellItem {
@@ -19,7 +17,7 @@ public class PanelCellItem extends AbstractPanelCellItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flags) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> list, TooltipFlag flags) {
         if (Screen.hasShiftDown()) {
             list.add(Component.translatable("message.item.redstone_panel_cell").withStyle(ChatFormatting.GRAY));
             list.add(Component.translatable("message." + this.getDescriptionId()).withStyle(ChatFormatting.RED));

@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.compat.theoneprobe;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
@@ -31,7 +32,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
 
     @Override
     public ResourceLocation getID() {
-        return new ResourceLocation( TinyRedstone.MODID,"panel");
+        return ResourceLocation.fromNamespaceAndPath( TinyRedstone.MODID,"panel");
     }
 
     @Override
@@ -88,7 +89,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                         CompoundTag itemTag = panelCell.getItemTag();
                         if (itemTag!=null){
                             for (String key : itemTag.getAllKeys()){
-                                itemStack.addTagElement(key,itemTag.get(key));
+                                ItemStackHelper.addTagElement(itemStack, key, itemTag.get(key));
                             }
                         }
 

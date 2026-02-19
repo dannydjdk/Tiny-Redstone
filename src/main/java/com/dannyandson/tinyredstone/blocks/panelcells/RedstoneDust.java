@@ -22,8 +22,8 @@ import java.util.StringJoiner;
 
 public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_REDSTONE_DUST = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_dust");
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT = new ResourceLocation(TinyRedstone.MODID,"block/panel_redstone_segment");
+    public static ResourceLocation TEXTURE_REDSTONE_DUST = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_dust");
+    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_segment");
 
 
     //pre-calculated variables for segment points

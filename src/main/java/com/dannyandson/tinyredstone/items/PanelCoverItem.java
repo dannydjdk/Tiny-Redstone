@@ -1,13 +1,14 @@
 package com.dannyandson.tinyredstone.items;
 
 import net.minecraft.client.Minecraft;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.function.Consumer;
 
@@ -36,10 +37,10 @@ public class PanelCoverItem extends PanelCellItem{
 
     @Override
     public Component getName(ItemStack stack) {
-        if (stack.hasTag()) {
+        if (ItemStackHelper.getCustomTag(stack) != null) {
             String thisName = super.getName(stack).getString();
             String fromBlockName = null;
-            CompoundTag itemNBT = stack.getTag();
+            CompoundTag itemNBT = ItemStackHelper.getCustomTag(stack);
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
                 fromBlockName = (Component.translatable("block." + madeFromTag.getString("namespace") + "." + madeFromTag.getString("path"))).getString();

@@ -1,42 +1,42 @@
 package com.dannyandson.tinyredstone.network;
 
+import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
+public record ClearPanelSync(BlockPos pos) implements CustomPacketPayload {
 
-public class ClearPanelSync {
-    private final BlockPos pos;
+    public static final Type<ClearPanelSync> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "clear_panel_sync"));
 
-    public ClearPanelSync(BlockPos pos)
-    {
-        this.pos=pos;
+    public static final StreamCodec<FriendlyByteBuf, ClearPanelSync> STREAM_CODEC =
+            StreamCodec.of(ClearPanelSync::write, ClearPanelSync::read);
+
+    public static ClearPanelSync read(FriendlyByteBuf buf) {
+        return new ClearPanelSync(buf.readBlockPos());
     }
 
-    public ClearPanelSync(FriendlyByteBuf buffer)
-    {
-        this.pos= buffer.readBlockPos();
+    public static void write(FriendlyByteBuf buf, ClearPanelSync msg) {
+        buf.writeBlockPos(msg.pos);
     }
 
-    public void toBytes(FriendlyByteBuf buf)
-    {
-        buf.writeBlockPos(pos);
-    }
-
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-
-        ctx.get().enqueueWork(()-> {
-            BlockEntity te =  ctx.get().getSender().level().getBlockEntity(this.pos);
-            if (te instanceof PanelTile)
-            {
-                ((PanelTile)te).removeAllCells(null);
+    public static void handle(ClearPanelSync msg, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            BlockEntity te = ctx.player().level().getBlockEntity(msg.pos);
+            if (te instanceof PanelTile panelTile) {
+                panelTile.removeAllCells(null);
             }
-            ctx.get().setPacketHandled(true);
         });
-        return true;
     }
 
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
 }

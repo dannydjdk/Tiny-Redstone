@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.api.IColorablePanelCell;
 import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
@@ -20,8 +21,8 @@ import net.minecraft.world.item.ItemStack;
 
 public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider {
 
-    public static final ResourceLocation TEXTURE_GRASS_BLOCK_TOP = new ResourceLocation(TinyRedstone.MODID, "block/grass_block_top");
-    public static final ResourceLocation TEXTURE_TINY_BLOCK = new ResourceLocation("minecraft","block/white_wool");
+    public static final ResourceLocation TEXTURE_GRASS_BLOCK_TOP = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "block/grass_block_top");
+    public static final ResourceLocation TEXTURE_TINY_BLOCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/white_wool");
 
     protected int weakSignalStrength = 0;
     protected int strongSignalStrength = 0;
@@ -65,11 +66,11 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
             stack = player.getItemInHand(player.getUsedItemHand());
         if (stack == ItemStack.EMPTY)
             stack = player.getMainHandItem();
-        if (stack.hasTag()) {
-            CompoundTag itemNBT = stack.getTag();
+        if (ItemStackHelper.getCustomTag(stack) != null) {
+            CompoundTag itemNBT = ItemStackHelper.getCustomTag(stack);
             CompoundTag madeFromTag = itemNBT.getCompound("made_from");
             if (madeFromTag.contains("namespace")) {
-                this.madeFrom = new ResourceLocation(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
+                this.madeFrom = ResourceLocation.fromNamespaceAndPath(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
             }
         }
 
@@ -194,7 +195,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
         this.weakSignalStrength=compoundNBT.getInt("weak");
         this.color=compoundNBT.getInt("color");
         if (compoundNBT.contains("made_from_namespace"))
-            this.madeFrom=new ResourceLocation(compoundNBT.getString("made_from_namespace"),compoundNBT.getString("made_from_path"));
+            this.madeFrom=ResourceLocation.fromNamespaceAndPath(compoundNBT.getString("made_from_namespace"),compoundNBT.getString("made_from_path"));
     }
 
     @Override

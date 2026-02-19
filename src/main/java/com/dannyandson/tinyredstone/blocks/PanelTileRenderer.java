@@ -26,26 +26,26 @@ import java.util.List;
 public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
     public static ResourceLocation[] TEXTURES = {
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0001"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0010"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0011"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0100"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0101"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0110"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_0111"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1000"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1001"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1010"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1011"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1100"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1101"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1110"),
-            new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_1111")
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0001"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0010"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0011"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0100"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0101"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0110"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0111"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1000"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1001"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1010"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1011"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1100"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1101"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1110"),
+            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1111")
     };
     public static ResourceLocation TEXTURE = TEXTURES[0];
-    public static ResourceLocation TEXTURE_BORDER = new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_border");
-    public static ResourceLocation TEXTURE_CRASHED = new ResourceLocation(TinyRedstone.MODID,"block/redstone_panel_crashed");
+    public static ResourceLocation TEXTURE_BORDER = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_border");
+    public static ResourceLocation TEXTURE_CRASHED = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_crashed");
 
     private float scale = 0.125f;
     private float t2X = 0.0f;

@@ -8,46 +8,38 @@ import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod.EventBusSubscriber
 @Mod(TinyRedstone.MODID)
 public class TinyRedstone {
-    // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MODID = "tinyredstone";
 
+    public TinyRedstone(IEventBus modEventBus, ModContainer modContainer) {
+        Registration.register(modEventBus);
 
-    public TinyRedstone() {
-
-        Registration.register();
-        // Register the setup method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ModSetup::init);
-        if(FMLEnvironment.dist.isClient()) {
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientSetup::init);
+        modEventBus.addListener(ModSetup::init);
+        if (FMLEnvironment.dist.isClient()) {
+            modEventBus.addListener(ClientSetup::init);
         }
 
-        //load configs
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
+        modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
 
         CompatHandler.register();
     }
 
-    public static void registerPanelCell(Class<? extends IPanelCell> iPanelCellClass, Item correspondingItem)
-    {
-        PanelBlock.registerPanelCell(iPanelCellClass,correspondingItem);
+    public static void registerPanelCell(Class<? extends IPanelCell> iPanelCellClass, Item correspondingItem) {
+        PanelBlock.registerPanelCell(iPanelCellClass, correspondingItem);
     }
 
-    public static void registerPanelCover(Class<? extends IPanelCover> iPanelCoverClass, Item correspondingItem)
-    {
-        PanelBlock.registerPanelCover(iPanelCoverClass,correspondingItem);
+    public static void registerPanelCover(Class<? extends IPanelCover> iPanelCoverClass, Item correspondingItem) {
+        PanelBlock.registerPanelCover(iPanelCoverClass, correspondingItem);
     }
-
 }
