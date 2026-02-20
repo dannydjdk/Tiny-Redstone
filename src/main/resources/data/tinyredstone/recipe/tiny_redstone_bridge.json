@@ -12,7 +12,7 @@
     }
   ],
   "result": {
-    "item": "tinyredstone:tiny_redstone_bridge",
+    "id": "tinyredstone:tiny_redstone_bridge",
     "count": 8
   }
 }

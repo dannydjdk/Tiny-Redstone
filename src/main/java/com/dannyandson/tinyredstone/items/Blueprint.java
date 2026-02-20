@@ -11,6 +11,7 @@ import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
 import com.dannyandson.tinyredstone.gui.BlueprintGUI;
 import com.dannyandson.tinyredstone.setup.Registration;
 import com.dannyandson.tinyredstone.util.ItemStackHelper;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -18,16 +19,17 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.level.Level;
-import javax.annotation.Nullable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +50,7 @@ public class Blueprint extends Item {
                 String itemName = itemNameComponent.getString();
                 list.add(Component.nullToEmpty(itemName + " : " + item.getCount()));
             }
+            list.add(Component.literal("CMD: " + stack.get(DataComponents.CUSTOM_MODEL_DATA)));
         } else {
             list.add(Component.translatable("message.item.blueprint.empty"));
         }
@@ -57,6 +60,7 @@ public class Blueprint extends Item {
     @Nonnull
     public InteractionResult useOn(UseOnContext context) {
         BlockEntity te = context.getLevel().getBlockEntity(context.getClickedPos());
+        CompoundTag itemCustomTag = ItemStackHelper.getCustomTag(context.getItemInHand());
         PanelTile panelTile = null;
         if (te instanceof PanelTile) {
             panelTile = (PanelTile) te;
@@ -71,7 +75,6 @@ public class Blueprint extends Item {
             }
         }
         if (panelTile != null) {
-            CompoundTag itemCustomTag = ItemStackHelper.getCustomTag(context.getItemInHand());
             if (itemCustomTag != null && itemCustomTag.contains("blueprint")) {
                 Player player = context.getPlayer();
                 if (panelTile.getCellCount() == 0 && player != null) {
@@ -110,9 +113,10 @@ public class Blueprint extends Item {
             } else {
                 CompoundTag nbt = new CompoundTag();
                 CompoundTag blueprintNBT = panelTile.saveToNbt(new CompoundTag());
-                nbt.putInt("CustomModelData", 1);
                 nbt.put("blueprint", blueprintNBT);
                 ItemStackHelper.setCustomTag(context.getItemInHand(), nbt);
+                context.getItemInHand().set(DataComponents.CUSTOM_MODEL_DATA,
+                        new CustomModelData(1));
             }
         }
 
@@ -208,7 +212,6 @@ public class Blueprint extends Item {
 
                 CompoundTag newNBT = new CompoundTag();
                 CompoundTag newBlueprintNBT = new CompoundTag();
-                newNBT.putInt("CustomModelData", 1);
                 newBlueprintNBT.put("cells", newCellsNBT);
                 newNBT.put("blueprint", newBlueprintNBT);
                 if (nbt.contains("display"))

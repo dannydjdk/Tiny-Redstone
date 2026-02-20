@@ -7,7 +7,7 @@
       "tag": "c:silicon"
     }],
   "result": {
-    "item": "tinyredstone:tiny_sticky_piston",
+    "id": "tinyredstone:tiny_sticky_piston",
     "count": 8
   }
 }

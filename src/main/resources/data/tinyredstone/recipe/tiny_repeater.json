@@ -7,7 +7,7 @@
       "tag": "c:silicon"
     }],
   "result": {
-    "item": "tinyredstone:tiny_repeater",
+    "id": "tinyredstone:tiny_repeater",
     "count": 8
   }
 }

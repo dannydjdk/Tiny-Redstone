@@ -9,7 +9,7 @@
     }
   ],
   "result": {
-    "item": "tinyredstone:tiny_redstone_block",
+    "id": "tinyredstone:tiny_redstone_block",
     "count": 8
   }
 }

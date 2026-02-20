@@ -274,14 +274,14 @@ public class PanelBlock extends BaseEntityBlock {
         return true;
     }
 
-    // Fix: changed BlockGetter -> LevelReader to match 1.21 signature
     private ItemStack getItemWithNBT(LevelReader worldIn, BlockPos pos, BlockState state) {
         if (worldIn.getBlockEntity(pos) instanceof PanelTile panelTile) {
             ItemStack itemstack = new ItemStack(this);
             CompoundTag compoundNBT = panelTile.saveToNbt(new CompoundTag());
-            compoundNBT.putBoolean("hasBase",panelTile.hasBase());
+            compoundNBT.putBoolean("hasBase", panelTile.hasBase());
             if (!compoundNBT.isEmpty()) {
-                ItemStackHelper.addTagElement(itemstack, "BlockEntityTag", compoundNBT);
+                compoundNBT.putString("id", "tinyredstone:redstone_panel");
+                ItemStackHelper.setBlockEntityTag(itemstack, compoundNBT);
             }
             return itemstack;
         }

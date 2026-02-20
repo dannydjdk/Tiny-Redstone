@@ -51,10 +51,14 @@ public class ItemStackHelper {
      */
     @Nullable
     public static CompoundTag getBlockEntityTag(ItemStack stack) {
-        CompoundTag tag = getCustomTag(stack);
-        if (tag != null && tag.contains("BlockEntityTag")) {
-            return tag.getCompound("BlockEntityTag");
+        net.minecraft.world.item.component.CustomData beData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (beData != null) {
+            return beData.copyTag();
         }
         return null;
+    }
+
+    public static void setBlockEntityTag(ItemStack stack, CompoundTag tag) {
+        stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
     }
 }

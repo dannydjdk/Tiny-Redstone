@@ -7,7 +7,7 @@
       "tag": "c:silicon"
     }],
   "result": {
-    "item": "tinyredstone:tiny_solid_block",
+    "id": "tinyredstone:tiny_solid_block",
     "count": 8
   }
 }

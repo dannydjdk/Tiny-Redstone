@@ -1,14 +1,7 @@
 {
   "parent": "item/handheld",
-  "textures": {
-    "layer0": "tinyredstone:item/blueprint_empty"
-  },
+  "textures": { "layer0": "tinyredstone:item/blueprint_empty" },
   "overrides": [
-    {
-      "predicate": {
-        "custom_model_data": 1
-      },
-      "model": "tinyredstone:item/blueprint_full"
-    }
+    { "predicate": { "custom_model_data": 1 }, "model": "tinyredstone:item/blueprint_full" }
   ]
 }

@@ -1,9 +1,7 @@
 {
   "type": "minecraft:smelting",
-  "ingredient": {
-    "item": "tinyredstone:silicon_compound"
-  },
-  "result": "tinyredstone:silicon",
+  "ingredient": { "item": "tinyredstone:silicon_compound" },
+  "result": { "id": "tinyredstone:silicon" },
   "experience": 0.45,
   "cookingtime": 100
 }

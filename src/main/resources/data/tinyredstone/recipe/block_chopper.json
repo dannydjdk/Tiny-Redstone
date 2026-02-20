@@ -20,7 +20,7 @@
     }
   },
   "result": {
-    "item": "tinyredstone:block_chopper",
+    "id": "tinyredstone:block_chopper",
     "count": 1
   }
 }

@@ -9,7 +9,7 @@
 
     }],
   "result": {
-    "item": "tinyredstone:tiny_redstone_torch",
+    "id": "tinyredstone:tiny_redstone_torch",
     "count": 8
   }
 }

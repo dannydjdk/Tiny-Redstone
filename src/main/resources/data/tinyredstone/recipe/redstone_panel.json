@@ -17,7 +17,7 @@
     }
   },
   "result": {
-    "item": "tinyredstone:redstone_panel",
+    "id": "tinyredstone:redstone_panel",
     "count": 3
   }
 }

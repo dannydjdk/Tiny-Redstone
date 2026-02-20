@@ -31,7 +31,7 @@ runs {
     server {
         systemProperty 'forge.enabledGameTestNamespaces', mod_id
         // Fix: use getArguments() instead of deprecated getProgramArguments()
-        arguments.add '--nogui'
+        //arguments.add '--nogui'
     }
 
     gameTestServer {
@@ -64,7 +64,9 @@ dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
     // The One Probe for NeoForge 1.21.1 - compileOnly so it's optional at runtime
-    compileOnly "curse.maven:theoneprobe-245211:${top_file_id}"
+    implementation "curse.maven:theoneprobe-245211:${top_file_id}"
+    implementation "curse.maven:jei-238222:${jei_file_id}"
+
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

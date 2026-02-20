@@ -111,7 +111,7 @@ public class Registration {
 
     public static final DeferredHolder<Item, Item> PANEL_COVER_DARK = ITEMS.register("dark_panel_cover",PanelCoverItem::new);
     public static final DeferredHolder<Item, Item> PANEL_COVER_LIGHT = ITEMS.register("light_panel_cover",PanelCoverItem::new);
-    public static final DeferredHolder<Item, Item> PANEL_COVER_TRIM = ITEMS.register("trim_panel_cover",PanelCellItem::new);
+    public static final DeferredHolder<Item, Item> PANEL_COVER_TRIM = ITEMS.register("trim_panel_cover",PanelCoverItem::new);
 
     public static final CodecTinyBlockOverrides TINY_BLOCK_OVERRIDES = new CodecTinyBlockOverrides("tiny_block_overrides", TinyBlockData.CODEC);
 

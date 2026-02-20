@@ -8,7 +8,7 @@
 
     }],
   "result": {
-    "item": "tinyredstone:tiny_redstone_lamp",
+    "id": "tinyredstone:tiny_redstone_lamp",
     "count": 8
   }
 }
