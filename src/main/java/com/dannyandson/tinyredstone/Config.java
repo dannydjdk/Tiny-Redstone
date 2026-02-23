@@ -19,6 +19,7 @@ public class Config {
     public static ModConfigSpec.IntValue CIRCUIT_MAX_ITERATION;
     public static ModConfigSpec.ConfigValue<List<String>> REDSTONE_WIRE_LIST;
     public static ModConfigSpec.BooleanValue ALLOW_WORLD_PLACEMENT;
+    public static ModConfigSpec.IntValue LIGHT_UPDATE_DELAY;
 
     static {
 
@@ -40,17 +41,22 @@ public class Config {
                 .defineInRange("super_repeater_max",1000,4,Integer.MAX_VALUE);
 
         CIRCUIT_MAX_ITERATION = SERVER_BUILDER.comment("How many blocks long can a line of redstone run in a single tick?" +
-                "\nThis number determines approximately 2x how many zero tick super repeaters can extend a single redstone line?" +
-                "\n(Since each repeater can extend signal 2 full blocks.)" +
-                "\nVery large numbers may degrade performance and potentially risk crash. (default=32)")
+                        "\nThis number determines approximately 2x how many zero tick super repeaters can extend a single redstone line?" +
+                        "\n(Since each repeater can extend signal 2 full blocks.)" +
+                        "\nVery large numbers may degrade performance and potentially risk crash. (default=32)")
                 .defineInRange("max_zero_tick_run",32,4,1024);
 
         ALLOW_WORLD_PLACEMENT = SERVER_BUILDER.comment("Allow components to be placed anywhere, not just on panels. (default: true)")
                 .define("allow_world_placement",true);
 
+        LIGHT_UPDATE_DELAY = SERVER_BUILDER.comment("Number of ticks to wait before applying light level changes from tiny lamps and torches."
+                        + "\nHigher values improve performance with many active lamps. Lower values give more responsive lighting."
+                        + "\nSet to 0 for immediate updates. 20 ticks = 1 second. (default: 4)")
+                .defineInRange("light_update_delay", 4, 0, 100);
+
         List<String> redstoneWires = new ArrayList<>(Arrays.asList("redstonepen:track", "cb_multipart:multipart", "cyclic:clock", "tinyredstone:redstone_panel"));
         REDSTONE_WIRE_LIST = SERVER_BUILDER.comment("List of blocks from other mods to be treated as redstone wire.")
-                        .define("redstone_wires",redstoneWires);
+                .define("redstone_wires",redstoneWires);
 
         SERVER_BUILDER.pop();
 

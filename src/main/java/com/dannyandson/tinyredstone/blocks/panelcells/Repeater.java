@@ -28,6 +28,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
 
     public static ResourceLocation TEXTURE_REPEATER_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_repeater_on");
     public static ResourceLocation TEXTURE_REPEATER_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_repeater_off");
+    private static final ResourceLocation TEXTURE_BEDROCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/bedrock");
 
     /**
      * Drawing the cell on the panel
@@ -50,7 +51,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         }
 
         if (locked)
-            sprite_torch_head=RenderHelper.getSprite(ResourceLocation.fromNamespaceAndPath("minecraft","block/bedrock"));
+            sprite_torch_head=RenderHelper.getSprite(TEXTURE_BEDROCK);
 
         float tU0 = sprite_torch_head.getU0();
         float tU1 = tU0 + ((sprite_torch_head.getU1()-tU0)/8);

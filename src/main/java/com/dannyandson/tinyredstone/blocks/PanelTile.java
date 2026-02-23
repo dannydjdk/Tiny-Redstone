@@ -53,6 +53,7 @@ public class PanelTile extends BlockEntity {
     protected Integer Color = RenderHelper.getTextureDiffusedColor(DyeColor.GRAY);
     private Integer lightOutput = 0;
     protected boolean flagLightUpdate = false;
+    protected int lightUpdateCooldown = 0;
     private boolean flagCrashed = false;
     private boolean flagOverflow = false;
     protected IPanelCover panelCover = null;
@@ -66,8 +67,33 @@ public class PanelTile extends BlockEntity {
     protected static boolean checkWireSignals = true;
     private int relTickTime = 0;
 
+    // Client-side cached renderer for vertex data caching
+    private CachedPanelRenderer cachedRenderer;
+
+    public CachedPanelRenderer getCachedRenderer() {
+        if (cachedRenderer == null) {
+            cachedRenderer = new CachedPanelRenderer();
+        }
+        return cachedRenderer;
+    }
+
+    private void markRenderDirty() {
+        if (cachedRenderer != null) {
+            cachedRenderer.markDirty();
+        }
+    }
+
     public PanelTile(BlockPos p_155229_, BlockState p_155230_) {
         super(Registration.REDSTONE_PANEL_TILE.get(), p_155229_, p_155230_);
+    }
+
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        if (level != null && level.isClientSide && cachedRenderer != null) {
+            cachedRenderer.close();
+            cachedRenderer = null;
+        }
     }
 
     @Override
@@ -106,6 +132,9 @@ public class PanelTile extends BlockEntity {
         if (tag != null) {
             this.loadAdditional(tag, registries);
         }
+        if (this.level != null && this.level.isClientSide) {
+            markRenderDirty();
+        }
     }
 
     /* Creates a tag containing the TileEntity information, used by vanilla to transmit from server to client*/
@@ -124,6 +153,9 @@ public class PanelTile extends BlockEntity {
             this.cellDirections.clear();
         }
         this.loadAdditional(tag, registries);
+        if (this.level != null && this.level.isClientSide) {
+            markRenderDirty();
+        }
     }
 
     public CompoundTag saveToNbt(CompoundTag compoundTag) {
@@ -159,7 +191,7 @@ public class PanelTile extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag parentNBTTagCompound, net.minecraft.core.HolderLookup.Provider registries) {
         super.saveAdditional(parentNBTTagCompound, registries);
-       try {
+        try {
             if (this.strongPowerToNeighbors.size()==5) {
                 CompoundTag strongPowerToNeighbors = new CompoundTag();
                 strongPowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.strongPowerToNeighbors.get(Side.FRONT));
@@ -182,24 +214,24 @@ public class PanelTile extends BlockEntity {
                     weakPowerToNeighbors.putInt(Side.BOTTOM.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BOTTOM));
                 parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
             }
-           if (this.wirePowerToNeighbors.size()==5) {
-               CompoundTag wirePowerToNeighbors = new CompoundTag();
-               wirePowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.wirePowerToNeighbors.get(Side.FRONT));
-               wirePowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.wirePowerToNeighbors.get(Side.RIGHT));
-               wirePowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.wirePowerToNeighbors.get(Side.BACK));
-               wirePowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.wirePowerToNeighbors.get(Side.LEFT));
-               wirePowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.wirePowerToNeighbors.get(Side.TOP));
-               parentNBTTagCompound.put("wire_power_outgoing", wirePowerToNeighbors);
-           }
-           if (!this.connectedPanelNeighbor.isEmpty()) {
-               CompoundTag connectedPanelNeighbors = new CompoundTag();
-               connectedPanelNeighbors.putBoolean(Side.FRONT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.FRONT) && this.connectedPanelNeighbor.get(Side.FRONT));
-               connectedPanelNeighbors.putBoolean(Side.RIGHT.ordinal() + "",this.connectedPanelNeighbor.containsKey(Side.RIGHT) &&  this.connectedPanelNeighbor.get(Side.RIGHT));
-               connectedPanelNeighbors.putBoolean(Side.BACK.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.BACK) &&  this.connectedPanelNeighbor.get(Side.BACK));
-               connectedPanelNeighbors.putBoolean(Side.LEFT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.LEFT) &&  this.connectedPanelNeighbor.get(Side.LEFT));
-               connectedPanelNeighbors.putBoolean(Side.TOP.ordinal() + "",  this.connectedPanelNeighbor.containsKey(Side.TOP) && this.connectedPanelNeighbor.get(Side.TOP));
-               parentNBTTagCompound.put("connected_panel_neighbors", connectedPanelNeighbors);
-           }
+            if (this.wirePowerToNeighbors.size()==5) {
+                CompoundTag wirePowerToNeighbors = new CompoundTag();
+                wirePowerToNeighbors.putInt(Side.FRONT.ordinal() + "", this.wirePowerToNeighbors.get(Side.FRONT));
+                wirePowerToNeighbors.putInt(Side.RIGHT.ordinal() + "", this.wirePowerToNeighbors.get(Side.RIGHT));
+                wirePowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.wirePowerToNeighbors.get(Side.BACK));
+                wirePowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.wirePowerToNeighbors.get(Side.LEFT));
+                wirePowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.wirePowerToNeighbors.get(Side.TOP));
+                parentNBTTagCompound.put("wire_power_outgoing", wirePowerToNeighbors);
+            }
+            if (!this.connectedPanelNeighbor.isEmpty()) {
+                CompoundTag connectedPanelNeighbors = new CompoundTag();
+                connectedPanelNeighbors.putBoolean(Side.FRONT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.FRONT) && this.connectedPanelNeighbor.get(Side.FRONT));
+                connectedPanelNeighbors.putBoolean(Side.RIGHT.ordinal() + "",this.connectedPanelNeighbor.containsKey(Side.RIGHT) &&  this.connectedPanelNeighbor.get(Side.RIGHT));
+                connectedPanelNeighbors.putBoolean(Side.BACK.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.BACK) &&  this.connectedPanelNeighbor.get(Side.BACK));
+                connectedPanelNeighbors.putBoolean(Side.LEFT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.LEFT) &&  this.connectedPanelNeighbor.get(Side.LEFT));
+                connectedPanelNeighbors.putBoolean(Side.TOP.ordinal() + "",  this.connectedPanelNeighbor.containsKey(Side.TOP) && this.connectedPanelNeighbor.get(Side.TOP));
+                parentNBTTagCompound.put("connected_panel_neighbors", connectedPanelNeighbors);
+            }
 
             parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
             parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
@@ -420,13 +452,28 @@ public class PanelTile extends BlockEntity {
                         }
                     }
 
-                    if (this.flagLightUpdate) {
-                        this.flagLightUpdate = false;
-                        this.level.getLightEngine().checkBlock(worldPosition);
-                    }
-
                     if (flagOutputUpdate)
                         updateOutputs();
+
+                    if (this.flagLightUpdate) {
+                        this.flagLightUpdate = false;
+                        int delay = Config.LIGHT_UPDATE_DELAY.get();
+                        if (delay <= 0 || this.lightUpdateCooldown == 0) {
+                            // Fire immediately on first change, or if delay is 0
+                            this.level.getLightEngine().checkBlock(worldPosition);
+                            this.lightUpdateCooldown = delay;
+                        } else {
+                            // Already in a cooldown period from a recent change — reset the timer
+                            this.lightUpdateCooldown = delay;
+                        }
+                    } else if (this.lightUpdateCooldown > 0) {
+                        this.lightUpdateCooldown--;
+                        if (this.lightUpdateCooldown == 0) {
+                            // Cooldown expired — fire one final checkBlock to capture
+                            // any changes that happened during the cooldown window
+                            this.level.getLightEngine().checkBlock(worldPosition);
+                        }
+                    }
 
                     if (flagSync || dirty) {
                         sync();
@@ -577,25 +624,25 @@ public class PanelTile extends BlockEntity {
 
         for (Integer i: this.cells.keySet()) {
 
-                PanelCellPos cellPos1 = PanelCellPos.fromIndex(this,i);
-                PanelCellPos cellPos2;
-                Side side1 = this.cellDirections.get(i);
-                Side side2;
+            PanelCellPos cellPos1 = PanelCellPos.fromIndex(this,i);
+            PanelCellPos cellPos2;
+            Side side1 = this.cellDirections.get(i);
+            Side side2;
 
-                if (rotationIn == Rotation.COUNTERCLOCKWISE_90) {
-                    cellPos2 = PanelCellPos.fromRowColumn(this,cellPos1.getColumn(),((cellPos1.getRow() - 4) * -1) + 3, cellPos1.getLevel());
-                    side2 = side1.rotateYCCW();
-                } else if (rotationIn == Rotation.CLOCKWISE_180) {
-                    cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getRow() - 4) * -1) + 3,((cellPos1.getColumn() - 4) * -1) + 3, cellPos1.getLevel());
-                    side2 = side1.getOpposite();
-                } else {
-                    //default rotation 90°
-                    cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getColumn() - 4) * -1) + 3,cellPos1.getRow(), cellPos1.getLevel());
-                    side2 = side1.rotateYCW();
-                }
+            if (rotationIn == Rotation.COUNTERCLOCKWISE_90) {
+                cellPos2 = PanelCellPos.fromRowColumn(this,cellPos1.getColumn(),((cellPos1.getRow() - 4) * -1) + 3, cellPos1.getLevel());
+                side2 = side1.rotateYCCW();
+            } else if (rotationIn == Rotation.CLOCKWISE_180) {
+                cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getRow() - 4) * -1) + 3,((cellPos1.getColumn() - 4) * -1) + 3, cellPos1.getLevel());
+                side2 = side1.getOpposite();
+            } else {
+                //default rotation 90°
+                cellPos2 = PanelCellPos.fromRowColumn(this,((cellPos1.getColumn() - 4) * -1) + 3,cellPos1.getRow(), cellPos1.getLevel());
+                side2 = side1.rotateYCW();
+            }
 
-                cells.put(cellPos2.getIndex(), this.cells.get(i));
-                cellDirections.put(cellPos2.getIndex(),side2);
+            cells.put(cellPos2.getIndex(), this.cells.get(i));
+            cellDirections.put(cellPos2.getIndex(),side2);
 
         }
 
@@ -815,7 +862,7 @@ public class PanelTile extends BlockEntity {
             //if change is still false (cell hasn't been removed, and this cell is affected by input changes
             //notify the cell of the input change and check for output changes
             if (!change && !thisCell.isIndependentState() && thisCell.neighborChanged(cellPos)) {
-            	//update neighbors if this cell output changed
+                //update neighbors if this cell output changed
                 updateNeighborCells(cellPos, iteration + 1);
                 if (thisCell instanceof RedstoneDust) {
                     PanelCellPos above = cellPos.offset(Side.TOP), below = cellPos.offset(Side.BOTTOM);
@@ -1281,7 +1328,7 @@ public class PanelTile extends BlockEntity {
     public boolean hasBase()
     {
         if(this.getBlockState().hasProperty(Registration.HAS_PANEL_BASE)
-            && !this.getBlockState().getValue(Registration.HAS_PANEL_BASE))
+                && !this.getBlockState().getValue(Registration.HAS_PANEL_BASE))
             return false;
         return true;
     }
@@ -1547,5 +1594,3 @@ public class PanelTile extends BlockEntity {
         return level.clip(new ClipContext(eyePosition, vec31, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, player));
     }
 }
-
-
