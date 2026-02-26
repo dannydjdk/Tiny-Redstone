@@ -1,7 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.Config;
-import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.PanelOverflowException;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IObservingPanelCell;
@@ -99,6 +98,8 @@ public class PanelTile extends BlockEntity {
     @Override
     public void onLoad() {
         super.onLoad();
+        // Update AuxiliaryLightManager on both server and client when chunk loads
+        updateAuxLight();
         if (getLevel()!=null && !getLevel().isClientSide())
             flagOutputUpdate();
     }
@@ -249,8 +250,6 @@ public class PanelTile extends BlockEntity {
     // This is where you load the data that you saved in writeToNBT
     @Override
     public void loadAdditional(CompoundTag parentNBTTagCompound, net.minecraft.core.HolderLookup.Provider registries) {
-        int previousLightOutput = this.lightOutput;
-
         super.loadAdditional(parentNBTTagCompound, registries);
 
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
@@ -324,9 +323,9 @@ public class PanelTile extends BlockEntity {
             panelCover=null;
         }
 
-        if(this.lightOutput != previousLightOutput && this.level!=null) {
-            this.level.getLightEngine().checkBlock(worldPosition);
-        }
+        // Flag light update so the tick cooldown will process it
+        // (avoids expensive rapid light updates from frequent sync packets)
+        flagLightUpdate = true;
 
         if (level!=null && !level.isClientSide) {
             try {
@@ -412,6 +411,10 @@ public class PanelTile extends BlockEntity {
                         else
                             this.panelCellGhostPos = null;
                     }
+
+                    // Client-side light update cooldown (flagLightUpdate set by loadAdditional on sync)
+                    checkLightUpdateFlagged();
+
                 } else {
                     //only on server side
                     boolean dirty = false;
@@ -455,25 +458,12 @@ public class PanelTile extends BlockEntity {
                     if (flagOutputUpdate)
                         updateOutputs();
 
-                    if (this.flagLightUpdate) {
-                        this.flagLightUpdate = false;
-                        int delay = Config.LIGHT_UPDATE_DELAY.get();
-                        if (delay <= 0 || this.lightUpdateCooldown == 0) {
-                            // Fire immediately on first change, or if delay is 0
-                            this.level.getLightEngine().checkBlock(worldPosition);
-                            this.lightUpdateCooldown = delay;
-                        } else {
-                            // Already in a cooldown period from a recent change — reset the timer
-                            this.lightUpdateCooldown = delay;
-                        }
-                    } else if (this.lightUpdateCooldown > 0) {
-                        this.lightUpdateCooldown--;
-                        if (this.lightUpdateCooldown == 0) {
-                            // Cooldown expired — fire one final checkBlock to capture
-                            // any changes that happened during the cooldown window
-                            this.level.getLightEngine().checkBlock(worldPosition);
-                        }
+                    // If any cell state changed, light output may have changed.
+                    if (dirty) {
+                        flagLightUpdate = true;
                     }
+
+                    checkLightUpdateFlagged();
 
                     if (flagSync || dirty) {
                         sync();
@@ -1108,6 +1098,64 @@ public class PanelTile extends BlockEntity {
         if(panelCover==null || panelCover.allowsLightOutput())
             return this.lightOutput;
         return 0;
+    }
+
+    public void checkLightUpdateFlagged() {
+        if (this.flagLightUpdate) {
+            this.flagLightUpdate = false;
+            int delay = Config.LIGHT_UPDATE_DELAY.get();
+            if (delay <= 0 || this.lightUpdateCooldown == 0) {
+                // Fire immediately on first change, or if delay is 0
+                updateAuxLight();
+                this.lightUpdateCooldown = delay;
+            } else {
+                // Already in a cooldown period from a recent change — reset the timer
+                this.lightUpdateCooldown = delay;
+            }
+        } else if (this.lightUpdateCooldown > 0) {
+            this.lightUpdateCooldown--;
+            if (this.lightUpdateCooldown == 0) {
+                // Cooldown expired — fire one final update to capture
+                // any changes that happened during the cooldown window
+                updateAuxLight();
+            }
+        }
+    }
+
+    /**
+     * Recalculates light output from all cells and updates the NeoForge AuxiliaryLightManager.
+     * This must be called on BOTH server and client whenever the light output may have changed.
+     * The AuxiliaryLightManager handles thread-safe storage and automatic chunk sync,
+     * solving both the dynamic update and world reload lighting problems.
+     */
+    public void updateAuxLight() {
+        if (this.level == null) return;
+
+        int ll = 0;
+        // Apply cover check
+        if (panelCover == null || panelCover.allowsLightOutput()) {
+            for (Integer index : cells.keySet()) {
+                ll += cells.get(index).lightOutput();
+            }
+        }
+
+        ll = Math.min(ll, 15);
+
+        this.lightOutput = ll;
+
+        // Update AuxiliaryLightManager and notify light engine if changed
+        var lightManager = this.level.getAuxLightManager(worldPosition);
+        if (lightManager != null) {
+            int currentAuxLight = lightManager.getLightAt(worldPosition);
+            if (currentAuxLight != this.lightOutput) {
+                if (this.lightOutput > 0) {
+                    lightManager.setLightAt(worldPosition, this.lightOutput);
+                } else {
+                    lightManager.removeLightAt(worldPosition);
+                }
+                this.level.getLightEngine().checkBlock(worldPosition);
+            }
+        }
     }
 
     public void sync()

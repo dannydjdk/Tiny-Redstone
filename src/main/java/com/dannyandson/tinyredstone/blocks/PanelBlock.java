@@ -496,13 +496,25 @@ public class PanelBlock extends BaseEntityBlock {
     @Override
     public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos)
     {
-        int ll = 0;
-        BlockEntity te = world.getBlockEntity(pos);
-        if (te instanceof PanelTile) {
-            PanelTile panelTile = (PanelTile) te;
-            ll=panelTile.getLightOutput();
+        // Use NeoForge's AuxiliaryLightManager for thread-safe, chunk-sync-aware light emission.
+        // The light value is set by PanelTile.updateAuxLight() on both server and client.
+        if (world instanceof Level level) {
+            var lightManager = level.getAuxLightManager(pos);
+            if (lightManager != null) {
+                return Math.min(lightManager.getLightAt(pos), level.getMaxLightLevel());
+            }
         }
-        return Math.min(ll,world.getMaxLightLevel());
+        // Fallback for non-Level contexts (e.g. RenderChunkRegion)
+        BlockEntity te = world.getBlockEntity(pos);
+        if (te instanceof PanelTile panelTile) {
+            return Math.min(panelTile.getLightOutput(), world.getMaxLightLevel());
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean hasDynamicLightEmission(BlockState state) {
+        return true;
     }
 
     @SuppressWarnings("deprecation")
@@ -596,6 +608,7 @@ public class PanelBlock extends BaseEntityBlock {
             }
 
             panelTile.panelCover = null;
+            panelTile.flagLightUpdate = true;
             panelTile.flagVoxelShapeUpdate();
             panelTile.flagSync();
         }
