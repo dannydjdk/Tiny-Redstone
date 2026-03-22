@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.DyeColor;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class RenderHelper {
 
@@ -74,11 +75,21 @@ public class RenderHelper {
     }
 
     public static void drawRectangle(VertexConsumer builder, PoseStack matrixStack, float x1, float x2, float y1, float y2, float u0, float u1, float v0, float v1, int combinedLight, int color, float alpha) {
+        // Compute world-space face normal from the PoseStack normal matrix.
+        // All quads are drawn in the XY plane at z=0; the local normal direction
+        // depends on the winding order of the quad.
+        float localNz = Math.signum((x2 - x1) * (y2 - y1));
+        Vector3f normal = matrixStack.last().normal().transform(new Vector3f(0, 0, localNz));
+        normal.normalize();
+
+        // Apply Minecraft's standard directional face shading to the vertex color
+        int shadedColor = applyShade(color, getShadeFromNormal(normal.x(), normal.y(), normal.z()));
+
         Matrix4f matrix4f = matrixStack.last().pose();
-        add(builder, matrix4f, x1, y1, 0, u0, v0, combinedLight, color, alpha);
-        add(builder, matrix4f, x2, y1, 0, u1, v0, combinedLight, color, alpha);
-        add(builder, matrix4f, x2, y2, 0, u1, v1, combinedLight, color, alpha);
-        add(builder, matrix4f, x1, y2, 0, u0, v1, combinedLight, color, alpha);
+        add(builder, matrix4f, x1, y1, 0, u0, v0, combinedLight, shadedColor, alpha, normal.x(), normal.y(), normal.z());
+        add(builder, matrix4f, x2, y1, 0, u1, v0, combinedLight, shadedColor, alpha, normal.x(), normal.y(), normal.z());
+        add(builder, matrix4f, x2, y2, 0, u1, v1, combinedLight, shadedColor, alpha, normal.x(), normal.y(), normal.z());
+        add(builder, matrix4f, x1, y2, 0, u0, v1, combinedLight, shadedColor, alpha, normal.x(), normal.y(), normal.z());
     }
 
     public static void drawTriangle(VertexConsumer builder, PoseStack matrixStack, float x1, float y1, float x2, float y2, float x3, float y3, int color, float alpha) {
@@ -113,13 +124,49 @@ public class RenderHelper {
      * Adds a full vertex (UV + light + normal) to a VertexConsumer.
      * Fix for 1.21: vertex() -> addVertex(), color() -> setColor(), uv2() -> setUv2(), normal() -> setNormal(), endVertex() removed.
      */
-    public static void add(VertexConsumer renderer, Matrix4f matrix4f, float x, float y, float z, float u, float v, int combinedLightIn, int color, float alpha) {
+    public static void add(VertexConsumer renderer, Matrix4f matrix4f, float x, float y, float z, float u, float v, int combinedLightIn, int color, float alpha, float nx, float ny, float nz) {
         renderer.addVertex(matrix4f, x, y, z)
                 .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, (int) (alpha * 255f))
                 .setUv(u, v)
                 .setUv2(combinedLightIn & 0xFFFF, (combinedLightIn >> 16) & 0xFFFF)
-                .setNormal(1, 0, 0);
+                .setNormal(nx, ny, nz);
         // Note: endVertex() is removed in 1.21; the vertex is committed implicitly.
+    }
+
+    /**
+     * Backward-compatible overload that defaults to the old hardcoded normal.
+     * Prefer the normal-aware overload when the correct face normal is known.
+     */
+    public static void add(VertexConsumer renderer, Matrix4f matrix4f, float x, float y, float z, float u, float v, int combinedLightIn, int color, float alpha) {
+        add(renderer, matrix4f, x, y, z, u, v, combinedLightIn, color, alpha, 1, 0, 0);
+    }
+
+    /**
+     * Returns Minecraft's standard directional shade multiplier for the given world-space
+     * face normal. Matches vanilla block face shading: top=1.0, bottom=0.5,
+     * north/south=0.8, east/west=0.6.
+     */
+    public static float getShadeFromNormal(float nx, float ny, float nz) {
+        float ax = Math.abs(nx), ay = Math.abs(ny), az = Math.abs(nz);
+        if (ay >= ax && ay >= az) {
+            return ny > 0 ? 1.0f : 0.5f;  // UP or DOWN
+        } else if (az >= ax) {
+            return 0.8f;  // NORTH or SOUTH
+        } else {
+            return 0.6f;  // EAST or WEST
+        }
+    }
+
+    /**
+     * Multiplies the RGB channels of a packed ARGB color by the given shade factor.
+     * Alpha is preserved unchanged.
+     */
+    public static int applyShade(int color, float shade) {
+        int r = (int) ((color >> 16 & 255) * shade);
+        int g = (int) ((color >> 8 & 255) * shade);
+        int b = (int) ((color & 255) * shade);
+        int a = color >> 24 & 255;
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     public static int getColor(int alpha, int red, int green, int blue) {

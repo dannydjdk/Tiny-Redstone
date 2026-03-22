@@ -31,6 +31,13 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     protected TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
 
     /**
+     * Returns the block ResourceLocation this tiny block is made from, or null if using default textures.
+     */
+    public ResourceLocation getMadeFrom() {
+        return madeFrom;
+    }
+
+    /**
      * Drawing the cell on the panel
      *
      * @param matrixStack     positioned for this cell
@@ -161,7 +168,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
         return this.strongSignalStrength;
     }
 
-     /**
+    /**
      * Can this cell be pushed by a piston?
      *
      * @return true if a piston can push this block

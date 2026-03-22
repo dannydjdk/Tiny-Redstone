@@ -4,20 +4,32 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
+import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
+import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
+import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.CheckForNull;
 import java.lang.reflect.InvocationTargetException;
+import org.joml.Vector3f;
 
 public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
@@ -84,9 +96,43 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
         if (tileEntity.isCovered())
         {
-            matrixStack.pushPose();
-            tileEntity.panelCover.render(matrixStack,buffer,combinedLight,combinedOverlay, tileEntity.getColor());
-            matrixStack.popPose();
+            // Check if this is a camouflage cover (DarkCover/LightCover with a madeFrom block).
+            // If so, use tesselateBlock for proper AO and face shading — but we need
+            // the PoseStack WITHOUT the panel-facing rotation, so render before it's applied.
+            // The panel rotation was already applied above, so pop it, render camouflage,
+            // then we're done.
+            boolean renderedViaTesselate = false;
+            if (tileEntity.panelCover instanceof DarkCover darkCover && darkCover.getMadeFrom() != null) {
+                ResourceLocation madeFrom = darkCover.getMadeFrom();
+                BlockState camouflageState = BuiltInRegistries.BLOCK.get(madeFrom).defaultBlockState();
+                if (camouflageState != null && !camouflageState.isAir()) {
+                    // Pop the panel-facing rotation so we're back to block-local space
+                    matrixStack.popPose();
+                    matrixStack.pushPose();
+
+                    var blockRenderer = Minecraft.getInstance().getBlockRenderer();
+                    BakedModel model = blockRenderer.getBlockModel(camouflageState);
+                    VertexConsumer builder = buffer.getBuffer(RenderType.solid());
+                    blockRenderer.getModelRenderer().tesselateBlock(
+                            tileEntity.getLevel(),
+                            model,
+                            camouflageState,
+                            tileEntity.getBlockPos(),
+                            matrixStack,
+                            builder,
+                            false,                    // checkSides - false to render all faces
+                            RandomSource.create(),
+                            camouflageState.getSeed(tileEntity.getBlockPos()),
+                            combinedOverlay
+                    );
+                    renderedViaTesselate = true;
+                }
+            }
+            if (!renderedViaTesselate) {
+                matrixStack.pushPose();
+                tileEntity.panelCover.render(matrixStack, buffer, combinedLight, combinedOverlay, tileEntity.getColor());
+                matrixStack.popPose();
+            }
         }
         else {
             CachedPanelRenderer cache = tileEntity.getCachedRenderer();
@@ -121,6 +167,46 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
         matrixStack.pushPose();
 
         matrixStack.translate(CELL_SIZE*(double)pos.getRow(), ((hasBase)?0.125:0)+(pos.getLevel()*0.125), CELL_SIZE*(pos.getColumn()));
+
+        IPanelCell cell = pos.getIPanelCell();
+
+        // For TinyBlock/TransparentBlock with a madeFrom block, use the block's actual
+        // BakedModel instead of the sprite-guessing manual draw path.
+        // This must happen BEFORE the X-270 rotation below, because BakedModel quads expect
+        // standard Y-up orientation — which is exactly what panel space provides at this point.
+        if (cell instanceof TinyBlock tinyBlock && tinyBlock.getMadeFrom() != null) {
+            ResourceLocation madeFrom = tinyBlock.getMadeFrom();
+            BlockState blockState = BuiltInRegistries.BLOCK.get(madeFrom).defaultBlockState();
+            PanelTile panelTile = pos.getPanelTile();
+            if (blockState != null && !blockState.isAir() && panelTile.getLevel() != null) {
+                matrixStack.scale(SCALE, SCALE, SCALE);
+                var blockRenderer = Minecraft.getInstance().getBlockRenderer();
+                BakedModel model = blockRenderer.getBlockModel(blockState);
+                VertexConsumer builder = buffer.getBuffer(
+                        (cell instanceof TransparentBlock || alpha < 1.0f) ? RenderType.translucent() : RenderType.solid());
+                // Render each face direction with Minecraft's standard directional shading,
+                // computed via the PoseStack normal matrix so it accounts for panel facing.
+                // This avoids AO neighbor sampling (which causes seams between tiny blocks)
+                // while still matching the shading of other tiny components.
+                RandomSource randomSource = RandomSource.create();
+                for (Direction direction : Direction.values()) {
+                    Vector3f normal = matrixStack.last().normal().transform(
+                            new Vector3f(direction.getStepX(), direction.getStepY(), direction.getStepZ()));
+                    normal.normalize();
+                    float shade = RenderHelper.getShadeFromNormal(normal.x(), normal.y(), normal.z());
+                    for (BakedQuad quad : model.getQuads(blockState, direction, randomSource)) {
+                        builder.putBulkData(matrixStack.last(), quad, shade, shade, shade, alpha, combinedLight, combinedOverlay);
+                    }
+                }
+                // Unculled quads (direction = null) get no directional shading
+                for (BakedQuad quad : model.getQuads(blockState, null, randomSource)) {
+                    builder.putBulkData(matrixStack.last(), quad, 1.0f, 1.0f, 1.0f, alpha, combinedLight, combinedOverlay);
+                }
+                matrixStack.popPose();
+                return;
+            }
+        }
+
         matrixStack.mulPose(Axis.XP.rotationDegrees(ROTATION1));
 
         Side facing = pos.getCellFacing();
@@ -152,9 +238,10 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
         }
 
         matrixStack.scale(SCALE, SCALE, SCALE);
-        matrixStack.translate(T2X,T2Y,T2Z);
 
-        pos.getIPanelCell().render(matrixStack, buffer, combinedLight, combinedOverlay,alpha);
+        // Default path: use cell's own render method
+        matrixStack.translate(T2X, T2Y, T2Z);
+        cell.render(matrixStack, buffer, combinedLight, combinedOverlay, alpha);
 
         matrixStack.popPose();
 

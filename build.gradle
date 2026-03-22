@@ -67,6 +67,12 @@ dependencies {
     implementation "curse.maven:theoneprobe-245211:${top_file_id}"
     implementation "curse.maven:jei-238222:${jei_file_id}"
 
+    implementation "curse.maven:lithium-360438:7581452"
+    implementation "curse.maven:sodium-394468:6382651"
+    implementation "curse.maven:sodium-extra-447673:5913377"
+    implementation "curse.maven:reeses-sodium-options-511319:6091021"
+    implementation "curse.maven:packet-fixer-689467:7221528"
+
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

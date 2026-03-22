@@ -55,9 +55,16 @@ public class DarkCover implements IPanelCover {
         return TEXTURE_DEFAULT_COVER;
     }
 
+    /**
+     * Returns the block ResourceLocation this cover is camouflaging as, or null if using default textures.
+     */
+    public ResourceLocation getMadeFrom() {
+        return madeFrom;
+    }
+
     @Override
     public void onPlace(PanelTile panelTile, Player player) {
-                ItemStack stack = ItemStack.EMPTY;
+        ItemStack stack = ItemStack.EMPTY;
         if (player.getUsedItemHand() != null)
             stack = player.getItemInHand(player.getUsedItemHand());
         if (stack == ItemStack.EMPTY)

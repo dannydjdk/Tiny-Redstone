@@ -4,7 +4,6 @@ import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
 import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PushChopperOutputType;
-import com.dannyandson.tinyredstone.network.ValidTinyBlockCacheSync;
 import com.dannyandson.tinyredstone.setup.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -102,14 +101,10 @@ public class ChopperMenu extends AbstractContainerMenu {
                     boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
                     if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasBlockEntity()) {
                         ResourceLocation inputRegistryName = BuiltInRegistries.BLOCK.getKey(inputBlock);
-                        if (!Registration.TINY_BLOCK_OVERRIDES.hasUsableTexture(inputRegistryName)) {
-                            if (!chopperBlockEntity.getLevel().isClientSide)
-                                // Fix: ValidTinyBlockCacheSync constructor is (ResourceLocation, BlockPos) - swap args
-                                ModNetworkHandler.sendToNearestClient(new ValidTinyBlockCacheSync(inputRegistryName, chopperBlockEntity.getBlockPos()), chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
-                        } else if (BuiltInRegistries.BLOCK.getKey(inputBlock) != null) {
+                        if (inputRegistryName != null && !Registration.TINY_BLOCK_OVERRIDES.isDisabled(inputRegistryName)) {
                             CompoundTag madeFromTag = new CompoundTag();
-                            madeFromTag.putString("namespace", BuiltInRegistries.BLOCK.getKey(inputBlock).getNamespace());
-                            madeFromTag.putString("path", BuiltInRegistries.BLOCK.getKey(inputBlock).getPath());
+                            madeFromTag.putString("namespace", inputRegistryName.getNamespace());
+                            madeFromTag.putString("path", inputRegistryName.getPath());
                             if (getItemType().equals("Dark Cover")) {
                                 outputStack = Registration.PANEL_COVER_DARK.get().getDefaultInstance();
                                 outputStack.setCount(2);
@@ -124,12 +119,12 @@ public class ChopperMenu extends AbstractContainerMenu {
                                 if (isGlass) {
                                     outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
-                                    if (!BuiltInRegistries.BLOCK.getKey(inputBlock).toString().equals("minecraft:glass"))
+                                    if (!inputRegistryName.toString().equals("minecraft:glass"))
                                         ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                                 } else {
                                     outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
-                                    if (!BuiltInRegistries.BLOCK.getKey(inputBlock).toString().equals("minecraft:white_wool"))
+                                    if (!inputRegistryName.toString().equals("minecraft:white_wool"))
                                         ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                                 }
                             }

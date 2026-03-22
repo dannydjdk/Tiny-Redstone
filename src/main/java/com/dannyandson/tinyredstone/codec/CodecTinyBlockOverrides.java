@@ -134,6 +134,20 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
         return TinyBlockData.validBlockTextureCache.contains(itemResourceId.toString());
     }
 
+    /**
+     * Check if a block has been explicitly disabled via data pack (type: "disabled").
+     * @param itemResourceId a resource location of the block to check
+     * @return true if the block has been marked as disabled
+     */
+    public boolean isDisabled(ResourceLocation itemResourceId) {
+        for (Map.Entry<ResourceLocation, TinyBlockData> entry : this.data.entrySet()) {
+            String status = entry.getValue().getType(itemResourceId);
+            if (status != null && status.equals("disabled"))
+                return true;
+        }
+        return false;
+    }
+
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager resourceManager, ProfilerFiller profiler)
     {
