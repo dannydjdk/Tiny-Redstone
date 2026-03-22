@@ -6,7 +6,6 @@ import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
-import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -68,88 +67,52 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
     @Override
     public void render(PanelTile tileEntity, float p_112308_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
 
+        CachedPanelRenderer cache = tileEntity.getCachedRenderer();
+
+        // Rebuild cache if dirty or if lighting changed
+        if (cache.isDirty() || cache.lightChanged(combinedLight)) {
+            PoseStack buildStack = new PoseStack();
+            cache.rebuild(tileEntity, buildStack, combinedLight, combinedOverlay);
+        }
+
         matrixStack.pushPose();
 
-        switch (tileEntity.getBlockState().getValue(BlockStateProperties.FACING))
-        {
-            case UP:
-                matrixStack.mulPose(Axis.XP.XP.rotationDegrees(180));
-                matrixStack.translate(0,-1,-1);
-                break;
-            case NORTH:
-                matrixStack.mulPose(Axis.XP.XP.rotationDegrees(90));
-                matrixStack.translate(0,0,-1);
-                break;
-            case EAST:
-                matrixStack.mulPose(Axis.XP.ZP.rotationDegrees(90));
-                matrixStack.translate(0,-1,0);
-                break;
-            case SOUTH:
-                matrixStack.mulPose(Axis.XP.XP.rotationDegrees(-90));
-                matrixStack.translate(0,-1,0);
-                break;
-            case WEST:
-                matrixStack.mulPose(Axis.XP.ZP.rotationDegrees(-90));
-                matrixStack.translate(-1,0,0);
-                break;
-        }
-
-        if (tileEntity.isCovered())
-        {
-            // Check if this is a camouflage cover (DarkCover/LightCover with a madeFrom block).
-            // If so, use tesselateBlock for proper AO and face shading — but we need
-            // the PoseStack WITHOUT the panel-facing rotation, so render before it's applied.
-            // The panel rotation was already applied above, so pop it, render camouflage,
-            // then we're done.
-            boolean renderedViaTesselate = false;
-            if (tileEntity.panelCover instanceof DarkCover darkCover && darkCover.getMadeFrom() != null) {
-                ResourceLocation madeFrom = darkCover.getMadeFrom();
-                BlockState camouflageState = BuiltInRegistries.BLOCK.get(madeFrom).defaultBlockState();
-                if (camouflageState != null && !camouflageState.isAir()) {
-                    // Pop the panel-facing rotation so we're back to block-local space
-                    matrixStack.popPose();
-                    matrixStack.pushPose();
-
-                    var blockRenderer = Minecraft.getInstance().getBlockRenderer();
-                    BakedModel model = blockRenderer.getBlockModel(camouflageState);
-                    VertexConsumer builder = buffer.getBuffer(RenderType.solid());
-                    blockRenderer.getModelRenderer().tesselateBlock(
-                            tileEntity.getLevel(),
-                            model,
-                            camouflageState,
-                            tileEntity.getBlockPos(),
-                            matrixStack,
-                            builder,
-                            false,                    // checkSides - false to render all faces
-                            RandomSource.create(),
-                            camouflageState.getSeed(tileEntity.getBlockPos()),
-                            combinedOverlay
-                    );
-                    renderedViaTesselate = true;
-                }
-            }
-            if (!renderedViaTesselate) {
-                matrixStack.pushPose();
-                tileEntity.panelCover.render(matrixStack, buffer, combinedLight, combinedOverlay, tileEntity.getColor());
-                matrixStack.popPose();
+        // Camouflage covers render in block-local space (tesselateBlock output),
+        // so they must NOT have the panel-facing rotation applied.
+        // Everything else (cells, manual covers, panel base) is captured in panel-space
+        // and needs the facing rotation during replay.
+        if (!cache.isCamouflageCache()) {
+            switch (tileEntity.getBlockState().getValue(BlockStateProperties.FACING))
+            {
+                case UP:
+                    matrixStack.mulPose(Axis.XP.XP.rotationDegrees(180));
+                    matrixStack.translate(0,-1,-1);
+                    break;
+                case NORTH:
+                    matrixStack.mulPose(Axis.XP.XP.rotationDegrees(90));
+                    matrixStack.translate(0,0,-1);
+                    break;
+                case EAST:
+                    matrixStack.mulPose(Axis.XP.ZP.rotationDegrees(90));
+                    matrixStack.translate(0,-1,0);
+                    break;
+                case SOUTH:
+                    matrixStack.mulPose(Axis.XP.XP.rotationDegrees(-90));
+                    matrixStack.translate(0,-1,0);
+                    break;
+                case WEST:
+                    matrixStack.mulPose(Axis.XP.ZP.rotationDegrees(-90));
+                    matrixStack.translate(-1,0,0);
+                    break;
             }
         }
-        else {
-            CachedPanelRenderer cache = tileEntity.getCachedRenderer();
 
-            // Rebuild cache if dirty or if lighting changed
-            if (cache.isDirty() || cache.lightChanged(combinedLight)) {
-                PoseStack buildStack = new PoseStack();
-                cache.rebuild(tileEntity, buildStack, combinedLight, combinedOverlay);
-            }
+        // Replay cached geometry
+        cache.replay(matrixStack, buffer, combinedLight);
 
-            // Replay cached geometry with the current panel facing transform
-            cache.replay(matrixStack, buffer, combinedLight);
-
-            // Ghost preview is always dynamic — changes with mouse position every frame
-            if (tileEntity.panelCellGhostPos != null) {
-                renderCellStatic(matrixStack, tileEntity.panelCellGhostPos, buffer, combinedLight, combinedOverlay, 0.5f, tileEntity.hasBase());
-            }
+        // Ghost preview is always dynamic — changes with mouse position every frame
+        if (!tileEntity.isCovered() && tileEntity.panelCellGhostPos != null) {
+            renderCellStatic(matrixStack, tileEntity.panelCellGhostPos, buffer, combinedLight, combinedOverlay, 0.5f, tileEntity.hasBase());
         }
 
         matrixStack.popPose();

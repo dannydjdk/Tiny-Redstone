@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -7,6 +8,11 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.math.Axis;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -25,6 +31,7 @@ public class CachedPanelRenderer {
 
     private boolean dirty = true;
     private int lastCombinedLight = -1;
+    private boolean isCamouflageCache = false;
 
     // Captured vertex data, separated by RenderType
     private List<CachedVertex> solidVertices = new ArrayList<>();
@@ -78,6 +85,14 @@ public class CachedPanelRenderer {
     }
 
     /**
+     * Returns true if this cache contains camouflage cover geometry, which should
+     * be replayed WITHOUT the panel-facing rotation (it's in block-local space).
+     */
+    public boolean isCamouflageCache() {
+        return isCamouflageCache;
+    }
+
+    /**
      * Rebuild the cache by running the panel's cell rendering into a capturing proxy.
      * After this call, solidVertices and translucentVertices contain all the
      * pre-transformed vertex data.
@@ -85,29 +100,59 @@ public class CachedPanelRenderer {
     public void rebuild(PanelTile tile, PoseStack matrixStack, int combinedLight, int combinedOverlay) {
         solidVertices.clear();
         translucentVertices.clear();
+        isCamouflageCache = false;
 
         CaptureBufferSource captureSource = new CaptureBufferSource(solidVertices, translucentVertices);
 
-        boolean hasBase = tile.hasBase();
-
-        // Render the panel base (if it has one)
-        if (hasBase) {
-            renderPanelBase(tile, matrixStack, captureSource, combinedLight);
-        }
-
-        // Render all cells
-        List<PanelCellPos> positions = tile.getCellPositions();
-        for (PanelCellPos pos : positions) {
-            if (pos.getIPanelCell() != null) {
-                PanelTileRenderer.renderCellStatic(matrixStack, pos, captureSource,
-                        (tile.isCrashed()) ? 0 : combinedLight, combinedOverlay,
-                        (tile.isCrashed()) ? 0.5f : 1.0f, hasBase);
+        if (tile.isCovered()) {
+            // Check for camouflage cover (DarkCover/LightCover with madeFrom block)
+            if (tile.panelCover instanceof DarkCover darkCover && darkCover.getMadeFrom() != null) {
+                ResourceLocation madeFrom = darkCover.getMadeFrom();
+                BlockState camouflageState = BuiltInRegistries.BLOCK.get(madeFrom).defaultBlockState();
+                if (camouflageState != null && !camouflageState.isAir() && tile.getLevel() != null) {
+                    // tesselateBlock renders in block-local space (identity PoseStack).
+                    // The caller must NOT apply panel-facing rotation during replay.
+                    var blockRenderer = Minecraft.getInstance().getBlockRenderer();
+                    BakedModel model = blockRenderer.getBlockModel(camouflageState);
+                    VertexConsumer builder = captureSource.getBuffer(RenderType.solid());
+                    blockRenderer.getModelRenderer().tesselateBlock(
+                            tile.getLevel(), model, camouflageState,
+                            tile.getBlockPos(), matrixStack, builder,
+                            false, RandomSource.create(),
+                            camouflageState.getSeed(tile.getBlockPos()),
+                            combinedOverlay
+                    );
+                    isCamouflageCache = true;
+                }
+            } else {
+                // Non-camouflage cover: render manually in panel space (same as cells).
+                // Panel-facing rotation is applied during replay.
+                matrixStack.pushPose();
+                tile.panelCover.render(matrixStack, captureSource, combinedLight, combinedOverlay, tile.getColor());
+                matrixStack.popPose();
             }
-        }
+        } else {
+            boolean hasBase = tile.hasBase();
 
-        // Render crash overlay if needed
-        if (tile.isCrashed() || tile.isOverflown()) {
-            renderCrashOverlay(matrixStack, captureSource, combinedLight);
+            // Render the panel base (if it has one)
+            if (hasBase) {
+                renderPanelBase(tile, matrixStack, captureSource, combinedLight);
+            }
+
+            // Render all cells
+            List<PanelCellPos> positions = tile.getCellPositions();
+            for (PanelCellPos pos : positions) {
+                if (pos.getIPanelCell() != null) {
+                    PanelTileRenderer.renderCellStatic(matrixStack, pos, captureSource,
+                            (tile.isCrashed()) ? 0 : combinedLight, combinedOverlay,
+                            (tile.isCrashed()) ? 0.5f : 1.0f, hasBase);
+                }
+            }
+
+            // Render crash overlay if needed
+            if (tile.isCrashed() || tile.isOverflown()) {
+                renderCrashOverlay(matrixStack, captureSource, combinedLight);
+            }
         }
 
         // Flush the last pending vertex in each consumer.
