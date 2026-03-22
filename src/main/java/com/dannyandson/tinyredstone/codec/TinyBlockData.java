@@ -7,14 +7,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.CheckForNull;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class TinyBlockData {
 
-    public static List<String> validBlockTextureCache = new ArrayList<>();
     private List<Pair<String, List<Pair<String, String>>>> data;
     private Map<String, Map<String, String>> tinyBlockDefinitions = new HashMap<>();
 

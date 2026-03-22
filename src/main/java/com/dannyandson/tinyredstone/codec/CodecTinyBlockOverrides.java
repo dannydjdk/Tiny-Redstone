@@ -118,23 +118,6 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
     }
 
     /**
-     * Does the item with the given resource id have a texture that can be used by a Tiny Block
-     * @param itemResourceId a resource location of the item whose texture we want
-     * @return true if the item with the given resource id has a texture that can be used by a Tiny Block
-     */
-    public boolean hasUsableTexture(ResourceLocation itemResourceId){
-        for (Map.Entry<ResourceLocation, TinyBlockData> entry : this.data.entrySet()){
-            String status = entry.getValue().getType(itemResourceId);
-            if (status !=null && status.equals("disabled"))
-                return false;
-            ResourceLocation texture = entry.getValue().getTexture(itemResourceId);
-            if (texture!=null)
-                return true;
-        }
-        return TinyBlockData.validBlockTextureCache.contains(itemResourceId.toString());
-    }
-
-    /**
      * Check if a block has been explicitly disabled via data pack (type: "disabled").
      * @param itemResourceId a resource location of the block to check
      * @return true if the block has been marked as disabled
@@ -153,7 +136,6 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
     {
         TinyRedstone.LOGGER.info("Beginning loading of data for data loader: {}", this.folderName);
         this.data = this.mapValues(jsons);
-        TinyBlockData.validBlockTextureCache.clear();
         TinyRedstone.LOGGER.info("Data loader for {} loaded {} jsons", this.folderName, this.data.size());
     }
 
