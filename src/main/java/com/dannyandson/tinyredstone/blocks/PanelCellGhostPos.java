@@ -2,7 +2,7 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.api.IPanelCell;
 
-import javax.annotation.CheckForNull;
+import org.jspecify.annotations.Nullable;
 
 public class PanelCellGhostPos extends PanelCellPos {
     IPanelCell panelCell;
@@ -25,7 +25,7 @@ public class PanelCellGhostPos extends PanelCellPos {
      * @return IPanelCell or null
      */
     @Override
-    @CheckForNull
+    @Nullable
     public IPanelCell getIPanelCell()
     {
         return this.panelCell;
@@ -37,7 +37,7 @@ public class PanelCellGhostPos extends PanelCellPos {
      * @return Side or null
      */
     @Override
-    @CheckForNull
+    @Nullable
     public Side getCellFacing()
     {
         return this.facing;

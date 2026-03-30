@@ -13,8 +13,8 @@ import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
@@ -32,12 +32,12 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
     public void renderByItem(ItemStack stack, ItemDisplayContext p_239207_2_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
     {
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
-        VertexConsumer builder = buffer.getBuffer(RenderType.solid());
+        VertexConsumer builder = buffer.getBuffer(Sheets.cutoutBlockSheet());
         Integer color = DyeColor.GRAY.getMapColor().col;
         CompoundTag blockEntityTag = ItemStackHelper.getBlockEntityTag(stack);
         if (blockEntityTag != null) {
             if (blockEntityTag.contains("color")) {
-                color = blockEntityTag.getInt("color");
+                color = blockEntityTag.getIntOr("color", 0);
             }
         }
 
@@ -50,10 +50,10 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
             CompoundTag itemTag = blockEntityTag;
 
             if (itemTag.contains("cover")) {
-                String coverClass = blockEntityTag.getString("cover");
+                String coverClass = blockEntityTag.getStringOr("cover", "");
                 try {
                     IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
-                    cover.readNBT(blockEntityTag.getCompound("coverData"));
+                    cover.readNBT(blockEntityTag.getCompound("coverData").orElseGet(CompoundTag::new));
                     matrixStack.pushPose();
                     cover.render(matrixStack, buffer, combinedLight, combinedOverlay, color);
                     matrixStack.popPose();
@@ -63,23 +63,23 @@ public class PanelItemRenderer extends BlockEntityWithoutLevelRenderer {
                 }
             }
             else {
-                boolean hasBase = !itemTag.contains("hasBase") || itemTag.getBoolean("hasBase");
+                boolean hasBase = !itemTag.contains("hasBase") || itemTag.getBooleanOr("hasBase", false);
 
                 if (hasBase)
                     renderBase(matrixStack,builder,sprite,combinedLight,color);
 
-                CompoundTag cellsNBT = itemTag.getCompound("cells");
+                CompoundTag cellsNBT = itemTag.getCompound("cells").orElseGet(CompoundTag::new);
                 for (Integer i = 0; i < (hasBase?448:512); i++) {
                     if (cellsNBT.contains(i.toString())) {
-                        CompoundTag cellNBT = cellsNBT.getCompound(i.toString());
+                        CompoundTag cellNBT = cellsNBT.getCompound(i.toString()).orElseGet(CompoundTag::new);
 
                         if (cellNBT.contains("data")) {
-                            String className = cellNBT.getString("class");
+                            String className = cellNBT.getStringOr("class", "");
                             try {
 
                                 IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
-                                cell.readNBT(cellNBT.getCompound("data"));
-                                Side cellDirection = Side.valueOf(cellNBT.getString("facing"));
+                                cell.readNBT(cellNBT.getCompound("data").orElseGet(CompoundTag::new));
+                                Side cellDirection = Side.valueOf(cellNBT.getStringOr("facing", ""));
                                 renderCell(matrixStack, i, cell, cellDirection, buffer, combinedLight, combinedOverlay);
 
                             } catch (Exception exception) {

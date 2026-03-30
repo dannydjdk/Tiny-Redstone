@@ -5,17 +5,17 @@ import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.items.Blueprint;
 import com.dannyandson.tinyredstone.network.BlueprintSync;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -32,7 +32,7 @@ public class BlueprintGUI  extends Screen {
     private static final int WIDTH = 120;
     private static final int HEIGHT = 90;
 
-    private final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
+    private final Identifier GUI = Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     private final ItemStack blueprint;
     private boolean dialogOpen = false;
@@ -68,15 +68,12 @@ public class BlueprintGUI  extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.setShaderTexture(0, GUI);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bindForSetup(GUI);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
-        guiGraphics.blit(GUI, relX, relY, 0, 0, WIDTH, HEIGHT);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI, relX, relY, 0, 0, WIDTH, HEIGHT, 256, 256);
 
-        super.render(guiGraphics,mouseX, mouseY, partialTicks);
+        super.extractRenderState(guiGraphics,mouseX, mouseY, partialTicks);
     }
 
 
@@ -161,7 +158,7 @@ public class BlueprintGUI  extends Screen {
 
                     try {
                         //will throw CommandSyntaxException, abort and log error if file is not valid NBT json
-                        CompoundTag nbt = TagParser.parseTag(data.toString());
+                        CompoundTag nbt = TagParser.parseCompoundTag(data.toString());
                         CompoundTag cleanNBT = Blueprint.cleanUpBlueprintNBT(nbt);
                         if (cleanNBT!=null) {
                             ItemStackHelper.setCustomTag(this.blueprint, cleanNBT);

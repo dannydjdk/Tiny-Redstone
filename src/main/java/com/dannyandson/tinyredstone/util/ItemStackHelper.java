@@ -1,12 +1,11 @@
 package com.dannyandson.tinyredstone.util;
 
 import net.minecraft.core.component.DataComponents;
-import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Utility class for working with ItemStack custom data in MC 1.21+.

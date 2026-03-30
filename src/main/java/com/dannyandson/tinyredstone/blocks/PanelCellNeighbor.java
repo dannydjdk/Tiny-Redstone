@@ -127,7 +127,7 @@ public class PanelCellNeighbor {
     public int getComparatorOverride()
     {
         if (blockPos!=null && hasComparatorOverride())
-            return getNeighborBlockState().getAnalogOutputSignal(panelTile.getLevel(), blockPos);
+            return getNeighborBlockState().getAnalogOutputSignal(panelTile.getLevel(), blockPos, panelTile.getDirectionFromSide(neighborDirection));
         return 0;
     }
 

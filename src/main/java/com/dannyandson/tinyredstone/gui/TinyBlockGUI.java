@@ -5,13 +5,13 @@ import com.dannyandson.tinyredstone.api.IColorablePanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.TinyBlockColorSync;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 
 public class TinyBlockGUI extends Screen {
@@ -23,7 +23,7 @@ public class TinyBlockGUI extends Screen {
     private final Integer cellIndex;
     private final IColorablePanelCell iColorablePanelCell;
 
-    private final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
+    private final Identifier GUI = Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     protected TinyBlockGUI(PanelTile panelTile, Integer cellIndex, IColorablePanelCell iColorablePanelCell) {
         super(Component.translatable("tinyredstone:tinyBlockGUI"));
@@ -86,15 +86,12 @@ public class TinyBlockGUI extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.setShaderTexture(0, GUI);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bindForSetup(GUI);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
-        guiGraphics.blit(GUI, relX, relY, 0, 0, WIDTH, HEIGHT);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI, relX, relY, 0, 0, WIDTH, HEIGHT, 256, 256);
 
-        super.render(guiGraphics,mouseX, mouseY, partialTicks);
+        super.extractRenderState(guiGraphics,mouseX, mouseY, partialTicks);
     }
 
 

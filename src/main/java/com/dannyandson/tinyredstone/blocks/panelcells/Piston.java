@@ -9,17 +9,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class Piston implements IPanelCell {
 
-    public static ResourceLocation TEXTURE_PISTON_SIDE = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_side");
-    public static ResourceLocation TEXTURE_PISTON_TOP = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_top");
-    public static ResourceLocation TEXTURE_PISTON_BOTTOM = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_bottom");
-    public static ResourceLocation TEXTURE_PISTON_INNER = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_inner");
+    public static Identifier TEXTURE_PISTON_SIDE = Identifier.fromNamespaceAndPath("minecraft","block/piston_side");
+    public static Identifier TEXTURE_PISTON_TOP = Identifier.fromNamespaceAndPath("minecraft","block/piston_top");
+    public static Identifier TEXTURE_PISTON_BOTTOM = Identifier.fromNamespaceAndPath("minecraft","block/piston_bottom");
+    public static Identifier TEXTURE_PISTON_INNER = Identifier.fromNamespaceAndPath("minecraft","block/piston_inner");
 
     protected boolean extended = false;
     protected int changePending = -1;
@@ -40,7 +41,7 @@ public class Piston implements IPanelCell {
         TextureAtlasSprite sprite_inner_top = RenderHelper.getSprite(TEXTURE_PISTON_TOP);
 
 
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         TextureAtlasSprite sprite_top = getSprite_top();
 
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
@@ -255,7 +256,7 @@ public class Piston implements IPanelCell {
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.extended=compoundNBT.getBoolean("extended");
-        this.changePending=compoundNBT.getInt("changePending");
+        this.extended=compoundNBT.getBooleanOr("extended", false);
+        this.changePending=compoundNBT.getIntOr("changePending", 0);
     }
 }

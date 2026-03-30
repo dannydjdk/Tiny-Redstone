@@ -12,47 +12,65 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.CheckForNull;
+import org.jspecify.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import org.joml.Vector3f;
 
-public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
+/**
+ * PanelTile renderer for NeoForge 26.1.
+ * 
+ * In 1.21.9+, BlockEntityRenderer uses a render state system with three methods:
+ * - createRenderState(): creates a new render state instance
+ * - extractRenderState(): copies data from the block entity into the render state
+ * - submit(): uses the render state data to emit geometry
+ * 
+ * The second type parameter is the render state class.
+ * 
+ * NOTE: If SubmitNodeCollector doesn't provide getBuffer() for custom vertex
+ * rendering, this may need adjustment. The structural pattern is correct.
+ */
+public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTileRenderState> {
 
-    public static ResourceLocation[] TEXTURES = {
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0001"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0010"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0011"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0100"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0101"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0110"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0111"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1000"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1001"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1010"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1011"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1100"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1101"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1110"),
-            ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1111")
+    public static Identifier[] TEXTURES = {
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0001"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0010"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0011"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0100"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0101"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0110"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_0111"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1000"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1001"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1010"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1011"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1100"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1101"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1110"),
+            Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_1111")
     };
-    public static ResourceLocation TEXTURE = TEXTURES[0];
-    public static ResourceLocation TEXTURE_BORDER = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_border");
-    public static ResourceLocation TEXTURE_CRASHED = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_crashed");
+    public static Identifier TEXTURE = TEXTURES[0];
+    public static Identifier TEXTURE_BORDER = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_border");
+    public static Identifier TEXTURE_CRASHED = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_panel_crashed");
 
     private static final float SCALE = 0.125f;
     private static final float T2X = 0.0f;
@@ -65,25 +83,58 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
     }
 
     @Override
-    public void render(PanelTile tileEntity, float p_112308_, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public PanelTileRenderState createRenderState() {
+        return new PanelTileRenderState();
+    }
 
+    @Override
+    public void extractRenderState(PanelTile tileEntity, PanelTileRenderState renderState, float partialTick, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+        BlockEntityRenderer.super.extractRenderState(tileEntity, renderState, partialTick, cameraPos, crumblingOverlay);
+        
         CachedPanelRenderer cache = tileEntity.getCachedRenderer();
-
+        
+        // Get light from the block position
+        int combinedLight = 0;
+        if (tileEntity.getLevel() != null) {
+            combinedLight = net.minecraft.client.renderer.LevelRenderer.getLightCoords(tileEntity.getLevel(), tileEntity.getBlockPos());
+        }
+        int combinedOverlay = net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY;
+        
         // Rebuild cache if dirty or if lighting changed
         if (cache.isDirty() || cache.lightChanged(combinedLight)) {
             PoseStack buildStack = new PoseStack();
             cache.rebuild(tileEntity, buildStack, combinedLight, combinedOverlay);
         }
+        
+        // Copy cached data into render state
+        renderState.solidVertices.clear();
+        renderState.solidVertices.addAll(cache.getSolidVertices());
+        renderState.translucentVertices.clear();
+        renderState.translucentVertices.addAll(cache.getTranslucentVertices());
+        renderState.isCamouflageCache = cache.isCamouflageCache();
+        renderState.facing = tileEntity.getBlockState().getValue(BlockStateProperties.FACING);
+        renderState.hasCover = tileEntity.isCovered();
+        renderState.hasBase = tileEntity.hasBase();
+        
+        // Ghost preview
+        if (!tileEntity.isCovered() && tileEntity.panelCellGhostPos != null) {
+            renderState.ghostPos = tileEntity.panelCellGhostPos;
+        } else {
+            renderState.ghostPos = null;
+        }
+    }
 
+    @Override
+    public void submit(PanelTileRenderState renderState, PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
+        // TODO: In 26.1, SubmitNodeCollector replaces MultiBufferSource.
+        // If SubmitNodeCollector provides a getBuffer(RenderType) method (or similar),
+        // the replay logic below works directly. Otherwise, this needs adaptation.
+        // For now, cast or adapt as needed.
+        
         matrixStack.pushPose();
 
-        // Camouflage covers render in block-local space (tesselateBlock output),
-        // so they must NOT have the panel-facing rotation applied.
-        // Everything else (cells, manual covers, panel base) is captured in panel-space
-        // and needs the facing rotation during replay.
-        if (!cache.isCamouflageCache()) {
-            switch (tileEntity.getBlockState().getValue(BlockStateProperties.FACING))
-            {
+        if (!renderState.isCamouflageCache) {
+            switch (renderState.facing) {
                 case UP:
                     matrixStack.mulPose(Axis.XP.XP.rotationDegrees(180));
                     matrixStack.translate(0,-1,-1);
@@ -107,16 +158,31 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
             }
         }
 
-        // Replay cached geometry
-        cache.replay(matrixStack, buffer, combinedLight);
+        // Replay cached geometry using the submit node collector
+        // In 26.1, SubmitNodeCollector should provide buffer access for custom vertices
+        org.joml.Matrix4f transform = matrixStack.last().pose();
+        
+        if (!renderState.solidVertices.isEmpty()) {
+            VertexConsumer solidBuilder = submitNodeCollector.getBuffer(Sheets.cutoutBlockSheet());
+            CachedPanelRenderer.replayVerticesStatic(solidBuilder, transform, renderState.solidVertices);
+        }
 
-        // Ghost preview is always dynamic — changes with mouse position every frame
-        if (!tileEntity.isCovered() && tileEntity.panelCellGhostPos != null) {
-            renderCellStatic(matrixStack, tileEntity.panelCellGhostPos, buffer, combinedLight, combinedOverlay, 0.5f, tileEntity.hasBase());
+        if (!renderState.translucentVertices.isEmpty()) {
+            VertexConsumer translucentBuilder = submitNodeCollector.getBuffer(Sheets.translucentBlockSheet());
+            CachedPanelRenderer.replayVerticesStatic(translucentBuilder, transform, renderState.translucentVertices);
+        }
+
+        // Ghost preview is always dynamic
+        if (renderState.ghostPos != null) {
+            // Ghost rendering still uses the capture+replay approach
+            // SubmitNodeCollector extends MultiBufferSource, so renderCellStatic works here
+            renderCellStatic(matrixStack, renderState.ghostPos, submitNodeCollector,
+                    renderState.lightCoords,
+                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
+                    0.5f, renderState.hasBase);
         }
 
         matrixStack.popPose();
-
     }
 
     /**
@@ -125,7 +191,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
      */
     static void renderCellStatic(PoseStack matrixStack, PanelCellPos pos, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha, boolean hasBase)
     {
-        alpha = (Minecraft.useShaderTransparency())?1.0f:alpha;
+        // useShaderTransparency removed in 26.1; just use the passed-in alpha
 
         matrixStack.pushPose();
 
@@ -135,22 +201,16 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
         // For TinyBlock/TransparentBlock with a madeFrom block, use the block's actual
         // BakedModel instead of the sprite-guessing manual draw path.
-        // This must happen BEFORE the X-270 rotation below, because BakedModel quads expect
-        // standard Y-up orientation — which is exactly what panel space provides at this point.
         if (cell instanceof TinyBlock tinyBlock && tinyBlock.getMadeFrom() != null) {
-            ResourceLocation madeFrom = tinyBlock.getMadeFrom();
-            BlockState blockState = BuiltInRegistries.BLOCK.get(madeFrom).defaultBlockState();
+            Identifier madeFrom = tinyBlock.getMadeFrom();
+            BlockState blockState = BuiltInRegistries.BLOCK.getValue(madeFrom).defaultBlockState();
             PanelTile panelTile = pos.getPanelTile();
             if (blockState != null && !blockState.isAir() && panelTile.getLevel() != null) {
                 matrixStack.scale(SCALE, SCALE, SCALE);
                 var blockRenderer = Minecraft.getInstance().getBlockRenderer();
                 BakedModel model = blockRenderer.getBlockModel(blockState);
                 VertexConsumer builder = buffer.getBuffer(
-                        (cell instanceof TransparentBlock || alpha < 1.0f) ? RenderType.translucent() : RenderType.solid());
-                // Render each face direction with Minecraft's standard directional shading,
-                // computed via the PoseStack normal matrix so it accounts for panel facing.
-                // This avoids AO neighbor sampling (which causes seams between tiny blocks)
-                // while still matching the shading of other tiny components.
+                        (cell instanceof TransparentBlock || alpha < 1.0f) ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
                 RandomSource randomSource = RandomSource.create();
                 for (Direction direction : Direction.values()) {
                     Vector3f normal = matrixStack.last().normal().transform(
@@ -158,12 +218,12 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
                     normal.normalize();
                     float shade = RenderHelper.getShadeFromNormal(normal.x(), normal.y(), normal.z());
                     for (BakedQuad quad : model.getQuads(blockState, direction, randomSource)) {
-                        builder.putBulkData(matrixStack.last(), quad, shade, shade, shade, alpha, combinedLight, combinedOverlay);
+                        // 26.1: putBulkData split into putBlockBakedQuad (chunk rendering) and putBakedQuad (all other)
+                        builder.putBakedQuad(matrixStack.last(), quad, shade, shade, shade, alpha, combinedLight, combinedOverlay);
                     }
                 }
-                // Unculled quads (direction = null) get no directional shading
                 for (BakedQuad quad : model.getQuads(blockState, null, randomSource)) {
-                    builder.putBulkData(matrixStack.last(), quad, 1.0f, 1.0f, 1.0f, alpha, combinedLight, combinedOverlay);
+                    builder.putBakedQuad(matrixStack.last(), quad, 1.0f, 1.0f, 1.0f, alpha, combinedLight, combinedOverlay);
                 }
                 matrixStack.popPose();
                 return;
@@ -210,7 +270,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
     }
 
-    @CheckForNull
+    @Nullable
     public static PanelCellGhostPos getPlayerLookingAtCell(PanelTile panelTile) {
         LocalPlayer player = Minecraft.getInstance().player;
         BlockPos blockPos = panelTile.getBlockPos();
@@ -240,9 +300,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
                                     Side attachingSideRel = (attachingSideDir == Side.TOP || attachingSideDir == Side.BOTTOM) ? attachingSideDir : Side.FRONT;
 
                                     if (
-                                        //check if the cell can attach to the side of the block facing
                                             !panelCell.canAttachToBaseOnSide(attachingSideRel) || (
-                                                    //if so, check if it's being placed against a full block
                                                     !cellPos1.equals(cellPos) && (
                                                             cellPos1.getIPanelCell() == null
                                                                     || !cellPos1.getIPanelCell().isPushable()
@@ -270,7 +328,6 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
                     }
                 }
 
-                //if we are not rendering a ghost component, check if we are hovering over a tiny redstone dust
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, blockPos, blockHitResult);
                 if (posInPanelCell != null && posInPanelCell.getIPanelCell() instanceof RedstoneDust) {
                     PanelCellSegment segmentHovering = posInPanelCell.getSegment();

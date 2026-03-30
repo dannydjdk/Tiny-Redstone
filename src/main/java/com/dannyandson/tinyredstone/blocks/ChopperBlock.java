@@ -12,25 +12,21 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class ChopperBlock extends BaseEntityBlock {
 
     // Fix for 1.21: BaseEntityBlock now requires codec() to be implemented.
     // A simple no-data codec is sufficient for blocks that don't serialize extra properties.
-    public static final MapCodec<ChopperBlock> CODEC = MapCodec.unit(ChopperBlock::new);
+    public static final MapCodec<ChopperBlock> CODEC = simpleCodec(ChopperBlock::new);
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
     }
 
-    public ChopperBlock() {
-        super(
-                Properties.of()
-                        .sound(SoundType.STONE)
-                        .strength(2.0f)
-        );
+    public ChopperBlock(Properties props) {
+        super(props);
     }
 
     @Nullable
@@ -64,7 +60,7 @@ public class ChopperBlock extends BaseEntityBlock {
     // Fix for 1.21: use() is renamed to useWithoutItem() / the interaction pipeline changed.
     // Use useWithoutItem for right-click with empty hand (no item context).
     protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         } else {
             MenuProvider menuProvider = this.getMenuProvider(blockState, level, blockPos);

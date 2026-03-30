@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
-import javax.annotation.CheckForNull;
+import org.jspecify.annotations.Nullable;
 
 public class PanelCellPos {
     private final int row;
@@ -134,7 +134,7 @@ public class PanelCellPos {
      * @param side The direction of the neighbor from the cell.
      * @return PanelCellPos representing the neighbor position, or null if we're at the edge of the panel
      */
-    @CheckForNull
+    @Nullable
     public PanelCellPos offset(Side side) {
         PanelCellPos cellPos = null;
 
@@ -212,7 +212,7 @@ public class PanelCellPos {
      * Gets the IPanelCell at this position or null if position is empty
      * @return IPanelCell or null
      */
-    @CheckForNull
+    @Nullable
     public IPanelCell getIPanelCell()
     {
         return this.panelTile.getIPanelCell(this);
@@ -223,13 +223,13 @@ public class PanelCellPos {
      * or null if position is empty
      * @return Side or null
      */
-    @CheckForNull
+    @Nullable
     public Side getCellFacing()
     {
         return this.panelTile.getCellFacing(this);
     }
 
-    @CheckForNull
+    @Nullable
     public Side getBaseDirection(){
         IPanelCell thisCell = getIPanelCell();
         if (thisCell==null || thisCell.getBaseSide()==null)return null;
@@ -242,7 +242,7 @@ public class PanelCellPos {
      * @param side The direction of the neighbor relative to this cell's facing direction.
      * @return PanelCellNeighbor object, null for an empty cell.
      */
-    @CheckForNull
+    @Nullable
     public PanelCellNeighbor getNeighbor(Side side) {
         Side cellFacing = this.getCellFacing();
         return getNeighbor(side,cellFacing);

@@ -6,13 +6,13 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.panelcells.Repeater;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.RepeaterTickSync;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class RepeaterCellGUI extends Screen {
 
@@ -24,7 +24,7 @@ public class RepeaterCellGUI extends Screen {
     private final Repeater repeaterCell;
     private ModWidget tickCount;
 
-    private final ResourceLocation GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
+    private final Identifier GUI = Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/transparent.png");
 
     protected RepeaterCellGUI(PanelTile panelTile, Integer cellIndex, Repeater repeaterCell) {
         super(Component.translatable("tinyredstone:repeaterGUI"));
@@ -76,7 +76,7 @@ public class RepeaterCellGUI extends Screen {
         ) {
             if (scroll != 0) {
                 Double dScroll = scroll*2;
-                if (hasShiftDown())
+                if (isShiftDown())
                     dScroll *= 10;
                 changeTicks(dScroll.intValue());
                 return true;
@@ -113,15 +113,12 @@ public class RepeaterCellGUI extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        RenderSystem.setShaderTexture(0, GUI);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bindForSetup(GUI);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
-        guiGraphics.blit(GUI, relX, relY, 0, 0, WIDTH, HEIGHT);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, GUI, relX, relY, 0, 0, WIDTH, HEIGHT, 256, 256);
 
-        super.render(guiGraphics,mouseX, mouseY, partialTicks);
+        super.extractRenderState(guiGraphics,mouseX, mouseY, partialTicks);
     }
 
 

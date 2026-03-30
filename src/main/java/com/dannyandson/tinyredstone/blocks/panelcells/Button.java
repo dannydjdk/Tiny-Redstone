@@ -8,17 +8,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 public class Button implements IPanelCell, IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_OAK_PLANKS = ResourceLocation.fromNamespaceAndPath("minecraft","block/oak_planks");
+    public static Identifier TEXTURE_OAK_PLANKS = Identifier.fromNamespaceAndPath("minecraft","block/oak_planks");
 
     protected boolean active = false;
     protected Integer ticksRemaining = 0;
@@ -36,7 +37,7 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
 
         TextureAtlasSprite sprite = getSprite();
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
 
         if (baseSide==Side.FRONT) {
             matrixStack.mulPose(Axis.XP.rotationDegrees(90));
@@ -163,10 +164,10 @@ public class Button implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.active=compoundNBT.getBoolean("active");
-        this.ticksRemaining=compoundNBT.getInt("ticksRemaining");
-        if (compoundNBT.getString("baseSide").length()>0)
-            this.baseSide=Side.valueOf(compoundNBT.getString("baseSide"));
+        this.active=compoundNBT.getBooleanOr("active", false);
+        this.ticksRemaining=compoundNBT.getIntOr("ticksRemaining", 0);
+        if (compoundNBT.getStringOr("baseSide", "").length()>0)
+            this.baseSide=Side.valueOf(compoundNBT.getStringOr("baseSide", ""));
         else
             baseSide=Side.BOTTOM;
     }

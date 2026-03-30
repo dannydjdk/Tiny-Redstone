@@ -13,7 +13,7 @@ public class PanelItemColor implements ItemColor {
         if (ItemStackHelper.getBlockEntityTag(p_getColor_1_) != null) {
             CompoundTag blockEntityTag = ItemStackHelper.getBlockEntityTag(p_getColor_1_);
             if (blockEntityTag.contains("color")) {
-                int color = blockEntityTag.getInt("color");
+                int color = blockEntityTag.getIntOr("color", 0);
                 return color;
             }
         }

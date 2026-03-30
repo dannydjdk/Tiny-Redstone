@@ -4,9 +4,9 @@ import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-import javax.annotation.CheckForNull;
+import org.jspecify.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +36,11 @@ public class TinyBlockData {
         }
     }
 
-    @CheckForNull
-    public ResourceLocation getTexture(ResourceLocation itemResourceId) {
+    @Nullable
+    public Identifier getTexture(Identifier itemResourceId) {
         return getTexture(itemResourceId,Side.FRONT);
     }
-    public ResourceLocation getTexture(ResourceLocation itemResourceId, Side side) {
+    public Identifier getTexture(Identifier itemResourceId, Side side) {
         if (tinyBlockDefinitions.containsKey(itemResourceId.toString())) {
             Map<String, String> itemData = tinyBlockDefinitions.get(itemResourceId.toString());
 
@@ -78,8 +78,8 @@ public class TinyBlockData {
         return null;
     }
 
-    @CheckForNull
-    public String getType(ResourceLocation itemResourceId) {
+    @Nullable
+    public String getType(Identifier itemResourceId) {
         if (tinyBlockDefinitions.containsKey(itemResourceId.toString())) {
             Map<String, String> itemData = tinyBlockDefinitions.get(itemResourceId.toString());
             if (itemData.containsKey("type")) {
@@ -89,13 +89,13 @@ public class TinyBlockData {
         return null;
     }
 
-    @CheckForNull
-    protected static ResourceLocation textureResourceLocationFromResourceId(String resourceId) {
+    @Nullable
+    protected static Identifier textureResourceLocationFromResourceId(String resourceId) {
         String[] resourceIdStrings = resourceId.split(":");
         if (resourceIdStrings.length == 1)
-            return ResourceLocation.fromNamespaceAndPath("minecraft", "block/" + resourceIdStrings[0]);
+            return Identifier.fromNamespaceAndPath("minecraft", "block/" + resourceIdStrings[0]);
         else if (resourceIdStrings.length == 2)
-            return ResourceLocation.fromNamespaceAndPath(resourceIdStrings[0], "block/" + resourceIdStrings[1]);
+            return Identifier.fromNamespaceAndPath(resourceIdStrings[0], "block/" + resourceIdStrings[1]);
         return null;
     }
 }

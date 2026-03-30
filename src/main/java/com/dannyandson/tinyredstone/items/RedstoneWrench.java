@@ -16,20 +16,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 public class RedstoneWrench extends Item {
-    public RedstoneWrench() {
-        super(new Item.Properties().stacksTo(1));
+    public RedstoneWrench(Item.Properties props) {
+        super(props);
     }
 
     @Override
-    @Nonnull
     public InteractionResult useOn(UseOnContext context) {
         Level world = context.getLevel();
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             Player player = context.getPlayer();
             InteractionHand hand = context.getHand();
             BlockPos pos = context.getClickedPos();

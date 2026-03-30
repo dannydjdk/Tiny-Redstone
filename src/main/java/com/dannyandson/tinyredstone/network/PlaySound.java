@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record PlaySound(BlockPos pos, String namespace, String path, float volume, float pitch) implements CustomPacketPayload {
 
     public static final Type<PlaySound> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "play_sound"));
+            new Type<>(Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "play_sound"));
 
     public static final StreamCodec<FriendlyByteBuf, PlaySound> STREAM_CODEC =
             StreamCodec.of(PlaySound::write, PlaySound::read);
@@ -39,7 +39,7 @@ public record PlaySound(BlockPos pos, String namespace, String path, float volum
             if (te instanceof PanelTile) {
                 te.getLevel().playLocalSound(
                         msg.pos.getX(), msg.pos.getY(), msg.pos.getZ(),
-                        SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(msg.namespace, msg.path)),
+                        SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(msg.namespace, msg.path)),
                         SoundSource.BLOCKS, msg.volume, msg.pitch, false
                 );
             }

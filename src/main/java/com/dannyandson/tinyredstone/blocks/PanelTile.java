@@ -9,11 +9,11 @@ import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.panelcells.*;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PlaySound;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -27,6 +27,8 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -34,8 +36,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.*;
 
 @SuppressWarnings("NullableProblems")
@@ -83,13 +84,13 @@ public class PanelTile extends BlockEntity {
     }
 
     public PanelTile(BlockPos p_155229_, BlockState p_155230_) {
-        super(Registration.REDSTONE_PANEL_TILE.get(), p_155229_, p_155230_);
+        super(ModRegistration.REDSTONE_PANEL_TILE.get(), p_155229_, p_155230_);
     }
 
     @Override
     public void setRemoved() {
         super.setRemoved();
-        if (level != null && level.isClientSide && cachedRenderer != null) {
+        if (level != null && level.isClientSide() && cachedRenderer != null) {
             cachedRenderer.close();
             cachedRenderer = null;
         }
@@ -123,39 +124,20 @@ public class PanelTile extends BlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, net.minecraft.core.HolderLookup.Provider registries) {
-        if (this.level.isClientSide) {
-            this.cells.clear();
-            this.cellDirections.clear();
-        }
-        CompoundTag tag = pkt.getTag();
-        if (tag != null) {
-            this.loadAdditional(tag, registries);
-        }
-        if (this.level != null && this.level.isClientSide) {
-            markRenderDirty();
-        }
-    }
+    // onDataPacket removed in 26.1 - sync handled automatically via getUpdatePacket/getUpdateTag
 
-    /* Creates a tag containing the TileEntity information, used by vanilla to transmit from server to client*/
-    @Override
-    public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
-        CompoundTag compoundtag = new CompoundTag();
-        this.saveAdditional(compoundtag, registries);
-        return compoundtag;
-    }
+    // getUpdateTag: using default implementation which calls saveAdditional
 
-    /* Populates this TileEntity with information from the tag, used by vanilla to transmit from server to client*/
-    @Override
-    public void handleUpdateTag(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
-        if (this.level.isClientSide) {
-            this.cells.clear();
-            this.cellDirections.clear();
-        }
-        this.loadAdditional(tag, registries);
-        if (this.level != null && this.level.isClientSide) {
-            markRenderDirty();
+    // handleUpdateTag: using default implementation which calls loadAdditional
+
+    /** Parse an SNBT string back to a CompoundTag, returning empty tag on failure. */
+    private static CompoundTag parseSnbt(String snbt) {
+        if (snbt == null || snbt.isEmpty()) return new CompoundTag();
+        try {
+            return TagParser.parseCompoundTag(snbt);
+        } catch (Exception e) {
+            TinyRedstone.LOGGER.error("Failed to parse SNBT: " + e.getMessage());
+            return new CompoundTag();
         }
     }
 
@@ -190,8 +172,8 @@ public class PanelTile extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag parentNBTTagCompound, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(parentNBTTagCompound, registries);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
         try {
             if (this.strongPowerToNeighbors.size()==5) {
                 CompoundTag strongPowerToNeighbors = new CompoundTag();
@@ -202,7 +184,7 @@ public class PanelTile extends BlockEntity {
                 strongPowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.strongPowerToNeighbors.get(Side.TOP));
                 if (!hasBase())
                     strongPowerToNeighbors.putInt(Side.BOTTOM.ordinal() + "",  this.strongPowerToNeighbors.get(Side.BOTTOM));
-                parentNBTTagCompound.put("strong_power_outgoing", strongPowerToNeighbors);
+                output.putString("strong_power_outgoing", strongPowerToNeighbors.toString());
             }
             if (this.weakPowerToNeighbors.size()==5) {
                 CompoundTag weakPowerToNeighbors = new CompoundTag();
@@ -213,7 +195,7 @@ public class PanelTile extends BlockEntity {
                 weakPowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.weakPowerToNeighbors.get(Side.TOP));
                 if (!hasBase())
                     weakPowerToNeighbors.putInt(Side.BOTTOM.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BOTTOM));
-                parentNBTTagCompound.put("weak_power_outgoing", weakPowerToNeighbors);
+                output.putString("weak_power_outgoing", weakPowerToNeighbors.toString());
             }
             if (this.wirePowerToNeighbors.size()==5) {
                 CompoundTag wirePowerToNeighbors = new CompoundTag();
@@ -222,7 +204,7 @@ public class PanelTile extends BlockEntity {
                 wirePowerToNeighbors.putInt(Side.BACK.ordinal() + "",  this.wirePowerToNeighbors.get(Side.BACK));
                 wirePowerToNeighbors.putInt(Side.LEFT.ordinal() + "",  this.wirePowerToNeighbors.get(Side.LEFT));
                 wirePowerToNeighbors.putInt(Side.TOP.ordinal() + "",  this.wirePowerToNeighbors.get(Side.TOP));
-                parentNBTTagCompound.put("wire_power_outgoing", wirePowerToNeighbors);
+                output.putString("wire_power_outgoing", wirePowerToNeighbors.toString());
             }
             if (!this.connectedPanelNeighbor.isEmpty()) {
                 CompoundTag connectedPanelNeighbors = new CompoundTag();
@@ -231,88 +213,93 @@ public class PanelTile extends BlockEntity {
                 connectedPanelNeighbors.putBoolean(Side.BACK.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.BACK) &&  this.connectedPanelNeighbor.get(Side.BACK));
                 connectedPanelNeighbors.putBoolean(Side.LEFT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.LEFT) &&  this.connectedPanelNeighbor.get(Side.LEFT));
                 connectedPanelNeighbors.putBoolean(Side.TOP.ordinal() + "",  this.connectedPanelNeighbor.containsKey(Side.TOP) && this.connectedPanelNeighbor.get(Side.TOP));
-                parentNBTTagCompound.put("connected_panel_neighbors", connectedPanelNeighbors);
+                output.putString("connected_panel_neighbors", connectedPanelNeighbors.toString());
             }
 
-            parentNBTTagCompound.putInt("lightOutput",this.lightOutput);
-            parentNBTTagCompound.putBoolean("flagLightUpdate",this.flagLightUpdate);
-            parentNBTTagCompound.putBoolean("flagCrashed",this.flagCrashed);
-            parentNBTTagCompound.putBoolean("flagOverflow",this.flagOverflow);
-            parentNBTTagCompound.putBoolean("flagOutputUpdate",this.flagOutputUpdate);
+            output.putInt("lightOutput",this.lightOutput);
+            output.putBoolean("flagLightUpdate",this.flagLightUpdate);
+            output.putBoolean("flagCrashed",this.flagCrashed);
+            output.putBoolean("flagOverflow",this.flagOverflow);
+            output.putBoolean("flagOutputUpdate",this.flagOutputUpdate);
 
         } catch (NullPointerException exception) {
             TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.toString() + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
         }
 
-        this.saveToNbt(parentNBTTagCompound);
+        // saveToNbt builds a CompoundTag — serialize it as SNBT string
+        CompoundTag cellData = this.saveToNbt(new CompoundTag());
+        output.putString("cellData", cellData.toString());
     }
 
     // This is where you load the data that you saved in writeToNBT
     @Override
-    public void loadAdditional(CompoundTag parentNBTTagCompound, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(parentNBTTagCompound, registries);
+    public void loadAdditional(ValueInput parentNBTTagCompound) {
+        super.loadAdditional(parentNBTTagCompound);
 
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
 
-        this.loadCellsFromNBT(parentNBTTagCompound);
+        // In 26.1, all compound sub-tags are stored as SNBT strings via ValueOutput.
+        // The cellData SNBT contains cells, color, cover, coverData (from saveToNbt).
+        CompoundTag cellData = parseSnbt(parentNBTTagCompound.getStringOr("cellData", ""));
+        this.loadCellsFromNBT(cellData.getCompound("cells").orElseGet(CompoundTag::new));
 
-        CompoundTag strongPowerToNeighbors = parentNBTTagCompound.getCompound("strong_power_outgoing");
+        CompoundTag strongPowerToNeighbors = parseSnbt(parentNBTTagCompound.getStringOr("strong_power_outgoing", ""));
         if (!strongPowerToNeighbors.isEmpty()) {
-            this.strongPowerToNeighbors.put(Side.FRONT, strongPowerToNeighbors.getInt(Side.FRONT.ordinal() + ""));
-            this.strongPowerToNeighbors.put(Side.RIGHT, strongPowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
-            this.strongPowerToNeighbors.put(Side.BACK,  strongPowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
-            this.strongPowerToNeighbors.put(Side.LEFT,  strongPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
-            this.strongPowerToNeighbors.put(Side.TOP,  strongPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
+            this.strongPowerToNeighbors.put(Side.FRONT, strongPowerToNeighbors.getIntOr(Side.FRONT.ordinal() + "", 0));
+            this.strongPowerToNeighbors.put(Side.RIGHT, strongPowerToNeighbors.getIntOr(Side.RIGHT.ordinal() + "", 0));
+            this.strongPowerToNeighbors.put(Side.BACK,  strongPowerToNeighbors.getIntOr(Side.BACK.ordinal() + "", 0));
+            this.strongPowerToNeighbors.put(Side.LEFT,  strongPowerToNeighbors.getIntOr(Side.LEFT.ordinal() + "", 0));
+            this.strongPowerToNeighbors.put(Side.TOP,  strongPowerToNeighbors.getIntOr(Side.TOP.ordinal() + "", 0));
             if (!hasBase())
-                this.strongPowerToNeighbors.put(Side.BOTTOM,  strongPowerToNeighbors.getInt(Side.BOTTOM.ordinal() + ""));
+                this.strongPowerToNeighbors.put(Side.BOTTOM,  strongPowerToNeighbors.getIntOr(Side.BOTTOM.ordinal() + "", 0));
         }
-        CompoundTag weakPowerToNeighbors = parentNBTTagCompound.getCompound("weak_power_outgoing");
+        CompoundTag weakPowerToNeighbors = parseSnbt(parentNBTTagCompound.getStringOr("weak_power_outgoing", ""));
         if (!weakPowerToNeighbors.isEmpty()) {
-            this.weakPowerToNeighbors.put(Side.FRONT, weakPowerToNeighbors.getInt(Side.FRONT.ordinal() + ""));
-            this.weakPowerToNeighbors.put(Side.RIGHT, weakPowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
-            this.weakPowerToNeighbors.put(Side.BACK,  weakPowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
-            this.weakPowerToNeighbors.put(Side.LEFT,  weakPowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
-            this.weakPowerToNeighbors.put(Side.TOP,  weakPowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
+            this.weakPowerToNeighbors.put(Side.FRONT, weakPowerToNeighbors.getIntOr(Side.FRONT.ordinal() + "", 0));
+            this.weakPowerToNeighbors.put(Side.RIGHT, weakPowerToNeighbors.getIntOr(Side.RIGHT.ordinal() + "", 0));
+            this.weakPowerToNeighbors.put(Side.BACK,  weakPowerToNeighbors.getIntOr(Side.BACK.ordinal() + "", 0));
+            this.weakPowerToNeighbors.put(Side.LEFT,  weakPowerToNeighbors.getIntOr(Side.LEFT.ordinal() + "", 0));
+            this.weakPowerToNeighbors.put(Side.TOP,  weakPowerToNeighbors.getIntOr(Side.TOP.ordinal() + "", 0));
             if (!hasBase())
-                this.weakPowerToNeighbors.put(Side.BOTTOM,  weakPowerToNeighbors.getInt(Side.BOTTOM.ordinal() + ""));
+                this.weakPowerToNeighbors.put(Side.BOTTOM,  weakPowerToNeighbors.getIntOr(Side.BOTTOM.ordinal() + "", 0));
         }
-        CompoundTag wirePowerToNeighbors = parentNBTTagCompound.getCompound("wire_power_outgoing");
+        CompoundTag wirePowerToNeighbors = parseSnbt(parentNBTTagCompound.getStringOr("wire_power_outgoing", ""));
         if (!wirePowerToNeighbors.isEmpty()) {
-            this.wirePowerToNeighbors.put(Side.FRONT, wirePowerToNeighbors.getInt(Side.FRONT.ordinal() + ""));
-            this.wirePowerToNeighbors.put(Side.RIGHT, wirePowerToNeighbors.getInt(Side.RIGHT.ordinal() + ""));
-            this.wirePowerToNeighbors.put(Side.BACK,  wirePowerToNeighbors.getInt(Side.BACK.ordinal() + ""));
-            this.wirePowerToNeighbors.put(Side.LEFT,  wirePowerToNeighbors.getInt(Side.LEFT.ordinal() + ""));
-            this.wirePowerToNeighbors.put(Side.TOP,  wirePowerToNeighbors.getInt(Side.TOP.ordinal() + ""));
+            this.wirePowerToNeighbors.put(Side.FRONT, wirePowerToNeighbors.getIntOr(Side.FRONT.ordinal() + "", 0));
+            this.wirePowerToNeighbors.put(Side.RIGHT, wirePowerToNeighbors.getIntOr(Side.RIGHT.ordinal() + "", 0));
+            this.wirePowerToNeighbors.put(Side.BACK,  wirePowerToNeighbors.getIntOr(Side.BACK.ordinal() + "", 0));
+            this.wirePowerToNeighbors.put(Side.LEFT,  wirePowerToNeighbors.getIntOr(Side.LEFT.ordinal() + "", 0));
+            this.wirePowerToNeighbors.put(Side.TOP,  wirePowerToNeighbors.getIntOr(Side.TOP.ordinal() + "", 0));
         }
-        CompoundTag connectedPanelNeighbors = parentNBTTagCompound.getCompound("connected_panel_neighbors");
-        if (!wirePowerToNeighbors.isEmpty()) {
-            this.connectedPanelNeighbor.put(Side.FRONT, connectedPanelNeighbors.getBoolean(Side.FRONT.ordinal() + ""));
-            this.connectedPanelNeighbor.put(Side.RIGHT, connectedPanelNeighbors.getBoolean(Side.RIGHT.ordinal() + ""));
-            this.connectedPanelNeighbor.put(Side.BACK,  connectedPanelNeighbors.getBoolean(Side.BACK.ordinal() + ""));
-            this.connectedPanelNeighbor.put(Side.LEFT,  connectedPanelNeighbors.getBoolean(Side.LEFT.ordinal() + ""));
-            this.connectedPanelNeighbor.put(Side.TOP,  connectedPanelNeighbors.getBoolean(Side.TOP.ordinal() + ""));
-        }
-
-        this.lightOutput = parentNBTTagCompound.getInt("lightOutput");
-        this.flagLightUpdate = parentNBTTagCompound.getBoolean("flagLightUpdate");
-        this.flagCrashed = parentNBTTagCompound.getBoolean("flagCrashed");
-        this.flagOverflow = parentNBTTagCompound.getBoolean("flagOverflow");
-        this.flagOutputUpdate = parentNBTTagCompound.getBoolean("flagOutputUpdate");
-
-        if (parentNBTTagCompound.contains("color")) {
-            int color = parentNBTTagCompound.getInt("color");
-            if (this.Color != color) {
-                this.Color = color;
-            }
+        CompoundTag connectedPanelNeighbors = parseSnbt(parentNBTTagCompound.getStringOr("connected_panel_neighbors", ""));
+        if (!connectedPanelNeighbors.isEmpty()) {
+            this.connectedPanelNeighbor.put(Side.FRONT, connectedPanelNeighbors.getBooleanOr(Side.FRONT.ordinal() + "", false));
+            this.connectedPanelNeighbor.put(Side.RIGHT, connectedPanelNeighbors.getBooleanOr(Side.RIGHT.ordinal() + "", false));
+            this.connectedPanelNeighbor.put(Side.BACK,  connectedPanelNeighbors.getBooleanOr(Side.BACK.ordinal() + "", false));
+            this.connectedPanelNeighbor.put(Side.LEFT,  connectedPanelNeighbors.getBooleanOr(Side.LEFT.ordinal() + "", false));
+            this.connectedPanelNeighbor.put(Side.TOP,  connectedPanelNeighbors.getBooleanOr(Side.TOP.ordinal() + "", false));
         }
 
-        String coverClass = parentNBTTagCompound.getString("cover");
+        this.lightOutput = parentNBTTagCompound.getIntOr("lightOutput", 0);
+        this.flagLightUpdate = parentNBTTagCompound.getBooleanOr("flagLightUpdate", false);
+        this.flagCrashed = parentNBTTagCompound.getBooleanOr("flagCrashed", false);
+        this.flagOverflow = parentNBTTagCompound.getBooleanOr("flagOverflow", false);
+        this.flagOutputUpdate = parentNBTTagCompound.getBooleanOr("flagOutputUpdate", false);
+
+        // Color and cover are inside the cellData compound tag (from saveToNbt)
+        int color = cellData.getIntOr("color", -1);
+        if (color != -1 && this.Color != color) {
+            this.Color = color;
+        }
+
+        String coverClass = cellData.getStringOr("cover", "");
         if (coverClass.length()>0)
         {
             try {
                 panelCover= (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
-                if (parentNBTTagCompound.contains("coverData")){
-                    panelCover.readNBT(parentNBTTagCompound.getCompound("coverData"));
+                CompoundTag coverDataTag = cellData.getCompound("coverData").orElseGet(CompoundTag::new);
+                if (!coverDataTag.isEmpty()){
+                    panelCover.readNBT(coverDataTag);
                 }
             } catch (Exception exception) {
                 TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class " + coverClass, exception);
@@ -324,10 +311,9 @@ public class PanelTile extends BlockEntity {
         }
 
         // Flag light update so the tick cooldown will process it
-        // (avoids expensive rapid light updates from frequent sync packets)
         flagLightUpdate = true;
 
-        if (level!=null && !level.isClientSide) {
+        if (level!=null && !level.isClientSide()) {
             try {
                 updateSide(Side.FRONT);
                 updateSide(Side.RIGHT);
@@ -344,14 +330,12 @@ public class PanelTile extends BlockEntity {
 
     }
 
-    public void loadCellsFromNBT(CompoundTag parentNBTTagCompound)
+    public void loadCellsFromNBT(CompoundTag cellsNBT)
     {
-        CompoundTag cellsNBT = parentNBTTagCompound.getCompound("cells");
-
-        for (String index : cellsNBT.getAllKeys()) {
-            CompoundTag cellNBT = cellsNBT.getCompound(index);
+        for (String index : cellsNBT.keySet()) {
+            CompoundTag cellNBT = cellsNBT.getCompound(index).orElseGet(CompoundTag::new);
             if (cellNBT.contains("data")) {
-                String className = cellNBT.getString("class");
+                String className = cellNBT.getStringOr("class", "");
                 try {
                     IPanelCell cell;
                     try {
@@ -361,7 +345,7 @@ public class PanelTile extends BlockEntity {
                             throw e;
                         cell=(IPanelCell) Class.forName(className.replaceFirst("tinypipes.components.","tinypipes.components.tiny.")).getConstructor().newInstance();
                     }
-                    cell.readNBT(cellNBT.getCompound("data"));
+                    cell.readNBT(cellNBT.getCompound("data").orElseGet(CompoundTag::new));
                     Integer i = Integer.parseInt(index);
                     this.cells.put(i, cell);
 
@@ -369,7 +353,7 @@ public class PanelTile extends BlockEntity {
                     if (cellNBT.contains("direction"))
                     {
                         //backward compatibility
-                        Direction direction = Direction.from3DDataValue(cellNBT.getInt("direction"));
+                        Direction direction = Direction.from3DDataValue(cellNBT.getIntOr("direction", 0));
                         if (direction==Direction.NORTH) this.cellDirections.put(i,Side.FRONT);
                         else if (direction==Direction.EAST) this.cellDirections.put(i,Side.RIGHT);
                         else if (direction==Direction.SOUTH) this.cellDirections.put(i,Side.BACK);
@@ -378,7 +362,7 @@ public class PanelTile extends BlockEntity {
 
                     }
                     else
-                        this.cellDirections.put(i, Side.valueOf(cellNBT.getString("facing")));
+                        this.cellDirections.put(i, Side.valueOf(cellNBT.getStringOr("facing", "")));
                 } catch (Exception exception) {
                     TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class " + className, exception);
                 }
@@ -400,7 +384,7 @@ public class PanelTile extends BlockEntity {
     public void tick() {
         try {
             if (!flagCrashed && !flagOverflow) {
-                if (level.isClientSide) {
+                if (level.isClientSide()) {
                     if (this.isCovered()) {
                         this.panelCellGhostPos = null;
                         this.panelCellHovering = null;
@@ -539,7 +523,7 @@ public class PanelTile extends BlockEntity {
 
         if (cell == null) return true;
         if (cell.needsSolidBase()) {
-            Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
+            ModRegistration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
             return true;
         }
         if (!cell.isPushable()) return false;
@@ -645,7 +629,7 @@ public class PanelTile extends BlockEntity {
             updateSide(Side.BACK);
             updateSide(Side.LEFT);
 
-            if (!level.isClientSide)
+            if (!level.isClientSide())
                 setChanged();
 
             updateOutputs();
@@ -844,7 +828,7 @@ public class PanelTile extends BlockEntity {
                 Side baseDirection = cellPos.getBaseDirection();
                 PanelCellPos basePos = cellPos.offset(baseDirection);
                 if (basePos != null && (basePos.getIPanelCell() == null || (!basePos.getIPanelCell().isPushable()) && !(basePos.getIPanelCell() instanceof Piston && basePos.getCellFacing()==cellPos.getBaseDirection().getOpposite() ) )) {
-                    Registration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
+                    ModRegistration.REDSTONE_PANEL_BLOCK.get().removeCell(cellPos, null);
                     change = true;
                 }
             }
@@ -1160,7 +1144,7 @@ public class PanelTile extends BlockEntity {
 
     public void sync()
     {
-        if (!level.isClientSide && (!isCovered() || panelCover.allowsLightOutput())) {
+        if (!level.isClientSide() && (!isCovered() || panelCover.allowsLightOutput())) {
             this.level.sendBlockUpdated(worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_CLIENTS);
             flagVoxelShapeUpdate();
         }
@@ -1375,19 +1359,19 @@ public class PanelTile extends BlockEntity {
 
     public boolean hasBase()
     {
-        if(this.getBlockState().hasProperty(Registration.HAS_PANEL_BASE)
-                && !this.getBlockState().getValue(Registration.HAS_PANEL_BASE))
+        if(this.getBlockState().hasProperty(ModRegistration.HAS_PANEL_BASE)
+                && !this.getBlockState().getValue(ModRegistration.HAS_PANEL_BASE))
             return false;
         return true;
     }
 
-    @CheckForNull
+    @Nullable
     public IPanelCell getIPanelCell(PanelCellPos cellPos){
         if (cellPos==null)return null;
         return this.cells.get(cellPos.getIndex());
     }
 
-    @CheckForNull
+    @Nullable
     public Side getCellFacing(PanelCellPos cellPos){
         if (cellPos==null)return null;
         return this.cellDirections.get(cellPos.getIndex());
@@ -1497,7 +1481,7 @@ public class PanelTile extends BlockEntity {
 
     private void updateVoxelShape()
     {
-        //TinyRedstone.LOGGER.debug("updating voxel shape at " + getBlockPos().toShortString() + ": " + ((level.isClientSide)?"client":"server"));
+        //TinyRedstone.LOGGER.debug("updating voxel shape at " + getBlockPos().toShortString() + ": " + ((level.isClientSide())?"client":"server"));
         if (isCovered()) {
             VoxelShape coverShape = panelCover.getShape();
             if (Shapes.block().equals(coverShape) || this.getBlockState().getValue(BlockStateProperties.FACING) == Direction.DOWN)
@@ -1564,7 +1548,7 @@ public class PanelTile extends BlockEntity {
         }
     }
 
-    @CheckForNull
+    @Nullable
     public VoxelShape getCellVoxelShape(PanelCellPos cellPos)
     {
         if (cellPos!=null)

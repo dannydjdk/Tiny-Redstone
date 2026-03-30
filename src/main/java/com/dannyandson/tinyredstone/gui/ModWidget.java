@@ -3,7 +3,7 @@ package com.dannyandson.tinyredstone.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -96,7 +96,7 @@ public class ModWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (visible) {
             int drawX,drawY;
             Font fr = Minecraft.getInstance().font;
@@ -133,10 +133,10 @@ public class ModWidget extends AbstractWidget {
                 matrixStack.pushPose();
                 matrixStack.scale(scale, scale, scale);
                 matrixStack.translate(drawX, getY(), 0);
-                guiGraphics.drawString(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
+                guiGraphics.text(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
                 matrixStack.popPose();
             } else {
-                guiGraphics.drawString(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
+                guiGraphics.text(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
             }
 
             if (bgcolor!=-1)
@@ -150,7 +150,7 @@ public class ModWidget extends AbstractWidget {
     }
 
 
-    public void renderHoverToolTip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+    public void renderHoverToolTip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         if (this.toolTipTextComponent != null) {
             Font fr = Minecraft.getInstance().font;
             int width = fr.width(this.toolTipTextComponent);
@@ -158,7 +158,7 @@ public class ModWidget extends AbstractWidget {
 
             guiGraphics.fill( mouseX, mouseY+10, mouseX + width + 4, mouseY +10 + height + 4, 0xCC000000);
             guiGraphics.fill( mouseX + 1, mouseY + 11, mouseX + width + 3, mouseY + 10 + height + 3, 0x66EEEEEE);
-            guiGraphics.drawString(fr, this.toolTipTextComponent.getVisualOrderText(), mouseX + 3, mouseY + 13, 0xFFFEFEFE);
+            guiGraphics.text(fr, this.toolTipTextComponent.getVisualOrderText(), mouseX + 3, mouseY + 13, 0xFFFEFEFE);
         }
     }
 

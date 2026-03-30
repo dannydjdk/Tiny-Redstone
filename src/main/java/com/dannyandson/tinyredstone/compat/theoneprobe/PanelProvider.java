@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,8 +31,8 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
     private IProbeConfig.ConfigMode redstoneMode;
 
     @Override
-    public ResourceLocation getID() {
-        return ResourceLocation.fromNamespaceAndPath( TinyRedstone.MODID,"panel");
+    public Identifier getID() {
+        return Identifier.fromNamespaceAndPath( TinyRedstone.MODID,"panel");
     }
 
     @Override
@@ -88,7 +88,7 @@ public class PanelProvider implements IBlockDisplayOverride, Function<ITheOnePro
                         ItemStack itemStack = item.getDefaultInstance();
                         CompoundTag itemTag = panelCell.getItemTag();
                         if (itemTag!=null){
-                            for (String key : itemTag.getAllKeys()){
+                            for (String key : itemTag.keySet()){
                                 ItemStackHelper.addTagElement(itemStack, key, itemTag.get(key));
                             }
                         }

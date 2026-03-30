@@ -1,6 +1,6 @@
 package com.dannyandson.tinyredstone.items;
 
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
@@ -12,8 +12,8 @@ import java.util.List;
 
 public class ChopperBlockItem extends BlockItem {
 
-    public ChopperBlockItem() {
-        super(Registration.CUTTER_BLOCK.get(), new Item.Properties());
+    public ChopperBlockItem(Item.Properties props) {
+        super(ModRegistration.CUTTER_BLOCK.get(), props);
     }
 
     @Override

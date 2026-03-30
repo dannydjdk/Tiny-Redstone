@@ -5,13 +5,15 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class RenderHelper {
+
+    private static final Identifier BLOCK_ATLAS = Identifier.withDefaultNamespace("textures/atlas/blocks.png");
 
     private static int[] textureDiffusedColors = {
             16383998,
@@ -193,7 +195,7 @@ public class RenderHelper {
         return packedColor >>> 24;
     }
 
-    public static TextureAtlasSprite getSprite(ResourceLocation resourceLocation) {
-        return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(resourceLocation);
+    public static TextureAtlasSprite getSprite(Identifier resourceLocation) {
+        return Minecraft.getInstance().getAtlasManager().get(new SpriteId(BLOCK_ATLAS,resourceLocation));
     }
 }

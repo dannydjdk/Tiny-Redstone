@@ -4,13 +4,13 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.gui.RepeaterCellGUI;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 public class SuperRepeater extends Repeater {
 
-    public static ResourceLocation TEXTURE_SUPER_REPEATER_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_super_repeater_on");
-    public static ResourceLocation TEXTURE_SUPER_REPEATER_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_super_repeater_off");
+    public static Identifier TEXTURE_SUPER_REPEATER_ON = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_super_repeater_on");
+    public static Identifier TEXTURE_SUPER_REPEATER_OFF = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_super_repeater_off");
 
     /**
      * Called when neighboring redstone signal output changes.
@@ -44,7 +44,7 @@ public class SuperRepeater extends Repeater {
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player) {
         PanelTile panelTile = cellPos.getPanelTile();
-        if (panelTile.getLevel().isClientSide)
+        if (panelTile.getLevel().isClientSide())
             RepeaterCellGUI.open(panelTile, cellPos.getIndex(), this);
         return false;
     }

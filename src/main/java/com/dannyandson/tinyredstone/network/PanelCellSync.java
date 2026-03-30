@@ -10,14 +10,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record PanelCellSync(BlockPos pos, int cellIndex, CompoundTag nbt) implements CustomPacketPayload {
 
     public static final Type<PanelCellSync> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "panel_cell_sync"));
+            new Type<>(Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "panel_cell_sync"));
 
     public static final StreamCodec<FriendlyByteBuf, PanelCellSync> STREAM_CODEC =
             StreamCodec.of(PanelCellSync::write, PanelCellSync::read);

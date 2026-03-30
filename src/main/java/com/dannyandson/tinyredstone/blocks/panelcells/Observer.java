@@ -9,20 +9,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.LinkedList;
 
 public class Observer implements IPanelCell, IObservingPanelCell {
 
-    public static ResourceLocation TEXTURE_OBSERVER_TOP      = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_top");
-    public static ResourceLocation TEXTURE_OBSERVER_BACK_ON  = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_back_on");
-    public static ResourceLocation TEXTURE_OBSERVER_BACK     = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_back");
-    public static ResourceLocation TEXTURE_OBSERVER_FRONT    = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_front");
-    public static ResourceLocation TEXTURE_OBSERVER_SIDE     = ResourceLocation.fromNamespaceAndPath("minecraft","block/observer_side");
+    public static Identifier TEXTURE_OBSERVER_TOP      = Identifier.fromNamespaceAndPath("minecraft","block/observer_top");
+    public static Identifier TEXTURE_OBSERVER_BACK_ON  = Identifier.fromNamespaceAndPath("minecraft","block/observer_back_on");
+    public static Identifier TEXTURE_OBSERVER_BACK     = Identifier.fromNamespaceAndPath("minecraft","block/observer_back");
+    public static Identifier TEXTURE_OBSERVER_FRONT    = Identifier.fromNamespaceAndPath("minecraft","block/observer_front");
+    public static Identifier TEXTURE_OBSERVER_SIDE     = Identifier.fromNamespaceAndPath("minecraft","block/observer_side");
 
 
     boolean output = false;
@@ -38,7 +39,7 @@ public class Observer implements IPanelCell, IObservingPanelCell {
      */
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
 
         TextureAtlasSprite sprite_top = RenderHelper.getSprite(TEXTURE_OBSERVER_TOP);
         TextureAtlasSprite sprite_back;
@@ -192,13 +193,13 @@ public class Observer implements IPanelCell, IObservingPanelCell {
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.output = compoundNBT.getBoolean("output");
-        String queueString = compoundNBT.getString("queue");
+        this.output = compoundNBT.getBooleanOr("output", false);
+        String queueString = compoundNBT.getStringOr("queue", "");
         for (Byte b : queueString.getBytes())
         {
             queue.add(b==49);
         }
-        this.changedTick=compoundNBT.getInt("changedTick");
+        this.changedTick=compoundNBT.getIntOr("changedTick", 0);
     }
 
     @Override

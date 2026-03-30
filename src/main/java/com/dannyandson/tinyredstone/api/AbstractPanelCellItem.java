@@ -3,7 +3,7 @@ package com.dannyandson.tinyredstone.api;
 import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -24,12 +24,12 @@ public abstract class AbstractPanelCellItem extends Item {
     public InteractionResult useOn(UseOnContext context) {
         if (Config.ALLOW_WORLD_PLACEMENT.get()) {
             ItemStack itemStackCopy = context.getItemInHand().copy();
-            InteractionResult result = Registration.REDSTONE_PANEL_ITEM.get().useOn(context);
+            InteractionResult result = ModRegistration.REDSTONE_PANEL_ITEM.get().useOn(context);
             context.getPlayer().setItemInHand(context.getHand(), itemStackCopy);
-            if (context.getLevel().getBlockEntity(context.getClickedPos().offset(context.getClickedFace().getNormal())) instanceof PanelTile panelTile && context.getPlayer() != null) {
+            if (context.getLevel().getBlockEntity(context.getClickedPos().offset(context.getClickedFace().step())) instanceof PanelTile panelTile && context.getPlayer() != null) {
                 // Use useItemOn (item-in-hand interaction) not useWithoutItem (empty-hand)
                 BlockHitResult hitResult = panelTile.getPlayerCollisionHitResult(context.getPlayer());
-                Registration.REDSTONE_PANEL_BLOCK.get().useItemOn(
+                ModRegistration.REDSTONE_PANEL_BLOCK.get().useItemOn(
                         context.getItemInHand(),
                         panelTile.getBlockState(),
                         context.getLevel(),

@@ -12,13 +12,13 @@ import net.minecraft.world.item.TooltipFlag;
 import java.util.List;
 
 public class PanelCellItem extends AbstractPanelCellItem {
-    public PanelCellItem() {
-        super(new Item.Properties());
+    public PanelCellItem(Item.Properties props) {
+        super(props);
     }
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> list, TooltipFlag flags) {
-        if (Screen.hasShiftDown()) {
+        if (Screen.isShiftDown()) {
             list.add(Component.translatable("message.item.redstone_panel_cell").withStyle(ChatFormatting.GRAY));
             list.add(Component.translatable("message." + this.getDescriptionId()).withStyle(ChatFormatting.RED));
         } else

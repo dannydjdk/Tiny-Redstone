@@ -9,15 +9,16 @@ import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.dannyandson.tinyredstone.gui.ClearPanelGUI;
 import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
@@ -33,13 +34,14 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,8 +50,8 @@ import static net.minecraft.core.Direction.*;
 
 public class PanelBlock extends BaseEntityBlock {
 
-    // --- 1.21 REQUIRED: codec() for BaseEntityBlock ---
-    public static final MapCodec<PanelBlock> CODEC = MapCodec.unit(PanelBlock::new);
+    // --- 1.21+ REQUIRED: codec() for BaseEntityBlock ---
+    public static final MapCodec<PanelBlock> CODEC = simpleCodec(PanelBlock::new);
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
@@ -84,11 +86,8 @@ public class PanelBlock extends BaseEntityBlock {
     private static final Map<Item, Class<? extends IPanelCover>> itemPanelCoverMap = new HashMap<>();
     private static final Map<Class<? extends IPanelCover>, Item> panelCoverItemMap = new HashMap<>();
 
-    public PanelBlock() {
-        super(Properties.of()
-                .sound(SoundType.STONE)
-                .strength(2.0f)
-        );
+    public PanelBlock(Properties props) {
+        super(props);
     }
 
     public Class<? extends IPanelCell> getIPanelCellByItem(Item item) {
@@ -117,22 +116,22 @@ public class PanelBlock extends BaseEntityBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(BlockStateProperties.FACING);
-        builder.add(Registration.HAS_PANEL_BASE);
+        builder.add(ModRegistration.HAS_PANEL_BASE);
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Boolean hasBase = context.getItemInHand().getItem()==Registration.REDSTONE_PANEL_ITEM.get();
+        Boolean hasBase = context.getItemInHand().getItem()== ModRegistration.REDSTONE_PANEL_ITEM.get();
         CompoundTag itemTag = ItemStackHelper.getBlockEntityTag(context.getItemInHand());
         if (itemTag != null) {
-            if (itemTag.contains("hasBase") && !itemTag.getBoolean("hasBase"))
+            if (itemTag.contains("hasBase") && !itemTag.getBooleanOr("hasBase", false))
                 hasBase=false;
         }
         if(hasBase) {
-            return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite()).setValue(Registration.HAS_PANEL_BASE, true);
+            return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite()).setValue(ModRegistration.HAS_PANEL_BASE, true);
         }
-        return defaultBlockState().setValue(BlockStateProperties.FACING, DOWN).setValue(Registration.HAS_PANEL_BASE,false);
+        return defaultBlockState().setValue(BlockStateProperties.FACING, DOWN).setValue(ModRegistration.HAS_PANEL_BASE,false);
     }
 
     @Override
@@ -156,12 +155,9 @@ public class PanelBlock extends BaseEntityBlock {
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState state, BlockGetter source, BlockPos pos) {
-        BlockEntity te =  source.getBlockEntity(pos);
-        if(te instanceof PanelTile)
-        {
-            return ((PanelTile) te).getVoxelShape();
-        }
+    public VoxelShape getOcclusionShape(BlockState state) {
+        // 26.1: getOcclusionShape no longer has world access — return empty since
+        // panel shapes are dynamic and depend on block entity data
         return Shapes.empty();
     }
 
@@ -172,7 +168,7 @@ public class PanelBlock extends BaseEntityBlock {
         {
             return ((PanelTile) te).getVoxelShape();
         }
-        if (state.hasProperty(Registration.HAS_PANEL_BASE) && state.getValue(Registration.HAS_PANEL_BASE))
+        if (state.hasProperty(ModRegistration.HAS_PANEL_BASE) && state.getValue(ModRegistration.HAS_PANEL_BASE))
             return BASE.get(state.getValue(BlockStateProperties.FACING));
         if (context == CollisionContext.empty()) {
             return Block.box(2, 2, 2, 14, 14, 14);
@@ -231,22 +227,11 @@ public class PanelBlock extends BaseEntityBlock {
 
     @Override
     @SuppressWarnings("deprecation")
-    public void neighborChanged(BlockState currentState, Level world, BlockPos pos, Block blockIn, BlockPos neighborPos, boolean isMoving) {
-        Direction direction;
-        if (pos.east().equals(neighborPos))
-            direction = EAST;
-        else if (pos.south().equals(neighborPos))
-            direction = SOUTH;
-        else if (pos.west().equals(neighborPos))
-            direction = WEST;
-        else if (pos.north().equals(neighborPos))
-            direction = NORTH;
-        else if (pos.above().equals(neighborPos))
-            direction = UP;
-        else if (pos.below().equals(neighborPos))
-            direction = DOWN;
-        else
-            return;
+    public void neighborChanged(BlockState currentState, Level world, BlockPos pos, Block blockIn, @Nullable Orientation orientation, boolean isMoving) {
+        // 26.1: neighborPos replaced by Orientation. Extract direction from it.
+        if (orientation == null) return;
+        Direction direction = orientation.getFront();
+        if (direction == null) return;
 
         if (world.getBlockEntity(pos) instanceof PanelTile panelTile) {
             boolean change = false;
@@ -313,9 +298,8 @@ public class PanelBlock extends BaseEntityBlock {
         return super.playerWillDestroy(worldIn, pos, state, player);
     }
 
-    // Fix: changed BlockGetter -> LevelReader to match 1.21 signature
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader world, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(LevelReader world, BlockPos pos, BlockState state, boolean includeData, Player player) {
         BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) te;
@@ -326,7 +310,7 @@ public class PanelBlock extends BaseEntityBlock {
                     ItemStack itemStack = panelCellItemMap.get(cell.getClass()).getDefaultInstance();
                     CompoundTag itemTag = cell.getItemTag();
                     if (itemTag != null) {
-                        for (String key : itemTag.getAllKeys()) {
+                        for (String key : itemTag.keySet()) {
                             ItemStackHelper.addTagElement(itemStack, key, itemTag.get(key));
                         }
                     }
@@ -335,13 +319,13 @@ public class PanelBlock extends BaseEntityBlock {
             }
         }
         ItemStack itemStack = getItemWithNBT(world, pos, state);
-        if(itemStack == null) return super.getCloneItemStack(state, target, world, pos, player);
+        if(itemStack == null) return super.getCloneItemStack(world,pos,state,includeData,player);
         return itemStack;
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public ItemInteractionResult useItemOn(ItemStack heldStack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult blockHitResult) {
+    public InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult blockHitResult) {
 
         boolean handled = false;
         BlockEntity te = world.getBlockEntity(pos);
@@ -351,26 +335,27 @@ public class PanelBlock extends BaseEntityBlock {
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, blockHitResult);
                 Item heldItem = player.getItemInHand(hand).getItem();
 
-                if ((posInPanelCell == null || posInPanelCell.getIPanelCell()==null) && heldItem.getDefaultInstance().is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/wrench"))) && !player.isCrouching() && !panelTile.isCovered()) {
+                if ((posInPanelCell == null || posInPanelCell.getIPanelCell()==null) && heldItem.getDefaultInstance().is(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/wrench"))) && !player.isCrouching() && !panelTile.isCovered()) {
                     panelTile.rotate(Rotation.CLOCKWISE_90);
                     handled = true;
                     state.updateNeighbourShapes(world, pos, UPDATE_ALL);
                 }
                 if (posInPanelCell != null) {
                     if (panelTile.isCrashed() || panelTile.isOverflown()) {
-                        if (world.isClientSide)
+                        if (world.isClientSide())
                             PanelCrashGUI.open(panelTile);
                         handled = true;
-                    } else if (heldItem.getDefaultInstance().is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/wrench"))) && player.isCrouching()) {
+                    } else if (heldItem.getDefaultInstance().is(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/wrench"))) && player.isCrouching()) {
                         this.playerWillDestroy(world, pos, state, player);
-                        if(!world.isClientSide) world.destroyBlock(pos, true);
+                        if(!world.isClientSide()) world.destroyBlock(pos, true);
                         handled = true;
-                    } else if (heldItem == Registration.TINY_COLOR_SELECTOR.get() && posInPanelCell.getIPanelCell() instanceof IColorablePanelCell) {
-                        if(world.isClientSide)
+                    } else if (heldItem == ModRegistration.TINY_COLOR_SELECTOR.get() && posInPanelCell.getIPanelCell() instanceof IColorablePanelCell) {
+                        if(world.isClientSide())
                             TinyBlockGUI.open(panelTile, posInPanelCell.getIndex(), (IColorablePanelCell)posInPanelCell.getIPanelCell());
                         handled = true;
                     } else if (heldItem instanceof DyeItem && posInPanelCell.getIPanelCell()==null) {
-                        int color = RenderHelper.getTextureDiffusedColor(((DyeItem) heldItem).getDyeColor());
+                        DyeColor dyeColor = heldStack.get(net.minecraft.core.component.DataComponents.DYE);
+                        int color = dyeColor != null ? RenderHelper.getTextureDiffusedColor(dyeColor) : panelTile.Color;
                         if (color != panelTile.Color) {
                             panelTile.Color = color;
                             if (!player.isCreative())
@@ -387,7 +372,7 @@ public class PanelBlock extends BaseEntityBlock {
                                 ((IPanelCover) panelCoverObject).onPlace(panelTile,player);
                                 panelTile.flagLightUpdate = true;
                                 panelTile.flagVoxelShapeUpdate();
-                                if (!world.isClientSide)
+                                if (!world.isClientSide())
                                     world.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS);
                                 if (!player.isCreative())
                                     player.getItemInHand(hand).setCount(player.getItemInHand(hand).getCount() - 1);
@@ -470,13 +455,13 @@ public class PanelBlock extends BaseEntityBlock {
                         }
                     } else if (panelTile.isOverflown())
                     {
-                        if (world.isClientSide)
+                        if (world.isClientSide())
                             PanelCrashGUI.open(panelTile);
                         handled = true;
                     }
 
                     panelTile.flagSync();
-                    if (!world.isClientSide) {
+                    if (!world.isClientSide()) {
                         panelTile.setChanged();
                     }
                     if (panelTile.isFlagOutputUpdate())
@@ -489,7 +474,7 @@ public class PanelBlock extends BaseEntityBlock {
             }
         }
         if(handled)
-            return ItemInteractionResult.CONSUME;
+            return InteractionResult.CONSUME;
         return super.useItemOn(heldStack, state, world, pos, player, hand, blockHitResult);
     }
 
@@ -501,13 +486,13 @@ public class PanelBlock extends BaseEntityBlock {
         if (world instanceof Level level) {
             var lightManager = level.getAuxLightManager(pos);
             if (lightManager != null) {
-                return Math.min(lightManager.getLightAt(pos), level.getMaxLightLevel());
+                return Math.min(lightManager.getLightAt(pos), 15);
             }
         }
         // Fallback for non-Level contexts (e.g. RenderChunkRegion)
         BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile panelTile) {
-            return Math.min(panelTile.getLightOutput(), world.getMaxLightLevel());
+            return Math.min(panelTile.getLightOutput(), 15);
         }
         return 0;
     }
@@ -522,7 +507,7 @@ public class PanelBlock extends BaseEntityBlock {
     public void attack(BlockState state, Level world, BlockPos pos, Player player) {
         Item heldItem = player.getMainHandItem().getItem();
 
-        if ((heldItem.getDefaultInstance().is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/wrench"))) || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)))
+        if ((heldItem.getDefaultInstance().is(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/wrench"))) || PanelBlock.itemPanelCellMap.containsKey(heldItem) || PanelBlock.itemPanelCoverMap.containsKey(heldItem)))
         {
             BlockEntity te = world.getBlockEntity(pos);
             if (te instanceof PanelTile) {
@@ -535,7 +520,7 @@ public class PanelBlock extends BaseEntityBlock {
                         panelTile.flagLightUpdate=true;
                     }
                     else {
-                        if(heldItem.getDefaultInstance().is(ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "tools/wrench"))) && player.isCrouching()) {
+                        if(heldItem.getDefaultInstance().is(ItemTags.create(Identifier.fromNamespaceAndPath("c", "tools/wrench"))) && player.isCrouching()) {
                             if(world.isClientSide())
                                 ClearPanelGUI.open(panelTile);
                         }
@@ -571,7 +556,7 @@ public class PanelBlock extends BaseEntityBlock {
                 ItemStack itemStack = new ItemStack(item);
                 CompoundTag itemTag = cellPos.getIPanelCell().getItemTag();
                 if (itemTag!=null){
-                    for (String key : itemTag.getAllKeys()){
+                    for (String key : itemTag.keySet()){
                         ItemStackHelper.addTagElement(itemStack, key, itemTag.get(key));
                     }
                 }
@@ -598,7 +583,7 @@ public class PanelBlock extends BaseEntityBlock {
                 ItemStack itemStack = new ItemStack(item);
                 CompoundTag coverTag = panelTile.panelCover.getItemTag();
                 if (coverTag!=null) {
-                    for (String key : coverTag.getAllKeys()) {
+                    for (String key : coverTag.keySet()) {
                         ItemStackHelper.addTagElement(itemStack, key, coverTag.get(key));
                     }
                 }

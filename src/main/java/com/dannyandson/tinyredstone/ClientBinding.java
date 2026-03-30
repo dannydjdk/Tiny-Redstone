@@ -8,6 +8,7 @@ import com.dannyandson.tinyredstone.blocks.RotationLock;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,13 +24,16 @@ import org.lwjgl.glfw.GLFW;
 
 import java.lang.reflect.InvocationTargetException;
 
-@EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
 public class ClientBinding {
 
     public static KeyMapping rotationLock;
+    // 26.1: Key mapping categories are now KeyMapping.Category records
+    public static final KeyMapping.Category KEY_CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "main"));
 
     public static void registerKeyBindings(RegisterKeyMappingsEvent event) {
-        rotationLock = new KeyMapping("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, "tinyredstone");
+        event.registerCategory(KEY_CATEGORY);
+        rotationLock = new KeyMapping("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, KEY_CATEGORY);
         event.register(rotationLock);
     }
 
@@ -40,7 +44,7 @@ public class ClientBinding {
         if(numberKey > 0 && numberKey <= 9) {
             final Player player = Minecraft.getInstance().player;
             if (player == null) return;
-            if(player.getInventory().selected + 1 == numberKey) return;
+            if(player.getInventory().getSelectedSlot() + 1 == numberKey) return;
             final ItemStack mainHand = player.getMainHandItem();
             final Item mainHandItem = mainHand.getItem();
 

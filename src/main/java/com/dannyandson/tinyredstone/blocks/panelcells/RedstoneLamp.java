@@ -9,17 +9,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class RedstoneLamp extends TinyBlock implements IPanelCell {
 
     private boolean lit = false;
 
-    public static ResourceLocation TEXTURE_REDSTONE_LAMP = ResourceLocation.fromNamespaceAndPath("minecraft","block/redstone_lamp");
-    public static ResourceLocation TEXTURE_REDSTONE_LAMP_ON = ResourceLocation.fromNamespaceAndPath("minecraft","block/redstone_lamp_on");
+    public static Identifier TEXTURE_REDSTONE_LAMP = Identifier.fromNamespaceAndPath("minecraft","block/redstone_lamp");
+    public static Identifier TEXTURE_REDSTONE_LAMP_ON = Identifier.fromNamespaceAndPath("minecraft","block/redstone_lamp_on");
 
     /**
      * Drawing the cell on the panel
@@ -31,7 +32,7 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
      */
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         TextureAtlasSprite sprite;
 
         if (lit) sprite = RenderHelper.getSprite(TEXTURE_REDSTONE_LAMP_ON);
@@ -113,7 +114,7 @@ public class RedstoneLamp extends TinyBlock implements IPanelCell {
     @Override
     public void readNBT(CompoundTag compoundNBT) {
         super.readNBT(compoundNBT);
-        this.lit= compoundNBT.getBoolean("lit");
+        this.lit= compoundNBT.getBooleanOr("lit", false);
     }
 
     /**

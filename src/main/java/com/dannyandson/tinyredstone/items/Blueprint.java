@@ -9,14 +9,13 @@ import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
 import com.dannyandson.tinyredstone.gui.BlueprintGUI;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -28,15 +27,14 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Blueprint extends Item {
 
-    public Blueprint() {
-        super(new Item.Properties());
+    public Blueprint(Item.Properties props) {
+        super(props);
     }
 
     @Override
@@ -44,7 +42,7 @@ public class Blueprint extends Item {
         CompoundTag customTag = ItemStackHelper.getCustomTag(stack);
         if (customTag != null && customTag.contains("blueprint")) {
             list.add(Component.translatable("message.item.blueprint.full"));
-            List<ItemStack> blueprintItems = getRequiredItemStacks(customTag.getCompound("blueprint"));
+            List<ItemStack> blueprintItems = getRequiredItemStacks(customTag.getCompound("blueprint").orElseGet(CompoundTag::new));
             for (ItemStack item : blueprintItems) {
                 Component itemNameComponent = item.getHoverName();
                 String itemName = itemNameComponent.getString();
@@ -57,7 +55,6 @@ public class Blueprint extends Item {
     }
 
     @Override
-    @Nonnull
     public InteractionResult useOn(UseOnContext context) {
         BlockEntity te = context.getLevel().getBlockEntity(context.getClickedPos());
         CompoundTag itemCustomTag = ItemStackHelper.getCustomTag(context.getItemInHand());
@@ -67,7 +64,7 @@ public class Blueprint extends Item {
         } else if (Config.ALLOW_WORLD_PLACEMENT.get()) {
             ItemStack itemStackCopy = context.getItemInHand().copy();
             BlockPlaceContext bpContext = new BlockPlaceContext(context);
-            ((BlockItem) Registration.REDSTONE_PANEL_ITEM.get()).place(bpContext);
+            ((BlockItem) ModRegistration.REDSTONE_PANEL_ITEM.get()).place(bpContext);
             context.getPlayer().setItemInHand(context.getHand(), itemStackCopy);
             te = context.getLevel().getBlockEntity(bpContext.getClickedPos());
             if (te instanceof PanelTile) {
@@ -78,11 +75,11 @@ public class Blueprint extends Item {
             if (itemCustomTag != null && itemCustomTag.contains("blueprint")) {
                 Player player = context.getPlayer();
                 if (panelTile.getCellCount() == 0 && player != null) {
-                    CompoundTag blueprintNBT = itemCustomTag.getCompound("blueprint");
+                    CompoundTag blueprintNBT = itemCustomTag.getCompound("blueprint").orElseGet(CompoundTag::new);
                     List<ItemStack> items = getRequiredItemStacks(blueprintNBT);
                     if (player.isCreative() || playerHasSufficientComponents(items, player)) {
                         try {
-                            panelTile.loadCellsFromNBT(blueprintNBT);
+                            panelTile.loadCellsFromNBT(blueprintNBT.getCompound("cells").orElseGet(CompoundTag::new));
                             panelTile.updateSide(Side.FRONT);
                             panelTile.updateSide(Side.RIGHT);
                             panelTile.updateSide(Side.BACK);
@@ -96,7 +93,7 @@ public class Blueprint extends Item {
                         if (!player.isCreative()) {
                             for (ItemStack item : items) {
                                 int itemsToRemove = item.getCount();
-                                for (ItemStack invStack : player.getInventory().items) {
+                                for (ItemStack invStack : player.getInventory().getContents()) {
                                     if (stacksAreMatchingItem(invStack, item)) {
                                         int removeCt = Math.min(invStack.getCount(), itemsToRemove);
                                         invStack.setCount(invStack.getCount() - removeCt);
@@ -124,8 +121,8 @@ public class Blueprint extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
-        if (worldIn.isClientSide && Config.JSON_BLUEPRINT.get())
+    public InteractionResult use(Level worldIn, Player playerIn, InteractionHand handIn) {
+        if (worldIn.isClientSide() && Config.JSON_BLUEPRINT.get())
             BlueprintGUI.open(playerIn.getItemInHand(handIn));
         return super.use(worldIn, playerIn, handIn);
     }
@@ -134,19 +131,19 @@ public class Blueprint extends Item {
         List<ItemStack> itemStacks = new ArrayList<>();
 
         if (blueprintNBT.contains("cells")) {
-            CompoundTag cellsNBT = blueprintNBT.getCompound("cells");
-            for (String key : cellsNBT.getAllKeys()) {
+            CompoundTag cellsNBT = blueprintNBT.getCompound("cells").orElseGet(CompoundTag::new);
+            for (String key : cellsNBT.keySet()) {
                 try {
-                    Class iPanelCellClass = Class.forName(cellsNBT.getCompound(key).getString("class"));
+                    Class iPanelCellClass = Class.forName(cellsNBT.getCompound(key).orElseGet(CompoundTag::new).getStringOr("class", ""));
                     if (IPanelCell.class.isAssignableFrom(iPanelCellClass)) {
                         Item item = PanelBlock.getPanelCellItemFromClass((Class<? extends IPanelCell>) iPanelCellClass);
                         ItemStack itemStack = item.getDefaultInstance();
                         if (iPanelCellClass == TinyBlock.class || iPanelCellClass == TransparentBlock.class) {
-                            CompoundTag cellDataNBT = cellsNBT.getCompound(key).getCompound("data");
+                            CompoundTag cellDataNBT = cellsNBT.getCompound(key).orElseGet(CompoundTag::new).getCompound("data").orElseGet(CompoundTag::new);
                             if (cellDataNBT.contains("made_from_namespace")) {
                                 CompoundTag madeFromTag = new CompoundTag();
-                                madeFromTag.putString("namespace", cellDataNBT.getString("made_from_namespace"));
-                                madeFromTag.putString("path", cellDataNBT.getString("made_from_path"));
+                                madeFromTag.putString("namespace", cellDataNBT.getStringOr("made_from_namespace", ""));
+                                madeFromTag.putString("path", cellDataNBT.getStringOr("made_from_path", ""));
                                 CompoundTag itemTag = new CompoundTag();
                                 itemTag.put("made_from", madeFromTag);
                                 ItemStackHelper.setCustomTag(itemStack, itemTag);
@@ -175,7 +172,7 @@ public class Blueprint extends Item {
     private static boolean playerHasSufficientComponents(List<ItemStack> itemStacks, Player player) {
         for (ItemStack itemStack : itemStacks) {
             int count = 0;
-            for (ItemStack invStack : player.getInventory().items) {
+            for (ItemStack invStack : player.getInventory().getContents()) {
                 if (stacksAreMatchingItem(invStack, itemStack)) {
                     count += invStack.getCount();
                 }
@@ -196,14 +193,14 @@ public class Blueprint extends Item {
     @Nullable
     public static CompoundTag cleanUpBlueprintNBT(CompoundTag nbt) {
         if (nbt.contains("blueprint")) {
-            CompoundTag blueprintNBT = nbt.getCompound("blueprint");
+            CompoundTag blueprintNBT = nbt.getCompound("blueprint").orElseGet(CompoundTag::new);
             if (blueprintNBT.contains("cells")) {
                 CompoundTag newCellsNBT = new CompoundTag();
-                CompoundTag cellsNBT = blueprintNBT.getCompound("cells");
-                for (String key : cellsNBT.getAllKeys()) {
+                CompoundTag cellsNBT = blueprintNBT.getCompound("cells").orElseGet(CompoundTag::new);
+                for (String key : cellsNBT.keySet()) {
                     try {
-                        if (IPanelCell.class.isAssignableFrom(Class.forName(cellsNBT.getCompound(key).getString("class")))) {
-                            newCellsNBT.put(key, cellsNBT.getCompound(key));
+                        if (IPanelCell.class.isAssignableFrom(Class.forName(cellsNBT.getCompound(key).orElseGet(CompoundTag::new).getStringOr("class", "")))) {
+                            newCellsNBT.put(key, cellsNBT.getCompound(key).orElseGet(CompoundTag::new));
                         }
                     } catch (ClassNotFoundException e) {
                         TinyRedstone.LOGGER.error("Class not found exception while attempting to read components from blueprint NBT: " + e.getLocalizedMessage());
@@ -215,7 +212,7 @@ public class Blueprint extends Item {
                 newBlueprintNBT.put("cells", newCellsNBT);
                 newNBT.put("blueprint", newBlueprintNBT);
                 if (nbt.contains("display"))
-                    newNBT.put("display", nbt.getCompound("display"));
+                    newNBT.put("display", nbt.getCompound("display").orElseGet(CompoundTag::new));
                 return newNBT;
             }
         }

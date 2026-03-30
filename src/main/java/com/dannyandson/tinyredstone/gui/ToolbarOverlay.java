@@ -11,7 +11,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
@@ -23,7 +23,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 @EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
 public class ToolbarOverlay {
 
-    public static ResourceLocation TEXTURE_ROTATION_LOCK = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "block/rotation_lock");
+    public static Identifier TEXTURE_ROTATION_LOCK = Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "block/rotation_lock");
 
     @SubscribeEvent
     // Fix for 1.21.1: RenderGuiOverlayEvent.Post -> RenderGuiLayerEvent.Post
@@ -34,8 +34,8 @@ public class ToolbarOverlay {
             final LocalPlayer player = mcInstance.player;
 
             if (player != null && !player.isSpectator()) {
-                final int currentSlot = player.getInventory().selected;
-                final ItemStack stack = player.getInventory().items.get(currentSlot);
+                final int currentSlot = player.getInventory().getSelectedSlot();
+                final ItemStack stack = player.getInventory().getItem((currentSlot));
                 if (stack.getItem() instanceof AbstractPanelCellItem) {
                     final Window window = Minecraft.getInstance().getWindow();
                     final Side rotationLock = RotationLock.getRotationLock();
@@ -45,12 +45,14 @@ public class ToolbarOverlay {
                         final int x = (window.getGuiScaledWidth() / 2 - 180 / 2 + currentSlot * 20) + 2 + 1;
                         final int y = (window.getGuiScaledHeight() - 20) + 1 + 1;
 
-                        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
+                        // bindForSetup removed in 26.1 - textures bound automatically
                         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_ROTATION_LOCK);
 
-                        RenderSystem.enableBlend();
+                        
+                        // 26.1: GuiGraphics class renamed to GuiGraphicsExtractor,
+                        // but NeoForge event getter keeps the name getGuiGraphics()
                         event.getGuiGraphics().blit(x, y, 0, 5, 5, sprite);
-                        RenderSystem.disableBlend();
+                        
                     }
                 }
             }

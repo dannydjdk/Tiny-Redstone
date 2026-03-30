@@ -2,7 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.1.20'
+    id 'net.neoforged.moddev' version '2.0.141'
 }
 
 version = mod_version
@@ -12,35 +12,31 @@ base {
     archivesName = mod_id
 }
 
-// Minecraft 1.21+ requires Java 21
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// Minecraft 26.1 requires Java 25
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
-        modSource project.sourceSets.main
+neoForge {
+    version = neo_version
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+        clientData {
+            clientData()
+            programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
     }
 
-    client {
-        systemProperty 'forge.enabledGameTestNamespaces', mod_id
-    }
-
-    server {
-        systemProperty 'forge.enabledGameTestNamespaces', mod_id
-        // Fix: use getArguments() instead of deprecated getProgramArguments()
-        //arguments.add '--nogui'
-    }
-
-    gameTestServer {
-        systemProperty 'forge.enabledGameTestNamespaces', mod_id
-    }
-
-    data {
-        // Fix: use arguments.addAll instead of programArguments.addAll
-        arguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 }
 
@@ -61,18 +57,18 @@ repositories {
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
+    // TheOneProbe and JEI - optional compile-time dependencies
+    // NOTE: These CurseForge file IDs will need to be updated to 26.1 versions
+    // when they become available. For now, exclude TOP compat from compilation.
+    // compileOnly "curse.maven:theoneprobe-245211:REPLACE_WITH_26_1_FILE_ID"
+    // compileOnly "curse.maven:jei-238222:REPLACE_WITH_26_1_FILE_ID"
+}
 
-    // The One Probe for NeoForge 1.21.1 - compileOnly so it's optional at runtime
-    implementation "curse.maven:theoneprobe-245211:${top_file_id}"
-    implementation "curse.maven:jei-238222:${jei_file_id}"
-
-    implementation "curse.maven:lithium-360438:7581452"
-    implementation "curse.maven:sodium-394468:6382651"
-    implementation "curse.maven:sodium-extra-447673:5913377"
-    implementation "curse.maven:reeses-sodium-options-511319:6091021"
-    implementation "curse.maven:packet-fixer-689467:7221528"
-
+// Exclude TheOneProbe compat until a 26.1 version is available
+// Exclude datagen until 26.1 datagen APIs are adopted (BlockStateProvider, ItemModelProvider removed)
+sourceSets.main.java {
+    exclude 'com/dannyandson/tinyredstone/compat/theoneprobe/**'
+    exclude 'com/dannyandson/tinyredstone/datagen/**'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

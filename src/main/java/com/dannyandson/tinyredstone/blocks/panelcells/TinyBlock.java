@@ -7,33 +7,34 @@ import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInfoProvider {
 
-    public static final ResourceLocation TEXTURE_GRASS_BLOCK_TOP = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "block/grass_block_top");
-    public static final ResourceLocation TEXTURE_TINY_BLOCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/white_wool");
+    public static final Identifier TEXTURE_GRASS_BLOCK_TOP = Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "block/grass_block_top");
+    public static final Identifier TEXTURE_TINY_BLOCK = Identifier.fromNamespaceAndPath("minecraft","block/white_wool");
 
     protected int weakSignalStrength = 0;
     protected int strongSignalStrength = 0;
     protected int color= 0xFFFFFFFF;
-    protected ResourceLocation madeFrom;
+    protected Identifier madeFrom;
     protected TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
 
     /**
-     * Returns the block ResourceLocation this tiny block is made from, or null if using default textures.
+     * Returns the block Identifier this tiny block is made from, or null if using default textures.
      */
-    public ResourceLocation getMadeFrom() {
+    public Identifier getMadeFrom() {
         return madeFrom;
     }
 
@@ -47,15 +48,15 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
      */
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)? Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         if (sprite_top==null) {
             if (madeFrom != null){
-                sprite_top = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.TOP);
-                sprite_front = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.FRONT);
-                sprite_right = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.RIGHT);
-                sprite_back = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.BACK);
-                sprite_left = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.LEFT);
-                sprite_bottom = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.BOTTOM);
+                sprite_top = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.TOP);
+                sprite_front = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.FRONT);
+                sprite_right = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.RIGHT);
+                sprite_back = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.BACK);
+                sprite_left = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.LEFT);
+                sprite_bottom = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.BOTTOM);
             }else{
                 sprite_top=sprite_front=sprite_right=sprite_back=sprite_left=sprite_bottom=RenderHelper.getSprite(TEXTURE_TINY_BLOCK);
             }
@@ -75,9 +76,9 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
             stack = player.getMainHandItem();
         if (ItemStackHelper.getCustomTag(stack) != null) {
             CompoundTag itemNBT = ItemStackHelper.getCustomTag(stack);
-            CompoundTag madeFromTag = itemNBT.getCompound("made_from");
+            CompoundTag madeFromTag = itemNBT.getCompound("made_from").orElseGet(CompoundTag::new);
             if (madeFromTag.contains("namespace")) {
-                this.madeFrom = ResourceLocation.fromNamespaceAndPath(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
+                this.madeFrom = Identifier.fromNamespaceAndPath(madeFromTag.getStringOr("namespace", ""), madeFromTag.getStringOr("path", ""));
             }
         }
 
@@ -198,11 +199,11 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.strongSignalStrength=compoundNBT.getInt("strong");
-        this.weakSignalStrength=compoundNBT.getInt("weak");
-        this.color=compoundNBT.getInt("color");
+        this.strongSignalStrength=compoundNBT.getIntOr("strong", 0);
+        this.weakSignalStrength=compoundNBT.getIntOr("weak", 0);
+        this.color=compoundNBT.getIntOr("color", 0);
         if (compoundNBT.contains("made_from_namespace"))
-            this.madeFrom=ResourceLocation.fromNamespaceAndPath(compoundNBT.getString("made_from_namespace"),compoundNBT.getString("made_from_path"));
+            this.madeFrom=Identifier.fromNamespaceAndPath(compoundNBT.getStringOr("made_from_namespace", ""),compoundNBT.getStringOr("made_from_path", ""));
     }
 
     @Override

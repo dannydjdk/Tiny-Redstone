@@ -5,13 +5,13 @@ import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 public class StoneButton extends Button {
-    public static ResourceLocation TEXTURE_OAK_PLANKS = ResourceLocation.fromNamespaceAndPath("minecraft","block/stone");
+    public static Identifier TEXTURE_OAK_PLANKS = Identifier.fromNamespaceAndPath("minecraft","block/stone");
 
     /**
      * Called when the cell is activated. i.e. player right clicked on the cell of the panel tile.

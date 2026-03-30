@@ -5,12 +5,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.math.Axis;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
@@ -41,7 +41,7 @@ public class CachedPanelRenderer {
      * A single captured vertex with all its attributes, pre-transformed
      * by the cell's local PoseStack at capture time.
      */
-    private static class CachedVertex {
+    public static class CachedVertex {
         final float x, y, z;
         final float r, g, b, a;
         final float u, v;
@@ -92,6 +92,14 @@ public class CachedPanelRenderer {
         return isCamouflageCache;
     }
 
+    public List<CachedVertex> getSolidVertices() {
+        return solidVertices;
+    }
+
+    public List<CachedVertex> getTranslucentVertices() {
+        return translucentVertices;
+    }
+
     /**
      * Rebuild the cache by running the panel's cell rendering into a capturing proxy.
      * After this call, solidVertices and translucentVertices contain all the
@@ -107,14 +115,14 @@ public class CachedPanelRenderer {
         if (tile.isCovered()) {
             // Check for camouflage cover (DarkCover/LightCover with madeFrom block)
             if (tile.panelCover instanceof DarkCover darkCover && darkCover.getMadeFrom() != null) {
-                ResourceLocation madeFrom = darkCover.getMadeFrom();
-                BlockState camouflageState = BuiltInRegistries.BLOCK.get(madeFrom).defaultBlockState();
+                Identifier madeFrom = darkCover.getMadeFrom();
+                BlockState camouflageState = BuiltInRegistries.BLOCK.getValue(madeFrom).defaultBlockState();
                 if (camouflageState != null && !camouflageState.isAir() && tile.getLevel() != null) {
                     // tesselateBlock renders in block-local space (identity PoseStack).
                     // The caller must NOT apply panel-facing rotation during replay.
                     var blockRenderer = Minecraft.getInstance().getBlockRenderer();
                     BakedModel model = blockRenderer.getBlockModel(camouflageState);
-                    VertexConsumer builder = captureSource.getBuffer(RenderType.solid());
+                    VertexConsumer builder = captureSource.getBuffer(Sheets.cutoutBlockSheet());
                     blockRenderer.getModelRenderer().tesselateBlock(
                             tile.getLevel(), model, camouflageState,
                             tile.getBlockPos(), matrixStack, builder,
@@ -172,17 +180,24 @@ public class CachedPanelRenderer {
         Matrix4f transform = matrixStack.last().pose();
 
         if (!solidVertices.isEmpty()) {
-            VertexConsumer solidBuilder = buffer.getBuffer(RenderType.solid());
+            VertexConsumer solidBuilder = buffer.getBuffer(Sheets.cutoutBlockSheet());
             replayVertices(solidBuilder, transform, solidVertices);
         }
 
         if (!translucentVertices.isEmpty()) {
-            VertexConsumer translucentBuilder = buffer.getBuffer(RenderType.translucent());
+            VertexConsumer translucentBuilder = buffer.getBuffer(Sheets.translucentBlockSheet());
             replayVertices(translucentBuilder, transform, translucentVertices);
         }
     }
 
     private void replayVertices(VertexConsumer builder, Matrix4f transform, List<CachedVertex> vertices) {
+        replayVerticesStatic(builder, transform, vertices);
+    }
+
+    /**
+     * Static version of replayVertices for use from PanelTileRenderer's submit() method.
+     */
+    public static void replayVerticesStatic(VertexConsumer builder, Matrix4f transform, List<CachedVertex> vertices) {
         for (CachedVertex v : vertices) {
             if (v.hasUV) {
                 builder.addVertex(transform, v.x, v.y, v.z)
@@ -208,7 +223,7 @@ public class CachedPanelRenderer {
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite topSprite = (topTextureIndex == 0) ? sprite : RenderHelper.getSprite(PanelTileRenderer.TEXTURES[topTextureIndex]);
         int color = tileEntity.getColor();
-        VertexConsumer builder = buffer.getBuffer(RenderType.solid());
+        VertexConsumer builder = buffer.getBuffer(Sheets.cutoutBlockSheet());
 
         matrixStack.pushPose();
         matrixStack.mulPose(Axis.XP.rotationDegrees(270));
@@ -245,8 +260,7 @@ public class CachedPanelRenderer {
 
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE_CRASHED);
         RenderHelper.drawRectangle(
-                buffer.getBuffer(
-                        (Minecraft.useShaderTransparency()) ? RenderType.solid() : RenderType.translucent()),
+                buffer.getBuffer(Sheets.translucentBlockSheet()),
                 matrixStack, 0, 1, 0, 1, sprite, combinedLight, 0.9f);
         matrixStack.popPose();
     }
@@ -275,7 +289,7 @@ public class CachedPanelRenderer {
 
         @Override
         public VertexConsumer getBuffer(RenderType renderType) {
-            if (renderType == RenderType.translucent()) {
+            if (renderType == Sheets.translucentBlockSheet()) {
                 return translucentConsumer;
             }
             return solidConsumer;
@@ -355,7 +369,6 @@ public class CachedPanelRenderer {
          * and Comparator's custom vertex emission.
          * The position is transformed by the matrix and stored pre-transformed.
          */
-        @Override
         public VertexConsumer addVertex(Matrix4f matrix, float x, float y, float z) {
             flushVertex();
             // Apply the matrix to get transformed coordinates
@@ -378,6 +391,15 @@ public class CachedPanelRenderer {
         @Override
         public VertexConsumer setColor(int r, int g, int b, int a) {
             this.r = r / 255f; this.g = g / 255f; this.b = b / 255f; this.a = a / 255f;
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setColor(int packedColor) {
+            this.a = (packedColor >> 24 & 0xFF) / 255f;
+            this.r = (packedColor >> 16 & 0xFF) / 255f;
+            this.g = (packedColor >> 8 & 0xFF) / 255f;
+            this.b = (packedColor & 0xFF) / 255f;
             return this;
         }
 
@@ -413,6 +435,11 @@ public class CachedPanelRenderer {
             this.normalX = x;
             this.normalY = y;
             this.normalZ = z;
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setLineWidth(float width) {
             return this;
         }
     }

@@ -6,7 +6,7 @@ import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.compat.CompatHandler;
 import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -22,10 +22,10 @@ public class TinyRedstone {
     public static final String MODID = "tinyredstone";
 
     public TinyRedstone(IEventBus modEventBus, ModContainer modContainer) {
-        Registration.register(modEventBus);
+        ModRegistration.register(modEventBus);
 
         modEventBus.addListener(ModSetup::init);
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             modEventBus.addListener(ClientSetup::init);
         }
 

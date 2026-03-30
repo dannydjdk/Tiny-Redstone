@@ -1,19 +1,18 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
 import com.dannyandson.tinyredstone.blocks.*;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class TransparentBlock extends TinyBlock {
-    public static ResourceLocation TEXTURE_TRANSPARENT_BLOCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/glass");
+    public static Identifier TEXTURE_TRANSPARENT_BLOCK = Identifier.fromNamespaceAndPath("minecraft","block/glass");
     private TextureAtlasSprite sprite;
     private int color= 16777215;
 
@@ -28,9 +27,9 @@ public class TransparentBlock extends TinyBlock {
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        VertexConsumer builder = buffer.getBuffer((Minecraft.useShaderTransparency())?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer(Sheets.translucentBlockSheet());
         if (sprite==null)
-            sprite =(madeFrom!=null)? Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.FRONT):RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
+            sprite =(madeFrom!=null)? ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.FRONT):RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
 
         matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
         matrixStack.translate(-1, -1, 1);
@@ -89,9 +88,9 @@ public class TransparentBlock extends TinyBlock {
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.color=compoundNBT.getInt("color");
+        this.color=compoundNBT.getIntOr("color", 0);
         if (compoundNBT.contains("made_from_namespace"))
-            this.madeFrom = ResourceLocation.fromNamespaceAndPath(compoundNBT.getString("made_from_namespace"), compoundNBT.getString("made_from_path"));
+            this.madeFrom = Identifier.fromNamespaceAndPath(compoundNBT.getStringOr("made_from_namespace", ""), compoundNBT.getStringOr("made_from_path", ""));
     }
 
 }

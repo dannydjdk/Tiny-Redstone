@@ -4,10 +4,10 @@ import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
 import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PushChopperOutputType;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -40,7 +40,7 @@ public class ChopperMenu extends AbstractContainerMenu {
     private String itemType = "Tiny Block";
 
     protected ChopperMenu(int containerId, Inventory playerInventory, Container container) {
-        super(Registration.CUTTER_MENU_TYPE.get(), containerId);
+        super(ModRegistration.CUTTER_MENU_TYPE.get(), containerId);
         checkContainerSize(container, 1);
 
         this.container = container;
@@ -64,7 +64,7 @@ public class ChopperMenu extends AbstractContainerMenu {
             }
 
             public void onTake(Player player, ItemStack itemStack) {
-                itemStack.onCraftedBy(player.level(), player, itemStack.getCount());
+                itemStack.onCraftedBy(player, itemStack.getCount());
                 ItemStack itemstack = ChopperMenu.this.inputSlot.remove(1);
                 if (!itemstack.isEmpty()) {
                     ChopperMenu.this.setupResultSlot();
@@ -100,29 +100,29 @@ public class ChopperMenu extends AbstractContainerMenu {
                 if (container instanceof ChopperBlockEntity chopperBlockEntity) {
                     boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
                     if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasBlockEntity()) {
-                        ResourceLocation inputRegistryName = BuiltInRegistries.BLOCK.getKey(inputBlock);
-                        if (inputRegistryName != null && !Registration.TINY_BLOCK_OVERRIDES.isDisabled(inputRegistryName)) {
+                        Identifier inputRegistryName = BuiltInRegistries.BLOCK.getKey(inputBlock);
+                        if (inputRegistryName != null && !ModRegistration.TINY_BLOCK_OVERRIDES.isDisabled(inputRegistryName)) {
                             CompoundTag madeFromTag = new CompoundTag();
                             madeFromTag.putString("namespace", inputRegistryName.getNamespace());
                             madeFromTag.putString("path", inputRegistryName.getPath());
                             if (getItemType().equals("Dark Cover")) {
-                                outputStack = Registration.PANEL_COVER_DARK.get().getDefaultInstance();
+                                outputStack = ModRegistration.PANEL_COVER_DARK.get().getDefaultInstance();
                                 outputStack.setCount(2);
                                 ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                             } else if (getItemType().equals("Light Cover")) {
-                                outputStack = Registration.PANEL_COVER_LIGHT.get().getDefaultInstance();
+                                outputStack = ModRegistration.PANEL_COVER_LIGHT.get().getDefaultInstance();
                                 outputStack.setCount(2);
                                 ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                             } else {
                                 // Fix: GlassBlock class removed in 1.21 - use block tag check instead
                                 boolean isGlass = inputBlockState.is(BlockTags.IMPERMEABLE); // vanilla glass tag
                                 if (isGlass) {
-                                    outputStack = Registration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
+                                    outputStack = ModRegistration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
                                     if (!inputRegistryName.toString().equals("minecraft:glass"))
                                         ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
                                 } else {
-                                    outputStack = Registration.TINY_SOLID_BLOCK.get().getDefaultInstance();
+                                    outputStack = ModRegistration.TINY_SOLID_BLOCK.get().getDefaultInstance();
                                     outputStack.setCount(8);
                                     if (!inputRegistryName.toString().equals("minecraft:white_wool"))
                                         ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);

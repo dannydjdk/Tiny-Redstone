@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -15,7 +15,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record PushChopperOutputType(String outputType, BlockPos pos) implements CustomPacketPayload {
 
     public static final Type<PushChopperOutputType> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "push_chopper_output_type"));
+            new Type<>(Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "push_chopper_output_type"));
 
     public static final StreamCodec<FriendlyByteBuf, PushChopperOutputType> STREAM_CODEC =
             StreamCodec.of(PushChopperOutputType::write, PushChopperOutputType::read);

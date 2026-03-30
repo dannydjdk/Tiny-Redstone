@@ -9,6 +9,10 @@ import java.util.List;
 
 public class TinyColorSelector extends RedstoneWrench {
 
+    public TinyColorSelector(Item.Properties props) {
+        super(props);
+    }
+
     @Override
     public  void  appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> list, TooltipFlag flags)
     {

@@ -1,14 +1,14 @@
 package com.dannyandson.tinyredstone.blocks.panelcovers;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class LightCover  extends DarkCover {
 
-    public static ResourceLocation TEXTURE_LIGHT_COVER = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/light_cover");
+    public static Identifier TEXTURE_LIGHT_COVER = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/light_cover");
 
 
-    protected ResourceLocation getDefaultResourceLocation() {
+    protected Identifier getDefaultResourceLocation() {
         return TEXTURE_LIGHT_COVER;
     }
 

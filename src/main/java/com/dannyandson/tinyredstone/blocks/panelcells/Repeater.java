@@ -10,10 +10,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 
@@ -26,9 +27,9 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
     protected Integer ticks = 2;
     private int changedTick = -1;
 
-    public static ResourceLocation TEXTURE_REPEATER_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_repeater_on");
-    public static ResourceLocation TEXTURE_REPEATER_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_repeater_off");
-    private static final ResourceLocation TEXTURE_BEDROCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/bedrock");
+    public static Identifier TEXTURE_REPEATER_ON = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_repeater_on");
+    public static Identifier TEXTURE_REPEATER_OFF = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_repeater_off");
+    private static final Identifier TEXTURE_BEDROCK = Identifier.fromNamespaceAndPath("minecraft","block/bedrock");
 
     /**
      * Drawing the cell on the panel
@@ -40,7 +41,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
      */
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = this.getRepeaterTexture();
         TextureAtlasSprite sprite_torch_head = RenderHelper.getSprite(Torch.TEXTURE_TORCH_TOP_ON);
@@ -333,13 +334,13 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.output = compoundNBT.getBoolean("output");
-        this.input = compoundNBT.getBoolean("input");
-        this.locked = compoundNBT.getBoolean("locked");
-        this.ticks = compoundNBT.getInt("ticks");
-        this.offPending=compoundNBT.getInt("offPending");
-        this.onPending=compoundNBT.getInt("onPending");
-        this.changedTick=compoundNBT.getInt("changedTick");
+        this.output = compoundNBT.getBooleanOr("output", false);
+        this.input = compoundNBT.getBooleanOr("input", false);
+        this.locked = compoundNBT.getBooleanOr("locked", false);
+        this.ticks = compoundNBT.getIntOr("ticks", 0);
+        this.offPending=compoundNBT.getIntOr("offPending", 0);
+        this.onPending=compoundNBT.getIntOr("onPending", 0);
+        this.changedTick=compoundNBT.getIntOr("changedTick", 0);
 
     }
 

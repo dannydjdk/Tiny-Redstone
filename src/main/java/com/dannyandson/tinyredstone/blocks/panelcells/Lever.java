@@ -8,18 +8,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 public class Lever implements IPanelCell, IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_LEVER = ResourceLocation.fromNamespaceAndPath("minecraft","block/lever");
-    public static ResourceLocation TEXTURE_COBBLESTONE = ResourceLocation.fromNamespaceAndPath("minecraft","block/cobblestone");
+    public static Identifier TEXTURE_LEVER = Identifier.fromNamespaceAndPath("minecraft","block/lever");
+    public static Identifier TEXTURE_COBBLESTONE = Identifier.fromNamespaceAndPath("minecraft","block/cobblestone");
     private boolean active = false;
     private Side baseSide = Side.BOTTOM;
 
@@ -44,7 +45,7 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
         float lhv0 = lv0 + ((lv1-lv0)*6f/16f);
         float lhv1 = lv1;
 
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)? Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
 
         matrixStack.pushPose();
         float x1 = 0.3125f, x2 = .6875f, y1 = 0.25f, y2 = 0.75f;
@@ -201,9 +202,9 @@ public class Lever implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.active=compoundNBT.getBoolean("active");
-        if (compoundNBT.getString("baseSide").length()>0)
-            this.baseSide=Side.valueOf(compoundNBT.getString("baseSide"));
+        this.active=compoundNBT.getBooleanOr("active", false);
+        if (compoundNBT.getStringOr("baseSide", "").length()>0)
+            this.baseSide=Side.valueOf(compoundNBT.getStringOr("baseSide", ""));
         else
             baseSide=Side.BOTTOM;
     }

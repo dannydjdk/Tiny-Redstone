@@ -6,7 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.nbt.CompoundTag;
 
 public class RedstoneBridge extends RedstoneDust {
@@ -45,7 +46,7 @@ public class RedstoneBridge extends RedstoneDust {
             setTextureMapValues();
         }
 
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
 
         matrixStack.translate(0,0,0.05);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.05f,s10+.05f,s6-.05f,s10+.05f,segmentU0,segmentU1b,segmentV0,segmentV1,combinedLight,0xFF888888, alpha);
@@ -190,7 +191,7 @@ public class RedstoneBridge extends RedstoneDust {
     @Override
     public void readNBT(CompoundTag compoundNBT) {
         super.readNBT(compoundNBT);
-        this.signalStrength2 = compoundNBT.getInt("strength2");
+        this.signalStrength2 = compoundNBT.getIntOr("strength2", 0);
     }
 
 

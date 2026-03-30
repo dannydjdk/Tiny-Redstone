@@ -9,14 +9,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record NoteBlockInstrumentSync(BlockPos pos, int cellIndex, String instrument) implements CustomPacketPayload {
 
     public static final Type<NoteBlockInstrumentSync> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "note_block_instrument_sync"));
+            new Type<>(Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "note_block_instrument_sync"));
 
     public static final StreamCodec<FriendlyByteBuf, NoteBlockInstrumentSync> STREAM_CODEC =
             StreamCodec.of(NoteBlockInstrumentSync::write, NoteBlockInstrumentSync::read);

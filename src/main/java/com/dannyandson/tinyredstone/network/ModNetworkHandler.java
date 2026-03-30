@@ -9,7 +9,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-@EventBusSubscriber(modid = TinyRedstone.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = TinyRedstone.MODID)
 public class ModNetworkHandler {
 
     @SubscribeEvent
@@ -59,7 +59,7 @@ public class ModNetworkHandler {
     }
 
     public static void sendToServer(CustomPacketPayload packet) {
-        PacketDistributor.sendToServer(packet);
+        Minecraft.getInstance().getConnection().send(packet);
     }
 
 }

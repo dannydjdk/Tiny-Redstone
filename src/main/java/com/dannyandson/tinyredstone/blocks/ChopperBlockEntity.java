@@ -2,8 +2,10 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.gui.ChopperItemHandler;
 import com.dannyandson.tinyredstone.gui.ChopperMenu;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -15,9 +17,10 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 // Fix for 1.21: removed Capability, ForgeCapabilities, LazyOptional imports entirely.
 // IItemHandler is kept as it's still used.
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.items.IItemHandler;
 
-import javax.annotation.Nonnull;
 
 public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
 
@@ -32,7 +35,7 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
     private String itemType = "Tiny Block";
 
     public ChopperBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.CUTTER_BLOCK_ENTITY.get(), pos, state);
+        super(ModRegistration.CUTTER_BLOCK_ENTITY.get(), pos, state);
         this.items = NonNullList.<ItemStack>withSize(1, ItemStack.EMPTY);
     }
 
@@ -77,21 +80,47 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
     }
 
     @Override
-    public void loadAdditional(CompoundTag compoundTag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.loadAdditional(compoundTag, registries);
-
+    public void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        this.items.set(0, ItemStack.parseOptional(registries, compoundTag.getCompound("input_container")));
-        this.resultContainer.setItem(0, ItemStack.parseOptional(registries, compoundTag.getCompound("output_container")));
-        this.itemType = compoundTag.getString("output_type");
+        // TODO: ItemStack serialization changed in 26.1.
+        // ItemStack.parseOptional/saveOptional removed. Need to use codec or SNBT approach.
+        // For now, store item IDs as strings. Full item NBT serialization needs codec-based approach.
+        String inputItemId = input.getStringOr("input_item", "");
+        int inputCount = input.getIntOr("input_count", 0);
+        if (!inputItemId.isEmpty() && inputCount > 0) {
+            var item = BuiltInRegistries.ITEM.getValue(Identifier.parse(inputItemId));
+            if (item != null) {
+                this.items.set(0, new ItemStack(item, inputCount));
+            }
+        }
+        String outputItemId = input.getStringOr("output_item", "");
+        int outputCount = input.getIntOr("output_count", 0);
+        if (!outputItemId.isEmpty() && outputCount > 0) {
+            var item = BuiltInRegistries.ITEM.getValue(Identifier.parse(outputItemId));
+            if (item != null) {
+                this.resultContainer.setItem(0, new ItemStack(item, outputCount));
+            }
+        }
+        this.itemType = input.getStringOr("output_type", "");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compoundTag, net.minecraft.core.HolderLookup.Provider registries) {
-        super.saveAdditional(compoundTag, registries);
-        compoundTag.put("input_container", this.items.get(0).saveOptional(registries));
-        compoundTag.put("output_container", resultContainer.getItem(0).saveOptional(registries));
-        compoundTag.putString("output_type", itemType);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        // TODO: Full ItemStack serialization needs codec approach for components/NBT.
+        // For now, store item ID + count as primitives.
+        ItemStack inputStack = this.items.get(0);
+        if (!inputStack.isEmpty()) {
+            output.putString("input_item", BuiltInRegistries.ITEM.getKey(inputStack.getItem()).toString());
+            output.putInt("input_count", inputStack.getCount());
+        }
+        ItemStack outputStack = resultContainer.getItem(0);
+        if (!outputStack.isEmpty()) {
+            output.putString("output_item", BuiltInRegistries.ITEM.getKey(outputStack.getItem()).toString());
+            output.putInt("output_count", outputStack.getCount());
+        }
+        output.putString("output_type", itemType);
     }
 
     private ChopperItemHandler createHandler() {
@@ -103,7 +132,6 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
      * from the RegisterCapabilitiesEvent registration in TinyRedstone.java.
      * The old getCapability() override on BlockEntity is gone entirely.
      */
-    @Nonnull
     public IItemHandler getItemHandler() {
         return itemHandler;
     }

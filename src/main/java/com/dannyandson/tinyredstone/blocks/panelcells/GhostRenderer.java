@@ -10,10 +10,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class GhostRenderer implements IPanelCell {
 
@@ -22,7 +23,7 @@ public class GhostRenderer implements IPanelCell {
     private static final float s6 = 0.375f;
     private static final float s10 = 0.625f;
     private static final int color = RenderHelper.getColor(255,80,0,0);
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT_GHOST = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_segment_ghost");
+    public static Identifier TEXTURE_REDSTONE_DUST_SEGMENT_GHOST = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_segment_ghost");
     private static TextureAtlasSprite sprite;
 
     public GhostRenderer(PanelCellSegment segmentHovering){
@@ -43,7 +44,7 @@ public class GhostRenderer implements IPanelCell {
         alpha = .75f;
         //color = RenderHelper.getColor(255,80,0,0);
 
-        VertexConsumer builder = buffer.getBuffer(RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer(Sheets.translucentBlockSheet());
 
         poseStack.translate(0,0,0.015);
 

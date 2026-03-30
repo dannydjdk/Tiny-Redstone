@@ -9,10 +9,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.properties.ComparatorMode;
 
@@ -27,10 +28,10 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
     private int changedTick = -1;
 
-    public static ResourceLocation TEXTURE_COMPARATOR_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_on");
-    public static ResourceLocation TEXTURE_COMPARATOR_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_off");
-    public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_subtract_on");
-    public static ResourceLocation TEXTURE_COMPARATOR_SUBTRACT_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_subtract_off");
+    public static Identifier TEXTURE_COMPARATOR_ON = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_on");
+    public static Identifier TEXTURE_COMPARATOR_OFF = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_off");
+    public static Identifier TEXTURE_COMPARATOR_SUBTRACT_ON = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_subtract_on");
+    public static Identifier TEXTURE_COMPARATOR_SUBTRACT_OFF = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_comparator_subtract_off");
 
     /**
      * Drawing the cell on the panel
@@ -43,7 +44,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
      */
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = RenderHelper.getSprite(TEXTURE_COMPARATOR_OFF);
 
@@ -203,7 +204,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
         boolean changed = false;
 
-        if (!cellPos.getPanelTile().getLevel().isClientSide) {
+        if (!cellPos.getPanelTile().getLevel().isClientSide()) {
             if (comparatorOverride) {
                 PanelCellNeighbor backNeighbor = cellPos.getNeighbor(Side.BACK);
                 int cInput = backNeighbor.getComparatorOverride();
@@ -264,14 +265,14 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.output = compoundNBT.getInt("output");
-        this.input1 = compoundNBT.getInt("input1");
-        this.input2 = compoundNBT.getInt("input2");
-        this.changePending=compoundNBT.getInt("changePending");
-        this.comparatorInput=compoundNBT.getInt("comparatorInput");
-        this.subtract = compoundNBT.getBoolean("subtract");
-        this.comparatorOverride = compoundNBT.getBoolean("comparatorOverride");
-        this.changedTick=compoundNBT.getInt("changedTick");
+        this.output = compoundNBT.getIntOr("output", 0);
+        this.input1 = compoundNBT.getIntOr("input1", 0);
+        this.input2 = compoundNBT.getIntOr("input2", 0);
+        this.changePending=compoundNBT.getIntOr("changePending", 0);
+        this.comparatorInput=compoundNBT.getIntOr("comparatorInput", 0);
+        this.subtract = compoundNBT.getBooleanOr("subtract", false);
+        this.comparatorOverride = compoundNBT.getBooleanOr("comparatorOverride", false);
+        this.changedTick=compoundNBT.getIntOr("changedTick", 0);
     }
 
     @Override

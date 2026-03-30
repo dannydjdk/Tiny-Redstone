@@ -8,11 +8,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.joml.Vector3d;
@@ -29,10 +30,10 @@ public class Torch implements IPanelCell
 
     private int changedTick = -1;
 
-    public static ResourceLocation TEXTURE_TORCH_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch");
-    public static ResourceLocation TEXTURE_TORCH_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_off");
-    public static ResourceLocation TEXTURE_TORCH_TOP_ON = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_top");
-    public static ResourceLocation TEXTURE_TORCH_TOP_OFF = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_top_off");
+    public static Identifier TEXTURE_TORCH_ON = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch");
+    public static Identifier TEXTURE_TORCH_OFF = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_off");
+    public static Identifier TEXTURE_TORCH_TOP_ON = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_top");
+    public static Identifier TEXTURE_TORCH_TOP_OFF = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/redstone_torch_top_off");
     private Side baseSide=Side.BOTTOM;
 
 
@@ -48,7 +49,7 @@ public class Torch implements IPanelCell
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
 
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         TextureAtlasSprite sprite_torch;
         TextureAtlasSprite sprite_torch_top;
 
@@ -295,22 +296,22 @@ public class Torch implements IPanelCell
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.output = compoundNBT.getBoolean("output");
-        this.changePending = compoundNBT.getInt("changePending");
-        this.burnout = compoundNBT.getBoolean("burnout");
-        this.upright = compoundNBT.getBoolean("upright");
-        if (compoundNBT.getString("baseSide").length()>0)
-            this.baseSide=Side.valueOf(compoundNBT.getString("baseSide"));
+        this.output = compoundNBT.getBooleanOr("output", false);
+        this.changePending = compoundNBT.getIntOr("changePending", 0);
+        this.burnout = compoundNBT.getBooleanOr("burnout", false);
+        this.upright = compoundNBT.getBooleanOr("upright", false);
+        if (compoundNBT.getStringOr("baseSide", "").length()>0)
+            this.baseSide=Side.valueOf(compoundNBT.getStringOr("baseSide", ""));
         else
             baseSide=Side.BOTTOM;
 
-        String changeHxString = compoundNBT.getString("changeHx");
+        String changeHxString = compoundNBT.getStringOr("changeHx", "");
         for (Byte b : changeHxString.getBytes())
         {
             changeHx.add(b==49);
             if (changeHx.size()>60)changeHx.pop();
         }
-        this.changedTick=compoundNBT.getInt("changedTick");
+        this.changedTick=compoundNBT.getIntOr("changedTick", 0);
 
     }
 

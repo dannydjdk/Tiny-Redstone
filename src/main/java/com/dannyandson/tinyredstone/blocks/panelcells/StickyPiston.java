@@ -3,11 +3,11 @@ package com.dannyandson.tinyredstone.blocks.panelcells;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class StickyPiston extends Piston {
 
-    public static ResourceLocation TEXTURE_PISTON_TOP = ResourceLocation.fromNamespaceAndPath("minecraft","block/piston_top_sticky");
+    public static Identifier TEXTURE_PISTON_TOP = Identifier.fromNamespaceAndPath("minecraft","block/piston_top_sticky");
 
    /**
      * Called each each tick.

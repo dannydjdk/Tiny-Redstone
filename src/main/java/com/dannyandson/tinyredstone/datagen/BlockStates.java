@@ -2,7 +2,7 @@ package com.dannyandson.tinyredstone.datagen;
 
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -15,6 +15,6 @@ public class BlockStates extends BlockStateProvider
 
     @Override
     protected void registerStatesAndModels() {
-        simpleBlock(Registration.REDSTONE_PANEL_BLOCK.get());
+        simpleBlock(ModRegistration.REDSTONE_PANEL_BLOCK.get());
     }
 }

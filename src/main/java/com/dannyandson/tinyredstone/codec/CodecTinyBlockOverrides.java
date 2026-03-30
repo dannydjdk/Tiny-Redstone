@@ -9,7 +9,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -26,7 +26,7 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
     private final Codec<TinyBlockData> codec;
 
     /** The raw data that we parsed from json last time resources were reloaded **/
-    protected Map<ResourceLocation, TinyBlockData> data = new HashMap<>();
+    protected Map<Identifier, TinyBlockData> data = new HashMap<>();
 
     private String folderName;
 
@@ -63,10 +63,10 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
      * @param itemResourceId a resource location of the item whose texture we want
      * @return resource location of the block texture
      */
-    public TextureAtlasSprite getSprite(ResourceLocation itemResourceId, Side side) {
+    public TextureAtlasSprite getSprite(Identifier itemResourceId, Side side) {
 
-        for (Map.Entry<ResourceLocation, TinyBlockData> entry : this.data.entrySet()) {
-            ResourceLocation texture = entry.getValue().getTexture(itemResourceId, side);
+        for (Map.Entry<Identifier, TinyBlockData> entry : this.data.entrySet()) {
+            Identifier texture = entry.getValue().getTexture(itemResourceId, side);
             if (texture != null)
                 return RenderHelper.getSprite(texture);
         }
@@ -122,8 +122,8 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
      * @param itemResourceId a resource location of the block to check
      * @return true if the block has been marked as disabled
      */
-    public boolean isDisabled(ResourceLocation itemResourceId) {
-        for (Map.Entry<ResourceLocation, TinyBlockData> entry : this.data.entrySet()) {
+    public boolean isDisabled(Identifier itemResourceId) {
+        for (Map.Entry<Identifier, TinyBlockData> entry : this.data.entrySet()) {
             String status = entry.getValue().getType(itemResourceId);
             if (status != null && status.equals("disabled"))
                 return true;
@@ -132,20 +132,20 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> jsons, ResourceManager resourceManager, ProfilerFiller profiler)
+    protected void apply(Map<Identifier, JsonElement> jsons, ResourceManager resourceManager, ProfilerFiller profiler)
     {
         TinyRedstone.LOGGER.info("Beginning loading of data for data loader: {}", this.folderName);
         this.data = this.mapValues(jsons);
         TinyRedstone.LOGGER.info("Data loader for {} loaded {} jsons", this.folderName, this.data.size());
     }
 
-    private Map<ResourceLocation, TinyBlockData> mapValues(Map<ResourceLocation, JsonElement> inputs)
+    private Map<Identifier, TinyBlockData> mapValues(Map<Identifier, JsonElement> inputs)
     {
-        Map<ResourceLocation, TinyBlockData> newMap = new HashMap<>();
+        Map<Identifier, TinyBlockData> newMap = new HashMap<>();
 
-        for (Map.Entry<ResourceLocation, JsonElement> entry : inputs.entrySet())
+        for (Map.Entry<Identifier, JsonElement> entry : inputs.entrySet())
         {
-            ResourceLocation key = entry.getKey();
+            Identifier key = entry.getKey();
             JsonElement element = entry.getValue();
             // if we fail to parse json, log an error and continue
             // if we succeeded, add the resulting TinyBlockData to the map

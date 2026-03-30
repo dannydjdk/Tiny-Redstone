@@ -1,30 +1,27 @@
 package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implements MenuAccess<ChopperMenu> {
 
-    public static final ResourceLocation CUTTER_GUI = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/block_chopper.png");
+    public static final Identifier CUTTER_GUI = Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "textures/gui/block_chopper.png");
     private ChopperMenu chopperMenu;
     private Button itemTypeButton = null;
 
     public ChopperScreen(ChopperMenu chopperMenu, Inventory playerInventory, Component title) {
-        super(chopperMenu, playerInventory, title);
-
+        // 26.1: imageWidth and imageHeight are now final, set via constructor params
+        super(chopperMenu, playerInventory, title, 184, 184);
         this.chopperMenu = chopperMenu;
-        this.imageWidth = 184;
-        this.imageHeight = 184;
     }
 
     @Override
@@ -43,23 +40,14 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
         }
     }
 
-    @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        // Fix: renderBackground now requires (GuiGraphics, int, int, float) in 1.21
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        this.renderTooltip(guiGraphics, mouseX, mouseY);
-    }
+    // 26.1: AbstractContainerScreen#render now calls renderTooltip automatically.
+    // No need to override extractRenderState.
 
     @Override
-    protected void renderBg(GuiGraphics poseStack, float partialTicks, int mouseX, int mouseY) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, CUTTER_GUI);
-
+    protected void extractBackground(GuiGraphicsExtractor guiGraphics, float partialTicks, int mouseX, int mouseY) {
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
-
-        poseStack.blit(CUTTER_GUI, x, y, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
+        // 26.1: blit uses RenderPipelines.GUI_TEXTURED instead of RenderType::guiTextured
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, CUTTER_GUI, x, y, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
     }
 }

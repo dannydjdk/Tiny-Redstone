@@ -8,14 +8,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 public class RedstoneBlock  implements IPanelCell, IPanelCellInfoProvider {
-    public static ResourceLocation TEXTURE_REDSTONE_BLOCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/redstone_block");
+    public static Identifier TEXTURE_REDSTONE_BLOCK = Identifier.fromNamespaceAndPath("minecraft","block/redstone_block");
 
     /**
      * Drawing the cell on the panel
@@ -27,7 +28,7 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellInfoProvider {
      */
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_REDSTONE_BLOCK);
 
         matrixStack.translate(0,0,1.0);

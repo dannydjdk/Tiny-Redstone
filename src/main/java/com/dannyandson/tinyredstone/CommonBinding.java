@@ -4,7 +4,7 @@ import com.dannyandson.tinyredstone.api.AbstractPanelCellItem;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,12 +13,12 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
-@EventBusSubscriber(modid = TinyRedstone.MODID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = TinyRedstone.MODID)
 public class CommonBinding {
     @SubscribeEvent
     public static void onPlayerLogoff(PlayerEvent.PlayerLoggedOutEvent event) {
         Player player = event.getEntity();
-        if(player.level().isClientSide) {
+        if(player.level().isClientSide()) {
             RotationLock.removeLock(false);
         } else {
             RotationLock.removeServerLock(player);
@@ -32,7 +32,7 @@ public class CommonBinding {
         if (event.getEntity().isCreative() &&
                 event.getEntity().level().getBlockState(event.getPos()).getBlock() instanceof PanelBlock &&
                 (
-                        event.getEntity().getMainHandItem().getItem()==Registration.REDSTONE_WRENCH.get() ||
+                        event.getEntity().getMainHandItem().getItem()== ModRegistration.REDSTONE_WRENCH.get() ||
                                 event.getEntity().getMainHandItem().getItem() instanceof AbstractPanelCellItem
                 )) {
             BlockState blockState = event.getEntity().level().getBlockState(event.getPos());
@@ -50,7 +50,7 @@ public class CommonBinding {
             BlockEntity te = event.getEntity().level().getBlockEntity(event.getPos());
             if (te instanceof PanelTile)
             {
-                Registration.REDSTONE_PANEL_BLOCK.get().useItemOn(event.getItemStack(), te.getBlockState(),event.getEntity().level(),event.getPos(),event.getEntity(),event.getHand(),event.getHitVec());
+                ModRegistration.REDSTONE_PANEL_BLOCK.get().useItemOn(event.getItemStack(), te.getBlockState(),event.getEntity().level(),event.getPos(),event.getEntity(),event.getHand(),event.getHitVec());
                 event.setCanceled(true);
             }
         }

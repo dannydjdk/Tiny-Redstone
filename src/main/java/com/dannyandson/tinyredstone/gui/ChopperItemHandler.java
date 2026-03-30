@@ -4,7 +4,6 @@ import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
-import javax.annotation.Nonnull;
 
 public class ChopperItemHandler implements IItemHandler {
     private ChopperBlockEntity innerHandler;
@@ -18,15 +17,13 @@ public class ChopperItemHandler implements IItemHandler {
         return 2;
     }
 
-    @Nonnull
     @Override
     public ItemStack getStackInSlot(int slot) {
         return (slot==0)?innerHandler.getItem(slot):innerHandler.getResultContainer().getItem(0);
     }
 
-    @Nonnull
     @Override
-    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
         if (stack.isEmpty())
             return ItemStack.EMPTY;
 
@@ -69,7 +66,6 @@ public class ChopperItemHandler implements IItemHandler {
         return reachedLimit ? stack.copyWithCount(stack.getCount() - limit) : ItemStack.EMPTY;
     }
 
-    @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
         if (amount == 0 || slot != 1)
@@ -96,7 +92,7 @@ public class ChopperItemHandler implements IItemHandler {
     }
 
     @Override
-    public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+    public boolean isItemValid(int slot, ItemStack stack) {
         return true;
     }
 }

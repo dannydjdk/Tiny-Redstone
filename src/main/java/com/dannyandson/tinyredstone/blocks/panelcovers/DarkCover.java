@@ -6,21 +6,21 @@ import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class DarkCover implements IPanelCover {
 
-    public static ResourceLocation TEXTURE_DEFAULT_COVER = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/dark_cover");
-    protected ResourceLocation madeFrom;
+    public static Identifier TEXTURE_DEFAULT_COVER = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/dark_cover");
+    protected Identifier madeFrom;
     protected TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
 
     private float x1 = 0, x2 = 1, y1 = 0, y2 = 1;
@@ -34,12 +34,12 @@ public class DarkCover implements IPanelCover {
 
         if (sprite_top == null) {
             if (madeFrom != null) {
-                sprite_top = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.TOP);
-                sprite_front = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.FRONT);
-                sprite_right = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.RIGHT);
-                sprite_back = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BACK);
-                sprite_left = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.LEFT);
-                sprite_bottom = Registration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BOTTOM);
+                sprite_top = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.TOP);
+                sprite_front = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.FRONT);
+                sprite_right = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.RIGHT);
+                sprite_back = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BACK);
+                sprite_left = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.LEFT);
+                sprite_bottom = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BOTTOM);
             } else {
                 sprite_top = sprite_front = sprite_right = sprite_back = sprite_left = sprite_bottom = RenderHelper.getSprite(getDefaultResourceLocation());
             }
@@ -48,17 +48,17 @@ public class DarkCover implements IPanelCover {
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_DEFAULT_COVER);
         matrixStack.translate(0, y2, 1);
         matrixStack.mulPose(Axis.XP.rotationDegrees(270));
-        RenderHelper.drawCube(matrixStack,buffer.getBuffer(RenderType.solid()),sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight, madeFrom != null?0x00FFFFFF:color,1f);
+        RenderHelper.drawCube(matrixStack,buffer.getBuffer(Sheets.cutoutBlockSheet()),sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight, madeFrom != null?0x00FFFFFF:color,1f);
     }
 
-    protected ResourceLocation getDefaultResourceLocation(){
+    protected Identifier getDefaultResourceLocation(){
         return TEXTURE_DEFAULT_COVER;
     }
 
     /**
-     * Returns the block ResourceLocation this cover is camouflaging as, or null if using default textures.
+     * Returns the block Identifier this cover is camouflaging as, or null if using default textures.
      */
-    public ResourceLocation getMadeFrom() {
+    public Identifier getMadeFrom() {
         return madeFrom;
     }
 
@@ -71,9 +71,9 @@ public class DarkCover implements IPanelCover {
             stack = player.getMainHandItem();
         if (ItemStackHelper.getCustomTag(stack) != null) {
             CompoundTag itemNBT = ItemStackHelper.getCustomTag(stack);
-            CompoundTag madeFromTag = itemNBT.getCompound("made_from");
+            CompoundTag madeFromTag = itemNBT.getCompound("made_from").orElseGet(CompoundTag::new);
             if (madeFromTag.contains("namespace")) {
-                this.madeFrom = ResourceLocation.fromNamespaceAndPath(madeFromTag.getString("namespace"), madeFromTag.getString("path"));
+                this.madeFrom = Identifier.fromNamespaceAndPath(madeFromTag.getStringOr("namespace", ""), madeFromTag.getStringOr("path", ""));
             }
         }
 
@@ -103,7 +103,7 @@ public class DarkCover implements IPanelCover {
     @Override
     public void readNBT(CompoundTag compoundNBT) {
         if (compoundNBT.contains("made_from_namespace"))
-            this.madeFrom=ResourceLocation.fromNamespaceAndPath(compoundNBT.getString("made_from_namespace"),compoundNBT.getString("made_from_path"));
+            this.madeFrom=Identifier.fromNamespaceAndPath(compoundNBT.getStringOr("made_from_namespace", ""),compoundNBT.getStringOr("made_from_path", ""));
     }
 
 

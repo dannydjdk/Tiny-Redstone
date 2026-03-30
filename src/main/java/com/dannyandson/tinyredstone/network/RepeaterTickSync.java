@@ -9,14 +9,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record RepeaterTickSync(BlockPos pos, int cellIndex, int ticks) implements CustomPacketPayload {
 
     public static final Type<RepeaterTickSync> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "repeater_tick_sync"));
+            new Type<>(Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "repeater_tick_sync"));
 
     public static final StreamCodec<FriendlyByteBuf, RepeaterTickSync> STREAM_CODEC =
             StreamCodec.of(RepeaterTickSync::write, RepeaterTickSync::read);

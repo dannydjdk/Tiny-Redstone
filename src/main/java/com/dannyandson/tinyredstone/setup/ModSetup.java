@@ -1,22 +1,22 @@
 package com.dannyandson.tinyredstone.setup;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+// TODO: AddReloadListenerEvent was removed/renamed in 26.1.
+// Find the replacement event to re-register TINY_BLOCK_OVERRIDES.
 
-@EventBusSubscriber(modid = TinyRedstone.MODID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = TinyRedstone.MODID)
 public class ModSetup {
 
     public static void init(final FMLCommonSetupEvent event) {
-        Registration.registerPanelCells();
-        // Network registration is now event-driven via RegisterPayloadHandlersEvent in ModNetworkHandler
+        ModRegistration.registerPanelCells();
     }
 
-    @SubscribeEvent
-    public static void onAddReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(Registration.TINY_BLOCK_OVERRIDES);
-    }
+    // TODO: Re-enable reload listener once the correct 26.1 event is identified
+    // @SubscribeEvent
+    // public static void onAddReloadListeners(??? event) {
+    //     event.addListener(Registration.TINY_BLOCK_OVERRIDES);
+    // }
 
 }

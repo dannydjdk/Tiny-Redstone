@@ -6,23 +6,23 @@ import com.dannyandson.tinyredstone.blocks.*;
 import com.dannyandson.tinyredstone.gui.NoteBlockGUI;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PlaySound;
-import com.dannyandson.tinyredstone.setup.Registration;
+import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_TINY_NOTE_BLOCK = ResourceLocation.fromNamespaceAndPath("minecraft","block/note_block");
+    public static Identifier TEXTURE_TINY_NOTE_BLOCK = Identifier.fromNamespaceAndPath("minecraft","block/note_block");
     private static final String[] noteNames = {"F#","G","G#","A","A#","B","C","C#","D","D#","E","F"};
 
     private boolean powered = false;
@@ -31,7 +31,7 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     @Override
     public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)? RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)? Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_TINY_NOTE_BLOCK);
 
 
@@ -99,8 +99,8 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player){
-        if (player.getMainHandItem().getItem() == Registration.REDSTONE_WRENCH.get()) {
-            if (cellPos.getPanelTile().getLevel().isClientSide)
+        if (player.getMainHandItem().getItem() == ModRegistration.REDSTONE_WRENCH.get()) {
+            if (cellPos.getPanelTile().getLevel().isClientSide())
                 NoteBlockGUI.open(cellPos.getPanelTile(), cellPos.getIndex(), this);
         }else {
             pitch++;
@@ -135,9 +135,9 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
     @Override
     public void readNBT(CompoundTag compoundNBT) {
         super.readNBT(compoundNBT);
-        this.pitch= compoundNBT.getInt("pitch");
-        this.instrument= compoundNBT.getString("instrument");
-        this.powered =compoundNBT.getBoolean("powered");
+        this.pitch= compoundNBT.getIntOr("pitch", 0);
+        this.instrument= compoundNBT.getStringOr("instrument", "");
+        this.powered =compoundNBT.getBooleanOr("powered", false);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class NoteBlock extends TinyBlock implements IPanelCellInfoProvider {
 
     private void playNote(PanelTile panelTile)
     {
-        if (!panelTile.getLevel().isClientSide)
+        if (!panelTile.getLevel().isClientSide())
         {
             BlockPos pos = panelTile.getBlockPos();
             for(Player player:panelTile.getLevel().players()){

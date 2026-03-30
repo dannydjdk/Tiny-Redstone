@@ -9,10 +9,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Vector3d;
 
@@ -22,8 +23,8 @@ import java.util.StringJoiner;
 
 public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
-    public static ResourceLocation TEXTURE_REDSTONE_DUST = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_dust");
-    public static ResourceLocation TEXTURE_REDSTONE_DUST_SEGMENT = ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_segment");
+    public static Identifier TEXTURE_REDSTONE_DUST = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_dust");
+    public static Identifier TEXTURE_REDSTONE_DUST_SEGMENT = Identifier.fromNamespaceAndPath(TinyRedstone.MODID,"block/panel_redstone_segment");
 
 
     //pre-calculated variables for segment points
@@ -62,7 +63,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
             setTextureMapValues();
         }
 
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?RenderType.solid():RenderType.translucent());
+        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
 
         matrixStack.translate(0,0,0.01);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.01f,s10+.01f,s6-.01f,s10+.01f,segmentU0,segmentU1b,segmentV0,segmentV1,combinedLight,color, alpha);
@@ -284,7 +285,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
      */
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player) {
-        if(cellPos.getPanelTile().getLevel().isClientSide)
+        if(cellPos.getPanelTile().getLevel().isClientSide())
            return false;
 
         if (segmentClicked==PanelCellSegment.FRONT)
@@ -347,12 +348,12 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
 
     @Override
     public void readNBT(CompoundTag compoundNBT) {
-        this.signalStrength = compoundNBT.getInt("strength");
-        this.frontEnabled = compoundNBT.getBoolean("front");
-        this.rightEnabled = compoundNBT.getBoolean("right");
-        this.backEnabled = compoundNBT.getBoolean("back");
-        this.leftEnabled = compoundNBT.getBoolean("left");
-        String crawlUpSides = compoundNBT.getString("crawlUpSides");
+        this.signalStrength = compoundNBT.getIntOr("strength", 0);
+        this.frontEnabled = compoundNBT.getBooleanOr("front", false);
+        this.rightEnabled = compoundNBT.getBooleanOr("right", false);
+        this.backEnabled = compoundNBT.getBooleanOr("back", false);
+        this.leftEnabled = compoundNBT.getBooleanOr("left", false);
+        String crawlUpSides = compoundNBT.getStringOr("crawlUpSides", "");
         if (!crawlUpSides.equals(""))
             for (String side : crawlUpSides.split(",")) {
                 this.crawlUpSide.add(Side.valueOf(side));
