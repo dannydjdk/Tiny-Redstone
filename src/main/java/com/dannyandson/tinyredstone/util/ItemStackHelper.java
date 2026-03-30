@@ -46,18 +46,25 @@ public class ItemStackHelper {
     }
 
     /**
-     * Get the BlockEntityTag compound from an ItemStack's custom data
+     * Get the BlockEntityTag compound from an ItemStack's custom data.
+     * 26.1: DataComponents.BLOCK_ENTITY_DATA now uses TypedEntityData instead of CustomData.
+     * As a workaround, we store block entity data inside CUSTOM_DATA under a "BlockEntityTag" key.
      */
     @Nullable
     public static CompoundTag getBlockEntityTag(ItemStack stack) {
-        net.minecraft.world.item.component.CustomData beData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        if (beData != null) {
-            return beData.copyTag();
+        CompoundTag customTag = getCustomTag(stack);
+        if (customTag != null && customTag.contains("BlockEntityTag")) {
+            return customTag.getCompound("BlockEntityTag").orElseGet(CompoundTag::new);
         }
         return null;
     }
 
     public static void setBlockEntityTag(ItemStack stack, CompoundTag tag) {
-        stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        CompoundTag customTag = getCustomTag(stack);
+        if (customTag == null) {
+            customTag = new CompoundTag();
+        }
+        customTag.put("BlockEntityTag", tag);
+        setCustomTag(stack, customTag);
     }
 }

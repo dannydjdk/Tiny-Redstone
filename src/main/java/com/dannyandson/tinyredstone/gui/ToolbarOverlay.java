@@ -7,15 +7,12 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
-// Fix for 1.21.1: RenderGuiOverlayEvent -> RenderGuiLayerEvent, VanillaGuiOverlay -> VanillaGuiLayers
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -48,11 +45,14 @@ public class ToolbarOverlay {
                         // bindForSetup removed in 26.1 - textures bound automatically
                         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_ROTATION_LOCK);
 
-                        
-                        // 26.1: GuiGraphics class renamed to GuiGraphicsExtractor,
-                        // but NeoForge event getter keeps the name getGuiGraphics()
-                        event.getGuiGraphics().blit(x, y, 0, 5, 5, sprite);
-                        
+                        // 26.1: Sprite-based blit overload removed.
+                        // Use atlas texture with sprite UV coordinates instead.
+                        event.getGuiGraphics().blit(
+                                sprite.atlasLocation(),
+                                x, y, 5, 5,
+                                sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1()
+                        );
+
                     }
                 }
             }

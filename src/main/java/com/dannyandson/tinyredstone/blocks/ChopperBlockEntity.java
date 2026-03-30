@@ -140,6 +140,16 @@ public class ChopperBlockEntity extends RandomizableContainerBlockEntity {
     // NeoForge's capability cache is automatically invalidated when the block entity is removed.
     // The override is no longer needed unless you have other cleanup to do here.
 
+    // 1.21.5: Container dropping moved from Block#onRemove to BlockEntity#preRemoveSideEffects
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (this.level != null) {
+            net.minecraft.world.Containers.dropContents(this.level, pos, this);
+            this.level.updateNeighbourForOutputSignal(pos, state.getBlock());
+        }
+        super.preRemoveSideEffects(pos, state);
+    }
+
     public String getItemType() {
         return itemType;
     }

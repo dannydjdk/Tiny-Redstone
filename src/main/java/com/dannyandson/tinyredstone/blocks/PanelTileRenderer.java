@@ -15,17 +15,11 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
@@ -33,18 +27,17 @@ import net.minecraft.world.phys.Vec3;
 
 import org.jspecify.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
-import org.joml.Vector3f;
 
 /**
  * PanelTile renderer for NeoForge 26.1.
- * 
+ *
  * In 1.21.9+, BlockEntityRenderer uses a render state system with three methods:
  * - createRenderState(): creates a new render state instance
  * - extractRenderState(): copies data from the block entity into the render state
  * - submit(): uses the render state data to emit geometry
- * 
+ *
  * The second type parameter is the render state class.
- * 
+ *
  * NOTE: If SubmitNodeCollector doesn't provide getBuffer() for custom vertex
  * rendering, this may need adjustment. The structural pattern is correct.
  */
@@ -90,22 +83,22 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
     @Override
     public void extractRenderState(PanelTile tileEntity, PanelTileRenderState renderState, float partialTick, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
         BlockEntityRenderer.super.extractRenderState(tileEntity, renderState, partialTick, cameraPos, crumblingOverlay);
-        
+
         CachedPanelRenderer cache = tileEntity.getCachedRenderer();
-        
+
         // Get light from the block position
         int combinedLight = 0;
         if (tileEntity.getLevel() != null) {
             combinedLight = net.minecraft.client.renderer.LevelRenderer.getLightCoords(tileEntity.getLevel(), tileEntity.getBlockPos());
         }
         int combinedOverlay = net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY;
-        
+
         // Rebuild cache if dirty or if lighting changed
         if (cache.isDirty() || cache.lightChanged(combinedLight)) {
             PoseStack buildStack = new PoseStack();
             cache.rebuild(tileEntity, buildStack, combinedLight, combinedOverlay);
         }
-        
+
         // Copy cached data into render state
         renderState.solidVertices.clear();
         renderState.solidVertices.addAll(cache.getSolidVertices());
@@ -115,7 +108,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
         renderState.facing = tileEntity.getBlockState().getValue(BlockStateProperties.FACING);
         renderState.hasCover = tileEntity.isCovered();
         renderState.hasBase = tileEntity.hasBase();
-        
+
         // Ghost preview
         if (!tileEntity.isCovered() && tileEntity.panelCellGhostPos != null) {
             renderState.ghostPos = tileEntity.panelCellGhostPos;
@@ -126,11 +119,11 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
 
     @Override
     public void submit(PanelTileRenderState renderState, PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
-        // TODO: In 26.1, SubmitNodeCollector replaces MultiBufferSource.
-        // If SubmitNodeCollector provides a getBuffer(RenderType) method (or similar),
-        // the replay logic below works directly. Otherwise, this needs adaptation.
-        // For now, cast or adapt as needed.
-        
+        // 26.1: SubmitNodeCollector does NOT extend MultiBufferSource and does NOT have getBuffer().
+        // We use the game's immediate buffer source for custom vertex rendering.
+        // This is the standard approach for block entity renderers that need direct vertex writing.
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+
         matrixStack.pushPose();
 
         if (!renderState.isCamouflageCache) {
@@ -158,25 +151,22 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
             }
         }
 
-        // Replay cached geometry using the submit node collector
-        // In 26.1, SubmitNodeCollector should provide buffer access for custom vertices
+        // Replay cached geometry
         org.joml.Matrix4f transform = matrixStack.last().pose();
-        
+
         if (!renderState.solidVertices.isEmpty()) {
-            VertexConsumer solidBuilder = submitNodeCollector.getBuffer(Sheets.cutoutBlockSheet());
+            VertexConsumer solidBuilder = bufferSource.getBuffer(Sheets.cutoutBlockSheet());
             CachedPanelRenderer.replayVerticesStatic(solidBuilder, transform, renderState.solidVertices);
         }
 
         if (!renderState.translucentVertices.isEmpty()) {
-            VertexConsumer translucentBuilder = submitNodeCollector.getBuffer(Sheets.translucentBlockSheet());
+            VertexConsumer translucentBuilder = bufferSource.getBuffer(Sheets.translucentBlockSheet());
             CachedPanelRenderer.replayVerticesStatic(translucentBuilder, transform, renderState.translucentVertices);
         }
 
         // Ghost preview is always dynamic
         if (renderState.ghostPos != null) {
-            // Ghost rendering still uses the capture+replay approach
-            // SubmitNodeCollector extends MultiBufferSource, so renderCellStatic works here
-            renderCellStatic(matrixStack, renderState.ghostPos, submitNodeCollector,
+            renderCellStatic(matrixStack, renderState.ghostPos, bufferSource,
                     renderState.lightCoords,
                     net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
                     0.5f, renderState.hasBase);
@@ -199,35 +189,14 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
 
         IPanelCell cell = pos.getIPanelCell();
 
-        // For TinyBlock/TransparentBlock with a madeFrom block, use the block's actual
-        // BakedModel instead of the sprite-guessing manual draw path.
+        // For TinyBlock/TransparentBlock with a madeFrom block, use sprite-based rendering.
+        // TODO 26.1: BakedModel is completely removed. The old path used BakedModel.getQuads()
+        // to render block models. The new system uses BlockStateModel + submission pipeline.
+        // For now, fall through to the sprite-based cell.render() path below.
+        // To re-implement: use BlockStateModelSet to get BlockStateModel, then use
+        // the submission pipeline or MutableQuad API for quad iteration.
         if (cell instanceof TinyBlock tinyBlock && tinyBlock.getMadeFrom() != null) {
-            Identifier madeFrom = tinyBlock.getMadeFrom();
-            BlockState blockState = BuiltInRegistries.BLOCK.getValue(madeFrom).defaultBlockState();
-            PanelTile panelTile = pos.getPanelTile();
-            if (blockState != null && !blockState.isAir() && panelTile.getLevel() != null) {
-                matrixStack.scale(SCALE, SCALE, SCALE);
-                var blockRenderer = Minecraft.getInstance().getBlockRenderer();
-                BakedModel model = blockRenderer.getBlockModel(blockState);
-                VertexConsumer builder = buffer.getBuffer(
-                        (cell instanceof TransparentBlock || alpha < 1.0f) ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
-                RandomSource randomSource = RandomSource.create();
-                for (Direction direction : Direction.values()) {
-                    Vector3f normal = matrixStack.last().normal().transform(
-                            new Vector3f(direction.getStepX(), direction.getStepY(), direction.getStepZ()));
-                    normal.normalize();
-                    float shade = RenderHelper.getShadeFromNormal(normal.x(), normal.y(), normal.z());
-                    for (BakedQuad quad : model.getQuads(blockState, direction, randomSource)) {
-                        // 26.1: putBulkData split into putBlockBakedQuad (chunk rendering) and putBakedQuad (all other)
-                        builder.putBakedQuad(matrixStack.last(), quad, shade, shade, shade, alpha, combinedLight, combinedOverlay);
-                    }
-                }
-                for (BakedQuad quad : model.getQuads(blockState, null, randomSource)) {
-                    builder.putBakedQuad(matrixStack.last(), quad, 1.0f, 1.0f, 1.0f, alpha, combinedLight, combinedOverlay);
-                }
-                matrixStack.popPose();
-                return;
-            }
+            // Fall through to sprite-based rendering below
         }
 
         matrixStack.mulPose(Axis.XP.rotationDegrees(ROTATION1));

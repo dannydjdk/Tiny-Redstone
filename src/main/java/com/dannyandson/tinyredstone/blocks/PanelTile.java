@@ -134,7 +134,7 @@ public class PanelTile extends BlockEntity {
     private static CompoundTag parseSnbt(String snbt) {
         if (snbt == null || snbt.isEmpty()) return new CompoundTag();
         try {
-            return TagParser.parseCompoundTag(snbt);
+            return TagParser.parseCompoundFully(snbt);
         } catch (Exception e) {
             TinyRedstone.LOGGER.error("Failed to parse SNBT: " + e.getMessage());
             return new CompoundTag();

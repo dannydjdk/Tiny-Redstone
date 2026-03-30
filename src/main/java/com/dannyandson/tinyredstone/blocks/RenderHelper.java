@@ -114,25 +114,28 @@ public class RenderHelper {
 
     /**
      * Adds a colored vertex (no UV/light) to a VertexConsumer.
-     * Fix for 1.21: vertex() -> addVertex(), color() -> setColor(), endVertex() removed (implicit).
+     * 26.1: BufferBuilder requires ALL vertex elements. Must provide UV, UV1, UV2, normal.
      */
     public static void add(VertexConsumer renderer, Matrix4f matrix4f, float x, float y, float z, int color, float alpha) {
         renderer.addVertex(matrix4f, x, y, z)
-                .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, (int) (alpha * 255f));
-        // Note: endVertex() is removed in 1.21; the vertex is committed implicitly on the next addVertex() call.
+                .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, (int) (alpha * 255f))
+                .setUv(0, 0)
+                .setUv1(0, 10)  // OverlayTexture.NO_OVERLAY
+                .setUv2(0, 0)
+                .setNormal(0, 1, 0);
     }
 
     /**
      * Adds a full vertex (UV + light + normal) to a VertexConsumer.
-     * Fix for 1.21: vertex() -> addVertex(), color() -> setColor(), uv2() -> setUv2(), normal() -> setNormal(), endVertex() removed.
+     * 26.1: Must include setUv1 (overlay) — BufferBuilder requires all elements.
      */
     public static void add(VertexConsumer renderer, Matrix4f matrix4f, float x, float y, float z, float u, float v, int combinedLightIn, int color, float alpha, float nx, float ny, float nz) {
         renderer.addVertex(matrix4f, x, y, z)
                 .setColor(color >> 16 & 255, color >> 8 & 255, color & 255, (int) (alpha * 255f))
                 .setUv(u, v)
+                .setUv1(0, 10)  // OverlayTexture.NO_OVERLAY
                 .setUv2(combinedLightIn & 0xFFFF, (combinedLightIn >> 16) & 0xFFFF)
                 .setNormal(nx, ny, nz);
-        // Note: endVertex() is removed in 1.21; the vertex is committed implicitly.
     }
 
     /**

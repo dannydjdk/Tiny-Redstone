@@ -4,8 +4,6 @@ import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.RotationLockRemoveSync;
 import com.dannyandson.tinyredstone.network.RotationLockSync;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -13,15 +11,12 @@ import java.util.UUID;
 public class RotationLock {
     private static final HashMap<UUID, Side> playerRotationLock = new HashMap<>();
 
-    @OnlyIn(Dist.CLIENT)
     private static Side rotationLock;
 
-    @OnlyIn(Dist.CLIENT)
     public static void removeLock() {
         removeLock(true);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void removeLock(boolean sendToServer) {
         if (rotationLock != null) {
             rotationLock = null;
@@ -29,12 +24,10 @@ public class RotationLock {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void lockRotation(Side side, boolean allowVertical, boolean invert) {
         lockRotation(side, allowVertical, invert, true);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void lockRotation(Side side, boolean allowVertical, boolean invert, boolean sendToServer) {
         switch (side) {
             case BACK:
@@ -62,27 +55,22 @@ public class RotationLock {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void lockRotation(boolean allowVertical, boolean invert) {
         lockRotation(allowVertical, invert, true);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void lockRotation(PanelTile panelTile, Player playerEntity, boolean allowVertical, boolean invert) {
         lockRotation(panelTile, playerEntity, allowVertical, invert, true);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void lockRotation(boolean allowVertical, boolean invert, boolean sendToServer) {
         lockRotation(rotationLock == null ? Side.FRONT : rotationLock, allowVertical, invert, sendToServer);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static void lockRotation(PanelTile panelTile, Player playerEntity, boolean allowVertical, boolean invert, boolean sendToServer) {
         lockRotation(rotationLock == null ? panelTile.getSideFromDirection(panelTile.getPlayerDirectionFacing(playerEntity, allowVertical)) : rotationLock, allowVertical, invert, sendToServer);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static Side getRotationLock() {
         return rotationLock;
     }

@@ -3,10 +3,7 @@ package com.dannyandson.tinyredstone.codec;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
@@ -17,45 +14,28 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
+/**
+ * 26.1: SimpleJsonResourceReloadListener now takes a type parameter and
+ * uses Codec + FileToIdConverter instead of Gson + folder name string.
+ * The apply() method receives already-deserialized objects.
+ */
+public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener<TinyBlockData>
 {
-    // default gson if unspecified
-    private static final Gson STANDARD_GSON = new Gson();
-
-    /** The codec we use to convert jsonelements to TinyBlockData **/
-    private final Codec<TinyBlockData> codec;
-
     /** The raw data that we parsed from json last time resources were reloaded **/
     protected Map<Identifier, TinyBlockData> data = new HashMap<>();
 
     private String folderName;
 
     /**
-     * Creates a data manager with a standard gson parser
-     * @param folderName The name of the data folder that we will load from, vanilla folderNames are "recipes", "loot_tables", etc</br>
-     * Jsons will be read from data/all_modids/folderName/all_jsons</br>
-     * folderName can include subfolders, e.g. "some_mod_that_adds_lots_of_data_loaders/cheeses"
-     * @param codec A codec to deserialize the json into your TinyBlockData, see javadocs above class
+     * Creates a data manager with a codec-based parser.
+     * @param folderName The name of the data folder that we will load from
+     * @param codec A codec to deserialize the json into TinyBlockData
      */
     public CodecTinyBlockOverrides(String folderName, Codec<TinyBlockData> codec)
     {
-        this(folderName, codec, STANDARD_GSON);
-    }
-
-    /**
-     * As above but with a custom GSON
-     * @param folderName The name of the data folder that we will load from, vanilla folderNames are "recipes", "loot_tables", etc</br>
-     * Jsons will be read from data/all_modids/folderName/all_jsons</br>
-     * folderName can include subfolders, e.g. "some_mod_that_adds_lots_of_data_loaders/cheeses"
-     * @param codec A codec to deserialize the json into your TinyBlockData, see javadocs above class
-     * @param gson A gson for parsing the raw json data into JsonElements. JsonElement-to-TinyBlockData conversion will be done by the codec,
-     * so gson type adapters shouldn't be necessary here
-     */
-    public CodecTinyBlockOverrides(String folderName, Codec<TinyBlockData> codec, Gson gson)
-    {
-        super(gson, folderName);
-        this.folderName=folderName;
-        this.codec = codec;
+        // 26.1: Constructor takes Codec<T> and FileToIdConverter
+        super(codec, net.minecraft.resources.FileToIdConverter.json(folderName));
+        this.folderName = folderName;
     }
 
     /**
@@ -131,30 +111,16 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener
         return false;
     }
 
+    /**
+     * 26.1: apply() now receives already-deserialized Map<Identifier, TinyBlockData>
+     * instead of raw JsonElement map.
+     */
     @Override
-    protected void apply(Map<Identifier, JsonElement> jsons, ResourceManager resourceManager, ProfilerFiller profiler)
+    protected void apply(Map<Identifier, TinyBlockData> deserializedData, ResourceManager resourceManager, ProfilerFiller profiler)
     {
         TinyRedstone.LOGGER.info("Beginning loading of data for data loader: {}", this.folderName);
-        this.data = this.mapValues(jsons);
+        this.data = new HashMap<>(deserializedData);
         TinyRedstone.LOGGER.info("Data loader for {} loaded {} jsons", this.folderName, this.data.size());
-    }
-
-    private Map<Identifier, TinyBlockData> mapValues(Map<Identifier, JsonElement> inputs)
-    {
-        Map<Identifier, TinyBlockData> newMap = new HashMap<>();
-
-        for (Map.Entry<Identifier, JsonElement> entry : inputs.entrySet())
-        {
-            Identifier key = entry.getKey();
-            JsonElement element = entry.getValue();
-            // if we fail to parse json, log an error and continue
-            // if we succeeded, add the resulting TinyBlockData to the map
-            this.codec.decode(JsonOps.INSTANCE, element)
-                    .ifSuccess(result -> newMap.put(key, result.getFirst()))
-                    .ifError(partial -> TinyRedstone.LOGGER.error("Failed to parse data json for {} due to: {}", key.toString(), partial.message()));
-        }
-
-        return newMap;
     }
 
 }

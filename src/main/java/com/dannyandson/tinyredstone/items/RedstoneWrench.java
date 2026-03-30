@@ -8,6 +8,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
@@ -17,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 import org.jspecify.annotations.Nullable;
-import java.util.List;
+import java.util.function.Consumer;
 
 public class RedstoneWrench extends Item {
     public RedstoneWrench(Item.Properties props) {
@@ -46,11 +47,10 @@ public class RedstoneWrench extends Item {
         return InteractionResult.SUCCESS;
     }
 
-    // Fix: appendHoverText signature changed in 1.21 - Level param removed, use Item.TooltipContext
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> list, TooltipFlag flags)
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> textConsumer, TooltipFlag flags)
     {
-        list.add(Component.translatable("message.item.redstone_wrench"));
+        textConsumer.accept(Component.translatable("message.item.redstone_wrench"));
     }
 
     public boolean canPlayerBreakBlockWhileHolding(BlockState state, Level worldIn, BlockPos pos, Player player) {

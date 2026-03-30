@@ -2,17 +2,17 @@ package com.dannyandson.tinyredstone.gui;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
-import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.panelcells.Repeater;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.RepeaterTickSync;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 public class RepeaterCellGUI extends Screen {
 
@@ -41,7 +41,7 @@ public class RepeaterCellGUI extends Screen {
 
         Float tSeconds = redstoneTicks.floatValue()/10f;
         this.tickCount = new ModWidget(relX,relY+38,WIDTH,20, Component.nullToEmpty(redstoneTicks.toString() + " ticks (" + tSeconds.toString() + " seconds)"))
-            .setTextHAlignment(ModWidget.HAlignment.CENTER).setTextVAlignment(ModWidget.VAlignment.MIDDLE);
+                .setTextHAlignment(ModWidget.HAlignment.CENTER).setTextVAlignment(ModWidget.VAlignment.MIDDLE);
 
         addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
         addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
@@ -49,7 +49,7 @@ public class RepeaterCellGUI extends Screen {
         addRenderableWidget(this.tickCount);
 
         addRenderableWidget(new ModWidget(relX,relY+3,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg")))
-            .setTextHAlignment(ModWidget.HAlignment.CENTER);
+                .setTextHAlignment(ModWidget.HAlignment.CENTER);
         addRenderableWidget(ModWidget.buildButton(relX + 15, relY + 15, 20, 20, Component.nullToEmpty("---"), button -> changeTicks(-200)));
         addRenderableWidget(ModWidget.buildButton(relX + 40, relY + 15, 20, 20, Component.nullToEmpty("--"), button -> changeTicks(-20)));
         addRenderableWidget(ModWidget.buildButton(relX + 65, relY + 15, 20, 20, Component.nullToEmpty("-"), button -> changeTicks(-2)));
@@ -76,7 +76,7 @@ public class RepeaterCellGUI extends Screen {
         ) {
             if (scroll != 0) {
                 Double dScroll = scroll*2;
-                if (isShiftDown())
+                if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT))
                     dScroll *= 10;
                 changeTicks(dScroll.intValue());
                 return true;

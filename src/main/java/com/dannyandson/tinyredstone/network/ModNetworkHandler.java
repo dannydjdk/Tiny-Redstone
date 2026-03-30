@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;

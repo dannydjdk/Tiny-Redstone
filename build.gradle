@@ -66,9 +66,15 @@ dependencies {
 
 // Exclude TheOneProbe compat until a 26.1 version is available
 // Exclude datagen until 26.1 datagen APIs are adopted (BlockStateProvider, ItemModelProvider removed)
+// Exclude BEWLR item renderers until SpecialModelRenderer rewrite is done
+// Exclude PanelItemColor until ItemTintSource rewrite is done
 sourceSets.main.java {
     exclude 'com/dannyandson/tinyredstone/compat/theoneprobe/**'
     exclude 'com/dannyandson/tinyredstone/datagen/**'
+    exclude 'com/dannyandson/tinyredstone/items/PanelItemRenderer.java'
+    exclude 'com/dannyandson/tinyredstone/items/TinyBlockItemRenderer.java'
+    exclude 'com/dannyandson/tinyredstone/items/PanelCoverItemRenderer.java'
+    exclude 'com/dannyandson/tinyredstone/items/PanelItemColor.java'
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

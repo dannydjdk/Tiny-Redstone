@@ -4,7 +4,6 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.compat.CompatHandler;
-import com.dannyandson.tinyredstone.setup.ClientSetup;
 import com.dannyandson.tinyredstone.setup.ModSetup;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.world.item.Item;
@@ -12,7 +11,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,9 +23,8 @@ public class TinyRedstone {
         ModRegistration.register(modEventBus);
 
         modEventBus.addListener(ModSetup::init);
-        if (FMLEnvironment.getDist().isClient()) {
-            modEventBus.addListener(ClientSetup::init);
-        }
+        // 26.1: ClientSetup.init() removed — block/item color registration now via
+        // @SubscribeEvent on RegisterColorHandlersEvent.Block in ClientSetup.
 
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
         modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);

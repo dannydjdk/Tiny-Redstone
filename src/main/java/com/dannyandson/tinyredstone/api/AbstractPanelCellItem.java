@@ -26,7 +26,7 @@ public abstract class AbstractPanelCellItem extends Item {
             ItemStack itemStackCopy = context.getItemInHand().copy();
             InteractionResult result = ModRegistration.REDSTONE_PANEL_ITEM.get().useOn(context);
             context.getPlayer().setItemInHand(context.getHand(), itemStackCopy);
-            if (context.getLevel().getBlockEntity(context.getClickedPos().offset(context.getClickedFace().step())) instanceof PanelTile panelTile && context.getPlayer() != null) {
+            if (context.getLevel().getBlockEntity(context.getClickedPos().relative(context.getClickedFace())) instanceof PanelTile panelTile && context.getPlayer() != null) {
                 // Use useItemOn (item-in-hand interaction) not useWithoutItem (empty-hand)
                 BlockHitResult hitResult = panelTile.getPlayerCollisionHitResult(context.getPlayer());
                 ModRegistration.REDSTONE_PANEL_BLOCK.get().useItemOn(

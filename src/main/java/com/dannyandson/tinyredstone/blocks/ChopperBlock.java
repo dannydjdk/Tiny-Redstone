@@ -2,12 +2,12 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -40,18 +40,15 @@ public class ChopperBlock extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
+    // 1.21.5: onRemove split into BlockEntity#preRemoveSideEffects (for dropping contents)
+    // and Block#affectNeighborsAfterRemoval (for neighbor updates only).
+    // Container dropping now happens in ChopperBlockEntity#preRemoveSideEffects.
+
+
     @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState newState, boolean isMoving) {
-        if (!blockState.is(newState.getBlock())) {
-            BlockEntity blockentity = level.getBlockEntity(blockPos);
-            if (blockentity instanceof Container) {
-                Containers.dropContents(level, blockPos, (Container) blockentity);
-                level.updateNeighbourForOutputSignal(blockPos, this);
-            }
-
-            super.onRemove(blockState, level, blockPos, newState, isMoving);
-        }
+    protected void affectNeighborsAfterRemoval(BlockState blockState, ServerLevel level, BlockPos blockPos, boolean isMoving) {
+        super.affectNeighborsAfterRemoval(blockState, level, blockPos, isMoving);
     }
 
     @SuppressWarnings("deprecation")

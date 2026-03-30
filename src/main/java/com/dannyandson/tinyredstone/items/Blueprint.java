@@ -22,6 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Blueprint extends Item {
 
@@ -38,19 +40,19 @@ public class Blueprint extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> list, TooltipFlag flags) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> textConsumer, TooltipFlag flags) {
         CompoundTag customTag = ItemStackHelper.getCustomTag(stack);
         if (customTag != null && customTag.contains("blueprint")) {
-            list.add(Component.translatable("message.item.blueprint.full"));
+            textConsumer.accept(Component.translatable("message.item.blueprint.full"));
             List<ItemStack> blueprintItems = getRequiredItemStacks(customTag.getCompound("blueprint").orElseGet(CompoundTag::new));
             for (ItemStack item : blueprintItems) {
                 Component itemNameComponent = item.getHoverName();
                 String itemName = itemNameComponent.getString();
-                list.add(Component.nullToEmpty(itemName + " : " + item.getCount()));
+                textConsumer.accept(Component.nullToEmpty(itemName + " : " + item.getCount()));
             }
-            list.add(Component.literal("CMD: " + stack.get(DataComponents.CUSTOM_MODEL_DATA)));
+            textConsumer.accept(Component.literal("CMD: " + stack.get(DataComponents.CUSTOM_MODEL_DATA)));
         } else {
-            list.add(Component.translatable("message.item.blueprint.empty"));
+            textConsumer.accept(Component.translatable("message.item.blueprint.empty"));
         }
     }
 
@@ -93,7 +95,8 @@ public class Blueprint extends Item {
                         if (!player.isCreative()) {
                             for (ItemStack item : items) {
                                 int itemsToRemove = item.getCount();
-                                for (ItemStack invStack : player.getInventory().getContents()) {
+                                for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                                    ItemStack invStack = player.getInventory().getItem(i);
                                     if (stacksAreMatchingItem(invStack, item)) {
                                         int removeCt = Math.min(invStack.getCount(), itemsToRemove);
                                         invStack.setCount(invStack.getCount() - removeCt);
@@ -113,7 +116,7 @@ public class Blueprint extends Item {
                 nbt.put("blueprint", blueprintNBT);
                 ItemStackHelper.setCustomTag(context.getItemInHand(), nbt);
                 context.getItemInHand().set(DataComponents.CUSTOM_MODEL_DATA,
-                        new CustomModelData(1));
+                        new CustomModelData(List.of(), List.of(), List.of(), List.of(1)));
             }
         }
 
@@ -172,7 +175,8 @@ public class Blueprint extends Item {
     private static boolean playerHasSufficientComponents(List<ItemStack> itemStacks, Player player) {
         for (ItemStack itemStack : itemStacks) {
             int count = 0;
-            for (ItemStack invStack : player.getInventory().getContents()) {
+            for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                ItemStack invStack = player.getInventory().getItem(i);
                 if (stacksAreMatchingItem(invStack, itemStack)) {
                     count += invStack.getCount();
                 }

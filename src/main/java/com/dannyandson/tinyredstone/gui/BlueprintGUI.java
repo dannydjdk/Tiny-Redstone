@@ -158,7 +158,7 @@ public class BlueprintGUI  extends Screen {
 
                     try {
                         //will throw CommandSyntaxException, abort and log error if file is not valid NBT json
-                        CompoundTag nbt = TagParser.parseCompoundTag(data.toString());
+                        CompoundTag nbt = TagParser.parseCompoundFully(data.toString());
                         CompoundTag cleanNBT = Blueprint.cleanUpBlueprintNBT(nbt);
                         if (cleanNBT!=null) {
                             ItemStackHelper.setCustomTag(this.blueprint, cleanNBT);

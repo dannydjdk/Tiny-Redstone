@@ -43,8 +43,9 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
     // 26.1: AbstractContainerScreen#render now calls renderTooltip automatically.
     // No need to override extractRenderState.
 
+
     @Override
-    protected void extractBackground(GuiGraphicsExtractor guiGraphics, float partialTicks, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float a) {
         int x = (this.width - this.imageWidth) / 2;
         int y = (this.height - this.imageHeight) / 2;
         // 26.1: blit uses RenderPipelines.GUI_TEXTURED instead of RenderType::guiTextured

@@ -3,16 +3,11 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.math.Axis;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -115,23 +110,15 @@ public class CachedPanelRenderer {
         if (tile.isCovered()) {
             // Check for camouflage cover (DarkCover/LightCover with madeFrom block)
             if (tile.panelCover instanceof DarkCover darkCover && darkCover.getMadeFrom() != null) {
-                Identifier madeFrom = darkCover.getMadeFrom();
-                BlockState camouflageState = BuiltInRegistries.BLOCK.getValue(madeFrom).defaultBlockState();
-                if (camouflageState != null && !camouflageState.isAir() && tile.getLevel() != null) {
-                    // tesselateBlock renders in block-local space (identity PoseStack).
-                    // The caller must NOT apply panel-facing rotation during replay.
-                    var blockRenderer = Minecraft.getInstance().getBlockRenderer();
-                    BakedModel model = blockRenderer.getBlockModel(camouflageState);
-                    VertexConsumer builder = captureSource.getBuffer(Sheets.cutoutBlockSheet());
-                    blockRenderer.getModelRenderer().tesselateBlock(
-                            tile.getLevel(), model, camouflageState,
-                            tile.getBlockPos(), matrixStack, builder,
-                            false, RandomSource.create(),
-                            camouflageState.getSeed(tile.getBlockPos()),
-                            combinedOverlay
-                    );
-                    isCamouflageCache = true;
-                }
+                // TODO 26.1: BakedModel, getBlockRenderer(), tesselateBlock() all removed.
+                // The camouflage rendering path needs to be rewritten using:
+                // - BlockStateModelSet to get the BlockStateModel for camouflageState
+                // - The new submission pipeline or MutableQuad API for quad rendering
+                // For now, fall through to the manual cover render path.
+                // This means camouflage covers will render as plain covers, not as the block they're disguised as.
+                matrixStack.pushPose();
+                tile.panelCover.render(matrixStack, captureSource, combinedLight, combinedOverlay, tile.getColor());
+                matrixStack.popPose();
             } else {
                 // Non-camouflage cover: render manually in panel space (same as cells).
                 // Panel-facing rotation is applied during replay.
@@ -200,14 +187,22 @@ public class CachedPanelRenderer {
     public static void replayVerticesStatic(VertexConsumer builder, Matrix4f transform, List<CachedVertex> vertices) {
         for (CachedVertex v : vertices) {
             if (v.hasUV) {
+                // 26.1: BufferBuilder strictly requires ALL vertex elements.
+                // Sheets render types need: position, color, UV0 (texture), UV1 (overlay), UV2 (lightmap), normal
                 builder.addVertex(transform, v.x, v.y, v.z)
                         .setColor(v.r, v.g, v.b, v.a)
                         .setUv(v.u, v.v)
+                        .setUv1(0, 10)  // overlay: OverlayTexture.NO_OVERLAY = pack(0, 10)
                         .setUv2(v.lightU, v.lightV)
                         .setNormal(v.normalX, v.normalY, v.normalZ);
             } else {
+                // Non-UV vertices also need all elements when going to Sheets render types
                 builder.addVertex(transform, v.x, v.y, v.z)
-                        .setColor(v.r, v.g, v.b, v.a);
+                        .setColor(v.r, v.g, v.b, v.a)
+                        .setUv(0, 0)
+                        .setUv1(0, 10)
+                        .setUv2(0, 0)
+                        .setNormal(0, 1, 0);
             }
         }
     }

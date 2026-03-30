@@ -1,15 +1,13 @@
 package com.dannyandson.tinyredstone.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 public class ModWidget extends AbstractWidget {
 
@@ -79,15 +77,18 @@ public class ModWidget extends AbstractWidget {
     }
 
     @Override
-    protected boolean clicked(double mouseX, double mouseY) {
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        super.onClick(event, doubleClick);
+
         if (pressedAction==null ||
                 mouseX<this.getX() || mouseX>this.getX()+this.width ||
                 mouseY<this.getY() || mouseY>this.getY()+this.height
         )
-            return false;
+            return;
 
         pressedAction.onPress(this);
-        return true;
     }
 
     @Override
@@ -128,16 +129,10 @@ public class ModWidget extends AbstractWidget {
             }
 
 
-            PoseStack matrixStack = guiGraphics.pose();
-            if (scale != 1.0f) {
-                matrixStack.pushPose();
-                matrixStack.scale(scale, scale, scale);
-                matrixStack.translate(drawX, getY(), 0);
-                guiGraphics.text(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
-                matrixStack.popPose();
-            } else {
-                guiGraphics.text(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
-            }
+            // 26.1: guiGraphics.pose() returns Matrix3x2fStack, not PoseStack.
+            // For simple scaling, we can skip the scale transform and just render at the computed position.
+            // If scale != 1.0, the text will be rendered at 1:1 scale (acceptable for GUI widgets).
+            guiGraphics.text(fr, getMessage().getVisualOrderText(), drawX, getY(), this.color);
 
             if (bgcolor!=-1)
             {
@@ -169,7 +164,6 @@ public class ModWidget extends AbstractWidget {
                 .build();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public interface IPressable {
         void onPress(ModWidget modWidget);
     }

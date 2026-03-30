@@ -9,7 +9,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
@@ -101,6 +100,7 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
         renderer.addVertex(stack.last().pose(), x, y, z)
                 .setColor(1.0f, 1.0f, 1.0f, alpha)
                 .setUv(u, v)
+                .setUv1(0, 10)  // 26.1: overlay required — OverlayTexture.NO_OVERLAY
                 .setUv2(combinedLightIn & 0xFFFF, (combinedLightIn >> 16) & 0xFFFF)
                 .setNormal(1, 0, 0);
     }
