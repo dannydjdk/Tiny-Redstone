@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "tinyredstone:item/redstone_panel",
+    "renderer": "tinyredstone:panel"
+  }
+}

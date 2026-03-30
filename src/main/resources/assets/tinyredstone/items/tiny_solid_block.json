@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "tinyredstone:item/tiny_solid_block",
+    "renderer": "tinyredstone:tiny_block"
+  }
+}

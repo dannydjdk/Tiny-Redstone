@@ -1,0 +1,7 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "tinyredstone:item/light_panel_cover",
+    "renderer": "tinyredstone:panel_cover"
+  }
+}
