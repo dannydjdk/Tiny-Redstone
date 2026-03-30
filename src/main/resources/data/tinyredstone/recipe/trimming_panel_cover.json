@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " a ",
+    "S S"
+  ],
+  "key": {
+    "S": "minecraft:smooth_stone_slab",
+    "a": "minecraft:wooden_axe"
+  },
+  "result": {
+    "id": "tinyredstone:trim_panel_cover",
+    "count": 3
+  }
+}

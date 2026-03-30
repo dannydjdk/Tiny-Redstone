@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:sand",
+    "minecraft:quartz",
+    "minecraft:charcoal"
+  ],
+  "result": {
+    "id": "tinyredstone:silicon_compound",
+    "count": 2
+  }
+}

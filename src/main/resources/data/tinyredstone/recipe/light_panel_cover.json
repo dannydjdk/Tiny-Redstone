@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " G ",
+    "S S"
+  ],
+  "key": {
+    "S": "minecraft:smooth_stone_slab",
+    "G": "minecraft:glass"
+  },
+  "result": {
+    "id": "tinyredstone:light_panel_cover",
+    "count": 3
+  }
+}

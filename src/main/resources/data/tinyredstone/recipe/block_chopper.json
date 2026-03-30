@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " i ",
+    "iai",
+    "SRS"
+  ],
+  "key": {
+    "S": "minecraft:smooth_stone",
+    "i": "#c:silicon",
+    "a": "minecraft:wooden_axe",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "tinyredstone:block_chopper",
+    "count": 1
+  }
+}

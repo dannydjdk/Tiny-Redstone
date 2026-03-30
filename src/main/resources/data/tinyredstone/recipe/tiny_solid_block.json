@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:white_wool",
+    "#c:silicon"
+  ],
+  "result": {
+    "id": "tinyredstone:tiny_solid_block",
+    "count": 8
+  }
+}

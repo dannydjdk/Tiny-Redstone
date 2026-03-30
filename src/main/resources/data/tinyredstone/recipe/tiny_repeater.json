@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:repeater",
+    "#c:silicon"
+  ],
+  "result": {
+    "id": "tinyredstone:tiny_repeater",
+    "count": 8
+  }
+}
