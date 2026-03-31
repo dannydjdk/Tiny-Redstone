@@ -1,16 +1,10 @@
 {
   "variants": {
-    "facing=up,has_panel_base=true": {"model": "tinyredstone:block/redstone_panel","x": 180},
-    "facing=north,has_panel_base=true": {"model": "tinyredstone:block/redstone_panel", "x": -90},
-    "facing=east,has_panel_base=true": {"model": "tinyredstone:block/redstone_panel", "x": 90, "y": -90},
-    "facing=south,has_panel_base=true": {"model": "tinyredstone:block/redstone_panel","x": 90},
-    "facing=west,has_panel_base=true": {"model": "tinyredstone:block/redstone_panel", "x": 90, "y": 90},
-    "facing=down,has_panel_base=true": {"model": "tinyredstone:block/redstone_panel"},
-    "facing=up,has_panel_base=false": {"model": "tinyredstone:block/redstone_panel_empty"},
-    "facing=north,has_panel_base=false": {"model": "tinyredstone:block/redstone_panel_empty"},
-    "facing=east,has_panel_base=false": {"model": "tinyredstone:block/redstone_panel_empty"},
-    "facing=south,has_panel_base=false": {"model": "tinyredstone:block/redstone_panel_empty"},
-    "facing=west,has_panel_base=false": {"model": "tinyredstone:block/redstone_panel_empty"},
-    "facing=down,has_panel_base=false": {"model": "tinyredstone:block/redstone_panel_empty"}
+    "facing=up": {"model": "tinyredstone:block/redstone_panel","x": 180},
+    "facing=north": {"model": "tinyredstone:block/redstone_panel", "x": -90},
+    "facing=east": {"model": "tinyredstone:block/redstone_panel", "x": 90, "y": -90},
+    "facing=south": {"model": "tinyredstone:block/redstone_panel","x": 90},
+    "facing=west": {"model": "tinyredstone:block/redstone_panel", "x": 90, "y": 90},
+    "facing=down": {"model": "tinyredstone:block/redstone_panel"}
   }
 }

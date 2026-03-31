@@ -253,11 +253,6 @@ public class PanelBlock extends BaseEntityBlock {
                 Direction direction = null;
                 if (orientation != null && orientation.getFront() != null) {
                     direction = orientation.getFront();
-                    TinyRedstone.LOGGER.debug("neighborChanged at {} — direction={}",
-                            pos.toShortString(), direction);
-                } else {
-                    TinyRedstone.LOGGER.debug("neighborChanged at {} — null orientation/front, updating all sides",
-                            pos.toShortString());
                 }
 
                 boolean change = false;
