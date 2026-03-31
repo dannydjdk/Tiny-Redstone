@@ -35,7 +35,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -245,28 +244,67 @@ public class PanelBlock extends BaseEntityBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void neighborChanged(BlockState currentState, Level world, BlockPos pos, Block blockIn, @Nullable Orientation orientation, boolean isMoving) {
-        // 26.1: neighborPos replaced by Orientation. Extract direction from it.
-        if (orientation == null) return;
-        Direction direction = orientation.getFront();
-        if (direction == null) return;
-
         if (world.getBlockEntity(pos) instanceof PanelTile panelTile) {
-            boolean change = false;
             try {
-                Side side = panelTile.getSideFromDirection(direction);
-                if (side != null) {
-                    if (panelTile.pingOutwardObservers(direction))
-                        change = true;
-                    panelTile.updateSide(direction);
-                    if (panelTile.isFlagOutputUpdate()) {
-                        panelTile.updateOutputs();
+                // 26.1: Orientation replaces the old neighbor BlockPos parameter.
+                // getFront() gives the direction relevant to this block's update.
+                // When orientation or direction is null (common for non-redstone updates),
+                // update all sides rather than silently ignoring the notification.
+                Direction direction = null;
+                if (orientation != null && orientation.getFront() != null) {
+                    direction = orientation.getFront();
+                    TinyRedstone.LOGGER.debug("neighborChanged at {} — direction={}",
+                            pos.toShortString(), direction);
+                } else {
+                    TinyRedstone.LOGGER.debug("neighborChanged at {} — null orientation/front, updating all sides",
+                            pos.toShortString());
+                }
+
+                boolean change = false;
+
+                if (direction != null) {
+                    // Targeted update: only the side facing the changed block
+                    Side side = panelTile.getSideFromDirection(direction);
+                    if (side != null) {
+                        if (panelTile.pingOutwardObservers(direction))
+                            change = true;
+                        panelTile.updateSide(direction);
                     }
+                } else {
+                    // Fallback: update all sides when we can't determine direction
+                    for (Direction dir : Direction.values()) {
+                        Side side = panelTile.getSideFromDirection(dir);
+                        if (side != null) {
+                            if (panelTile.pingOutwardObservers(dir))
+                                change = true;
+                            panelTile.updateSide(dir);
+                        }
+                    }
+                }
+
+                if (panelTile.isFlagOutputUpdate()) {
+                    panelTile.updateOutputs();
                 }
                 if (panelTile.updateSideConnections() || change) {
                     panelTile.flagSync();
                 }
             } catch (Exception e) {
                 panelTile.handleCrash(e);
+            }
+        }
+    }
+
+    /**
+     * 26.1 NeoForge extension: called when a neighboring block entity changes.
+     * Only used to track side connections (whether a neighbor is a panel for rendering).
+     * Redstone state propagation between panels is handled directly through the cell
+     * offset system in PanelCellPos, not through block update notifications.
+     */
+    @Override
+    public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor) {
+        if (level instanceof Level world && world.getBlockEntity(pos) instanceof PanelTile panelTile) {
+            if (panelTile.updateSideConnections()) {
+                panelTile.flagSync();
             }
         }
     }
