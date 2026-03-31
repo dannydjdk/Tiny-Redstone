@@ -12,7 +12,9 @@ import com.dannyandson.tinyredstone.network.PlaySound;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -123,14 +125,26 @@ public class PanelTile extends BlockEntity {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    // onDataPacket removed in 26.1 - sync handled automatically via getUpdatePacket/getUpdateTag
+    // onDataPacket: default implementation forwards to loadWithComponents → loadAdditional
+    // handleUpdateTag: default implementation calls loadWithComponents → loadAdditional
 
-    // getUpdateTag: using default implementation which calls saveAdditional
-
-    // handleUpdateTag: using default implementation which calls loadAdditional
+    // 26.1: getUpdateTag MUST be overridden to include custom data in sync packets.
+    // Without this, the default only sends minimal metadata (pos, type) and the client gets nothing.
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return this.saveWithoutMetadata(registries);
+    }
 
     /** Parse an SNBT string back to a CompoundTag, returning empty tag on failure. */
-    // parseSnbt removed in session 4 — replaced by input.read(key, CompoundTag.CODEC)
+    private static CompoundTag parseSnbt(String snbt) {
+        if (snbt == null || snbt.isEmpty()) return new CompoundTag();
+        try {
+            return TagParser.parseCompoundFully(snbt);
+        } catch (Exception e) {
+            TinyRedstone.LOGGER.error("Failed to parse SNBT: " + e.getMessage());
+            return new CompoundTag();
+        }
+    }
 
     public CompoundTag saveToNbt(CompoundTag compoundTag) {
 
@@ -166,154 +180,118 @@ public class PanelTile extends BlockEntity {
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
 
-        // 26.1 DEBUG: Verify saveAdditional is called and basic primitives round-trip
-        output.putInt("_debug_cell_count", cells.size());
-        TinyRedstone.LOGGER.info("PanelTile.saveAdditional at {} — {} cells, hasBase={}", getBlockPos(), cells.size(), hasBase());
+        // --- Simple primitives go directly on the output ---
+        output.putInt("lightOutput", this.lightOutput);
+        output.putBoolean("flagLightUpdate", this.flagLightUpdate);
+        output.putBoolean("flagCrashed", this.flagCrashed);
+        output.putBoolean("flagOverflow", this.flagOverflow);
+        output.putBoolean("flagOutputUpdate", this.flagOutputUpdate);
 
+        // --- Power maps: build CompoundTag, serialize to SNBT string ---
         try {
-            // 26.1: Use child() to create nested ValueOutput objects for power maps.
-            // CompoundTag.CODEC via store() was not round-tripping correctly.
-            if (this.strongPowerToNeighbors.size()==5) {
-                ValueOutput strongOut = output.child("strong_power_outgoing");
-                strongOut.putInt(Side.FRONT.ordinal() + "", this.strongPowerToNeighbors.get(Side.FRONT));
-                strongOut.putInt(Side.RIGHT.ordinal() + "", this.strongPowerToNeighbors.get(Side.RIGHT));
-                strongOut.putInt(Side.BACK.ordinal() + "",  this.strongPowerToNeighbors.get(Side.BACK));
-                strongOut.putInt(Side.LEFT.ordinal() + "",  this.strongPowerToNeighbors.get(Side.LEFT));
-                strongOut.putInt(Side.TOP.ordinal() + "",  this.strongPowerToNeighbors.get(Side.TOP));
-                if (!hasBase())
-                    strongOut.putInt(Side.BOTTOM.ordinal() + "",  this.strongPowerToNeighbors.get(Side.BOTTOM));
+            CompoundTag powerData = new CompoundTag();
+
+            if (!this.strongPowerToNeighbors.isEmpty()) {
+                CompoundTag strongTag = new CompoundTag();
+                for (Map.Entry<Side, Integer> entry : this.strongPowerToNeighbors.entrySet()) {
+                    strongTag.putInt(entry.getKey().ordinal() + "", entry.getValue());
+                }
+                powerData.put("strong_power_outgoing", strongTag);
             }
-            if (this.weakPowerToNeighbors.size()==5) {
-                ValueOutput weakOut = output.child("weak_power_outgoing");
-                weakOut.putInt(Side.FRONT.ordinal() + "", this.weakPowerToNeighbors.get(Side.FRONT));
-                weakOut.putInt(Side.RIGHT.ordinal() + "", this.weakPowerToNeighbors.get(Side.RIGHT));
-                weakOut.putInt(Side.BACK.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BACK));
-                weakOut.putInt(Side.LEFT.ordinal() + "",  this.weakPowerToNeighbors.get(Side.LEFT));
-                weakOut.putInt(Side.TOP.ordinal() + "",  this.weakPowerToNeighbors.get(Side.TOP));
-                if (!hasBase())
-                    weakOut.putInt(Side.BOTTOM.ordinal() + "",  this.weakPowerToNeighbors.get(Side.BOTTOM));
+            if (!this.weakPowerToNeighbors.isEmpty()) {
+                CompoundTag weakTag = new CompoundTag();
+                for (Map.Entry<Side, Integer> entry : this.weakPowerToNeighbors.entrySet()) {
+                    weakTag.putInt(entry.getKey().ordinal() + "", entry.getValue());
+                }
+                powerData.put("weak_power_outgoing", weakTag);
             }
-            if (this.wirePowerToNeighbors.size()==5) {
-                ValueOutput wireOut = output.child("wire_power_outgoing");
-                wireOut.putInt(Side.FRONT.ordinal() + "", this.wirePowerToNeighbors.get(Side.FRONT));
-                wireOut.putInt(Side.RIGHT.ordinal() + "", this.wirePowerToNeighbors.get(Side.RIGHT));
-                wireOut.putInt(Side.BACK.ordinal() + "",  this.wirePowerToNeighbors.get(Side.BACK));
-                wireOut.putInt(Side.LEFT.ordinal() + "",  this.wirePowerToNeighbors.get(Side.LEFT));
-                wireOut.putInt(Side.TOP.ordinal() + "",  this.wirePowerToNeighbors.get(Side.TOP));
+            if (!this.wirePowerToNeighbors.isEmpty()) {
+                CompoundTag wireTag = new CompoundTag();
+                for (Map.Entry<Side, Integer> entry : this.wirePowerToNeighbors.entrySet()) {
+                    wireTag.putInt(entry.getKey().ordinal() + "", entry.getValue());
+                }
+                powerData.put("wire_power_outgoing", wireTag);
             }
             if (!this.connectedPanelNeighbor.isEmpty()) {
-                ValueOutput connOut = output.child("connected_panel_neighbors");
-                connOut.putBoolean(Side.FRONT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.FRONT) && this.connectedPanelNeighbor.get(Side.FRONT));
-                connOut.putBoolean(Side.RIGHT.ordinal() + "",this.connectedPanelNeighbor.containsKey(Side.RIGHT) &&  this.connectedPanelNeighbor.get(Side.RIGHT));
-                connOut.putBoolean(Side.BACK.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.BACK) &&  this.connectedPanelNeighbor.get(Side.BACK));
-                connOut.putBoolean(Side.LEFT.ordinal() + "", this.connectedPanelNeighbor.containsKey(Side.LEFT) &&  this.connectedPanelNeighbor.get(Side.LEFT));
-                connOut.putBoolean(Side.TOP.ordinal() + "",  this.connectedPanelNeighbor.containsKey(Side.TOP) && this.connectedPanelNeighbor.get(Side.TOP));
+                CompoundTag connTag = new CompoundTag();
+                for (Map.Entry<Side, Boolean> entry : this.connectedPanelNeighbor.entrySet()) {
+                    connTag.putBoolean(entry.getKey().ordinal() + "", entry.getValue());
+                }
+                powerData.put("connected_panel_neighbors", connTag);
             }
 
-            output.putInt("lightOutput",this.lightOutput);
-            output.putBoolean("flagLightUpdate",this.flagLightUpdate);
-            output.putBoolean("flagCrashed",this.flagCrashed);
-            output.putBoolean("flagOverflow",this.flagOverflow);
-            output.putBoolean("flagOutputUpdate",this.flagOutputUpdate);
-
-        } catch (NullPointerException exception) {
-            TinyRedstone.LOGGER.error("Exception thrown when attempting to save power inputs and outputs: " + exception.toString() + ((exception.getStackTrace().length>0)?exception.getStackTrace()[0].toString():""));
+            output.putString("powerData", powerData.toString());
+        } catch (Exception exception) {
+            TinyRedstone.LOGGER.error("Exception saving power data: " + exception.getMessage(), exception);
         }
 
-        // 26.1: Serialize cellData as compressed NBT bytes encoded in Base64.
-        // Neither SNBT strings nor CompoundTag.CODEC round-tripped correctly through ValueOutput.
-        // Raw compressed bytes via Base64 string are guaranteed to preserve the full CompoundTag.
+        // --- Cell data (cells, color, cover): build CompoundTag via saveToNbt, serialize to SNBT ---
         try {
             CompoundTag cellData = this.saveToNbt(new CompoundTag());
-            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-            net.minecraft.nbt.NbtIo.writeCompressed(cellData, baos);
-            output.putString("cellData", java.util.Base64.getEncoder().encodeToString(baos.toByteArray()));
-            TinyRedstone.LOGGER.info("PanelTile.saveAdditional — cellData base64 length: {}", baos.size());
+            output.putString("cellData", cellData.toString());
         } catch (Exception e) {
-            TinyRedstone.LOGGER.error("Failed to save cellData as base64: " + e.getMessage(), e);
+            TinyRedstone.LOGGER.error("Failed to save cellData as SNBT: " + e.getMessage(), e);
         }
     }
 
     // This is where you load the data that you saved in writeToNBT
     @Override
-    public void loadAdditional(ValueInput parentNBTTagCompound) {
-        super.loadAdditional(parentNBTTagCompound);
-
-        // 26.1 DEBUG: Verify loadAdditional is called and basic primitives round-trip
-        int debugCount = parentNBTTagCompound.getIntOr("_debug_cell_count", -1);
-        TinyRedstone.LOGGER.info("PanelTile.loadAdditional at {} — debug_cell_count={}", getBlockPos(), debugCount);
+    public void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
 
         // important rule: never trust the data you read from NBT, make sure it can't cause a crash
 
-        // 26.1: Read cellData from base64-encoded compressed NBT bytes.
-        CompoundTag cellData = new CompoundTag();
-        try {
-            String encoded = parentNBTTagCompound.getStringOr("cellData", "");
-            if (!encoded.isEmpty()) {
-                byte[] bytes = java.util.Base64.getDecoder().decode(encoded);
-                cellData = net.minecraft.nbt.NbtIo.readCompressed(
-                        new java.io.ByteArrayInputStream(bytes),
-                        net.minecraft.nbt.NbtAccounter.unlimitedHeap());
-                TinyRedstone.LOGGER.info("PanelTile.loadAdditional — decoded cellData, keys: {}", cellData.keySet());
-            } else {
-                TinyRedstone.LOGGER.warn("PanelTile.loadAdditional — cellData string is empty!");
-            }
-        } catch (Exception e) {
-            TinyRedstone.LOGGER.error("Failed to load cellData from base64: " + e.getMessage(), e);
+        // --- Simple primitives ---
+        this.lightOutput = input.getIntOr("lightOutput", 0);
+        this.flagLightUpdate = input.getBooleanOr("flagLightUpdate", false);
+        this.flagCrashed = input.getBooleanOr("flagCrashed", false);
+        this.flagOverflow = input.getBooleanOr("flagOverflow", false);
+        this.flagOutputUpdate = input.getBooleanOr("flagOutputUpdate", false);
+
+        // --- Power maps: parse SNBT back into CompoundTag ---
+        CompoundTag powerData = parseSnbt(input.getStringOr("powerData", ""));
+
+        CompoundTag strongTag = powerData.getCompound("strong_power_outgoing").orElseGet(CompoundTag::new);
+        if (!strongTag.isEmpty()) {
+            this.strongPowerToNeighbors.put(Side.FRONT, strongTag.getIntOr(Side.FRONT.ordinal() + "", 0));
+            this.strongPowerToNeighbors.put(Side.RIGHT, strongTag.getIntOr(Side.RIGHT.ordinal() + "", 0));
+            this.strongPowerToNeighbors.put(Side.BACK,  strongTag.getIntOr(Side.BACK.ordinal() + "", 0));
+            this.strongPowerToNeighbors.put(Side.LEFT,  strongTag.getIntOr(Side.LEFT.ordinal() + "", 0));
+            this.strongPowerToNeighbors.put(Side.TOP,   strongTag.getIntOr(Side.TOP.ordinal() + "", 0));
+            if (strongTag.contains(Side.BOTTOM.ordinal() + ""))
+                this.strongPowerToNeighbors.put(Side.BOTTOM, strongTag.getIntOr(Side.BOTTOM.ordinal() + "", 0));
         }
+        CompoundTag weakTag = powerData.getCompound("weak_power_outgoing").orElseGet(CompoundTag::new);
+        if (!weakTag.isEmpty()) {
+            this.weakPowerToNeighbors.put(Side.FRONT, weakTag.getIntOr(Side.FRONT.ordinal() + "", 0));
+            this.weakPowerToNeighbors.put(Side.RIGHT, weakTag.getIntOr(Side.RIGHT.ordinal() + "", 0));
+            this.weakPowerToNeighbors.put(Side.BACK,  weakTag.getIntOr(Side.BACK.ordinal() + "", 0));
+            this.weakPowerToNeighbors.put(Side.LEFT,  weakTag.getIntOr(Side.LEFT.ordinal() + "", 0));
+            this.weakPowerToNeighbors.put(Side.TOP,   weakTag.getIntOr(Side.TOP.ordinal() + "", 0));
+            if (weakTag.contains(Side.BOTTOM.ordinal() + ""))
+                this.weakPowerToNeighbors.put(Side.BOTTOM, weakTag.getIntOr(Side.BOTTOM.ordinal() + "", 0));
+        }
+        CompoundTag wireTag = powerData.getCompound("wire_power_outgoing").orElseGet(CompoundTag::new);
+        if (!wireTag.isEmpty()) {
+            this.wirePowerToNeighbors.put(Side.FRONT, wireTag.getIntOr(Side.FRONT.ordinal() + "", 0));
+            this.wirePowerToNeighbors.put(Side.RIGHT, wireTag.getIntOr(Side.RIGHT.ordinal() + "", 0));
+            this.wirePowerToNeighbors.put(Side.BACK,  wireTag.getIntOr(Side.BACK.ordinal() + "", 0));
+            this.wirePowerToNeighbors.put(Side.LEFT,  wireTag.getIntOr(Side.LEFT.ordinal() + "", 0));
+            this.wirePowerToNeighbors.put(Side.TOP,   wireTag.getIntOr(Side.TOP.ordinal() + "", 0));
+        }
+        CompoundTag connTag = powerData.getCompound("connected_panel_neighbors").orElseGet(CompoundTag::new);
+        if (!connTag.isEmpty()) {
+            this.connectedPanelNeighbor.put(Side.FRONT, connTag.getBooleanOr(Side.FRONT.ordinal() + "", false));
+            this.connectedPanelNeighbor.put(Side.RIGHT, connTag.getBooleanOr(Side.RIGHT.ordinal() + "", false));
+            this.connectedPanelNeighbor.put(Side.BACK,  connTag.getBooleanOr(Side.BACK.ordinal() + "", false));
+            this.connectedPanelNeighbor.put(Side.LEFT,  connTag.getBooleanOr(Side.LEFT.ordinal() + "", false));
+            this.connectedPanelNeighbor.put(Side.TOP,   connTag.getBooleanOr(Side.TOP.ordinal() + "", false));
+        }
+
+        // --- Cell data (cells, color, cover): parse SNBT back into CompoundTag ---
+        CompoundTag cellData = parseSnbt(input.getStringOr("cellData", ""));
 
         this.loadCellsFromNBT(cellData.getCompound("cells").orElseGet(CompoundTag::new));
-
-        // 26.1: Use childOrEmpty() to read nested ValueInput objects for power maps
-        ValueInput strongIn = parentNBTTagCompound.childOrEmpty("strong_power_outgoing");
-        int strongTest = strongIn.getIntOr(Side.FRONT.ordinal() + "", -999);
-        if (strongTest != -999) {
-            this.strongPowerToNeighbors.put(Side.FRONT, strongIn.getIntOr(Side.FRONT.ordinal() + "", 0));
-            this.strongPowerToNeighbors.put(Side.RIGHT, strongIn.getIntOr(Side.RIGHT.ordinal() + "", 0));
-            this.strongPowerToNeighbors.put(Side.BACK,  strongIn.getIntOr(Side.BACK.ordinal() + "", 0));
-            this.strongPowerToNeighbors.put(Side.LEFT,  strongIn.getIntOr(Side.LEFT.ordinal() + "", 0));
-            this.strongPowerToNeighbors.put(Side.TOP,  strongIn.getIntOr(Side.TOP.ordinal() + "", 0));
-            if (!hasBase())
-                this.strongPowerToNeighbors.put(Side.BOTTOM,  strongIn.getIntOr(Side.BOTTOM.ordinal() + "", 0));
-        }
-        ValueInput weakIn = parentNBTTagCompound.childOrEmpty("weak_power_outgoing");
-        int weakTest = weakIn.getIntOr(Side.FRONT.ordinal() + "", -999);
-        if (weakTest != -999) {
-            this.weakPowerToNeighbors.put(Side.FRONT, weakIn.getIntOr(Side.FRONT.ordinal() + "", 0));
-            this.weakPowerToNeighbors.put(Side.RIGHT, weakIn.getIntOr(Side.RIGHT.ordinal() + "", 0));
-            this.weakPowerToNeighbors.put(Side.BACK,  weakIn.getIntOr(Side.BACK.ordinal() + "", 0));
-            this.weakPowerToNeighbors.put(Side.LEFT,  weakIn.getIntOr(Side.LEFT.ordinal() + "", 0));
-            this.weakPowerToNeighbors.put(Side.TOP,  weakIn.getIntOr(Side.TOP.ordinal() + "", 0));
-            if (!hasBase())
-                this.weakPowerToNeighbors.put(Side.BOTTOM,  weakIn.getIntOr(Side.BOTTOM.ordinal() + "", 0));
-        }
-        ValueInput wireIn = parentNBTTagCompound.childOrEmpty("wire_power_outgoing");
-        int wireTest = wireIn.getIntOr(Side.FRONT.ordinal() + "", -999);
-        if (wireTest != -999) {
-            this.wirePowerToNeighbors.put(Side.FRONT, wireIn.getIntOr(Side.FRONT.ordinal() + "", 0));
-            this.wirePowerToNeighbors.put(Side.RIGHT, wireIn.getIntOr(Side.RIGHT.ordinal() + "", 0));
-            this.wirePowerToNeighbors.put(Side.BACK,  wireIn.getIntOr(Side.BACK.ordinal() + "", 0));
-            this.wirePowerToNeighbors.put(Side.LEFT,  wireIn.getIntOr(Side.LEFT.ordinal() + "", 0));
-            this.wirePowerToNeighbors.put(Side.TOP,  wireIn.getIntOr(Side.TOP.ordinal() + "", 0));
-        }
-        ValueInput connIn = parentNBTTagCompound.childOrEmpty("connected_panel_neighbors");
-        // Use a sentinel to check if the child actually had data
-        if (connIn.getBooleanOr(Side.FRONT.ordinal() + "", false) || connIn.getBooleanOr(Side.RIGHT.ordinal() + "", false)
-                || connIn.getBooleanOr(Side.BACK.ordinal() + "", false) || connIn.getBooleanOr(Side.LEFT.ordinal() + "", false)
-                || connIn.getBooleanOr(Side.TOP.ordinal() + "", false) || true) {
-            // Always try to read — defaults are false anyway
-            this.connectedPanelNeighbor.put(Side.FRONT, connIn.getBooleanOr(Side.FRONT.ordinal() + "", false));
-            this.connectedPanelNeighbor.put(Side.RIGHT, connIn.getBooleanOr(Side.RIGHT.ordinal() + "", false));
-            this.connectedPanelNeighbor.put(Side.BACK,  connIn.getBooleanOr(Side.BACK.ordinal() + "", false));
-            this.connectedPanelNeighbor.put(Side.LEFT,  connIn.getBooleanOr(Side.LEFT.ordinal() + "", false));
-            this.connectedPanelNeighbor.put(Side.TOP,  connIn.getBooleanOr(Side.TOP.ordinal() + "", false));
-        }
-
-        this.lightOutput = parentNBTTagCompound.getIntOr("lightOutput", 0);
-        this.flagLightUpdate = parentNBTTagCompound.getBooleanOr("flagLightUpdate", false);
-        this.flagCrashed = parentNBTTagCompound.getBooleanOr("flagCrashed", false);
-        this.flagOverflow = parentNBTTagCompound.getBooleanOr("flagOverflow", false);
-        this.flagOutputUpdate = parentNBTTagCompound.getBooleanOr("flagOutputUpdate", false);
 
         // Color and cover are inside the cellData compound tag (from saveToNbt)
         int color = cellData.getIntOr("color", -1);
