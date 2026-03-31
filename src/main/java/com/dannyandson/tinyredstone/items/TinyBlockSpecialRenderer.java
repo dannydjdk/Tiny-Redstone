@@ -1,6 +1,7 @@
 package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
@@ -45,25 +46,31 @@ public record TinyBlockSpecialRenderer() implements SpecialModelRenderer<ItemSta
 
         boolean isTransparent = stack.getItem() == ModRegistration.TINY_TRANSPARENT_BLOCK.get();
 
-        // TODO 26.1: BakedModel/getBlockModel removed. For blocks with madeFrom data,
-        // we'd need BlockStateModel + submission pipeline. For now, fall through to sprite.
-        TextureAtlasSprite sprite = RenderHelper.getSprite(
-                isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
+        // Per-face sprites, matching TinyBlock.render() logic
+        TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
 
-        // Check if this item has a custom "made_from" block to get its sprite
+        Identifier madeFrom = null;
         CompoundTag customTag = ItemStackHelper.getCustomTag(stack);
         if (customTag != null) {
             CompoundTag madeFromTag = customTag.getCompound("made_from").orElseGet(CompoundTag::new);
             if (madeFromTag.contains("namespace")) {
-                Identifier madeFrom = Identifier.fromNamespaceAndPath(
+                madeFrom = Identifier.fromNamespaceAndPath(
                         madeFromTag.getStringOr("namespace", ""),
                         madeFromTag.getStringOr("path", ""));
-                TextureAtlasSprite overrideSprite = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(
-                        madeFrom, com.dannyandson.tinyredstone.blocks.Side.FRONT);
-                if (overrideSprite != null) {
-                    sprite = overrideSprite;
-                }
             }
+        }
+
+        if (madeFrom != null) {
+            sprite_top    = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.TOP);
+            sprite_front  = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.FRONT);
+            sprite_right  = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.RIGHT);
+            sprite_back   = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BACK);
+            sprite_left   = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.LEFT);
+            sprite_bottom = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BOTTOM);
+        } else {
+            TextureAtlasSprite defaultSprite = RenderHelper.getSprite(
+                    isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
+            sprite_top = sprite_front = sprite_right = sprite_back = sprite_left = sprite_bottom = defaultSprite;
         }
 
         VertexConsumer builder = bufferSource.getBuffer(
@@ -73,8 +80,11 @@ public record TinyBlockSpecialRenderer() implements SpecialModelRenderer<ItemSta
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.translate(1, 0, 0);
-        RenderHelper.drawCube(poseStack, builder, sprite, sprite, sprite, sprite, sprite, sprite,
-                lightCoords, 0xFFFFFFFF, alpha);
+        // Skip directional face shading for item rendering — the lightmap (UV2) provides
+        // proper environmental lighting. Vanilla block items don't apply face shading either.
+        // Full BlockModelResolver pipeline (Session 8) will handle this properly.
+        RenderHelper.drawCube(poseStack, builder, sprite_top, sprite_front, sprite_right,
+                sprite_back, sprite_left, sprite_bottom, lightCoords, 0xFFFFFFFF, alpha, false);
         poseStack.popPose();
 
         // 26.1: Must explicitly flush in SpecialModelRenderer — item rendering pipeline

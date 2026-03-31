@@ -383,6 +383,38 @@ public class PanelTile extends BlockEntity {
         flagVoxelShapeUpdate();
     }
 
+    /**
+     * Load cell, color, and cover data from a CompoundTag stored on an item.
+     * This is the format produced by saveToNbt() and stored via ItemStackHelper.setBlockEntityTag().
+     * Called from PanelBlock.setPlacedBy() when placing an item that carries block entity data.
+     */
+    public void loadFromItemTag(CompoundTag tag) {
+        this.loadCellsFromNBT(tag.getCompound("cells").orElseGet(CompoundTag::new));
+
+        int color = tag.getIntOr("color", -1);
+        if (color != -1) {
+            this.Color = color;
+        }
+
+        String coverClass = tag.getStringOr("cover", "");
+        if (coverClass.length() > 0) {
+            try {
+                panelCover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
+                CompoundTag coverDataTag = tag.getCompound("coverData").orElseGet(CompoundTag::new);
+                if (!coverDataTag.isEmpty()) {
+                    panelCover.readNBT(coverDataTag);
+                }
+            } catch (Exception exception) {
+                TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class " + coverClass, exception);
+            }
+        }
+
+        flagLightUpdate = true;
+        flagVoxelShapeUpdate();
+        setChanged();
+        flagSync();
+    }
+
     public void removeOutOfRange(Player player) {
         if (hasBase()) {
             List<Integer> indices = new ArrayList<>(cells.keySet());

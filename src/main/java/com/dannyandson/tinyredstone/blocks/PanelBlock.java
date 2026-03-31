@@ -19,6 +19,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
@@ -132,6 +133,22 @@ public class PanelBlock extends BaseEntityBlock {
             return defaultBlockState().setValue(BlockStateProperties.FACING, context.getClickedFace().getOpposite()).setValue(ModRegistration.HAS_PANEL_BASE, true);
         }
         return defaultBlockState().setValue(BlockStateProperties.FACING, DOWN).setValue(ModRegistration.HAS_PANEL_BASE,false);
+    }
+
+    /**
+     * 26.1: Vanilla's automatic item→block entity data transfer only works with
+     * DataComponents.BLOCK_ENTITY_DATA. Since we store data in CUSTOM_DATA under
+     * a "BlockEntityTag" key, we must manually load it into the block entity on placement.
+     */
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (!level.isClientSide()) {
+            CompoundTag itemTag = ItemStackHelper.getBlockEntityTag(stack);
+            if (itemTag != null && level.getBlockEntity(pos) instanceof PanelTile panelTile) {
+                panelTile.loadFromItemTag(itemTag);
+            }
+        }
     }
 
     @Override
@@ -418,12 +435,12 @@ public class PanelBlock extends BaseEntityBlock {
                                         Side attachingSideDir = panelTile.getSideFromDirection(blockHitResult.getDirection()).getOpposite();
                                         Side attachingSideRel = (attachingSideDir==Side.TOP || attachingSideDir==Side.BOTTOM)?attachingSideDir:Side.FRONT;
                                         if (
-                                            !cell.canAttachToBaseOnSide(attachingSideRel) || (
-                                                    !posInPanelCell.equals(placementPos) && (
-                                                            posInPanelCell.getIPanelCell() == null
-                                                                    || !posInPanelCell.getIPanelCell().isPushable()
-                                                    )
-                                            )
+                                                !cell.canAttachToBaseOnSide(attachingSideRel) || (
+                                                        !posInPanelCell.equals(placementPos) && (
+                                                                posInPanelCell.getIPanelCell() == null
+                                                                        || !posInPanelCell.getIPanelCell().isPushable()
+                                                        )
+                                                )
                                         ) {
                                             placementOK = false;
                                         }
