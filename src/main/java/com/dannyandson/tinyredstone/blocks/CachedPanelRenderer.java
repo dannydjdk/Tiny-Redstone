@@ -3,12 +3,22 @@ package com.dannyandson.tinyredstone.blocks;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.math.Axis;
 import org.joml.Matrix4f;
+import org.joml.Vector3fc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +37,8 @@ public class CachedPanelRenderer {
     private boolean dirty = true;
     private int lastCombinedLight = -1;
     private boolean isCamouflageCache = false;
+
+    private static ModelBlockRenderer cachedModelRenderer;
 
     // Captured vertex data, separated by RenderType
     private List<CachedVertex> solidVertices = new ArrayList<>();
@@ -110,15 +122,10 @@ public class CachedPanelRenderer {
         if (tile.isCovered()) {
             // Check for camouflage cover (DarkCover/LightCover with madeFrom block)
             if (tile.panelCover instanceof DarkCover darkCover && darkCover.getMadeFrom() != null) {
-                // TODO 26.1: BakedModel, getBlockRenderer(), tesselateBlock() all removed.
-                // The camouflage rendering path needs to be rewritten using:
-                // - BlockStateModelSet to get the BlockStateModel for camouflageState
-                // - The new submission pipeline or MutableQuad API for quad rendering
-                // For now, fall through to the manual cover render path.
-                // This means camouflage covers will render as plain covers, not as the block they're disguised as.
-                matrixStack.pushPose();
-                tile.panelCover.render(matrixStack, captureSource, combinedLight, combinedOverlay, tile.getColor());
-                matrixStack.popPose();
+                // Camouflage cover: render via ModelBlockRenderer.tesselateBlock() into the cache.
+                // This gives us world-aware AO and correct face shading, all captured as vertices.
+                isCamouflageCache = true;
+                renderCamouflageBlock(tile, darkCover.getMadeFrom(), captureSource);
             } else {
                 // Non-camouflage cover: render manually in panel space (same as cells).
                 // Panel-facing rotation is applied during replay.
@@ -258,6 +265,58 @@ public class CachedPanelRenderer {
                 buffer.getBuffer(Sheets.translucentBlockSheet()),
                 matrixStack, 0, 1, 0, 1, sprite, combinedLight, 0.9f);
         matrixStack.popPose();
+    }
+
+    /**
+     * Render a camouflage cover block via ModelBlockRenderer.tesselateBlock() into the cache.
+     * Uses the same vertex unpacking as vanilla's putBlockBakedQuad, but sets normals to UP
+     * to prevent the Sheets shader from applying a second round of face shading — tesselateBlock
+     * already bakes the correct directional shade and world-aware AO into the QuadInstance colors.
+     */
+    private void renderCamouflageBlock(PanelTile tile, Identifier madeFrom, CaptureBufferSource captureSource) {
+        if (tile.getLevel() == null) return;
+
+        BlockState blockState = BuiltInRegistries.BLOCK.getValue(madeFrom).defaultBlockState();
+        if (blockState == null || blockState.isAir()) return;
+
+        var modelSet = Minecraft.getInstance().getModelManager().getBlockStateModelSet();
+        var model = modelSet.get(blockState);
+        if (model == null) return;
+
+        ModelBlockRenderer modelRenderer = getOrCreateModelRenderer();
+        VertexConsumer builder = captureSource.getBuffer(Sheets.cutoutBlockSheet());
+
+        // Unpack quads exactly like putBlockBakedQuad does (same color multiply, UV, light),
+        // but with normal forced to UP so the shader doesn't apply a second face shade pass.
+        modelRenderer.tesselateBlock(
+                (var x, var y, var z, var quad, var instance) -> {
+                    int lightEmission = quad.materialInfo().lightEmission();
+                    for (int vertex = 0; vertex < 4; vertex++) {
+                        Vector3fc pos = quad.position(vertex);
+                        long packedUv = quad.packedUV(vertex);
+                        int vertexColor = ARGB.multiply(instance.getColor(vertex), quad.bakedColors().color(vertex));
+                        int light = instance.getLightCoordsWithEmission(vertex, lightEmission);
+                        float u = UVPair.unpackU(packedUv);
+                        float v = UVPair.unpackV(packedUv);
+                        // Normal set to UP (0,1,0) — shade factor 1.0 from shader.
+                        // Face shading is already in vertexColor from tesselateBlock.
+                        builder.addVertex(pos.x() + x, pos.y() + y, pos.z() + z, vertexColor,
+                                u, v, instance.overlayCoords(), light, 0f, 1f, 0f);
+                    }
+                },
+                0f, 0f, 0f,
+                (BlockAndTintGetter) tile.getLevel(), tile.getBlockPos(),
+                blockState, model,
+                blockState.getSeed(tile.getBlockPos())
+        );
+    }
+
+    private static ModelBlockRenderer getOrCreateModelRenderer() {
+        if (cachedModelRenderer == null) {
+            BlockColors blockColors = Minecraft.getInstance().getBlockColors();
+            cachedModelRenderer = new ModelBlockRenderer(true, false, blockColors);
+        }
+        return cachedModelRenderer;
     }
 
     /**
