@@ -3,13 +3,12 @@ package com.dannyandson.tinyredstone.gui;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import net.neoforged.fml.common.EventBusSubscriber;
 import com.dannyandson.tinyredstone.api.AbstractPanelCellItem;
-import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
@@ -20,12 +19,10 @@ import net.neoforged.bus.api.SubscribeEvent;
 @EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
 public class ToolbarOverlay {
 
-    public static Identifier TEXTURE_ROTATION_LOCK = Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "block/rotation_lock");
+    private static final Identifier ROTATION_LOCK_TEXTURE = Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "textures/block/rotation_lock.png");
 
     @SubscribeEvent
-    // Fix for 1.21.1: RenderGuiOverlayEvent.Post -> RenderGuiLayerEvent.Post
     public static void onRenderGUI(final RenderGuiLayerEvent.Post event) {
-        // Fix for 1.21.1: VanillaGuiOverlay.HOTBAR.type() -> VanillaGuiLayers.HOTBAR
         if (event.getName().equals(VanillaGuiLayers.HOTBAR)) {
             final Minecraft mcInstance = Minecraft.getInstance();
             final LocalPlayer player = mcInstance.player;
@@ -42,17 +39,14 @@ public class ToolbarOverlay {
                         final int x = (window.getGuiScaledWidth() / 2 - 180 / 2 + currentSlot * 20) + 2 + 1;
                         final int y = (window.getGuiScaledHeight() - 20) + 1 + 1;
 
-                        // bindForSetup removed in 26.1 - textures bound automatically
-                        TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_ROTATION_LOCK);
-
-                        // 26.1: Sprite-based blit overload removed.
-                        // Use atlas texture with sprite UV coordinates instead.
+                        // 26.1: Use direct texture reference with GUI_TEXTURED pipeline.
+                        // Setting textureWidth/Height equal to render size maps the full
+                        // 16x16 texture onto the 5x5 screen area.
                         event.getGuiGraphics().blit(
-                                sprite.atlasLocation(),
-                                x, y, 5, 5,
-                                sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1()
+                                RenderPipelines.GUI_TEXTURED,
+                                ROTATION_LOCK_TEXTURE,
+                                x, y, 0, 0, 5, 5, 5, 5
                         );
-
                     }
                 }
             }

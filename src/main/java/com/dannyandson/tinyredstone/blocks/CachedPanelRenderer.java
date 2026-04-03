@@ -196,12 +196,14 @@ public class CachedPanelRenderer {
             if (v.hasUV) {
                 // 26.1: BufferBuilder strictly requires ALL vertex elements.
                 // Sheets render types need: position, color, UV0 (texture), UV1 (overlay), UV2 (lightmap), normal
+                // Normal set to UP (0,1,0) — shade factor 1.0 from shader.
+                // Directional face shading is already baked into vertex colors by RenderHelper.drawRectangle().
                 builder.addVertex(transform, v.x, v.y, v.z)
                         .setColor(v.r, v.g, v.b, v.a)
                         .setUv(v.u, v.v)
                         .setUv1(0, 10)  // overlay: OverlayTexture.NO_OVERLAY = pack(0, 10)
                         .setUv2(v.lightU, v.lightV)
-                        .setNormal(v.normalX, v.normalY, v.normalZ);
+                        .setNormal(0f, 1f, 0f);
             } else {
                 // Non-UV vertices also need all elements when going to Sheets render types
                 builder.addVertex(transform, v.x, v.y, v.z)
