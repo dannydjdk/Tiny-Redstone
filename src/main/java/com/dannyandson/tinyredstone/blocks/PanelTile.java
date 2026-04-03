@@ -291,6 +291,12 @@ public class PanelTile extends BlockEntity {
         // --- Cell data (cells, color, cover): parse SNBT back into CompoundTag ---
         CompoundTag cellData = parseSnbt(input.getStringOr("cellData", ""));
 
+        // Clear cells on client side before reloading them from NBT to prevent visual duplication of moved blocks.
+        if (level != null && level.isClientSide()) {
+            this.cells.clear();
+            this.cellDirections.clear();
+        }
+
         this.loadCellsFromNBT(cellData.getCompound("cells").orElseGet(CompoundTag::new));
 
         // Color and cover are inside the cellData compound tag (from saveToNbt)
