@@ -91,5 +91,8 @@
   "tinyredstone.noteblock.bit": "Битная музыка",
   "tinyredstone.noteblock.banjo": "Банджо",
   "tinyredstone.noteblock.pling": "Электронное пианино",
-  "tinyredstone.noteblock.harp": "Пианино / арфа"
+  "tinyredstone.noteblock.harp": "Пианино / арфа",
+
+  "config.jade.plugin_tinyredstone.panel": "Панель Tiny Redstone",
+  "jade.tinyredstone.power": "Сигнал: %d"
 }

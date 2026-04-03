@@ -89,5 +89,8 @@
   "tinyredstone.noteblock.bit": "Chiptune",
   "tinyredstone.noteblock.banjo": "Banjo",
   "tinyredstone.noteblock.pling": "Klavier",
-  "tinyredstone.noteblock.harp": "Harfe"
+  "tinyredstone.noteblock.harp": "Harfe",
+
+  "config.jade.plugin_tinyredstone.panel": "Tiny-Redstone-Panel",
+  "jade.tinyredstone.power": "Signalstärke: %d"
 }

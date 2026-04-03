@@ -25,3 +25,10 @@ description='''${mod_description}'''
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.tinyredstone]]
+modId="jade"
+type="optional"
+versionRange="[26.0.0,)"
+ordering="NONE"
+side="BOTH"

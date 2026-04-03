@@ -57,11 +57,9 @@ repositories {
 }
 
 dependencies {
-    // TheOneProbe and JEI - optional compile-time dependencies
-    // NOTE: These CurseForge file IDs will need to be updated to 26.1 versions
-    // when they become available. For now, exclude TOP compat from compilation.
-    // compileOnly "curse.maven:theoneprobe-245211:REPLACE_WITH_26_1_FILE_ID"
-    // compileOnly "curse.maven:jei-238222:REPLACE_WITH_26_1_FILE_ID"
+
+    implementation "curse.maven:jade-324717:7817285"
+    implementation "curse.maven:jei-238222:7861613"
 }
 
 // Exclude TheOneProbe compat until a 26.1 version is available

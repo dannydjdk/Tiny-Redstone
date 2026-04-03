@@ -92,5 +92,8 @@
   "tinyredstone.noteblock.bit": "Bit",
   "tinyredstone.noteblock.banjo": "Banjo",
   "tinyredstone.noteblock.pling": "Pling",
-  "tinyredstone.noteblock.harp": "Harp"
+  "tinyredstone.noteblock.harp": "Harp",
+
+  "config.jade.plugin_tinyredstone.panel": "Tiny Redstone Panel",
+  "jade.tinyredstone.power": "Power: %d"
 }
