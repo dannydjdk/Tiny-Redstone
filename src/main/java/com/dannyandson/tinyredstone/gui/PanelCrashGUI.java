@@ -4,10 +4,8 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.network.CrashFlagResetSync;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -33,14 +31,14 @@ public class PanelCrashGUI  extends Screen {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
 
-        addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
-        addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EE0000));
+        addRenderableOnly(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
+        addRenderableOnly(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EE0000));
 
         Component crashTextComponent = Component.translatable((panelTile.isCrashed())?"tinyredstone.gui.crash.msg":"tinyredstone.gui.overflow.msg");
         int lineY = relY+2;
         for (String line : crashTextComponent.getString().split("\n",5))
         {
-            addRenderableWidget(new ModWidget(relX+2,lineY,WIDTH-2,50, Component.nullToEmpty(line)));
+            addRenderableOnly(new ModWidget(relX+2,lineY,WIDTH-2,50, Component.nullToEmpty(line)));
             lineY+=10;
         }
 

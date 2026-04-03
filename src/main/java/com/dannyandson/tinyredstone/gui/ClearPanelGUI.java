@@ -4,7 +4,6 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.network.ClearPanelSync;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -32,11 +31,11 @@ public class ClearPanelGUI extends Screen {
         int relX = (this.width - WIDTH) / 2;
         int relY = (this.height - HEIGHT) / 2;
 
-        addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
-        addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
+        addRenderableOnly(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
+        addRenderableOnly(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
 
-        addRenderableWidget(new ModWidget(relX,relY+10,WIDTH,20,Component.translatable("tinyredstone.gui.clearpanel.msg")))
-            .setTextHAlignment(ModWidget.HAlignment.CENTER);
+        addRenderableOnly(new ModWidget(relX,relY+10,WIDTH,20,Component.translatable("tinyredstone.gui.clearpanel.msg")))
+                .setTextHAlignment(ModWidget.HAlignment.CENTER);
         addRenderableWidget(Button.builder(Component.translatable("tinyredstone.yes"),button -> removeCells())
                 .pos(relX + 20, relY + 30)
                 .size(80, 20)

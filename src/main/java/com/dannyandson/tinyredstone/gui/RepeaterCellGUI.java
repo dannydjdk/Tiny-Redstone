@@ -43,12 +43,12 @@ public class RepeaterCellGUI extends Screen {
         this.tickCount = new ModWidget(relX,relY+38,WIDTH,20, Component.nullToEmpty(redstoneTicks.toString() + " ticks (" + tSeconds.toString() + " seconds)"))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER).setTextVAlignment(ModWidget.VAlignment.MIDDLE);
 
-        addRenderableWidget(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
-        addRenderableWidget(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
+        addRenderableOnly(new ModWidget(relX-1, relY-1, WIDTH+2, HEIGHT+2, 0xAA000000));
+        addRenderableOnly(new ModWidget(relX, relY, WIDTH, HEIGHT, 0x88EEEEEE));
         addRenderableWidget(ModWidget.buildButton(relX + 55, relY + 48, 80, 20, Component.translatable("tinyredstone.close"), button -> close()));
-        addRenderableWidget(this.tickCount);
+        addRenderableOnly(this.tickCount);
 
-        addRenderableWidget(new ModWidget(relX,relY+3,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg")))
+        addRenderableOnly(new ModWidget(relX,relY+3,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg")))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER);
         addRenderableWidget(ModWidget.buildButton(relX + 15, relY + 15, 20, 20, Component.nullToEmpty("---"), button -> changeTicks(-200)));
         addRenderableWidget(ModWidget.buildButton(relX + 40, relY + 15, 20, 20, Component.nullToEmpty("--"), button -> changeTicks(-20)));
@@ -58,9 +58,9 @@ public class RepeaterCellGUI extends Screen {
         addRenderableWidget(ModWidget.buildButton(relX + 130, relY + 15, 20, 20, Component.nullToEmpty("++"), button -> changeTicks(20)));
         addRenderableWidget(ModWidget.buildButton(relX + 155, relY + 15, 20, 20, Component.nullToEmpty("+++"), button -> changeTicks(200)));
 
-        addRenderableWidget(new ModWidget(relX,relY+73,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg2"),0xFFFFFFFF))
+        addRenderableOnly(new ModWidget(relX,relY+73,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg2"),0xFFFFFFFF))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER);
-        addRenderableWidget(new ModWidget(relX,relY+88,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg3"),0xFFFFFFFF))
+        addRenderableOnly(new ModWidget(relX,relY+88,WIDTH-2,20,Component.translatable("tinyredstone.gui.repeater.msg3"),0xFFFFFFFF))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER);
     }
 
@@ -104,7 +104,7 @@ public class RepeaterCellGUI extends Screen {
         Float tSeconds = redstoneTicks.floatValue()/10f;
         this.tickCount = new ModWidget(relX,relY+38,WIDTH,20, Component.nullToEmpty(redstoneTicks.toString() + " ticks (" + tSeconds.toString() + " seconds)"))
                 .setTextHAlignment(ModWidget.HAlignment.CENTER).setTextVAlignment(ModWidget.VAlignment.MIDDLE);
-        addRenderableWidget(this.tickCount);
+        addRenderableOnly(this.tickCount);
     }
 
     @Override
