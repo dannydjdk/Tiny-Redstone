@@ -1,8 +1,8 @@
 package com.dannyandson.tinyredstone.network;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
-import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.dannyandson.tinyredstone.items.Blueprint;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

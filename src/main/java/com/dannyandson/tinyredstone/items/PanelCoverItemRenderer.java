@@ -1,83 +1,117 @@
 package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
-import com.dannyandson.tinyredstone.util.ItemStackHelper;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.dannyandson.tinyredstone.blocks.panelcovers.LightCover;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.BlockStateModelSet;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 
-public class PanelCoverItemRenderer extends BlockEntityWithoutLevelRenderer {
+import java.util.function.Consumer;
 
+/**
+  * Renders panel cover items showing either the default cover texture
+ * or the block they're disguised as (camouflage covers).
+ */
+public record PanelCoverItemRenderer() implements SpecialModelRenderer<ItemStack> {
 
-    public PanelCoverItemRenderer(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
-        super(p_172550_, p_172551_);
+    @Nullable
+    @Override
+    public ItemStack extractArgument(ItemStack stack) {
+        return stack;
     }
 
     @Override
-    public void renderByItem(ItemStack stack, ItemDisplayContext itemDisplayContext, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void submit(ItemStack stack, PoseStack poseStack, SubmitNodeCollector collector,
+                       int lightCoords, int overlayCoords, boolean hasFoil, int outlineColor) {
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
         boolean isTransparent = stack.getItem() == ModRegistration.PANEL_COVER_LIGHT.get();
-        Identifier madeFrom = null;
 
-        if (ItemStackHelper.getCustomTag(stack) != null) {
-            CompoundTag itemNBT = ItemStackHelper.getCustomTag(stack);
-            CompoundTag madeFromTag = itemNBT.getCompound("made_from").orElseGet(CompoundTag::new);
+        // Per-face sprites, matching DarkCover.render() logic
+        TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
+
+        Identifier madeFrom = null;
+        CompoundTag customTag = ItemStackHelper.getCustomTag(stack);
+        if (customTag != null) {
+            CompoundTag madeFromTag = customTag.getCompound("made_from").orElseGet(CompoundTag::new);
             if (madeFromTag.contains("namespace")) {
-                madeFrom = Identifier.fromNamespaceAndPath(madeFromTag.getStringOr("namespace", ""), madeFromTag.getStringOr("path", ""));
+                madeFrom = Identifier.fromNamespaceAndPath(
+                        madeFromTag.getStringOr("namespace", ""),
+                        madeFromTag.getStringOr("path", ""));
             }
         }
 
         if (madeFrom != null) {
-            // Use the block's actual BakedModel for rendering (flat-lit, no Level needed)
-            BlockState blockState = BuiltInRegistries.BLOCK.getValue(madeFrom).defaultBlockState();
-            if (blockState != null && !blockState.isAir()) {
-                BlockStateModelSet modelSet = Minecraft.getInstance().getModelManager().getBlockStateModelSet(); // or similar
-                BlockStateModel model = modelSet.get(blockState);
-
-                VertexConsumer builder = buffer.getBuffer(isTransparent ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
-
-                poseStack.pushPose();
-                // Offset to match the position of the old drawCube rendering path,
-                // which the item model JSON display transforms are calibrated against.
-                poseStack.translate(1.0, -1.0, -1.0);
-                ModelBlockRenderer.
-                blockRenderer.getModelRenderer().renderModel(
-                        poseStack.last(), builder, blockState, model,
-                        1.0f, 1.0f, 1.0f, combinedLight, combinedOverlay
-                );
-                poseStack.popPose();
-                return;
-            }
+            sprite_top    = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.TOP);
+            sprite_front  = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.FRONT);
+            sprite_right  = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.RIGHT);
+            sprite_back   = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BACK);
+            sprite_left   = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.LEFT);
+            sprite_bottom = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BOTTOM);
+        } else {
+            TextureAtlasSprite defaultSprite = RenderHelper.getSprite(
+                    isTransparent ? LightCover.TEXTURE_LIGHT_COVER : DarkCover.TEXTURE_DEFAULT_COVER);
+            sprite_top = sprite_front = sprite_right = sprite_back = sprite_left = sprite_bottom = defaultSprite;
         }
 
-        // Fallback: default texture rendering for covers without madeFrom
-        TextureAtlasSprite sprite = RenderHelper.getSprite(isTransparent ? LightCover.TEXTURE_LIGHT_COVER : DarkCover.TEXTURE_DEFAULT_COVER);
-        VertexConsumer builder = buffer.getBuffer(isTransparent ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
-        float alpha = isTransparent ? .99f : 1.0f;
+        VertexConsumer builder = bufferSource.getBuffer(
+                isTransparent ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
+        float alpha = isTransparent ? 0.99f : 1.0f;
+        int color = madeFrom != null ? 0x00FFFFFF : 0xFFFFFFFF;
 
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.translate(1, 0, 0);
-        RenderHelper.drawCube(poseStack, builder, sprite, sprite, sprite, sprite, sprite, sprite, combinedLight, 0xFFFFFFFF, alpha);
+        // Skip directional face shading for item rendering — the lightmap (UV2) provides
+        // proper environmental lighting. Vanilla block items don't apply face shading either.
+        // Full BlockModelResolver pipeline (Session 8) will handle this properly.
+        RenderHelper.drawCube(poseStack, builder, sprite_top, sprite_front, sprite_right,
+                sprite_back, sprite_left, sprite_bottom, lightCoords, color, alpha, false);
         poseStack.popPose();
+
+        // 26.1: Must explicitly flush the immediate buffer source in SpecialModelRenderer.
+        bufferSource.endBatch();
+    }
+
+    @Override
+    public void getExtents(Consumer<Vector3fc> consumer) {
+        // Provide bounding box corners so the engine knows this renderer's geometry extent.
+        // Our drawCube renders a unit cube, so provide its 8 corners.
+        consumer.accept(new Vector3f(0, 0, 0));
+        consumer.accept(new Vector3f(1, 1, 1));
+    }
+
+    /**
+     * Unbaked form for JSON deserialization and registration.
+     */
+    public record Unbaked() implements SpecialModelRenderer.Unbaked {
+        public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(Unbaked::new);
+
+        @Override
+        public MapCodec<Unbaked> type() {
+            return MAP_CODEC;
+        }
+
+        @Override
+        public @Nullable SpecialModelRenderer<?> bake(BakingContext bakingContext) {
+            return new PanelCoverItemRenderer();
+        }
     }
 }

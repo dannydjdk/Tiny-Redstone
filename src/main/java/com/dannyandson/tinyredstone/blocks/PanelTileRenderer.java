@@ -4,8 +4,6 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
-import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
-import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -14,18 +12,17 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-
 import org.jspecify.annotations.Nullable;
+
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -188,16 +185,6 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
         matrixStack.translate(CELL_SIZE*(double)pos.getRow(), ((hasBase)?0.125:0)+(pos.getLevel()*0.125), CELL_SIZE*(pos.getColumn()));
 
         IPanelCell cell = pos.getIPanelCell();
-
-        // For TinyBlock/TransparentBlock with a madeFrom block, use sprite-based rendering.
-        // TODO 26.1: BakedModel is completely removed. The old path used BakedModel.getQuads()
-        // to render block models. The new system uses BlockStateModel + submission pipeline.
-        // For now, fall through to the sprite-based cell.render() path below.
-        // To re-implement: use BlockStateModelSet to get BlockStateModel, then use
-        // the submission pipeline or MutableQuad API for quad iteration.
-        if (cell instanceof TinyBlock tinyBlock && tinyBlock.getMadeFrom() != null) {
-            // Fall through to sprite-based rendering below
-        }
 
         matrixStack.mulPose(Axis.XP.rotationDegrees(ROTATION1));
 

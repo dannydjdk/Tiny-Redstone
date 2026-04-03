@@ -1,7 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.api.IPanelCell;
-
 import org.jspecify.annotations.Nullable;
 
 public class PanelCellGhostPos extends PanelCellPos {

@@ -5,21 +5,17 @@ import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.blocks.PanelTileColor;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.gui.ChopperScreen;
-import com.dannyandson.tinyredstone.items.PanelCoverSpecialRenderer;
+import com.dannyandson.tinyredstone.items.PanelCoverItemRenderer;
 import com.dannyandson.tinyredstone.items.PanelItemTintSource;
-import com.dannyandson.tinyredstone.items.PanelSpecialRenderer;
-import com.dannyandson.tinyredstone.items.TinyBlockSpecialRenderer;
+import com.dannyandson.tinyredstone.items.PanelItemRenderer;
+import com.dannyandson.tinyredstone.items.TinyBlockItemRenderer;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.event.*;
 
 @EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
 public class ClientSetup {
@@ -73,15 +69,15 @@ public class ClientSetup {
     public static void onRegisterSpecialRenderers(RegisterSpecialModelRendererEvent event) {
         event.register(
                 Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "panel"),
-                (MapCodec<? extends SpecialModelRenderer.Unbaked<?>>) (MapCodec<?>) PanelSpecialRenderer.Unbaked.MAP_CODEC
+                (MapCodec<? extends SpecialModelRenderer.Unbaked<?>>) (MapCodec<?>) PanelItemRenderer.Unbaked.MAP_CODEC
         );
         event.register(
                 Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "tiny_block"),
-                (MapCodec<? extends SpecialModelRenderer.Unbaked<?>>) (MapCodec<?>) TinyBlockSpecialRenderer.Unbaked.MAP_CODEC
+                (MapCodec<? extends SpecialModelRenderer.Unbaked<?>>) (MapCodec<?>) TinyBlockItemRenderer.Unbaked.MAP_CODEC
         );
         event.register(
                 Identifier.fromNamespaceAndPath(TinyRedstone.MODID, "panel_cover"),
-                (MapCodec<? extends SpecialModelRenderer.Unbaked<?>>) (MapCodec<?>) PanelCoverSpecialRenderer.Unbaked.MAP_CODEC
+                (MapCodec<? extends SpecialModelRenderer.Unbaked<?>>) (MapCodec<?>) PanelCoverItemRenderer.Unbaked.MAP_CODEC
         );
     }
 }

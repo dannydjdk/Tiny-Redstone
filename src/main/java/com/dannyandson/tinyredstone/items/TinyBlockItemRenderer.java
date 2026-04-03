@@ -1,78 +1,116 @@
 package com.dannyandson.tinyredstone.items;
 
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
-import com.dannyandson.tinyredstone.util.ItemStackHelper;
+import com.dannyandson.tinyredstone.blocks.Side;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
+import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 
-public class TinyBlockItemRenderer extends BlockEntityWithoutLevelRenderer {
+import java.util.function.Consumer;
 
-    private static final TextureAtlasSprite brokenSprite = RenderHelper.getSprite(TextureManager.INTENTIONAL_MISSING_TEXTURE);
+/**
+ * Renders tiny block items showing the block they're made from,
+ * or a default texture if no "made_from" data is present.
+ */
+public record TinyBlockItemRenderer() implements SpecialModelRenderer<ItemStack> {
 
-    public TinyBlockItemRenderer(BlockEntityRenderDispatcher p_172550_, EntityModelSet p_172551_) {
-        super(p_172550_, p_172551_);
+    @Nullable
+    @Override
+    public ItemStack extractArgument(ItemStack stack) {
+        return stack;
     }
 
     @Override
-    public void renderByItem(ItemStack stack, ItemDisplayContext transformType, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+    public void submit(ItemStack stack, PoseStack poseStack, SubmitNodeCollector collector,
+                       int lightCoords, int overlayCoords, boolean hasFoil, int outlineColor) {
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
         boolean isTransparent = stack.getItem() == ModRegistration.TINY_TRANSPARENT_BLOCK.get();
-        Identifier madeFrom = null;
 
-        if (ItemStackHelper.getCustomTag(stack) != null) {
-            CompoundTag itemNBT = ItemStackHelper.getCustomTag(stack);
-            CompoundTag madeFromTag = itemNBT.getCompound("made_from").orElseGet(CompoundTag::new);
+        // Per-face sprites, matching TinyBlock.render() logic
+        TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
+
+        Identifier madeFrom = null;
+        CompoundTag customTag = ItemStackHelper.getCustomTag(stack);
+        if (customTag != null) {
+            CompoundTag madeFromTag = customTag.getCompound("made_from").orElseGet(CompoundTag::new);
             if (madeFromTag.contains("namespace")) {
-                madeFrom = Identifier.fromNamespaceAndPath(madeFromTag.getStringOr("namespace", ""), madeFromTag.getStringOr("path", ""));
+                madeFrom = Identifier.fromNamespaceAndPath(
+                        madeFromTag.getStringOr("namespace", ""),
+                        madeFromTag.getStringOr("path", ""));
             }
         }
 
         if (madeFrom != null) {
-            // Use the block's actual BakedModel for rendering (flat-lit, no Level needed)
-            BlockState blockState = BuiltInRegistries.BLOCK.getValue(madeFrom).defaultBlockState();
-            if (blockState != null && !blockState.isAir()) {
-                var blockRenderer = Minecraft.getInstance().getBlockRenderer();
-                BakedModel model = blockRenderer.getBlockModel(blockState);
-                VertexConsumer builder = buffer.getBuffer(isTransparent ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
-
-                poseStack.pushPose();
-                blockRenderer.getModelRenderer().renderModel(
-                        poseStack.last(), builder, blockState, model,
-                        1.0f, 1.0f, 1.0f, combinedLight, combinedOverlay
-                );
-                poseStack.popPose();
-                return;
-            }
+            sprite_top    = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.TOP);
+            sprite_front  = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.FRONT);
+            sprite_right  = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.RIGHT);
+            sprite_back   = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BACK);
+            sprite_left   = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.LEFT);
+            sprite_bottom = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BOTTOM);
+        } else {
+            TextureAtlasSprite defaultSprite = RenderHelper.getSprite(
+                    isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
+            sprite_top = sprite_front = sprite_right = sprite_back = sprite_left = sprite_bottom = defaultSprite;
         }
 
-        // Fallback: default texture rendering for blocks without madeFrom
-        TextureAtlasSprite sprite = RenderHelper.getSprite(isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
-        VertexConsumer builder = buffer.getBuffer(isTransparent ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
-        float alpha = isTransparent ? .99f : 1.0f;
+        VertexConsumer builder = bufferSource.getBuffer(
+                isTransparent ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
+        float alpha = isTransparent ? 0.99f : 1.0f;
 
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(-90));
         poseStack.translate(1, 0, 0);
-        RenderHelper.drawCube(poseStack, builder, sprite, sprite, sprite, sprite, sprite, sprite, combinedLight, 0xFFFFFFFF, alpha);
+        // Skip directional face shading for item rendering — the lightmap (UV2) provides
+        // proper environmental lighting. Vanilla block items don't apply face shading either.
+        // Full BlockModelResolver pipeline (Session 8) will handle this properly.
+        RenderHelper.drawCube(poseStack, builder, sprite_top, sprite_front, sprite_right,
+                sprite_back, sprite_left, sprite_bottom, lightCoords, 0xFFFFFFFF, alpha, false);
         poseStack.popPose();
+
+        // 26.1: Must explicitly flush in SpecialModelRenderer — item rendering pipeline
+        // does not flush the immediate buffer source automatically.
+        bufferSource.endBatch();
+    }
+
+    @Override
+    public void getExtents(Consumer<Vector3fc> consumer) {
+        // Bounding box corners for a unit cube
+        consumer.accept(new Vector3f(0, 0, 0));
+        consumer.accept(new Vector3f(1, 1, 1));
+    }
+
+    /**
+     * Unbaked form for JSON deserialization and registration.
+     */
+    public record Unbaked() implements SpecialModelRenderer.Unbaked {
+        public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(Unbaked::new);
+
+        @Override
+        public MapCodec<Unbaked> type() {
+            return MAP_CODEC;
+        }
+
+        @Override
+        public @Nullable SpecialModelRenderer<?> bake(BakingContext bakingContext) {
+            return new TinyBlockItemRenderer();
+        }
     }
 }
