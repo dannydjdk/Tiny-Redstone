@@ -98,7 +98,7 @@ public class BlueprintGUI  extends Screen {
 
                 String path = TinyFileDialogs.tinyfd_saveFileDialog(
                         new TranslationTextComponent("tinyredstone.save_file").getString(),
-                        "blueprint.json", filters, null
+                        "blueprint.json", null, null
                 );
                 this.dialogOpen=false;
                 stack.pop();
@@ -138,7 +138,7 @@ public class BlueprintGUI  extends Screen {
 
                 String path = TinyFileDialogs.tinyfd_openFileDialog(
                         new TranslationTextComponent("tinyredstone.choose_file").getString(),
-                        null, filters, "JSON File (*.json)", false
+                        null, null, "JSON File (*.json)", false
                 );
                 this.dialogOpen=false;
 
