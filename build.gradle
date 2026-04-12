@@ -50,10 +50,6 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    maven {
-        name = "McJty"
-        url "https://maven.k-4u.nl"
-    }
 }
 
 dependencies {
