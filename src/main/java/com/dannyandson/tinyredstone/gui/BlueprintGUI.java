@@ -94,9 +94,7 @@ public class BlueprintGUI  extends Screen {
             new Thread(() -> {
 
                 MemoryStack stack = MemoryStack.stackPush();
-                PointerBuffer filters = stack.mallocPointer(1);
-                filters.put(stack.UTF8("*.json"));
-                filters.flip();
+                PointerBuffer filters = null;
 
                 String path = TinyFileDialogs.tinyfd_saveFileDialog(
                         Component.translatable("tinyredstone.save_file").getString(),
@@ -132,11 +130,7 @@ public class BlueprintGUI  extends Screen {
             new Thread(() -> {
 
                 MemoryStack stack = MemoryStack.stackPush();
-                PointerBuffer filters = stack.mallocPointer(2);
-                filters.put(stack.UTF8(""));
-                filters.put(stack.UTF8("*.json"));
-                filters.flip();
-
+                PointerBuffer filters = null;
 
                 String path = TinyFileDialogs.tinyfd_openFileDialog(
                         Component.translatable("tinyredstone.choose_file").getString(),
@@ -169,6 +163,13 @@ public class BlueprintGUI  extends Screen {
                         }
                     } catch (CommandSyntaxException e) {
                         TinyRedstone.LOGGER.error("Exception reading JSON from user file: ",e);
+                        try {
+                            ItemStackHelper.setCustomTag(this.blueprint, TagParser.parseTag(""));
+                            ModNetworkHandler.sendToServer(new BlueprintSync(TagParser.parseTag("")));
+                        } catch(CommandSyntaxException e2){
+                            TinyRedstone.LOGGER.error("Exception rolling back faulty JSON: ",e);
+
+                        }
                     }
                 }
 
