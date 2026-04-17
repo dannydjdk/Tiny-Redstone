@@ -75,11 +75,11 @@ public class ModRegistration {
     // --- Blocks ---
     public static final DeferredBlock<PanelBlock> REDSTONE_PANEL_BLOCK = BLOCKS.registerBlock("redstone_panel",
             PanelBlock::new,
-            BlockBehaviour.Properties.of().sound(SoundType.STONE).strength(2.0f));
+            props -> props.sound(SoundType.STONE).strength(2.0f));
 
     public static final DeferredBlock<ChopperBlock> CUTTER_BLOCK = BLOCKS.registerBlock("block_chopper",
             ChopperBlock::new,
-            BlockBehaviour.Properties.of().sound(SoundType.STONE).strength(2.0f));
+            props -> props.sound(SoundType.STONE).strength(2.0f));
 
     // --- Block Entity Types (1.21.2: use constructor instead of Builder) ---
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PanelTile>> REDSTONE_PANEL_TILE =

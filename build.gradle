@@ -54,8 +54,8 @@ repositories {
 
 dependencies {
 
-    implementation "curse.maven:jade-324717:7817285"
-    implementation "curse.maven:jei-238222:7861613"
+    implementation "curse.maven:jade-324717:7938398"
+    implementation "curse.maven:jei-238222:7920926"
 }
 
 // Exclude TheOneProbe compat until a 26.1 version is available
