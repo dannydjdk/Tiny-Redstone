@@ -4,12 +4,7 @@ import com.dannyandson.tinyredstone.blocks.ChopperBlockEntity;
 import com.dannyandson.tinyredstone.network.ModNetworkHandler;
 import com.dannyandson.tinyredstone.network.PushChopperOutputType;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
-import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.Identifier;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,11 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class ChopperMenu extends AbstractContainerMenu {
     public static ChopperMenu createChopperMenu(int containerId, Inventory playerInventory) {
@@ -86,61 +77,17 @@ public class ChopperMenu extends AbstractContainerMenu {
         setupResultSlot();
     }
 
+    /** Thin delegate — the recipe + display/committed logic lives on ChopperBlockEntity now. */
     void setupResultSlot() {
-        if (this.inputSlot != null) {
-            ItemStack inputStack = this.inputSlot.getItem();
-            ItemStack outputStack = ItemStack.EMPTY;
-            Item item = inputStack.getItem();
-
-            if (inputStack.getItem() instanceof BlockItem blockItem) {
-                Block inputBlock = blockItem.getBlock();
-                BlockState inputBlockState = inputBlock.defaultBlockState();
-
-                if (container instanceof ChopperBlockEntity chopperBlockEntity) {
-                    boolean isFullBlock = inputBlockState.isCollisionShapeFullBlock(chopperBlockEntity.getLevel(), chopperBlockEntity.getBlockPos());
-                    if (isFullBlock && !inputBlockState.isSignalSource() && !inputBlockState.hasBlockEntity()) {
-                        Identifier inputRegistryName = BuiltInRegistries.BLOCK.getKey(inputBlock);
-                        if (inputRegistryName != null && !ModRegistration.TINY_BLOCK_OVERRIDES.isDisabled(inputRegistryName)) {
-                            CompoundTag madeFromTag = new CompoundTag();
-                            madeFromTag.putString("namespace", inputRegistryName.getNamespace());
-                            madeFromTag.putString("path", inputRegistryName.getPath());
-                            if (getItemType().equals("Dark Cover")) {
-                                outputStack = ModRegistration.PANEL_COVER_DARK.get().getDefaultInstance();
-                                outputStack.setCount(2);
-                                ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
-                            } else if (getItemType().equals("Light Cover")) {
-                                outputStack = ModRegistration.PANEL_COVER_LIGHT.get().getDefaultInstance();
-                                outputStack.setCount(2);
-                                ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
-                            } else {
-                                // Fix: GlassBlock class removed in 1.21 - use block tag check instead
-                                boolean isGlass = inputBlockState.is(BlockTags.IMPERMEABLE); // vanilla glass tag
-                                if (isGlass) {
-                                    outputStack = ModRegistration.TINY_TRANSPARENT_BLOCK.get().getDefaultInstance();
-                                    outputStack.setCount(8);
-                                    if (!inputRegistryName.toString().equals("minecraft:glass"))
-                                        ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
-                                } else {
-                                    outputStack = ModRegistration.TINY_SOLID_BLOCK.get().getDefaultInstance();
-                                    outputStack.setCount(8);
-                                    if (!inputRegistryName.toString().equals("minecraft:white_wool"))
-                                        ItemStackHelper.addTagElement(outputStack, "made_from", madeFromTag);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            this.outputSlot.set(outputStack);
-            this.broadcastChanges();
+        if (container instanceof ChopperBlockEntity chopperBE) {
+            chopperBE.refreshOutputSlot();
         }
+        this.broadcastChanges();
     }
 
     @Override
     public void slotsChanged(Container container) {
-        if (this.inputSlot!=null) {
-            ItemStack itemstack = this.inputSlot.getItem();
+        if (this.inputSlot != null) {
             ChopperMenu.this.setupResultSlot();
         }
     }
