@@ -8,7 +8,6 @@ import java.util.List;
 
 public class Config {
     public static ModConfigSpec SERVER_CONFIG;
-    public static ModConfigSpec CLIENT_CONFIG;
 
     public static final String CATEGORY_FEATURE = "feature";
     public static final String CATEGORY_PERFORMANCE = "performance";
@@ -29,6 +28,9 @@ public class Config {
 
         JSON_BLUEPRINT = SERVER_BUILDER.comment("Should it be possible to export or import the blueprint as json? (default:true)")
                 .define("json_blueprint",true);
+
+        DISPLAY_MODE = SERVER_BUILDER.comment("When should the information be displayed in the overlay? 0 = no, 1 = always, 2 = only in extended or debug, 3 = when you have a wrench in your hand, 4 = when you have any component in your hand")
+                .defineInRange("display_mode", 1, 0, 4);
 
         SERVER_BUILDER.pop();
 
@@ -61,17 +63,6 @@ public class Config {
         SERVER_BUILDER.pop();
 
         SERVER_CONFIG = SERVER_BUILDER.build();
-
-        ModConfigSpec.Builder CLIENT_BUILDER = new ModConfigSpec.Builder();
-
-        CLIENT_BUILDER.comment("Performance Settings").push(CATEGORY_PERFORMANCE);
-
-        DISPLAY_MODE = CLIENT_BUILDER.comment("When should the information be displayed in the overlay? 0 = no, 1 = always, 2 = only in extended or debug, 3 = when you have a wrench in your hand, 4 = when you have any component in your hand")
-                .defineInRange("display_mode", 1, 0, 4);
-
-        CLIENT_BUILDER.pop();
-
-        CLIENT_CONFIG = CLIENT_BUILDER.build();
     }
 
 

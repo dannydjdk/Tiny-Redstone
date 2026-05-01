@@ -30,7 +30,6 @@ public class TinyRedstone {
         }
 
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
-        modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
 
         CompatHandler.register();
     }
