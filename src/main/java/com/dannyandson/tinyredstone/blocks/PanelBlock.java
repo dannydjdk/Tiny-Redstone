@@ -89,6 +89,7 @@ public class PanelBlock extends BaseEntityBlock {
         super(Properties.of()
                 .sound(SoundType.STONE)
                 .strength(2.0f)
+                .forceSolidOn()
         );
     }
 
