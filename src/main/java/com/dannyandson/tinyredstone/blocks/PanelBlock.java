@@ -24,6 +24,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.*;
@@ -175,9 +176,35 @@ public class PanelBlock extends BaseEntityBlock {
         if (state.hasProperty(Registration.HAS_PANEL_BASE) && state.getValue(Registration.HAS_PANEL_BASE))
             return BASE.get(state.getValue(BlockStateProperties.FACING));
         if (context == CollisionContext.empty()) {
-            return Block.box(2, 2, 2, 14, 14, 14);
+            return Shapes.empty();
         }
         return Shapes.empty();
+    }
+
+    /**
+     * Stashed by {@link #rotate} and consumed by {@link PanelTile#loadAdditional} to
+     * pair the FACING rotation with the matching cell-grid rotation. Block#rotate has
+     * no BlockEntity access, so we hand the rotation off to the BE's NBT-load on the
+     * same thread (the pattern Sable sub-level disassembly uses).
+     */
+    public static final ThreadLocal<Rotation> PENDING_ROTATION = new ThreadLocal<>();
+
+    @Override
+    public BlockState rotate(BlockState state, LevelAccessor level, BlockPos pos, Rotation rotation) {
+        return doRotate(state, rotation);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public BlockState rotate(BlockState state, Rotation rotation) {
+        return doRotate(state, rotation);
+    }
+
+    private static BlockState doRotate(BlockState state, Rotation rotation) {
+        if (rotation == Rotation.NONE) return state;
+        PENDING_ROTATION.set(rotation);
+        return state.setValue(BlockStateProperties.FACING,
+                rotation.rotate(state.getValue(BlockStateProperties.FACING)));
     }
 
     @SuppressWarnings("deprecation")

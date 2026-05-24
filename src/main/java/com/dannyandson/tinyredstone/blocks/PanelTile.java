@@ -340,6 +340,23 @@ public class PanelTile extends BlockEntity {
             } catch (PanelOverflowException e){
                 this.handleCrash(e);
             }
+
+            // Apply any rotation queued by PanelBlock#rotate on this thread.
+            // Applies an X+180 flip to UP-facing panels.
+            Rotation pendingRotation = PanelBlock.PENDING_ROTATION.get();
+            if (pendingRotation != null) {
+                PanelBlock.PENDING_ROTATION.remove();
+                if (getBlockState().getValue(BlockStateProperties.FACING) == Direction.UP) {
+                    pendingRotation =
+                            (pendingRotation==Rotation.CLOCKWISE_90)
+                                    ?Rotation.COUNTERCLOCKWISE_90:(
+                                            (pendingRotation==Rotation.COUNTERCLOCKWISE_90)?
+                                                    Rotation.CLOCKWISE_90:
+                                                    pendingRotation // NONE and CLOCKWISE_180 are self-inverse
+                            );
+                }
+                this.rotate(pendingRotation);
+            }
         }
 
     }
