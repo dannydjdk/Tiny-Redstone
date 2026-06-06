@@ -76,7 +76,10 @@ public class PanelTile extends BlockEntity {
         return cachedRenderer;
     }
 
-    private void markRenderDirty() {
+    /**
+     * Flags the client-side render cache to rebuild on the next frame.
+     */
+    public void markRenderDirty() {
         if (cachedRenderer != null) {
             cachedRenderer.markDirty();
         }

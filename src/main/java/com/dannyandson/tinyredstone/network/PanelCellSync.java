@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record PanelCellSync(BlockPos pos, int cellIndex, CompoundTag nbt) implements CustomPacketPayload {
+public record PanelCellSync(BlockPos pos, int cellIndex, CompoundTag nbt, boolean renderUpdate) implements CustomPacketPayload {
 
     public static final Type<PanelCellSync> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(TinyRedstone.MODID, "panel_cell_sync"));
@@ -22,14 +22,23 @@ public record PanelCellSync(BlockPos pos, int cellIndex, CompoundTag nbt) implem
     public static final StreamCodec<FriendlyByteBuf, PanelCellSync> STREAM_CODEC =
             StreamCodec.of(PanelCellSync::write, PanelCellSync::read);
 
+    /**
+     * Convenience constructor for a state-only sync that does NOT change the cell's
+     * appearance.
+     */
+    public PanelCellSync(BlockPos pos, int cellIndex, CompoundTag nbt) {
+        this(pos, cellIndex, nbt, false);
+    }
+
     public static PanelCellSync read(FriendlyByteBuf buf) {
-        return new PanelCellSync(buf.readBlockPos(), buf.readInt(), buf.readNbt());
+        return new PanelCellSync(buf.readBlockPos(), buf.readInt(), buf.readNbt(), buf.readBoolean());
     }
 
     public static void write(FriendlyByteBuf buf, PanelCellSync msg) {
         buf.writeBlockPos(msg.pos);
         buf.writeInt(msg.cellIndex);
         buf.writeNbt(msg.nbt);
+        buf.writeBoolean(msg.renderUpdate);
     }
 
     public static void handle(PanelCellSync msg, IPayloadContext ctx) {
@@ -40,6 +49,9 @@ public record PanelCellSync(BlockPos pos, int cellIndex, CompoundTag nbt) implem
                 IPanelCell cell = cellPos.getIPanelCell();
                 if (cell != null) {
                     cell.readNBT(msg.nbt);
+                    if (msg.renderUpdate()) {
+                        panelTile.markRenderDirty();
+                    }
                 }
             }
         });
