@@ -34,12 +34,13 @@ public class DarkCover implements IPanelCover {
 
         if (sprite_top == null) {
             if (madeFrom != null) {
-                sprite_top = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.TOP);
-                sprite_front = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.FRONT);
-                sprite_right = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.RIGHT);
-                sprite_back = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BACK);
-                sprite_left = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.LEFT);
-                sprite_bottom = ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom, Side.BOTTOM);
+                TextureAtlasSprite[] sprites = ModRegistration.TINY_BLOCK_OVERRIDES.getSprites(madeFrom);
+                sprite_top    = sprites[Side.TOP.ordinal()];
+                sprite_front  = sprites[Side.FRONT.ordinal()];
+                sprite_right  = sprites[Side.RIGHT.ordinal()];
+                sprite_back   = sprites[Side.BACK.ordinal()];
+                sprite_left   = sprites[Side.LEFT.ordinal()];
+                sprite_bottom = sprites[Side.BOTTOM.ordinal()];
             } else {
                 sprite_top = sprite_front = sprite_right = sprite_back = sprite_left = sprite_bottom = RenderHelper.getSprite(getDefaultResourceLocation());
             }
