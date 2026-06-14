@@ -5,6 +5,7 @@ import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.serialization.Codec;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,46 +38,55 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener<Ti
 {
     private static final int SIDE_COUNT = Side.values().length;
 
+    /** Sentinel: no tint (multiplier of 1.0 in every channel). */
+    private static final int NO_TINT = 0xFFFFFFFF;
+
     /** The raw data that we parsed from json last time resources were reloaded **/
     protected Map<Identifier, TinyBlockData> data = new HashMap<>();
 
     private String folderName;
 
-    /**
-     * Creates a data manager with a codec-based parser.
-     * @param folderName The name of the data folder that we will load from
-     * @param codec A codec to deserialize the json into TinyBlockData
-     */
     public CodecTinyBlockOverrides(String folderName, Codec<TinyBlockData> codec)
     {
-        // 26.1: Constructor takes Codec<T> and FileToIdConverter
         super(codec, net.minecraft.resources.FileToIdConverter.json(folderName));
         this.folderName = folderName;
     }
 
     /**
-     * Returns all six face sprites for the block in a single model walk,
-     * indexed by {@link Side#ordinal()}. Resolution order per side:
-     *   1. Data-pack override (TinyBlockData JSON), if any
-     *   2. The block's baked model — first quad facing that direction
-     *   3. The block's baked model — first direction-agnostic quad
-     *   4. The block's particle sprite
-     *   5. Intentional missing-texture sprite
+     * Bundle of per-side sprites plus per-side biome-tint colors. Both arrays are
+     * indexed by {@link Side#ordinal()}. Untinted faces (most blocks) get {@code 0xFFFFFFFF}
+     * in the tint slot, which is a no-op when multiplied with a cell color.
      */
-    public TextureAtlasSprite[] getSprites(Identifier itemResourceId) {
-        TextureAtlasSprite[] result = new TextureAtlasSprite[SIDE_COUNT];
+    public record SpritesAndTints(TextureAtlasSprite[] sprites, int[] tints) {}
 
-        applyDataOverrides(itemResourceId, result);
-        fillFromBlockModel(itemResourceId, result);
-        fillMissingWithDefault(result);
+    /**
+     * Returns all six face sprites and their associated biome-tint colors in a single
+     * model walk. Tiny blocks render the default tint.
+     */
+    public SpritesAndTints getSpritesAndTints(Identifier itemResourceId) {
+        TextureAtlasSprite[] sprites = new TextureAtlasSprite[SIDE_COUNT];
+        int[] tints = new int[SIDE_COUNT];
+        Arrays.fill(tints, NO_TINT);
 
-        return result;
+        applyDataOverrides(itemResourceId, sprites);
+        fillFromBlockModel(itemResourceId, sprites, tints);
+        fillMissingWithDefault(sprites);
+
+        return new SpritesAndTints(sprites, tints);
     }
 
     /**
-     * Returns the sprite for one face. Convenience wrapper around {@link #getSprites};
-     * callers needing more than one face should call {@code getSprites} directly to
-     * avoid repeated model walks.
+     * Returns all six face sprites for the block, indexed by {@link Side#ordinal()}.
+     * Convenience wrapper around {@link #getSpritesAndTints} that discards the tint info.
+     */
+    public TextureAtlasSprite[] getSprites(Identifier itemResourceId) {
+        return getSpritesAndTints(itemResourceId).sprites();
+    }
+
+    /**
+     * Returns the sprite for one face. Convenience wrapper; callers needing more than
+     * one face should call {@link #getSpritesAndTints} (or {@link #getSprites}) directly
+     * to avoid repeated model walks.
      */
     public TextureAtlasSprite getSprite(Identifier itemResourceId, Side side) {
         return getSprites(itemResourceId)[side.ordinal()];
@@ -95,11 +106,11 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener<Ti
     }
 
     /**
-     * Fills any null entries in {@code result} from the block's baked model.
-     * Single model walk: collectParts runs once, then each unfilled side is
-     * resolved by querying the parts for that direction.
+     * Walks the block's baked model once and fills any null entries in {@code result}
+     * with per-face sprites, and (when {@code tints} is non-null) any tinted faces with
+     * the default tint color from {@code BlockColors}.
      */
-    private void fillFromBlockModel(Identifier itemResourceId, TextureAtlasSprite[] result) {
+    private void fillFromBlockModel(Identifier itemResourceId, TextureAtlasSprite[] result, int @Nullable [] tints) {
         if (allFilled(result)) return;
 
         Block block = BuiltInRegistries.BLOCK.getValue(itemResourceId);
@@ -111,7 +122,7 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener<Ti
                 .getBlockStateModelSet().get(state);
         if (model == null) return;
 
-        // Variant selection seed: stable per block position. BlockPos.ZERO —
+        // Variant selection seed: stable per block position. BlockPos.ZERO is fine —
         // tiny blocks always render the default variant of the source block.
         RandomSource random = RandomSource.create(state.getSeed(BlockPos.ZERO));
         List<BlockStateModelPart> parts = new ArrayList<>();
@@ -122,25 +133,41 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener<Ti
         for (Side side : Side.values()) {
             if (result[side.ordinal()] != null) continue;
 
-            TextureAtlasSprite sprite = findFaceSprite(parts, directionForSide(side));
-            if (sprite == null) {
+            BakedQuad quad = findFaceQuad(parts, directionForSide(side));
+            if (quad == null) {
                 // Cross-shaped models etc. have direction-agnostic quads (null face).
-                sprite = findFaceSprite(parts, null);
+                quad = findFaceQuad(parts, null);
             }
-            if (sprite == null) {
+
+            if (quad != null) {
+                result[side.ordinal()] = quad.materialInfo().sprite();
+                if (tints != null) {
+                    int tintIndex = quad.materialInfo().tintIndex();
+                    if (tintIndex >= 0) {
+                        // Tiny Blocks use default tints (no biome specific tints)
+                        // BlockTintSource.color(state) is the no-world-context path.
+                        BlockTintSource source = Minecraft.getInstance().getBlockColors()
+                                .getTintSource(state, tintIndex);
+                        if (source != null) {
+                            int raw = source.color(state);
+                            tints[side.ordinal()] = raw;
+                        }
+                    }
+                }
+            } else {
                 if (particleSprite == null) {
                     particleSprite = model.particleMaterial().sprite();
                 }
-                sprite = particleSprite;
+                result[side.ordinal()] = particleSprite;
+                // Particle fallback: no tint info, leave tints[side] at NO_TINT default.
             }
-            result[side.ordinal()] = sprite;
         }
     }
 
-    private static @Nullable TextureAtlasSprite findFaceSprite(List<BlockStateModelPart> parts, @Nullable Direction face) {
+    private static @Nullable BakedQuad findFaceQuad(List<BlockStateModelPart> parts, @Nullable Direction face) {
         for (BlockStateModelPart part : parts) {
             for (BakedQuad quad : part.getQuads(face)) {
-                return quad.materialInfo().sprite();
+                return quad;
             }
         }
         return null;

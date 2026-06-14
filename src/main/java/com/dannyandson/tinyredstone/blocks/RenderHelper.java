@@ -72,6 +72,49 @@ public class RenderHelper {
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_bottom, combinedLight, color, alpha, applyDirectionalShading);
     }
 
+    /**
+     * Per-face-color variant of {@link #drawCube}. The {@code perFaceColors} array
+     * is indexed by {@link Side#ordinal()}; pass per-face tint colors (e.g. biome
+     * tint × cell color) for blocks where each face needs a different multiplier.
+     * Directional shading defaults to true.
+     */
+    public static void drawCube(PoseStack poseStack, VertexConsumer builder, TextureAtlasSprite sprite_top, TextureAtlasSprite sprite_front, TextureAtlasSprite sprite_right, TextureAtlasSprite sprite_back, TextureAtlasSprite sprite_left, TextureAtlasSprite sprite_bottom, int combinedLight, int[] perFaceColors, float alpha) {
+        drawCube(poseStack, builder, sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom, combinedLight, perFaceColors, alpha, true);
+    }
+
+    /**
+     * Per-face-color variant of {@link #drawCube} with explicit directional-shading flag.
+     */
+    public static void drawCube(PoseStack poseStack, VertexConsumer builder, TextureAtlasSprite sprite_top, TextureAtlasSprite sprite_front, TextureAtlasSprite sprite_right, TextureAtlasSprite sprite_back, TextureAtlasSprite sprite_left, TextureAtlasSprite sprite_bottom, int combinedLight, int[] perFaceColors, float alpha, boolean applyDirectionalShading) {
+        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_top, combinedLight, perFaceColors[Side.TOP.ordinal()], alpha, applyDirectionalShading);
+
+        //back
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
+        poseStack.translate(0, 0, 1);
+        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_back, combinedLight, perFaceColors[Side.BACK.ordinal()], alpha, applyDirectionalShading);
+
+        //left
+        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.translate(0, 0, 1);
+        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_left, combinedLight, perFaceColors[Side.LEFT.ordinal()], alpha, applyDirectionalShading);
+
+        //front
+        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.translate(0, 0, 1);
+        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_front, combinedLight, perFaceColors[Side.FRONT.ordinal()], alpha, applyDirectionalShading);
+
+        //right
+        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.translate(0, 0, 1);
+        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_right, combinedLight, perFaceColors[Side.RIGHT.ordinal()], alpha, applyDirectionalShading);
+
+        //bottom
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(-90));
+        poseStack.translate(-1, 0, 1);
+        RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_bottom, combinedLight, perFaceColors[Side.BOTTOM.ordinal()], alpha, applyDirectionalShading);
+    }
+
     public static void drawRectangle(VertexConsumer builder, PoseStack matrixStack, float x1, float x2, float y1, float y2, TextureAtlasSprite sprite, int combinedLight, float alpha) {
         drawRectangle(builder, matrixStack, x1, x2, y1, y2, sprite, combinedLight, 0xFFFFFFFF, alpha);
     }

@@ -34,6 +34,8 @@ public class DarkCover implements IPanelCover {
 
         if (sprite_top == null) {
             if (madeFrom != null) {
+                //Only reached from item renderer. Panel renderer uses ModelBlockRenderer.tesselateBlock()
+                //and does not call this method if madeFrom != null
                 TextureAtlasSprite[] sprites = ModRegistration.TINY_BLOCK_OVERRIDES.getSprites(madeFrom);
                 sprite_top    = sprites[Side.TOP.ordinal()];
                 sprite_front  = sprites[Side.FRONT.ordinal()];

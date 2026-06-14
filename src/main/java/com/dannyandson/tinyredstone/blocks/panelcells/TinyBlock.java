@@ -6,6 +6,7 @@ import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCellInfoProvider;
 import com.dannyandson.tinyredstone.blocks.*;
+import com.dannyandson.tinyredstone.codec.CodecTinyBlockOverrides;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -29,6 +31,8 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
     protected int color= 0xFFFFFFFF;
     protected Identifier madeFrom;
     protected TextureAtlasSprite sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom;
+    /** Per-face biome-tint colors (default-shade only — no biome awareness), indexed by Side.ordinal(). Populated alongside sprites. */
+    protected int[] tints;
 
     /**
      * Returns the block Identifier this tiny block is made from, or null if using default textures.
@@ -50,21 +54,39 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
         VertexConsumer builder = buffer.getBuffer((alpha==1.0)? Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
         if (sprite_top==null) {
             if (madeFrom != null){
-                TextureAtlasSprite[] sprites = ModRegistration.TINY_BLOCK_OVERRIDES.getSprites(madeFrom);
+                CodecTinyBlockOverrides.SpritesAndTints st = ModRegistration.TINY_BLOCK_OVERRIDES.getSpritesAndTints(madeFrom);
+                TextureAtlasSprite[] sprites = st.sprites();
                 sprite_top    = sprites[Side.TOP.ordinal()];
                 sprite_front  = sprites[Side.FRONT.ordinal()];
                 sprite_right  = sprites[Side.RIGHT.ordinal()];
                 sprite_back   = sprites[Side.BACK.ordinal()];
                 sprite_left   = sprites[Side.LEFT.ordinal()];
                 sprite_bottom = sprites[Side.BOTTOM.ordinal()];
+                tints = st.tints();
             }else{
                 sprite_top=sprite_front=sprite_right=sprite_back=sprite_left=sprite_bottom=RenderHelper.getSprite(TEXTURE_TINY_BLOCK);
+                tints = NO_TINTS;
             }
+        }
+
+        // Combine the cell's dye color with each face's biome tint.
+        int[] perFaceColors = new int[Side.values().length];
+        for (int i = 0; i < perFaceColors.length; i++) {
+            perFaceColors[i] = ARGB.multiply(color, tints[i]);
         }
 
         matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
         matrixStack.translate(-1, -1, 1);
-        RenderHelper.drawCube(matrixStack,builder,sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight,color,alpha);
+        RenderHelper.drawCube(matrixStack, builder,
+                sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,
+                combinedLight, perFaceColors, alpha);
+    }
+
+    /** Shared no-tint array for default tiny blocks (madeFrom == null). Never mutated. */
+    private static final int[] NO_TINTS;
+    static {
+        NO_TINTS = new int[Side.values().length];
+        java.util.Arrays.fill(NO_TINTS, 0xFFFFFFFF);
     }
 
     @Override
