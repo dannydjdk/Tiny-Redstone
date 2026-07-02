@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
@@ -9,8 +10,6 @@ import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -36,11 +35,11 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
+     * @param target render target (solid/translucent vertex consumers)
      */
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
+    public void render(PoseStack matrixStack, IRenderTarget target, int combinedLight, int combinedOverlay, float alpha) {
+        VertexConsumer builder = ((alpha == 1.0) ? target.solid() : target.translucent());
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite sprite_repeater = this.getRepeaterTexture();
         TextureAtlasSprite sprite_torch_head = RenderHelper.getSprite(Torch.TEXTURE_TORCH_TOP_ON);

@@ -1,5 +1,7 @@
 package com.dannyandson.tinyredstone.items;
 
+import com.dannyandson.tinyredstone.blocks.CachedPanelRenderer;
+import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.panelcells.TinyBlock;
 import com.dannyandson.tinyredstone.blocks.panelcells.TransparentBlock;
@@ -10,8 +12,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
@@ -26,6 +26,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -61,7 +63,7 @@ public record TinyBlockItemRenderer() implements SpecialModelRenderer<ItemStack>
             }
         }
 
-        renderDefault(stack, poseStack, lightCoords);
+        renderDefault(stack, poseStack, collector, lightCoords);
     }
 
     /** Reads the made_from Identifier from the stack's CUSTOM_DATA. Returns null if absent. */
@@ -93,22 +95,30 @@ public record TinyBlockItemRenderer() implements SpecialModelRenderer<ItemStack>
     }
 
     /** Default-texture cube shown when the stack has no made_from data, matching prior behavior. */
-    private static void renderDefault(ItemStack stack, PoseStack poseStack, int lightCoords) {
+    private static void renderDefault(ItemStack stack, PoseStack poseStack, SubmitNodeCollector collector, int lightCoords) {
         boolean isTransparent = stack.getItem() == ModRegistration.TINY_TRANSPARENT_BLOCK.get();
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         TextureAtlasSprite sprite = RenderHelper.getSprite(
                 isTransparent ? TransparentBlock.TEXTURE_TRANSPARENT_BLOCK : TinyBlock.TEXTURE_TINY_BLOCK);
-        VertexConsumer builder = bufferSource.getBuffer(
-                isTransparent ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet());
         float alpha = isTransparent ? 0.99f : 1.0f;
 
-        poseStack.pushPose();
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
-        poseStack.translate(1, 0, 0);
-        RenderHelper.drawCube(poseStack, builder, sprite, sprite, sprite, sprite, sprite, sprite,
+        // Capture the cube into a panel-local buffer (construction transforms on a fresh
+        // stack), then submit through the feature pipeline. The provided item poseStack supplies
+        // the display transform once, at submit time.
+        List<CachedPanelRenderer.CachedVertex> solid = new ArrayList<>();
+        List<CachedPanelRenderer.CachedVertex> translucent = new ArrayList<>();
+        CachedPanelRenderer.VertexCapture capture = new CachedPanelRenderer.VertexCapture(solid, translucent);
+        VertexConsumer builder = isTransparent ? capture.translucent() : capture.solid();
+
+        PoseStack captureStack = new PoseStack();
+        captureStack.pushPose();
+        captureStack.mulPose(Axis.XP.rotationDegrees(-90));
+        captureStack.translate(1, 0, 0);
+        RenderHelper.drawCube(captureStack, builder, sprite, sprite, sprite, sprite, sprite, sprite,
                 lightCoords, 0xFFFFFFFF, alpha, false);
-        poseStack.popPose();
-        bufferSource.endBatch();
+        captureStack.popPose();
+        capture.flush();
+
+        PanelTileRenderer.submitCachedVertices(poseStack, collector, solid, translucent);
     }
 
     @Override

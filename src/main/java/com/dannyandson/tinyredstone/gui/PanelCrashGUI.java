@@ -50,7 +50,7 @@ public class PanelCrashGUI  extends Screen {
     }
 
     private void close() {
-        minecraft.setScreen(null);
+        minecraft.gui.setScreen(null);
     }
 
     private void enable() {
@@ -71,7 +71,7 @@ public class PanelCrashGUI  extends Screen {
 
 
     public static void open(PanelTile panelTile) {
-        Minecraft.getInstance().setScreen(new PanelCrashGUI(panelTile));
+        Minecraft.getInstance().gui.setScreen(new PanelCrashGUI(panelTile));
     }
 
 }

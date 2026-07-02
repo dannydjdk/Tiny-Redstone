@@ -87,7 +87,7 @@ public class RepeaterCellGUI extends Screen {
     }
 
     private void close() {
-        minecraft.setScreen(null);
+        minecraft.gui.setScreen(null);
     }
 
     private void changeTicks(int change)
@@ -123,6 +123,6 @@ public class RepeaterCellGUI extends Screen {
 
 
     public static void open(PanelTile panelTile, Integer cellIndex, Repeater repeaterCell) {
-        Minecraft.getInstance().setScreen(new RepeaterCellGUI(panelTile, cellIndex, repeaterCell));
+        Minecraft.getInstance().gui.setScreen(new RepeaterCellGUI(panelTile, cellIndex, repeaterCell));
     }
 }

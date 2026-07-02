@@ -5,7 +5,6 @@ import com.dannyandson.tinyredstone.blocks.PanelCellSegment;
 import com.dannyandson.tinyredstone.blocks.PanelCellVoxelShape;
 import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 
@@ -16,8 +15,10 @@ public interface IPanelCell {
      * @param poseStack positioned for this cell
      *                    scaled to 1/8 block size such that length and width of cell are 1.0
      *                    starting point is (0,0,0)
+     * @param target render target exposing the solid and translucent vertex consumers
+     *               (replaces the 26.1 MultiBufferSource + Sheets.cutout/translucentBlockSheet pairing)
      */
-    void render(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha);
+    void render(PoseStack poseStack, IRenderTarget target, int combinedLight, int combinedOverlay, float alpha);
 
     /**
      * Called when cell is placed on a panel, also when ghost preview is rendered

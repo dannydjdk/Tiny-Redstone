@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
@@ -9,8 +10,6 @@ import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -36,14 +35,14 @@ public class GhostRenderer implements IPanelCell {
      *                        starting point is (0,0,0)
      */
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
+    public void render(PoseStack poseStack, IRenderTarget target, int combinedLight, int combinedOverlay, float alpha) {
         if (sprite==null){
             sprite=RenderHelper.getSprite(TEXTURE_REDSTONE_DUST_SEGMENT_GHOST);
         }
         alpha = .75f;
         //color = RenderHelper.getColor(255,80,0,0);
 
-        VertexConsumer builder = buffer.getBuffer(Sheets.translucentBlockSheet());
+        VertexConsumer builder = target.translucent();
 
         poseStack.translate(0,0,0.015);
 

@@ -3,6 +3,7 @@ package com.dannyandson.tinyredstone.items;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +20,7 @@ public class ChopperBlockItem extends BlockItem {
 
     @Override
     public void appendHoverText(ItemStack itemStack, TooltipContext context, TooltipDisplay display, Consumer<Component> textConsumer, TooltipFlag flag) {
-        textConsumer.accept(Component.translatable("message." + this.getDescriptionId()).withStyle(ChatFormatting.DARK_GRAY));
+        textConsumer.accept(Component.translatable("message." + this.getDescriptionId()).withStyle(Style.EMPTY.withColor(ChatFormatting.DARK_GRAY)));
     }
 
 }

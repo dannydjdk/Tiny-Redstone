@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelCellNeighbor;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
@@ -8,8 +9,6 @@ import com.dannyandson.tinyredstone.blocks.Side;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -30,17 +29,17 @@ public class Piston implements IPanelCell {
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
+     * @param target render target (solid/translucent vertex consumers)
      */
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
+    public void render(PoseStack matrixStack, IRenderTarget target, int combinedLight, int combinedOverlay, float alpha) {
 
         TextureAtlasSprite sprite_bottom = RenderHelper.getSprite(TEXTURE_PISTON_BOTTOM);
         TextureAtlasSprite sprite_inner = RenderHelper.getSprite(TEXTURE_PISTON_INNER);
         TextureAtlasSprite sprite_inner_top = RenderHelper.getSprite(TEXTURE_PISTON_TOP);
 
 
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
+        VertexConsumer builder = ((alpha == 1.0) ? target.solid() : target.translucent());
         TextureAtlasSprite sprite_top = getSprite_top();
 
         boolean renderExtended = (extended && changePending==-1) || (!extended && changePending!=-1);
@@ -174,23 +173,23 @@ public class Piston implements IPanelCell {
 
         boolean extend =
                 (cellPos.getLevel()>0||cellPos.getCellFacing()!=Side.TOP)
-                &&
-                (
-                        ( rightNeighbor!=null && rightNeighbor.getWeakRsOutput()>0) ||
-                                ( frontNeighbor!=null && frontNeighbor.getWeakRsOutput()>0) ||
-                                ( leftNeighbor!=null && leftNeighbor.getWeakRsOutput()>0) ||
-                                ( topNeighbor!=null && topNeighbor.getWeakRsOutput()>0) ||
-                                ( bottomNeighbor!=null && bottomNeighbor.getWeakRsOutput()>0)
-                )
-                &&
-                        (backNeighbor == null || backNeighbor.isOnPanel())
-                &&
-                ( extended ||
+                        &&
                         (
-                                backNeighbor == null || ( backNeighbor.getNeighborIPanelCell() != null &&
-                                backNeighbor.isPushable() )
+                                ( rightNeighbor!=null && rightNeighbor.getWeakRsOutput()>0) ||
+                                        ( frontNeighbor!=null && frontNeighbor.getWeakRsOutput()>0) ||
+                                        ( leftNeighbor!=null && leftNeighbor.getWeakRsOutput()>0) ||
+                                        ( topNeighbor!=null && topNeighbor.getWeakRsOutput()>0) ||
+                                        ( bottomNeighbor!=null && bottomNeighbor.getWeakRsOutput()>0)
                         )
-                );
+                        &&
+                        (backNeighbor == null || backNeighbor.isOnPanel())
+                        &&
+                        ( extended ||
+                                (
+                                        backNeighbor == null || ( backNeighbor.getNeighborIPanelCell() != null &&
+                                                backNeighbor.isPushable() )
+                                )
+                        );
         if (extend!=this.extended)
         {
             this.extended=extend;

@@ -1,12 +1,11 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.nbt.CompoundTag;
 
 public class RedstoneBridge extends RedstoneDust {
@@ -31,10 +30,10 @@ public class RedstoneBridge extends RedstoneDust {
      * Drawing the cell on the panel
      *
      * @param matrixStack     positioned for this cell and scaled such that length and width are 1.0 and height is 0.5 above panel base
-     * @param buffer
+     * @param target render target (solid/translucent vertex consumers)
      */
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
+    public void render(PoseStack matrixStack, IRenderTarget target, int combinedLight, int combinedOverlay, float alpha) {
 
         float red1 = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         float red2 = (signalStrength2==0)?.25f:.30f + (.04f*signalStrength2);
@@ -45,7 +44,7 @@ public class RedstoneBridge extends RedstoneDust {
             setTextureMapValues();
         }
 
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
+        VertexConsumer builder = ((alpha == 1.0) ? target.solid() : target.translucent());
 
         matrixStack.translate(0,0,0.05);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.05f,s10+.05f,s6-.05f,s10+.05f,segmentU0,segmentU1b,segmentV0,segmentV1,combinedLight,0xFF888888, alpha);

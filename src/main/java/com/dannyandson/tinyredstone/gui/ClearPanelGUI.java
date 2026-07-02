@@ -56,7 +56,7 @@ public class ClearPanelGUI extends Screen {
     }
 
     private void close() {
-        minecraft.setScreen(null);
+        minecraft.gui.setScreen(null);
     }
 
     @Override
@@ -70,6 +70,6 @@ public class ClearPanelGUI extends Screen {
 
 
     public static void open(PanelTile panelTile) {
-        Minecraft.getInstance().setScreen(new ClearPanelGUI(panelTile));
+        Minecraft.getInstance().gui.setScreen(new ClearPanelGUI(panelTile));
     }
 }

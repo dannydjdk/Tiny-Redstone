@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.blocks.panelcovers.DarkCover;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -7,11 +8,8 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.model.geom.builders.UVPair;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -28,9 +26,10 @@ import java.util.List;
  * Instead of recomputing all cell geometry every frame, we capture the vertex data
  * once (when dirty) and replay it on subsequent frames.
  * <p>
- * The capture works by providing a proxy MultiBufferSource that records all vertex
- * operations. On replay, the recorded vertices are written directly to the real
- * MultiBufferSource's VertexConsumer, applying only the panel's world-space transform.
+ * The capture works by providing a capturing {@link IRenderTarget} that records all vertex
+ * operations. On replay, the recorded vertices are written directly to a real
+ * VertexConsumer (obtained via the feature submit pipeline), applying only the panel's
+ * world-space transform.
  */
 public class CachedPanelRenderer {
 
@@ -117,7 +116,7 @@ public class CachedPanelRenderer {
         translucentVertices.clear();
         isCamouflageCache = false;
 
-        CaptureBufferSource captureSource = new CaptureBufferSource(solidVertices, translucentVertices);
+        VertexCapture captureSource = new VertexCapture(solidVertices, translucentVertices);
 
         if (tile.isCovered()) {
             // Check for camouflage cover (DarkCover/LightCover with madeFrom block)
@@ -167,29 +166,9 @@ public class CachedPanelRenderer {
     }
 
     /**
-     * Replay the cached vertex data into the real MultiBufferSource.
-     * The matrixStack should already have the panel's facing rotation applied.
-     */
-    public void replay(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight) {
-        Matrix4f transform = matrixStack.last().pose();
-
-        if (!solidVertices.isEmpty()) {
-            VertexConsumer solidBuilder = buffer.getBuffer(Sheets.cutoutBlockSheet());
-            replayVertices(solidBuilder, transform, solidVertices);
-        }
-
-        if (!translucentVertices.isEmpty()) {
-            VertexConsumer translucentBuilder = buffer.getBuffer(Sheets.translucentBlockSheet());
-            replayVertices(translucentBuilder, transform, translucentVertices);
-        }
-    }
-
-    private void replayVertices(VertexConsumer builder, Matrix4f transform, List<CachedVertex> vertices) {
-        replayVerticesStatic(builder, transform, vertices);
-    }
-
-    /**
-     * Static version of replayVertices for use from PanelTileRenderer's submit() method.
+     * Replay the cached vertex data into a live VertexConsumer, applying the given
+     * world/facing transform. Called from PanelTileRenderer.submit() (and the item
+     * renderers) inside the feature submit pipeline.
      */
     public static void replayVerticesStatic(VertexConsumer builder, Matrix4f transform, List<CachedVertex> vertices) {
         for (CachedVertex v : vertices) {
@@ -217,7 +196,7 @@ public class CachedPanelRenderer {
     }
 
     private void renderPanelBase(PanelTile tileEntity, PoseStack matrixStack,
-                                 MultiBufferSource buffer, int combinedLight) {
+                                 IRenderTarget target, int combinedLight) {
         int topTextureIndex =
                 ((tileEntity.getConnectedPanelNeighbor(Side.FRONT)) ? 2 : 0)
                         + ((tileEntity.getConnectedPanelNeighbor(Side.RIGHT)) ? 1 : 0)
@@ -227,7 +206,7 @@ public class CachedPanelRenderer {
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
         TextureAtlasSprite topSprite = (topTextureIndex == 0) ? sprite : RenderHelper.getSprite(PanelTileRenderer.TEXTURES[topTextureIndex]);
         int color = tileEntity.getColor();
-        VertexConsumer builder = buffer.getBuffer(Sheets.cutoutBlockSheet());
+        VertexConsumer builder = target.solid();
 
         matrixStack.pushPose();
         matrixStack.mulPose(Axis.XP.rotationDegrees(270));
@@ -257,14 +236,14 @@ public class CachedPanelRenderer {
         matrixStack.popPose();
     }
 
-    private void renderCrashOverlay(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight) {
+    private void renderCrashOverlay(PoseStack matrixStack, IRenderTarget target, int combinedLight) {
         matrixStack.pushPose();
         matrixStack.translate(0, 0.126, 1);
         matrixStack.mulPose(Axis.XP.rotationDegrees(270f));
 
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE_CRASHED);
         RenderHelper.drawRectangle(
-                buffer.getBuffer(Sheets.translucentBlockSheet()),
+                target.translucent(),
                 matrixStack, 0, 1, 0, 1, sprite, combinedLight, 0.9f);
         matrixStack.popPose();
     }
@@ -275,7 +254,7 @@ public class CachedPanelRenderer {
      * to prevent the Sheets shader from applying a second round of face shading — tesselateBlock
      * already bakes the correct directional shade and world-aware AO into the QuadInstance colors.
      */
-    private void renderCamouflageBlock(PanelTile tile, Identifier madeFrom, CaptureBufferSource captureSource) {
+    private void renderCamouflageBlock(PanelTile tile, Identifier madeFrom, VertexCapture captureSource) {
         if (tile.getLevel() == null) return;
 
         BlockState blockState = BuiltInRegistries.BLOCK.getValue(madeFrom).defaultBlockState();
@@ -286,7 +265,7 @@ public class CachedPanelRenderer {
         if (model == null) return;
 
         ModelBlockRenderer modelRenderer = getOrCreateModelRenderer();
-        VertexConsumer builder = captureSource.getBuffer(Sheets.cutoutBlockSheet());
+        VertexConsumer builder = captureSource.solid();
 
         // Unpack quads exactly like putBlockBakedQuad does (same color multiply, UV, light),
         // but with normal forced to UP so the shader doesn't apply a second face shade pass.
@@ -330,32 +309,34 @@ public class CachedPanelRenderer {
     }
 
     /**
-     * A proxy MultiBufferSource that captures vertex data into lists instead
-     * of submitting it to the GPU. Each getBuffer() call returns a CapturingVertexConsumer
-     * that records vertex attributes.
+     * A capturing {@link IRenderTarget} that records vertex data into lists instead of
+     * submitting it to the GPU. {@link #solid()} / {@link #translucent()} each return a
+     * {@link CapturingVertexConsumer} that records vertex attributes.
      */
-    private static class CaptureBufferSource implements MultiBufferSource {
+    public static class VertexCapture implements IRenderTarget {
         private final CapturingVertexConsumer solidConsumer;
         private final CapturingVertexConsumer translucentConsumer;
 
-        CaptureBufferSource(List<CachedVertex> solidVertices, List<CachedVertex> translucentVertices) {
+        public VertexCapture(List<CachedVertex> solidVertices, List<CachedVertex> translucentVertices) {
             this.solidConsumer = new CapturingVertexConsumer(solidVertices);
             this.translucentConsumer = new CapturingVertexConsumer(translucentVertices);
         }
 
         @Override
-        public VertexConsumer getBuffer(RenderType renderType) {
-            if (renderType == Sheets.translucentBlockSheet()) {
-                return translucentConsumer;
-            }
+        public VertexConsumer solid() {
             return solidConsumer;
+        }
+
+        @Override
+        public VertexConsumer translucent() {
+            return translucentConsumer;
         }
 
         /**
          * Flush any pending vertex data from both consumers.
          * Must be called after all rendering is complete.
          */
-        void flush() {
+        public void flush() {
             solidConsumer.flushVertex();
             translucentConsumer.flushVertex();
         }

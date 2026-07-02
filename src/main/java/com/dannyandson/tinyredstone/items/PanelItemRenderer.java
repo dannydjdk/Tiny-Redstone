@@ -3,6 +3,8 @@ package com.dannyandson.tinyredstone.items;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCover;
+import com.dannyandson.tinyredstone.api.IRenderTarget;
+import com.dannyandson.tinyredstone.blocks.CachedPanelRenderer;
 import com.dannyandson.tinyredstone.blocks.PanelTileRenderer;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
@@ -11,9 +13,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -24,6 +23,8 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -41,10 +42,15 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
     @Override
     public void submit(ItemStack stack, PoseStack matrixStack, SubmitNodeCollector collector,
                        int combinedLight, int combinedOverlay, boolean hasFoil, int outlineColor) {
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        // Capture the panel geometry into a panel-local buffer using a fresh construction stack,
+        // then submit it through the feature pipeline. The provided item matrixStack is applied once, at submit
+        // time, so construction transforms below run on captureStack (mirrors the BER cache path).
+        List<CachedPanelRenderer.CachedVertex> solid = new ArrayList<>();
+        List<CachedPanelRenderer.CachedVertex> translucent = new ArrayList<>();
+        CachedPanelRenderer.VertexCapture capture = new CachedPanelRenderer.VertexCapture(solid, translucent);
 
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE);
-        VertexConsumer builder = bufferSource.getBuffer(Sheets.cutoutBlockSheet());
+        VertexConsumer builder = capture.solid();
         int color = DyeColor.GRAY.getMapColor().col;
         CompoundTag blockEntityTag = ItemStackHelper.getBlockEntityTag(stack);
         if (blockEntityTag != null) {
@@ -53,8 +59,9 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
             }
         }
 
-        matrixStack.pushPose();
-        matrixStack.translate(0, 0.125, 0);
+        PoseStack captureStack = new PoseStack();
+        captureStack.pushPose();
+        captureStack.translate(0, 0.125, 0);
 
         if (blockEntityTag != null) {
 
@@ -65,9 +72,9 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
                 try {
                     IPanelCover cover = (IPanelCover) Class.forName(coverClass).getConstructor().newInstance();
                     cover.readNBT(blockEntityTag.getCompound("coverData").orElseGet(CompoundTag::new));
-                    matrixStack.pushPose();
-                    cover.render(matrixStack, bufferSource, combinedLight, combinedOverlay, color);
-                    matrixStack.popPose();
+                    captureStack.pushPose();
+                    cover.render(captureStack, capture, combinedLight, combinedOverlay, color);
+                    captureStack.popPose();
                 } catch (Exception exception) {
                     TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCover class for item render: " + coverClass +
                             ": " + exception.getMessage() + " " + exception.getStackTrace()[0].toString());
@@ -76,7 +83,7 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
                 boolean hasBase = !itemTag.contains("hasBase") || itemTag.getBooleanOr("hasBase", false);
 
                 if (hasBase)
-                    renderBase(matrixStack, builder, sprite, combinedLight, color);
+                    renderBase(captureStack, builder, sprite, combinedLight, color);
 
                 CompoundTag cellsNBT = itemTag.getCompound("cells").orElseGet(CompoundTag::new);
                 for (Integer i = 0; i < (hasBase ? 448 : 512); i++) {
@@ -89,7 +96,7 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
                                 IPanelCell cell = (IPanelCell) Class.forName(className).getConstructor().newInstance();
                                 cell.readNBT(cellNBT.getCompound("data").orElseGet(CompoundTag::new));
                                 Side cellDirection = Side.valueOf(cellNBT.getStringOr("facing", ""));
-                                renderCell(matrixStack, i, cell, cellDirection, bufferSource, combinedLight, combinedOverlay);
+                                renderCell(captureStack, i, cell, cellDirection, capture, combinedLight, combinedOverlay);
                             } catch (Exception exception) {
                                 TinyRedstone.LOGGER.error("Exception attempting to construct IPanelCell class for item render: " + className +
                                         ": " + exception.getMessage() + " " + exception.getStackTrace()[0].toString());
@@ -99,14 +106,14 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
                 }
             }
         } else {
-            renderBase(matrixStack, builder, sprite, combinedLight, color);
+            renderBase(captureStack, builder, sprite, combinedLight, color);
         }
 
-        matrixStack.popPose();
+        captureStack.popPose();
+        capture.flush();
 
-        // 26.1: Must explicitly flush in SpecialModelRenderer — item rendering pipeline
-        // does not flush the immediate buffer source automatically.
-        bufferSource.endBatch();
+        // Submit captured geometry; the item matrixStack supplies the display transform.
+        PanelTileRenderer.submitCachedVertices(matrixStack, collector, solid, translucent);
     }
 
     @Override
@@ -147,7 +154,7 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
     }
 
     private void renderCell(PoseStack matrixStack, Integer index, IPanelCell panelCell, Side cellDirection,
-                            MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+                            IRenderTarget target, int combinedLight, int combinedOverlay) {
         float scale = 0.125f;
         float t2X = 0.0f;
         float t2Y = -1.0f;
@@ -178,7 +185,7 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
         matrixStack.scale(scale, scale, scale);
         matrixStack.translate(t2X, t2Y, t2Z);
 
-        panelCell.render(matrixStack, buffer, combinedLight, combinedOverlay, 1);
+        panelCell.render(matrixStack, target, combinedLight, combinedOverlay, 1);
 
         matrixStack.popPose();
     }

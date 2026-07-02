@@ -1,13 +1,12 @@
 package com.dannyandson.tinyredstone.blocks.panelcovers;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -61,38 +60,38 @@ public class TrimCover implements IPanelCover {
      * Drawing the cover on the panel
      */
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, int color) {
+    public void render(PoseStack matrixStack, IRenderTarget target, int combinedLight, int combinedOverlay, int color) {
         if (xMin ==null)setDefaultBoundaries();
         if (sprite==null)sprite = RenderHelper.getSprite(DarkCover.TEXTURE_DEFAULT_COVER);
 
         //south face (+z)
         matrixStack.translate(0, 0, zMax);
-        RenderHelper.drawRectangle(buffer.getBuffer(Sheets.cutoutBlockSheet()),matrixStack,xMin,xMax,yMin,yMax,sprite,combinedLight,color,1f);
+        RenderHelper.drawRectangle(target.solid(),matrixStack,xMin,xMax,yMin,yMax,sprite,combinedLight,color,1f);
 
         //east face (+x)
         matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,xMax);
-        RenderHelper.drawRectangle(buffer.getBuffer(Sheets.cutoutBlockSheet()),matrixStack,0,zMax-zMin,yMin,yMax,sprite,combinedLight,color,1f);
+        RenderHelper.drawRectangle(target.solid(),matrixStack,0,zMax-zMin,yMin,yMax,sprite,combinedLight,color,1f);
 
         //north face (-z)
         matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,zMax-zMin);
-        RenderHelper.drawRectangle(buffer.getBuffer(Sheets.cutoutBlockSheet()),matrixStack,0,xMax-xMin,0,yMax-yMin,sprite,combinedLight,color,1f);
+        RenderHelper.drawRectangle(target.solid(),matrixStack,0,xMax-xMin,0,yMax-yMin,sprite,combinedLight,color,1f);
 
         //west face (-x)
         matrixStack.mulPose(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,xMax-xMin);
-        RenderHelper.drawRectangle(buffer.getBuffer(Sheets.cutoutBlockSheet()),matrixStack,0,zMax-zMin,0,yMax-yMin,sprite,combinedLight,color,1f);
+        RenderHelper.drawRectangle(target.solid(),matrixStack,0,zMax-zMin,0,yMax-yMin,sprite,combinedLight,color,1f);
 
         //bottom face (-y)
         matrixStack.mulPose(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,xMin-xMax,0);
-        RenderHelper.drawRectangle(buffer.getBuffer(Sheets.cutoutBlockSheet()),matrixStack,0,zMax-zMin,0,xMax-xMin,sprite,combinedLight,color,1f);
+        RenderHelper.drawRectangle(target.solid(),matrixStack,0,zMax-zMin,0,xMax-xMin,sprite,combinedLight,color,1f);
 
         //top face (+y)
         matrixStack.mulPose(Axis.XP.rotationDegrees(180));
         matrixStack.translate(0,xMin-xMax,yMax-yMin);
-        RenderHelper.drawRectangle(buffer.getBuffer(Sheets.cutoutBlockSheet()),matrixStack,0,zMax-zMin,0,xMax-xMin,sprite,combinedLight,color,1f);
+        RenderHelper.drawRectangle(target.solid(),matrixStack,0,zMax-zMin,0,xMax-xMin,sprite,combinedLight,color,1f);
     }
 
     /**

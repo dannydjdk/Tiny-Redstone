@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcovers;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCover;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
@@ -9,8 +10,6 @@ import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.dannyandson.tinyredstone.util.ItemStackHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -29,7 +28,7 @@ public class DarkCover implements IPanelCover {
      * Drawing the cover on the panel
      */
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, int color) {
+    public void render(PoseStack matrixStack, IRenderTarget target, int combinedLight, int combinedOverlay, int color) {
 
 
         if (sprite_top == null) {
@@ -51,7 +50,7 @@ public class DarkCover implements IPanelCover {
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_DEFAULT_COVER);
         matrixStack.translate(0, y2, 1);
         matrixStack.mulPose(Axis.XP.rotationDegrees(270));
-        RenderHelper.drawCube(matrixStack,buffer.getBuffer(Sheets.cutoutBlockSheet()),sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight, madeFrom != null?0x00FFFFFF:color,1f);
+        RenderHelper.drawCube(matrixStack,target.solid(),sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight, madeFrom != null?0x00FFFFFF:color,1f);
     }
 
     protected Identifier getDefaultResourceLocation(){

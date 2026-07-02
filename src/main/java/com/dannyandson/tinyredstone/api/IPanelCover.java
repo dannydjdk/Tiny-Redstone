@@ -2,7 +2,6 @@ package com.dannyandson.tinyredstone.api;
 
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -14,8 +13,9 @@ public interface IPanelCover {
 
     /**
      * Drawing the cover on the panel
+     * @param target render target exposing the solid and translucent vertex consumers
      */
-    void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, int color);
+    void render(PoseStack matrixStack, IRenderTarget target, int combinedLight, int combinedOverlay, int color);
 
     /**
      * Does this cover allows light output?

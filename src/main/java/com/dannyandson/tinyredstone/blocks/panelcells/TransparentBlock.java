@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.blocks.PanelCellPos;
 import com.dannyandson.tinyredstone.blocks.RenderHelper;
 import com.dannyandson.tinyredstone.blocks.Side;
@@ -7,8 +8,6 @@ import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -24,12 +23,12 @@ public class TransparentBlock extends TinyBlock {
      * @param matrixStack     positioned for this cell
      *                        scaled to 1/8 block size such that length and width of cell are 1.0
      *                        starting point is (0,0,0)
-     * @param buffer
+     * @param target render target (solid/translucent vertex consumers)
      */
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
+    public void render(PoseStack matrixStack, IRenderTarget target, int combinedLight, int combinedOverlay, float alpha) {
 
-        VertexConsumer builder = buffer.getBuffer(Sheets.translucentBlockSheet());
+        VertexConsumer builder = target.translucent();
         if (sprite==null)
             sprite =(madeFrom!=null)? ModRegistration.TINY_BLOCK_OVERRIDES.getSprite(madeFrom,Side.FRONT):RenderHelper.getSprite(TEXTURE_TRANSPARENT_BLOCK);
 

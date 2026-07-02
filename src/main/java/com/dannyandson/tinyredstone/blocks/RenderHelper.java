@@ -4,6 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.resources.Identifier;
@@ -14,6 +18,33 @@ import org.joml.Vector3f;
 public class RenderHelper {
 
     private static final Identifier BLOCK_ATLAS = Identifier.withDefaultNamespace("textures/atlas/blocks.png");
+
+    // Cutout/solid block layer for cell geometry, back-face culled.
+    public static RenderType cutoutBlockRenderType() {
+        return RenderTypes.entityCutoutCull(BLOCK_ATLAS);
+    }
+
+    // Translucent block layer, back-face culled. Kept LAZY (not a static final): RenderType.create /
+    // RenderPipelines are client-only, and PanelTile touches RenderHelper on the dedicated server
+    // (getTextureDiffusedColor), so running these in static init crashes the server. RenderTypes has
+    // no culling translucent factory for the default target, so we build it here on first use.
+    private static RenderType translucentCullBlock;
+
+    public static RenderType translucentBlockRenderType() {
+        if (translucentCullBlock == null) {
+            translucentCullBlock = RenderType.create(
+                    "tinyredstone_translucent_cull",
+                    RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT_CULL)
+                            .withTexture("Sampler0", BLOCK_ATLAS)
+                            .useLightmap()
+                            .useOverlay()
+                            .affectsCrumbling()
+                            .sortOnUpload()
+                            .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
+                            .createRenderSetup());
+        }
+        return translucentCullBlock;
+    }
 
     private static int[] textureDiffusedColors = {
             16383998,

@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks.panelcells;
 
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IOverlayBlockInfo;
 import com.dannyandson.tinyredstone.api.IPanelCell;
@@ -8,8 +9,6 @@ import com.dannyandson.tinyredstone.blocks.*;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
@@ -50,10 +49,10 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
      * Drawing the cell on the panel
      *
      * @param matrixStack     positioned for this cell and scaled such that length and width are 1.0 and height is 0.5 above panel base
-     * @param buffer
+     * @param target render target (solid/translucent vertex consumers)
      */
     @Override
-    public void render(PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha) {
+    public void render(PoseStack matrixStack, IRenderTarget target, int combinedLight, int combinedOverlay, float alpha) {
 
         red = (signalStrength==0)?.25f:.30f + (.04f*signalStrength);
         int color = RenderHelper.getColor(255,Math.round(red*255),0,0);
@@ -62,7 +61,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
             setTextureMapValues();
         }
 
-        VertexConsumer builder = buffer.getBuffer((alpha==1.0)?Sheets.cutoutBlockSheet():Sheets.translucentBlockSheet());
+        VertexConsumer builder = ((alpha == 1.0) ? target.solid() : target.translucent());
 
         matrixStack.translate(0,0,0.01);
         RenderHelper.drawRectangle(builder,matrixStack,s6-.01f,s10+.01f,s6-.01f,s10+.01f,segmentU0,segmentU1b,segmentV0,segmentV1,combinedLight,color, alpha);
@@ -285,7 +284,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
     @Override
     public boolean onBlockActivated(PanelCellPos cellPos, PanelCellSegment segmentClicked, Player player) {
         if(cellPos.getPanelTile().getLevel().isClientSide())
-           return false;
+            return false;
 
         if (segmentClicked==PanelCellSegment.FRONT)
         {

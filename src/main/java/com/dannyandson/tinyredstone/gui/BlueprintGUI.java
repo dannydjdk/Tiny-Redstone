@@ -63,7 +63,7 @@ public class BlueprintGUI  extends Screen {
     }
 
     private void close() {
-        minecraft.setScreen(null);
+        minecraft.gui.setScreen(null);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class BlueprintGUI  extends Screen {
 
 
     public static void open(ItemStack blueprint) {
-        Minecraft.getInstance().setScreen(new BlueprintGUI(blueprint));
+        Minecraft.getInstance().gui.setScreen(new BlueprintGUI(blueprint));
     }
 
     public void exportToFile()

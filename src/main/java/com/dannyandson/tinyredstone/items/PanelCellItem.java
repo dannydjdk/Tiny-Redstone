@@ -6,6 +6,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -28,9 +29,9 @@ public class PanelCellItem extends AbstractPanelCellItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> textConsumer, TooltipFlag flags) {
         if (isShiftKeyDown()) {
-            textConsumer.accept(Component.translatable("message.item.redstone_panel_cell").withStyle(ChatFormatting.GRAY));
-            textConsumer.accept(Component.translatable("message." + this.getDescriptionId()).withStyle(ChatFormatting.RED));
+            textConsumer.accept(Component.translatable("message.item.redstone_panel_cell").withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)));
+            textConsumer.accept(Component.translatable("message." + this.getDescriptionId()).withStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
         } else
-            textConsumer.accept(Component.translatable("tinyredstone.tooltip.press_shift").withStyle(ChatFormatting.DARK_GRAY));
+            textConsumer.accept(Component.translatable("tinyredstone.tooltip.press_shift").withStyle(Style.EMPTY.withColor(ChatFormatting.DARK_GRAY)));
     }
 }

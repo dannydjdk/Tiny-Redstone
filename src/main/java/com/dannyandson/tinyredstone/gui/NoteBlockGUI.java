@@ -73,7 +73,7 @@ public class NoteBlockGUI extends Screen {
     }
 
     private void close() {
-        minecraft.setScreen(null);
+        minecraft.gui.setScreen(null);
     }
 
     private void setInstrument(String instrument)
@@ -99,6 +99,6 @@ public class NoteBlockGUI extends Screen {
 
 
     public static void open(PanelTile panelTile, Integer cellIndex, NoteBlock tinyNoteBlock) {
-        Minecraft.getInstance().setScreen(new NoteBlockGUI(panelTile, cellIndex, tinyNoteBlock));
+        Minecraft.getInstance().gui.setScreen(new NoteBlockGUI(panelTile, cellIndex, tinyNoteBlock));
     }
 }

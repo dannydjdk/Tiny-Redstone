@@ -2,31 +2,34 @@ package com.dannyandson.tinyredstone.blocks;
 
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IPanelCell;
+import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * PanelTile renderer for NeoForge 26.1.
+ * PanelTile renderer for NeoForge 26.2.
  *
  * In 1.21.9+, BlockEntityRenderer uses a render state system with three methods:
  * - createRenderState(): creates a new render state instance
@@ -35,8 +38,9 @@ import java.lang.reflect.InvocationTargetException;
  *
  * The second type parameter is the render state class.
  *
- * NOTE: If SubmitNodeCollector doesn't provide getBuffer() for custom vertex
- * rendering, this may need adjustment. The structural pattern is correct.
+ * 26.2 removed MultiBufferSource, Sheets.cutout/translucentBlockSheet() and
+ * RenderBuffers.bufferSource(). Custom geometry is now emitted through the feature
+ * submit pipeline (SubmitNodeCollector#submitCustomGeometry); see submitLayer().
  */
 public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTileRenderState> {
 
@@ -83,10 +87,10 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
 
         CachedPanelRenderer cache = tileEntity.getCachedRenderer();
 
-        // Get light from the block position
+        // Get light from the block position.
         int combinedLight = 0;
         if (tileEntity.getLevel() != null) {
-            combinedLight = net.minecraft.client.renderer.LevelRenderer.getLightCoords(tileEntity.getLevel(), tileEntity.getBlockPos());
+            combinedLight = LightCoordsUtil.getLightCoords(tileEntity.getLevel(), tileEntity.getBlockPos());
         }
         int combinedOverlay = net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY;
 
@@ -116,10 +120,10 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
 
     @Override
     public void submit(PanelTileRenderState renderState, PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
-        // 26.1: SubmitNodeCollector does NOT extend MultiBufferSource and does NOT have getBuffer().
-        // We use the game's immediate buffer source for custom vertex rendering.
-        // This is the standard approach for block entity renderers that need direct vertex writing.
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        // Custom BER geometry flows through the feature submit pipeline via
+        // SubmitNodeCollector#submitCustomGeometry (see submitLayer()). Cached vertices are
+        // captured in panel-local space; the facing/world transform below is applied once
+        // per vertex during replay.
 
         matrixStack.pushPose();
 
@@ -148,35 +152,61 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
             }
         }
 
-        // Replay cached geometry
-        org.joml.Matrix4f transform = matrixStack.last().pose();
+        // Replay cached geometry (facing transform applied once, at submit time)
+        submitCachedVertices(matrixStack, submitNodeCollector,
+                renderState.solidVertices, renderState.translucentVertices);
 
-        if (!renderState.solidVertices.isEmpty()) {
-            VertexConsumer solidBuilder = bufferSource.getBuffer(Sheets.cutoutBlockSheet());
-            CachedPanelRenderer.replayVerticesStatic(solidBuilder, transform, renderState.solidVertices);
-        }
-
-        if (!renderState.translucentVertices.isEmpty()) {
-            VertexConsumer translucentBuilder = bufferSource.getBuffer(Sheets.translucentBlockSheet());
-            CachedPanelRenderer.replayVerticesStatic(translucentBuilder, transform, renderState.translucentVertices);
-        }
-
-        // Ghost preview is always dynamic
+        // Ghost preview is always dynamic. Capture it into a fresh panel-local buffer using a
+        // fresh PoseStack (mirroring the BER cache path), then submit through the same pipeline
+        // so the facing transform above is applied exactly once.
         if (renderState.ghostPos != null) {
-            renderCellStatic(matrixStack, renderState.ghostPos, bufferSource,
+            List<CachedPanelRenderer.CachedVertex> ghostSolid = new ArrayList<>();
+            List<CachedPanelRenderer.CachedVertex> ghostTranslucent = new ArrayList<>();
+            CachedPanelRenderer.VertexCapture ghostCapture =
+                    new CachedPanelRenderer.VertexCapture(ghostSolid, ghostTranslucent);
+
+            renderCellStatic(new PoseStack(), renderState.ghostPos, ghostCapture,
                     renderState.lightCoords,
                     net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
                     0.5f, renderState.hasBase);
+            ghostCapture.flush();
+
+            submitCachedVertices(matrixStack, submitNodeCollector, ghostSolid, ghostTranslucent);
         }
 
         matrixStack.popPose();
     }
 
     /**
+     * Submit cached (panel-local) vertex data through the feature submit pipeline.
+     * The given PoseStack supplies the world/facing transform, applied once per vertex during
+     * replay. Solid geometry goes to the cutout layer, translucent to the translucent layer.
+     */
+    public static void submitCachedVertices(PoseStack matrixStack, SubmitNodeCollector collector,
+                                            List<CachedPanelRenderer.CachedVertex> solid,
+                                            List<CachedPanelRenderer.CachedVertex> translucent) {
+        if (!solid.isEmpty()) {
+            submitLayer(matrixStack, collector, RenderHelper.cutoutBlockRenderType(), solid);
+        }
+        if (!translucent.isEmpty()) {
+            submitLayer(matrixStack, collector, RenderHelper.translucentBlockRenderType(), translucent);
+        }
+    }
+
+    /**
+     * Submit one render layer's worth of cached vertices.
+     */
+    private static void submitLayer(PoseStack matrixStack, SubmitNodeCollector collector,
+                                    RenderType renderType, List<CachedPanelRenderer.CachedVertex> verts) {
+        collector.submitCustomGeometry(matrixStack, renderType,
+                (pose, consumer) -> CachedPanelRenderer.replayVerticesStatic(consumer, pose.pose(), verts));
+    }
+
+    /**
      * Render a single cell. This is a static method so it can be called both from the
      * live render path (ghost preview) and from CachedPanelRenderer during cache rebuilds.
      */
-    static void renderCellStatic(PoseStack matrixStack, PanelCellPos pos, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float alpha, boolean hasBase)
+    static void renderCellStatic(PoseStack matrixStack, PanelCellPos pos, IRenderTarget target, int combinedLight, int combinedOverlay, float alpha, boolean hasBase)
     {
         // useShaderTransparency removed in 26.1; just use the passed-in alpha
 
@@ -220,7 +250,7 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
 
         // Default path: use cell's own render method
         matrixStack.translate(T2X, T2Y, T2Z);
-        cell.render(matrixStack, buffer, combinedLight, combinedOverlay, alpha);
+        cell.render(matrixStack, target, combinedLight, combinedOverlay, alpha);
 
         matrixStack.popPose();
 

@@ -69,7 +69,7 @@ public class TinyBlockGUI extends Screen {
     }
 
     private void close() {
-        minecraft.setScreen(null);
+        minecraft.gui.setScreen(null);
     }
 
     private void setColor(int color)
@@ -95,6 +95,6 @@ public class TinyBlockGUI extends Screen {
 
 
     public static void open(PanelTile panelTile, Integer cellIndex, IColorablePanelCell iColorablePanelCell) {
-        Minecraft.getInstance().setScreen(new TinyBlockGUI(panelTile, cellIndex, iColorablePanelCell));
+        Minecraft.getInstance().gui.setScreen(new TinyBlockGUI(panelTile, cellIndex, iColorablePanelCell));
     }
 }
