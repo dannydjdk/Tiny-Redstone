@@ -20,6 +20,7 @@ public class Config {
     public static ModConfigSpec.ConfigValue<List<String>> REDSTONE_WIRE_LIST;
     public static ModConfigSpec.BooleanValue ALLOW_WORLD_PLACEMENT;
     public static ModConfigSpec.IntValue LIGHT_UPDATE_DELAY;
+    public static ModConfigSpec.BooleanValue CREATIVE_PANEL_DROPS;
 
     static {
 
@@ -29,6 +30,10 @@ public class Config {
 
         JSON_BLUEPRINT = SERVER_BUILDER.comment("Should it be possible to export or import the blueprint as json? (default:true)")
                 .define("json_blueprint",true);
+
+        CREATIVE_PANEL_DROPS = SERVER_BUILDER.comment("Should a panel containing components, a cover, or a custom color drop as an item when broken in creative mode?"
+                        + "\nThis prevents an accidental left click from permanently destroying a circuit. (default:true)")
+                .define("creative_panel_drops",true);
 
         SERVER_BUILDER.pop();
 

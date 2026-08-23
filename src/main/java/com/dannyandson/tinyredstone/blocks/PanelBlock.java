@@ -1,5 +1,6 @@
 package com.dannyandson.tinyredstone.blocks;
 
+import com.dannyandson.tinyredstone.Config;
 import com.dannyandson.tinyredstone.TinyRedstone;
 import com.dannyandson.tinyredstone.api.IColorablePanelCell;
 import com.dannyandson.tinyredstone.api.IPanelCell;
@@ -353,8 +354,13 @@ public class PanelBlock extends BaseEntityBlock {
     }
 
     /**
-     * Fix: In 1.21 playerWillDestroy must return BlockState (not void).
+     * Does this panel hold anything worth preserving (components, a cover or a custom color)?
      */
+    private boolean panelHasContent(PanelTile panelTile) {
+        return panelTile.getCellCount()>0||panelTile.Color!=RenderHelper.getTextureDiffusedColor(DyeColor.GRAY)||panelTile.panelCover!=null;
+    }
+
+
     @Override
     public BlockState playerWillDestroy(Level worldIn, BlockPos pos, BlockState state, Player player) {
         PanelTile panelTile = null;
@@ -363,16 +369,26 @@ public class PanelBlock extends BaseEntityBlock {
             panelTile.onBlockDestroy();
         }
 
-        if(!player.isCreative() && (panelTile==null || panelTile.hasBase() || panelTile.getCellCount()>0)) {
-            ItemStack itemstack =
-                    (panelTile != null && (panelTile.getCellCount()>0||panelTile.Color!=RenderHelper.getTextureDiffusedColor(DyeColor.GRAY)||panelTile.panelCover!=null))
+        ItemStack itemstack = null;
+
+        if(player.isCreative()) {
+            //A stray left click in vanilla could destroy hours of circuit work,
+            // so drop the panel (with its contents) instead of voiding it (configurable).
+            //Blank panels are still voided in creative to avoid unnecessary item litter.
+            if(panelTile != null && Config.CREATIVE_PANEL_DROPS.get() && panelTile.getCellCount()>0)
+                itemstack = getItemWithNBT(worldIn, pos, state);
+        }
+        else if(panelTile==null || panelTile.hasBase() || panelTile.getCellCount()>0) {
+            itemstack =
+                    (panelTile != null && panelHasContent(panelTile))
                             ? getItemWithNBT(worldIn, pos, state)
                             : new ItemStack(this);
-            if(itemstack != null) {
-                ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
-                itementity.setDefaultPickUpDelay();
-                worldIn.addFreshEntity(itementity);
-            }
+        }
+
+        if(itemstack != null) {
+            ItemEntity itementity = new ItemEntity(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, itemstack);
+            itementity.setDefaultPickUpDelay();
+            worldIn.addFreshEntity(itementity);
         }
         return super.playerWillDestroy(worldIn, pos, state, player);
     }
