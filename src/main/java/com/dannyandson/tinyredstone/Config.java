@@ -19,6 +19,7 @@ public class Config {
     public static ModConfigSpec.ConfigValue<List<String>> REDSTONE_WIRE_LIST;
     public static ModConfigSpec.BooleanValue ALLOW_WORLD_PLACEMENT;
     public static ModConfigSpec.IntValue LIGHT_UPDATE_DELAY;
+    public static ModConfigSpec.BooleanValue CREATIVE_PANEL_DROPS;
 
     static {
 
@@ -31,6 +32,10 @@ public class Config {
 
         DISPLAY_MODE = SERVER_BUILDER.comment("When should the information be displayed in the overlay? 0 = no, 1 = always, 2 = only in extended or debug, 3 = when you have a wrench in your hand, 4 = when you have any component in your hand")
                 .defineInRange("display_mode", 1, 0, 4);
+
+        CREATIVE_PANEL_DROPS = SERVER_BUILDER.comment("Should a panel containing components, a cover, or a custom color drop as an item when broken in creative mode?"
+                        + "\nThis prevents an accidental left click from permanently destroying a circuit. (default:true)")
+                .define("creative_panel_drops",true);
 
         SERVER_BUILDER.pop();
 
