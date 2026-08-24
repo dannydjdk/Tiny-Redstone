@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -1647,6 +1648,18 @@ public class PanelTile extends BlockEntity {
         }
 
 
+    }
+
+    /**
+     * Prefer the hit result the engine handed us for improved compatibility with other mods that adjust it.
+     * (Sable,  Create Aeronautics). Fall back to custom hit result only when the supplied result is unusable.
+     */
+    public BlockHitResult resolveHitResult(Player player, @Nullable BlockHitResult supplied) {
+        if (supplied != null
+                && supplied.getType() == HitResult.Type.BLOCK
+                && supplied.getBlockPos().equals(getBlockPos()))
+            return supplied;
+        return getPlayerCollisionHitResult(player);
     }
 
     public BlockHitResult getPlayerCollisionHitResult(Player player) {

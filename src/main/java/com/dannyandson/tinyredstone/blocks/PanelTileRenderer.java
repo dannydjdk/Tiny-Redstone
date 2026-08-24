@@ -25,6 +25,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.CheckForNull;
 import java.lang.reflect.InvocationTargetException;
@@ -210,15 +211,30 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile> {
 
     }
 
+    /**
+     * Cheap pre-filter so that only the panel actually being looked at runs a clip,
+     * and so hover tracks the standard block interaction range rather
+     * than a fixed radius.
+     */
+    private static boolean isVanillaTarget(BlockPos blockPos) {
+        return Minecraft.getInstance().hitResult instanceof BlockHitResult hit
+                && hit.getType() == HitResult.Type.BLOCK
+                && hit.getBlockPos().equals(blockPos);
+    }
+
     @CheckForNull
     public static PanelCellGhostPos getPlayerLookingAtCell(PanelTile panelTile) {
         LocalPlayer player = Minecraft.getInstance().player;
         BlockPos blockPos = panelTile.getBlockPos();
         if (player != null) {
-            double distance = panelTile.getBlockPos().distToCenterSqr(player.position());
-            if (distance < 6.0d) {
+            //Also run for a panel still holding a hover, so it gets cleared.
+            if (isVanillaTarget(blockPos) || panelTile.panelCellHovering != null) {
                 BlockHitResult blockHitResult = panelTile.getPlayerCollisionHitResult(player);
-                PanelCellPos cellPos1 = PosInPanelCell.fromHitVec(panelTile, panelTile.getBlockPos(), blockHitResult);
+                if (blockHitResult.getType() != HitResult.Type.BLOCK || !blockHitResult.getBlockPos().equals(blockPos)) {
+                    panelTile.panelCellHovering = null;
+                    return null;
+                }
+                PanelCellPos cellPos1 = PosInPanelCell.fromHitVec(panelTile, blockPos, blockHitResult);
                 panelTile.panelCellHovering = cellPos1;
 
                 if (PanelBlock.isPanelCellItem(player.getMainHandItem().getItem())) {

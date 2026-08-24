@@ -364,7 +364,8 @@ public class PanelBlock extends BaseEntityBlock {
         if (te instanceof PanelTile) {
             PanelTile panelTile = (PanelTile) te;
             if (!panelTile.isCovered()) {
-                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING), panelTile.getPlayerCollisionHitResult(player));
+                PanelCellPos panelCellPos = PanelCellPos.fromHitVec(panelTile, state.getValue(BlockStateProperties.FACING),
+                        panelTile.resolveHitResult(player, target instanceof BlockHitResult bhr ? bhr : null));
                 IPanelCell cell = panelTile.getIPanelCell(panelCellPos);
                 if (cell != null) {
                     ItemStack itemStack = panelCellItemMap.get(cell.getClass()).getDefaultInstance();
@@ -391,7 +392,7 @@ public class PanelBlock extends BaseEntityBlock {
         BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof PanelTile panelTile && hand==InteractionHand.MAIN_HAND) {
             try {
-                blockHitResult = panelTile.getPlayerCollisionHitResult(player);
+                blockHitResult = panelTile.resolveHitResult(player, blockHitResult);
                 PosInPanelCell posInPanelCell = PosInPanelCell.fromHitVec(panelTile, pos, blockHitResult);
                 Item heldItem = player.getItemInHand(hand).getItem();
 
