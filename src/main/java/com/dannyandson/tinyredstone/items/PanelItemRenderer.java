@@ -126,27 +126,27 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
 
     private void renderBase(PoseStack matrixStack, VertexConsumer builder, TextureAtlasSprite sprite, int combinedLight, int color) {
         matrixStack.pushPose();
-        matrixStack.mulPose(Axis.XP.rotationDegrees(270));
+        matrixStack.rotate(Axis.XP.rotationDegrees(270));
         matrixStack.translate(0, -1, 0.125);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0, -0.125, 0);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0, -1, 0);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
 
@@ -169,17 +169,17 @@ public record PanelItemRenderer() implements SpecialModelRenderer<ItemStack> {
         matrixStack.pushPose();
 
         matrixStack.translate(cellSize * (double) row, 0.125 + (cellSize * (double) level), cellSize * (cell));
-        matrixStack.mulPose(Axis.XP.rotationDegrees(rotation1));
+        matrixStack.rotate(Axis.XP.rotationDegrees(rotation1));
 
         if (cellDirection == Side.LEFT) {
             matrixStack.translate(0, -cellSize, 0);
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(90));
+            matrixStack.rotate(Axis.ZP.rotationDegrees(90));
         } else if (cellDirection == Side.BACK) {
             matrixStack.translate(cellSize, -cellSize, 0);
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
+            matrixStack.rotate(Axis.ZP.rotationDegrees(180));
         } else if (cellDirection == Side.RIGHT) {
             matrixStack.translate(cellSize, 0, 0);
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(270));
+            matrixStack.rotate(Axis.ZP.rotationDegrees(270));
         }
 
         matrixStack.scale(scale, scale, scale);

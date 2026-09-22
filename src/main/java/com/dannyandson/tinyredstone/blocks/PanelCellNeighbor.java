@@ -162,7 +162,7 @@ public class PanelCellNeighbor {
     {
         BlockState blockState = getNeighborBlockState();
         if (blockState!=null && !blockIsRedstoneWire(getNeighborBlockState().getBlock(),false))
-            return blockState.canRedstoneConnectTo(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
+            return blockState.shouldRedstoneWireConnectTo(panelTile.getLevel(),this.blockPos,panelTile.getDirectionFromSide(neighborDirection));
         if (iPanelCell!=null && !(iPanelCell instanceof TinyBlock) && !(iPanelCell.powerDrops()))
             return true;
         return false;

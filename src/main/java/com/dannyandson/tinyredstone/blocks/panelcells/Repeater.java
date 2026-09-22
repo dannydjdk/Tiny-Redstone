@@ -61,7 +61,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
 
         //draw base top
         matrixStack.pushPose();
-        matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
+        matrixStack.rotate(Axis.ZP.rotationDegrees(180));
         matrixStack.translate(-1,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite_repeater,combinedLight,alpha);
         matrixStack.popPose();
@@ -86,7 +86,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.popPose();
 
         //draw back side
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.25,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 
@@ -102,7 +102,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.popPose();
 
         //right side
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 
@@ -118,7 +118,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.popPose();
 
         //front side
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
         matrixStack.pushPose();
@@ -134,7 +134,7 @@ public class Repeater implements IPanelCell, IPanelCellInfoProvider {
 
 
         //left side
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,0.25f,sprite,combinedLight,alpha);
 

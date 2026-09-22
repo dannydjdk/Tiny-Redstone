@@ -1,6 +1,5 @@
 package com.dannyandson.tinyredstone.blocks;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
@@ -18,14 +17,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
 public class ChopperBlock extends BaseEntityBlock implements WorldlyContainerHolder {
-
-    // Fix for 1.21: BaseEntityBlock now requires codec() to be implemented.
-    public static final MapCodec<ChopperBlock> CODEC = simpleCodec(ChopperBlock::new);
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
 
     public ChopperBlock(Properties props) {
         super(props);

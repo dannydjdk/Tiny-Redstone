@@ -49,7 +49,7 @@ public class DarkCover implements IPanelCover {
 
         TextureAtlasSprite sprite = RenderHelper.getSprite(TEXTURE_DEFAULT_COVER);
         matrixStack.translate(0, y2, 1);
-        matrixStack.mulPose(Axis.XP.rotationDegrees(270));
+        matrixStack.rotate(Axis.XP.rotationDegrees(270));
         RenderHelper.drawCube(matrixStack,target.solid(),sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,combinedLight, madeFrom != null?0x00FFFFFF:color,1f);
     }
 

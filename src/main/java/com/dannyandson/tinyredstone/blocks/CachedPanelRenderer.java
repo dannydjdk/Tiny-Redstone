@@ -195,6 +195,23 @@ public class CachedPanelRenderer {
         }
     }
 
+    /**
+     * Replay cached vertices for the block-breaking crack overlay. The consumer is a
+     * SheetedDecalTextureGenerator, which derives crack UVs from position + face normal,
+     * so real (pose-transformed) normals are needed here, unlike the shaded replay above.
+     */
+    public static void replayCrumblingStatic(VertexConsumer builder, PoseStack.Pose pose, List<CachedVertex> vertices) {
+        for (CachedVertex v : vertices) {
+            boolean hasNormal = v.normalX != 0 || v.normalY != 0 || v.normalZ != 0;
+            builder.addVertex(pose, v.x, v.y, v.z)
+                    .setColor(-1)
+                    .setUv(0, 0)
+                    .setUv1(0, 10)
+                    .setUv2(v.lightU, v.lightV)
+                    .setNormal(pose, hasNormal ? v.normalX : 0f, hasNormal ? v.normalY : 1f, hasNormal ? v.normalZ : 0f);
+        }
+    }
+
     private void renderPanelBase(PanelTile tileEntity, PoseStack matrixStack,
                                  IRenderTarget target, int combinedLight) {
         int topTextureIndex =
@@ -209,27 +226,27 @@ public class CachedPanelRenderer {
         VertexConsumer builder = target.solid();
 
         matrixStack.pushPose();
-        matrixStack.mulPose(Axis.XP.rotationDegrees(270));
+        matrixStack.rotate(Axis.XP.rotationDegrees(270));
         matrixStack.translate(0, -1, 0.125);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, topSprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0, -0.125, 0);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, .125f, sprite, combinedLight, color, 1.0f);
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0, -1, 0);
         RenderHelper.drawRectangle(builder, matrixStack, 0, 1, 0, 1, sprite, combinedLight, color, 1.0f);
 
@@ -239,7 +256,7 @@ public class CachedPanelRenderer {
     private void renderCrashOverlay(PoseStack matrixStack, IRenderTarget target, int combinedLight) {
         matrixStack.pushPose();
         matrixStack.translate(0, 0.126, 1);
-        matrixStack.mulPose(Axis.XP.rotationDegrees(270f));
+        matrixStack.rotate(Axis.XP.rotationDegrees(270f));
 
         TextureAtlasSprite sprite = RenderHelper.getSprite(PanelTileRenderer.TEXTURE_CRASHED);
         RenderHelper.drawRectangle(
@@ -457,6 +474,12 @@ public class CachedPanelRenderer {
         @Override
         public VertexConsumer setUv1(int u, int v) {
             // Overlay UV coords — not used in tiny redstone rendering
+            return this;
+        }
+
+        @Override
+        public VertexConsumer setUv3(float u, float v) {
+            // Sheeted decal UV coords — not used in tiny redstone rendering
             return this;
         }
 

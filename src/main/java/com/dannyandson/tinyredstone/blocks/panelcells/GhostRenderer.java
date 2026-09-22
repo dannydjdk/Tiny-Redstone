@@ -52,7 +52,7 @@ public class GhostRenderer implements IPanelCell {
         if (segmentHovering==PanelCellSegment.LEFT || segmentHovering==PanelCellSegment.CENTER) {
             RenderHelper.drawRectangle(builder,poseStack,-.01f,s6,0,1,sprite,combinedLight,color,alpha);
         }
-        poseStack.mulPose(Axis.ZP.rotationDegrees(90));
+        poseStack.rotate(Axis.ZP.rotationDegrees(90));
         poseStack.translate(0,-1,0);
         if (segmentHovering==PanelCellSegment.FRONT || segmentHovering==PanelCellSegment.CENTER) {
             RenderHelper.drawRectangle(builder,poseStack,s10,1.01f,0,1,sprite,combinedLight,color,alpha);

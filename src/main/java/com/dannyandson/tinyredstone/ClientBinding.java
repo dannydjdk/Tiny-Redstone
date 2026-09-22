@@ -5,6 +5,7 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.PanelBlock;
 import com.dannyandson.tinyredstone.blocks.PanelTile;
 import com.dannyandson.tinyredstone.blocks.RotationLock;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -20,8 +21,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import org.lwjgl.glfw.GLFW;
-
 import java.lang.reflect.InvocationTargetException;
 
 @EventBusSubscriber(modid = TinyRedstone.MODID, value = Dist.CLIENT)
@@ -33,14 +32,15 @@ public class ClientBinding {
 
     public static void registerKeyBindings(RegisterKeyMappingsEvent event) {
         event.registerCategory(KEY_CATEGORY);
-        rotationLock = new KeyMapping("key." + TinyRedstone.MODID + ".rotation_lock", GLFW.GLFW_KEY_LEFT_ALT, KEY_CATEGORY);
+        rotationLock = new KeyMapping("key." + TinyRedstone.MODID + ".rotation_lock", InputConstants.KEY_LALT, KEY_CATEGORY);
         event.register(rotationLock);
     }
 
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key keyInputEvent) {
-        // Fix: isCanceled() removed from InputEvent.Key in 1.21 - no replacement needed, just remove the check
-        int numberKey = keyInputEvent.getKey() - GLFW.GLFW_KEY_0;
+        // SDL scancodes order the number row 1..9 then 0 (KEY_1=30 ... KEY_9=38, KEY_0=39),
+        // so offset from KEY_1 rather than KEY_0 as GLFW's ASCII-ordered codes allowed.
+        int numberKey = keyInputEvent.getKey() - InputConstants.KEY_1 + 1;
         if(numberKey > 0 && numberKey <= 9) {
             final Player player = Minecraft.getInstance().player;
             if (player == null) return;

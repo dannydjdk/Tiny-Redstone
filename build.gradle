@@ -2,7 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.141'
+    id 'net.neoforged.moddev' version '2.0.147'
 }
 
 version = mod_version
@@ -54,8 +54,18 @@ repositories {
 
 dependencies {
 
-    implementation "curse.maven:jade-324717:8326243"
-    implementation "curse.maven:jei-238222:8352845"
+    implementation "curse.maven:jade-324717:8892782"
+    implementation "curse.maven:jei-238222:8941416"
+
+    // BlueprintGUI uses TinyFileDialogs for native save/open dialogs. Minecraft 26.3 no
+    // longer bundles org.lwjgl.util.tinyfd on the mod compile/runtime classpath (SDL2 provides
+    // its own dialog handling for vanilla), so it must be declared explicitly, with natives
+    // for every desktop platform the built mod can run on.
+    implementation "org.lwjgl:lwjgl-tinyfd:3.4.3"
+    runtimeOnly "org.lwjgl:lwjgl-tinyfd:3.4.3:natives-windows"
+    runtimeOnly "org.lwjgl:lwjgl-tinyfd:3.4.3:natives-linux"
+    runtimeOnly "org.lwjgl:lwjgl-tinyfd:3.4.3:natives-macos"
+    runtimeOnly "org.lwjgl:lwjgl-tinyfd:3.4.3:natives-macos-arm64"
 }
 
 // Exclude TheOneProbe compat until a 26.1 version is available

@@ -77,28 +77,28 @@ public class RenderHelper {
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_top, combinedLight, color, alpha, applyDirectionalShading);
 
         //back
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
+        poseStack.rotate(Axis.XP.rotationDegrees(-90));
         poseStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_back, combinedLight, color, alpha, applyDirectionalShading);
 
         //left
-        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.rotate(Axis.YP.rotationDegrees(90));
         poseStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_left, combinedLight, color, alpha, applyDirectionalShading);
 
         //front
-        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.rotate(Axis.YP.rotationDegrees(90));
         poseStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_front, combinedLight, color, alpha, applyDirectionalShading);
 
         //right
-        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.rotate(Axis.YP.rotationDegrees(90));
         poseStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_right, combinedLight, color, alpha, applyDirectionalShading);
 
         //bottom
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(-90));
+        poseStack.rotate(Axis.XP.rotationDegrees(-90));
+        poseStack.rotate(Axis.ZP.rotationDegrees(-90));
         poseStack.translate(-1, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_bottom, combinedLight, color, alpha, applyDirectionalShading);
     }
@@ -120,28 +120,28 @@ public class RenderHelper {
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_top, combinedLight, perFaceColors[Side.TOP.ordinal()], alpha, applyDirectionalShading);
 
         //back
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
+        poseStack.rotate(Axis.XP.rotationDegrees(-90));
         poseStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_back, combinedLight, perFaceColors[Side.BACK.ordinal()], alpha, applyDirectionalShading);
 
         //left
-        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.rotate(Axis.YP.rotationDegrees(90));
         poseStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_left, combinedLight, perFaceColors[Side.LEFT.ordinal()], alpha, applyDirectionalShading);
 
         //front
-        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.rotate(Axis.YP.rotationDegrees(90));
         poseStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_front, combinedLight, perFaceColors[Side.FRONT.ordinal()], alpha, applyDirectionalShading);
 
         //right
-        poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        poseStack.rotate(Axis.YP.rotationDegrees(90));
         poseStack.translate(0, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_right, combinedLight, perFaceColors[Side.RIGHT.ordinal()], alpha, applyDirectionalShading);
 
         //bottom
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(-90));
+        poseStack.rotate(Axis.XP.rotationDegrees(-90));
+        poseStack.rotate(Axis.ZP.rotationDegrees(-90));
         poseStack.translate(-1, 0, 1);
         RenderHelper.drawRectangle(builder, poseStack, 0, 1, 0, 1, sprite_bottom, combinedLight, perFaceColors[Side.BOTTOM.ordinal()], alpha, applyDirectionalShading);
     }

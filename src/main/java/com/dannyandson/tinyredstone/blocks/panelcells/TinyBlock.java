@@ -74,7 +74,7 @@ public class TinyBlock implements IPanelCell, IColorablePanelCell, IPanelCellInf
             perFaceColors[i] = ARGB.multiply(color, tints[i]);
         }
 
-        matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
+        matrixStack.rotate(Axis.ZP.rotationDegrees(180));
         matrixStack.translate(-1, -1, 1);
         RenderHelper.drawCube(matrixStack, builder,
                 sprite_top, sprite_front, sprite_right, sprite_back, sprite_left, sprite_bottom,

@@ -71,7 +71,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
             if (crawlUpSide.contains(Side.RIGHT))
             {
                 matrixStack.pushPose();
-                matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+                matrixStack.rotate(Axis.YP.rotationDegrees(90));
                 matrixStack.translate(0,0,1.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
                 matrixStack.popPose();
@@ -82,20 +82,20 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
             if (crawlUpSide.contains(Side.LEFT))
             {
                 matrixStack.pushPose();
-                matrixStack.mulPose(Axis.YP.rotationDegrees(-90));
+                matrixStack.rotate(Axis.YP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,0.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
                 matrixStack.popPose();
             }
         }
-        matrixStack.mulPose(Axis.ZP.rotationDegrees(90));
+        matrixStack.rotate(Axis.ZP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         if (frontEnabled) {
             RenderHelper.drawRectangle(builder,matrixStack,s10,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
             if (crawlUpSide.contains(Side.FRONT))
             {
                 matrixStack.pushPose();
-                matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+                matrixStack.rotate(Axis.YP.rotationDegrees(90));
                 matrixStack.translate(0,0,1.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
                 matrixStack.popPose();
@@ -106,7 +106,7 @@ public class RedstoneDust implements IPanelCell, IPanelCellInfoProvider {
             if (crawlUpSide.contains(Side.BACK))
             {
                 matrixStack.pushPose();
-                matrixStack.mulPose(Axis.YP.rotationDegrees(-90));
+                matrixStack.rotate(Axis.YP.rotationDegrees(-90));
                 matrixStack.translate(-1,0,.01);
                 RenderHelper.drawRectangle(builder,matrixStack,-.01f,1.01f,s7,s9,segmentU0,segmentU1,segmentV0,segmentV1,combinedLight,color,alpha);
                 matrixStack.popPose();

@@ -65,28 +65,28 @@ public class Comparator implements IPanelCell, IPanelCellInfoProvider {
         add(builder, matrixStack, 1,1,0, sprite_repeater.getU1(), sprite_repeater.getV0(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 0,1,0, sprite_repeater.getU0(), sprite_repeater.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-0.25,0);
         add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0.25f,0, sprite.getU1(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 0,0.25f,0, sprite.getU0(), sprite.getV0(),combinedLight,combinedOverlay,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         add(builder, matrixStack, 0,0,0, sprite.getU0(), sprite.getV1(),combinedLight,combinedOverlay,alpha);
         add(builder, matrixStack, 1,0,0, sprite.getU1(), sprite.getV1(),combinedLight,combinedOverlay,alpha);

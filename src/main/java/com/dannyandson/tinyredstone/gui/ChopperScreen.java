@@ -33,7 +33,7 @@ public class ChopperScreen extends AbstractContainerScreen<ChopperMenu> implemen
 
     private void toggleItemType(){
         if (this.minecraft.hitResult instanceof BlockHitResult) {
-            chopperMenu.toggleItemType(new BlockPos(((BlockHitResult) this.minecraft.hitResult).getBlockPos()));
+            chopperMenu.toggleItemType(((BlockHitResult) this.minecraft.hitResult).getBlockPos());
             removeWidget(itemTypeButton);
             itemTypeButton = ModWidget.buildButton(leftPos + (imageWidth / 2) - 35, topPos + 18, 70, 20, Component.nullToEmpty(chopperMenu.getItemType()), button -> toggleItemType());
             addRenderableWidget(itemTypeButton);

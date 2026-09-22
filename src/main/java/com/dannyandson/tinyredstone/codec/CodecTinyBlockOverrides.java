@@ -9,7 +9,7 @@ import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -178,7 +178,7 @@ public class CodecTinyBlockOverrides extends SimpleJsonResourceReloadListener<Ti
         for (int i = 0; i < result.length; i++) {
             if (result[i] == null) {
                 if (missing == null) {
-                    missing = RenderHelper.getSprite(TextureManager.INTENTIONAL_MISSING_TEXTURE);
+                    missing = RenderHelper.getSprite(MissingTextureAtlasSprite.getLocation());
                 }
                 result[i] = missing;
             }

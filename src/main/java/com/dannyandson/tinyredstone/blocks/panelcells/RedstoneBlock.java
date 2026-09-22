@@ -32,23 +32,23 @@ public class RedstoneBlock  implements IPanelCell, IPanelCellInfoProvider {
         matrixStack.translate(0,0,1.0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,1);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,-1,0);
         RenderHelper.drawRectangle(builder,matrixStack,0,1,0,1,sprite,combinedLight,alpha);
 

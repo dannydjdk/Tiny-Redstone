@@ -69,27 +69,27 @@ public class TrimCover implements IPanelCover {
         RenderHelper.drawRectangle(target.solid(),matrixStack,xMin,xMax,yMin,yMax,sprite,combinedLight,color,1f);
 
         //east face (+x)
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,xMax);
         RenderHelper.drawRectangle(target.solid(),matrixStack,0,zMax-zMin,yMin,yMax,sprite,combinedLight,color,1f);
 
         //north face (-z)
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,zMax-zMin);
         RenderHelper.drawRectangle(target.solid(),matrixStack,0,xMax-xMin,0,yMax-yMin,sprite,combinedLight,color,1f);
 
         //west face (-x)
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(0,0,xMax-xMin);
         RenderHelper.drawRectangle(target.solid(),matrixStack,0,zMax-zMin,0,yMax-yMin,sprite,combinedLight,color,1f);
 
         //bottom face (-y)
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90));
         matrixStack.translate(0,xMin-xMax,0);
         RenderHelper.drawRectangle(target.solid(),matrixStack,0,zMax-zMin,0,xMax-xMin,sprite,combinedLight,color,1f);
 
         //top face (+y)
-        matrixStack.mulPose(Axis.XP.rotationDegrees(180));
+        matrixStack.rotate(Axis.XP.rotationDegrees(180));
         matrixStack.translate(0,xMin-xMax,yMax-yMin);
         RenderHelper.drawRectangle(target.solid(),matrixStack,0,zMax-zMin,0,xMax-xMin,sprite,combinedLight,color,1f);
     }

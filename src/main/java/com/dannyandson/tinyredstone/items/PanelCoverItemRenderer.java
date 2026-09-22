@@ -111,7 +111,7 @@ public record PanelCoverItemRenderer() implements SpecialModelRenderer<ItemStack
 
         PoseStack captureStack = new PoseStack();
         captureStack.pushPose();
-        captureStack.mulPose(Axis.XP.rotationDegrees(-90));
+        captureStack.rotate(Axis.XP.rotationDegrees(-90));
         captureStack.translate(1, 0, 0);
         RenderHelper.drawCube(captureStack, builder, sprite, sprite, sprite, sprite, sprite, sprite,
                 lightCoords, 0xFFFFFFFF, alpha, false);

@@ -2,12 +2,15 @@
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
 license="${mod_license}"
-logoFile="logo.png"
 
 [[mods]]
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
+# logoFile is deprecated but still read by launchers like Prism. It must come BEFORE iconFile:
+# logoFile alone, or iconFile followed by logoFile, triggers a warning that hangs 26.3 startup.
+logoFile="logo.png"
+iconFile="logo.png"
 credits="Thanks for this mod goes to NeoForge and many mods who came before this."
 authors="${mod_authors}"
 description='''${mod_description}'''

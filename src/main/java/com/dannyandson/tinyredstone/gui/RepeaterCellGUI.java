@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 
 public class RepeaterCellGUI extends Screen {
 
@@ -64,7 +63,6 @@ public class RepeaterCellGUI extends Screen {
                 .setTextHAlignment(ModWidget.HAlignment.CENTER);
     }
 
-    // Fix: mouseScrolled signature changed in 1.21 - added scrollX parameter before scrollY
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scroll)
     {
@@ -76,7 +74,7 @@ public class RepeaterCellGUI extends Screen {
         ) {
             if (scroll != 0) {
                 Double dScroll = scroll*2;
-                if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT))
+                if (InputConstants.isKeyDown(InputConstants.KEY_LSHIFT))
                     dScroll *= 10;
                 changeTicks(dScroll.intValue());
                 return true;

@@ -6,6 +6,8 @@ import com.dannyandson.tinyredstone.api.IRenderTarget;
 import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -15,6 +17,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
@@ -130,23 +133,23 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
         if (!renderState.isCamouflageCache) {
             switch (renderState.facing) {
                 case UP:
-                    matrixStack.mulPose(Axis.XP.XP.rotationDegrees(180));
+                    matrixStack.rotate(Axis.XP.XP.rotationDegrees(180));
                     matrixStack.translate(0,-1,-1);
                     break;
                 case NORTH:
-                    matrixStack.mulPose(Axis.XP.XP.rotationDegrees(90));
+                    matrixStack.rotate(Axis.XP.XP.rotationDegrees(90));
                     matrixStack.translate(0,0,-1);
                     break;
                 case EAST:
-                    matrixStack.mulPose(Axis.XP.ZP.rotationDegrees(90));
+                    matrixStack.rotate(Axis.XP.ZP.rotationDegrees(90));
                     matrixStack.translate(0,-1,0);
                     break;
                 case SOUTH:
-                    matrixStack.mulPose(Axis.XP.XP.rotationDegrees(-90));
+                    matrixStack.rotate(Axis.XP.XP.rotationDegrees(-90));
                     matrixStack.translate(0,-1,0);
                     break;
                 case WEST:
-                    matrixStack.mulPose(Axis.XP.ZP.rotationDegrees(-90));
+                    matrixStack.rotate(Axis.XP.ZP.rotationDegrees(-90));
                     matrixStack.translate(-1,0,0);
                     break;
             }
@@ -155,6 +158,13 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
         // Replay cached geometry (facing transform applied once, at submit time)
         submitCachedVertices(matrixStack, submitNodeCollector,
                 renderState.solidVertices, renderState.translucentVertices);
+
+        // Block-breaking cracks. Vanilla's destroy pass only draws RenderShape.MODEL geometry and the
+        // panel's block model is particle-only, so replay the cached geometry under the crumbling type.
+        if (renderState.breakProgress != null) {
+            submitCrumbling(matrixStack, submitNodeCollector, renderState.breakProgress,
+                    renderState.solidVertices, renderState.translucentVertices);
+        }
 
         // Ghost preview is always dynamic. Capture it into a fresh panel-local buffer using a
         // fresh PoseStack (mirroring the BER cache path), then submit through the same pipeline
@@ -194,6 +204,25 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
     }
 
     /**
+     * Submit cached geometry under the block-breaking crumbling render type, with crack UVs generated
+     * by SheetedDecalTextureGenerator (as vanilla's BlockModelFeatureRenderer does for block models).
+     */
+    private static void submitCrumbling(PoseStack matrixStack, SubmitNodeCollector collector,
+                                        ModelFeatureRenderer.CrumblingOverlay crumbling,
+                                        List<CachedPanelRenderer.CachedVertex> solid,
+                                        List<CachedPanelRenderer.CachedVertex> translucent) {
+        // Crumbling blends, so custom geometry lands in the translucent phase (the OIT phase when
+        // Improved Transparency is on) — pick destroy types the way vanilla does for translucent blocks.
+        List<RenderType> destroyTypes = Minecraft.getInstance().gameRenderer.useImprovedTransparency()
+                ? ModelBakery.DESTROY_TYPES_OIT : ModelBakery.DESTROY_TYPES;
+        collector.submitCustomGeometry(matrixStack, destroyTypes.get(crumbling.progress()), (pose, consumer) -> {
+            VertexConsumer decal = new SheetedDecalTextureGenerator(consumer, crumbling.cameraPose(), 1.0F);
+            CachedPanelRenderer.replayCrumblingStatic(decal, pose, solid);
+            CachedPanelRenderer.replayCrumblingStatic(decal, pose, translucent);
+        });
+    }
+
+    /**
      * Submit one render layer's worth of cached vertices.
      */
     private static void submitLayer(PoseStack matrixStack, SubmitNodeCollector collector,
@@ -216,34 +245,34 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
 
         IPanelCell cell = pos.getIPanelCell();
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(ROTATION1));
+        matrixStack.rotate(Axis.XP.rotationDegrees(ROTATION1));
 
         Side facing = pos.getCellFacing();
 
         if (facing == Side.LEFT)
         {
             matrixStack.translate(0,-CELL_SIZE,0);
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(90));
+            matrixStack.rotate(Axis.ZP.rotationDegrees(90));
         }
         else if (facing == Side.BACK)
         {
             matrixStack.translate(CELL_SIZE,-CELL_SIZE,0);
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
+            matrixStack.rotate(Axis.ZP.rotationDegrees(180));
         }
         else if (facing == Side.RIGHT)
         {
             matrixStack.translate(CELL_SIZE,0,0);
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(270));
+            matrixStack.rotate(Axis.ZP.rotationDegrees(270));
         }
         else if (pos.getCellFacing()==Side.BOTTOM)
         {
             matrixStack.translate(0,-CELL_SIZE,0);
-            matrixStack.mulPose(Axis.XP.rotationDegrees(-90));
+            matrixStack.rotate(Axis.XP.rotationDegrees(-90));
         }
         else if (pos.getCellFacing()==Side.TOP)
         {
             matrixStack.translate(0,0,CELL_SIZE);
-            matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+            matrixStack.rotate(Axis.XP.rotationDegrees(90));
         }
 
         matrixStack.scale(SCALE, SCALE, SCALE);

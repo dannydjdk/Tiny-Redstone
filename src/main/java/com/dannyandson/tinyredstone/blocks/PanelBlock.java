@@ -11,7 +11,6 @@ import com.dannyandson.tinyredstone.gui.PanelCrashGUI;
 import com.dannyandson.tinyredstone.gui.TinyBlockGUI;
 import com.dannyandson.tinyredstone.setup.ModRegistration;
 import com.dannyandson.tinyredstone.util.ItemStackHelper;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -53,15 +52,6 @@ import java.util.Map;
 import static net.minecraft.core.Direction.*;
 
 public class PanelBlock extends BaseEntityBlock {
-
-    // --- 1.21+ REQUIRED: codec() for BaseEntityBlock ---
-    public static final MapCodec<PanelBlock> CODEC = simpleCodec(PanelBlock::new);
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
-    // --------------------------------------------------
 
     private static final Map<Direction, VoxelShape> BASE = new HashMap<>();
     static{
@@ -229,12 +219,12 @@ public class PanelBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction direction) {
+    protected boolean shouldRedstoneWireConnectTo(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction direction) {
         if (world.getBlockEntity(pos) instanceof PanelTile panelTile && direction!=null){
             Direction facing = direction.getOpposite();
             return panelTile.hasCellsOnFace(facing);
         }
-        return super.canConnectRedstone(state, world, pos, direction);
+        return super.shouldRedstoneWireConnectTo(state, world, pos, direction);
     }
 
     @Override

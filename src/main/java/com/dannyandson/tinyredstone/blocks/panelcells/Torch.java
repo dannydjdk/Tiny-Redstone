@@ -77,34 +77,34 @@ public class Torch implements IPanelCell
         float y2 = 1f;
 
         if (this.upright) {
-            matrixStack.mulPose(Axis.XP.rotationDegrees(90));
+            matrixStack.rotate(Axis.XP.rotationDegrees(90));
             matrixStack.translate(0, 0, -0.375f);
         }
         else if (this.baseSide==Side.FRONT) {
-            matrixStack.mulPose(Axis.ZP.rotationDegrees(180));
+            matrixStack.rotate(Axis.ZP.rotationDegrees(180));
             matrixStack.translate(-1, -1.125f, 0.125f);
-            matrixStack.mulPose(Axis.XP.rotationDegrees(60));
+            matrixStack.rotate(Axis.XP.rotationDegrees(60));
             //matrixStack.translate(0, 0.03125f, 0);
         }else {
-            matrixStack.mulPose(Axis.XP.rotationDegrees(60));
+            matrixStack.rotate(Axis.XP.rotationDegrees(60));
             matrixStack.translate(0, 0.03125f, 0);
         }
 
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,tU0,tU1,tV0,tV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,tU0,tU1,tV0,tV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,tU0,tU1,tV0,tV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Axis.YP.rotationDegrees(90));
+        matrixStack.rotate(Axis.YP.rotationDegrees(90));
         matrixStack.translate(-x1,0,x2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,y1,y2,tU0,tU1,tV0,tV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
-        matrixStack.mulPose(Axis.XP.rotationDegrees(-90));
+        matrixStack.rotate(Axis.XP.rotationDegrees(-90));
         matrixStack.translate(0,-x1,y2);
         RenderHelper.drawRectangle(builder,matrixStack,x1,x2,x1,x2,topU0,topU1,topV0,topV1,(output)?15728880:combinedLight,0xFFFFFFFF,alpha);
 
