@@ -16,6 +16,7 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.fml.ModList;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -80,22 +81,45 @@ public class BlueprintGUI  extends Screen {
         Minecraft.getInstance().gui.setScreen(new BlueprintGUI(blueprint));
     }
 
+    // TinyFileDialogs isn't bundled with this mod; FancyModLoader (Neoforge's loader) provides it at runtime. If a future
+    // NeoForge stops shipping it, log a clear report-this message and restore the button instead of leaving the GUI stuck.
+    private void dialogUnavailable(ModWidget placeholder, LinkageError e) {
+        String neoVersion = ModList.get().getModContainerById("neoforge")
+                .map(c -> c.getModInfo().getVersion().toString()).orElse("unknown");
+        TinyRedstone.LOGGER.error("Tiny Redstone: blueprint import/export is unavailable because the TinyFileDialogs library "
+                + "(org.lwjgl.util.tinyfd) was not found at runtime. NeoForge " + neoVersion + " likely no longer provides it. "
+                + "Please report this at https://github.com/dannydjdk/Tiny-Redstone/issues and include this message.", e);
+        Minecraft.getInstance().execute(() -> {
+            this.renderables.remove(placeholder);
+            this.renderables.add(button);
+            this.dialogOpen = false;
+        });
+    }
+
     public void exportToFile()
     {
         if (!dialogOpen) {
             this.dialogOpen=true;
             this.renderables.remove(button);
-            this.renderables.add(new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444));
+            ModWidget placeholder = new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444);
+            this.renderables.add(placeholder);
 
             new Thread(() -> {
 
                 MemoryStack stack = MemoryStack.stackPush();
                 PointerBuffer filters = null;
 
-                String path = TinyFileDialogs.tinyfd_saveFileDialog(
-                        Component.translatable("tinyredstone.save_file").getString(),
-                        "blueprint.json", filters, null
-                );
+                String path;
+                try {
+                    path = TinyFileDialogs.tinyfd_saveFileDialog(
+                            Component.translatable("tinyredstone.save_file").getString(),
+                            "blueprint.json", filters, null
+                    );
+                } catch (LinkageError e) {
+                    stack.pop();
+                    dialogUnavailable(placeholder, e);
+                    return;
+                }
                 this.dialogOpen=false;
                 stack.pop();
 
@@ -121,17 +145,25 @@ public class BlueprintGUI  extends Screen {
             this.dialogOpen = true;
 
             this.renderables.remove(button);
-            this.renderables.add(new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444));
+            ModWidget placeholder = new ModWidget((this.width - WIDTH) / 2 + 20, (this.height - HEIGHT) / 2 + 20, 80, 20, 0xFF444444);
+            this.renderables.add(placeholder);
 
             new Thread(() -> {
 
                 MemoryStack stack = MemoryStack.stackPush();
                 PointerBuffer filters = null;
 
-                String path = TinyFileDialogs.tinyfd_openFileDialog(
-                        Component.translatable("tinyredstone.choose_file").getString(),
-                        null, filters, "JSON File (*.json)", false
-                );
+                String path;
+                try {
+                    path = TinyFileDialogs.tinyfd_openFileDialog(
+                            Component.translatable("tinyredstone.choose_file").getString(),
+                            null, filters, "JSON File (*.json)", false
+                    );
+                } catch (LinkageError e) {
+                    stack.pop();
+                    dialogUnavailable(placeholder, e);
+                    return;
+                }
                 this.dialogOpen=false;
 
                 stack.pop();
