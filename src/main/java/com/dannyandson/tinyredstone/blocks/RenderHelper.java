@@ -4,8 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -24,26 +22,9 @@ public class RenderHelper {
         return RenderTypes.entityCutoutCull(BLOCK_ATLAS);
     }
 
-    // Translucent block layer, back-face culled. Kept LAZY (not a static final): RenderType.create /
-    // RenderPipelines are client-only, and PanelTile touches RenderHelper on the dedicated server
-    // (getTextureDiffusedColor), so running these in static init crashes the server. RenderTypes has
-    // no culling translucent factory for the default target, so we build it here on first use.
-    private static RenderType translucentCullBlock;
-
+    // Translucent block layer, back-face culled.
     public static RenderType translucentBlockRenderType() {
-        if (translucentCullBlock == null) {
-            translucentCullBlock = RenderType.create(
-                    "tinyredstone_translucent_cull",
-                    RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT_CULL)
-                            .withTexture("Sampler0", BLOCK_ATLAS)
-                            .useLightmap()
-                            .useOverlay()
-                            .affectsCrumbling()
-                            .sortOnUpload()
-                            .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
-                            .createRenderSetup());
-        }
-        return translucentCullBlock;
+        return RenderTypes.entityTranslucentCull(BLOCK_ATLAS);
     }
 
     private static int[] textureDiffusedColors = {
