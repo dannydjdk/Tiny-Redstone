@@ -54,8 +54,8 @@ repositories {
 
 dependencies {
 
-    implementation "curse.maven:jade-324717:8892782"
-    implementation "curse.maven:jei-238222:8941416"
+    implementation "curse.maven:jade-324717:9042207"
+    implementation "curse.maven:jei-238222:9318906"
 
     // provided at runtime by FancyModLoader
     compileOnly "org.lwjgl:lwjgl-tinyfd:3.4.1"

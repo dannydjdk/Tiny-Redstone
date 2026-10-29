@@ -28,7 +28,7 @@ public class TinyRedstone {
         modEventBus.addListener(TinyRedstone::registerCapabilities);
         modEventBus.addListener(ModSetup::init);
 
-        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_CONFIG);
+        modContainer.registerConfig(ModConfig.Type.SYNCED, Config.SERVER_CONFIG);
         modContainer.registerConfig(ModConfig.Type.CLIENT, Config.CLIENT_CONFIG);
 
         CompatHandler.register();
