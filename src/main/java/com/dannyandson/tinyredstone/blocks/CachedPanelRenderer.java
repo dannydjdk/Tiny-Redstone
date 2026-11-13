@@ -11,6 +11,7 @@ import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
@@ -267,9 +268,9 @@ public class CachedPanelRenderer {
 
     /**
      * Render a camouflage cover block via ModelBlockRenderer.tesselateBlock() into the cache.
-     * Uses the same vertex unpacking as vanilla's putBlockBakedQuad, but sets normals to UP
-     * to prevent the Sheets shader from applying a second round of face shading — tesselateBlock
-     * already bakes the correct directional shade and world-aware AO into the QuadInstance colors.
+     * Uses the same vertex unpacking as vanilla's putBlockBakedQuad. Real face normals are cached
+     * for the crack overlay; the shaded replay forces UP so face shading (already baked into the
+     * QuadInstance colors by tesselateBlock) isn't applied twice.
      */
     private void renderCamouflageBlock(PanelTile tile, Identifier madeFrom, VertexCapture captureSource) {
         if (tile.getLevel() == null) return;
@@ -284,8 +285,7 @@ public class CachedPanelRenderer {
         ModelBlockRenderer modelRenderer = getOrCreateModelRenderer();
         VertexConsumer builder = captureSource.solid();
 
-        // Unpack quads exactly like putBlockBakedQuad does (same color multiply, UV, light),
-        // but with normal forced to UP so the shader doesn't apply a second face shade pass.
+        // Unpack quads exactly like putBlockBakedQuad does (same color multiply, UV, light).
         modelRenderer.tesselateBlock(
                 (var x, var y, var z, var quad, var instance) -> {
                     int lightEmission = quad.materialInfo().lightEmission();
@@ -296,10 +296,11 @@ public class CachedPanelRenderer {
                         int light = instance.getLightCoordsWithEmission(vertex, lightEmission);
                         float u = UVPair.unpackU(packedUv);
                         float v = UVPair.unpackV(packedUv);
-                        // Normal set to UP (0,1,0) — shade factor 1.0 from shader.
-                        // Face shading is already in vertexColor from tesselateBlock.
+                        // Cache the real face normal: crack decal UVs depend on it.
+                        // replayVerticesStatic still sends UP, since face shading is already in vertexColor.
+                        Direction face = quad.direction();
                         builder.addVertex(pos.x() + x, pos.y() + y, pos.z() + z, vertexColor,
-                                u, v, instance.overlayCoords(), light, 0f, 1f, 0f);
+                                u, v, instance.overlayCoords(), light, face.getStepX(), face.getStepY(), face.getStepZ());
                     }
                 },
                 0f, 0f, 0f,
