@@ -5,6 +5,7 @@ import com.dannyandson.tinyredstone.api.IPanelCell;
 import com.dannyandson.tinyredstone.blocks.panelcells.GhostRenderer;
 import com.dannyandson.tinyredstone.blocks.panelcells.RedstoneDust;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -24,6 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 /**
  * PanelTile renderer for NeoForge 26.1.
@@ -161,6 +164,13 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
             CachedPanelRenderer.replayVerticesStatic(translucentBuilder, transform, renderState.translucentVertices);
         }
 
+        // Block-breaking cracks. Vanilla's destroy pass only draws RenderShape.MODEL geometry and the
+        // panel's block model is particle-only, so replay the cached geometry under the crumbling type.
+        if (renderState.breakProgress != null) {
+            submitCrumbling(matrixStack, submitNodeCollector, renderState.breakProgress,
+                    renderState.solidVertices, renderState.translucentVertices);
+        }
+
         // Ghost preview is always dynamic
         if (renderState.ghostPos != null) {
             renderCellStatic(matrixStack, renderState.ghostPos, bufferSource,
@@ -170,6 +180,23 @@ public class PanelTileRenderer implements BlockEntityRenderer<PanelTile, PanelTi
         }
 
         matrixStack.popPose();
+    }
+
+    /**
+     * Submit cached geometry under the block-breaking crumbling render type, with crack UVs generated
+     * by SheetedDecalTextureGenerator (as vanilla's BlockModelFeatureRenderer does for block models).
+     * Uses the submit pipeline: crumbling blends, so it renders in the translucent feature phase,
+     * after the immediate buffer source holding the panel geometry has been flushed.
+     */
+    private static void submitCrumbling(PoseStack matrixStack, SubmitNodeCollector collector,
+                                        ModelFeatureRenderer.CrumblingOverlay crumbling,
+                                        List<CachedPanelRenderer.CachedVertex> solid,
+                                        List<CachedPanelRenderer.CachedVertex> translucent) {
+        collector.submitCustomGeometry(matrixStack, ModelBakery.DESTROY_TYPES.get(crumbling.progress()), (pose, consumer) -> {
+            VertexConsumer decal = new SheetedDecalTextureGenerator(consumer, crumbling.cameraPose(), 1.0F);
+            CachedPanelRenderer.replayCrumblingStatic(decal, pose, solid);
+            CachedPanelRenderer.replayCrumblingStatic(decal, pose, translucent);
+        });
     }
 
     /**
